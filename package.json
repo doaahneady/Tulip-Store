@@ -1,0 +1,21 @@
+{
+  "name": "tulip-store",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "Tulip Store Team",
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "connect-mongo": "^5.1.0",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "i18next": "^25.5.2",
+    "i18next-fs-backend": "^2.6.0",
+    "mongoose": "^8.18.2"
+  }
+}

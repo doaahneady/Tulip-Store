@@ -1,0 +1,310 @@
+<!-- sign up form -->
+<%- include('./includes/head') %>
+
+<div class="container d-flex justify-content-end align-items-center">
+  <div class="card-signup shadow-sm">
+    <div class="card-body p-4">
+      <h3 class="card-title text-center mb-4">Sign Up</h3>
+
+      <form
+        id="signupForm"
+        class="row g-3"
+        novalidate
+        onsubmit="return performSignup(event)"
+      >
+        <!-- business name -->
+        <div class="col-12 col-md-6">
+          <input
+            type="text"
+            class="form-control"
+            id="inputname"
+            placeholder="business name"
+          />
+          <div class="invalid-feedback">Please enter your business name.</div>
+        </div>
+        <!-- email -->
+        <div class="col-12 col-md-6">
+          <input
+            type="email"
+            class="form-control"
+            id="inputEmail4"
+            placeholder="E-mail"
+          />
+          <div class="invalid-feedback">
+            Please enter a valid email address.
+          </div>
+        </div>
+
+        <!-- phone number -->
+        <div class="col-12 col-md-6">
+          <input
+            type="text"
+            class="form-control"
+            id="inputphone"
+            placeholder="phone number"
+          />
+          <div class="invalid-feedback">Please enter a valid phone number.</div>
+        </div>
+
+        <!-- password -->
+        <div class="col-12 col-md-6">
+          <input
+            type="password"
+            class="form-control"
+            id="inputPassword"
+            placeholder="Password"
+          />
+          <div class="invalid-feedback">
+            Please enter a password (min 6 characters).
+          </div>
+        </div>
+
+        <!-- prefer lang -->
+        <fieldset class="col-12" id="category-group">
+          <legend class="col-form-label" style="font-size: 0.9rem">
+            category:
+          </legend>
+          <div class="d-flex gap-3">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="category-1"
+                id="fashion"
+                value="fashion"
+                required
+              />
+              <label class="form-check-label" for="category-1">Fashion</label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="category-2"
+                id="electronics"
+                value="electronics"
+                required
+              />
+              <label class="form-check-label" for="category-2"
+                >electronics</label
+              >
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="category-3"
+                id="backToSchool"
+                value="backToSchool"
+                required
+              />
+              <label class="form-check-label" for="category-3"
+                >Back To School</label
+              >
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="category-4"
+                id="jewelry"
+                value="jewelry"
+                required
+              />
+              <label class="form-check-label" for="category-4">Jewelry</label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="category-5"
+                id="kitchenHome"
+                value="kitchenHome"
+                required
+              />
+              <label class="form-check-label" for="category-5"
+                >Kitchin&Home</label
+              >
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="category-6"
+                id="toys"
+                value="toys"
+                required
+              />
+              <label class="form-check-label" for="category-6">toys</label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="category-7"
+                id="beautyMakeUp"
+                value="beautyMakeUp"
+                required
+              />
+              <label class="form-check-label" for="category-7"
+                >Beauty&MakeUp</label
+              >
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="category-8"
+                id="grocery"
+                value="grocery"
+                required
+              />
+              <label class="form-check-label" for="category-8">Grocery</label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="category-9"
+                id="GiftBox"
+                value="GiftBox"
+                required
+              />
+              <label class="form-check-label" for="category-9">Gift Box</label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="category-10"
+                id="sport"
+                value="sport"
+                required
+              />
+              <label class="form-check-label" for="category-10">sport</label>
+            </div>
+          </div>
+          <div class="invalid-feedback">
+            Please select a preferred category.
+          </div>
+        </fieldset>
+
+        <!-- submit sign up -->
+        <div class="col-12 d-flex justify-content-center px-0">
+          <button type="submit" class="btn btn-primary btn-lg w-auto">
+            Register
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="toast-fixed">
+  <div
+    id="signupToast"
+    class="toast align-items-center text-bg-success border-0"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+  >
+    <div class="d-flex">
+      <div class="toast-body" id="toastMessage"></div>
+      <button
+        type="button"
+        class="btn-close btn-close-white me-2 m-auto"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+      ></button>
+    </div>
+  </div>
+</div>
+<style>
+  @import url(https://db.onlinewebfonts.com/c/ba155473d72fb574bd945b20f4598560?family=Montserrat-Alt1+SemBd);
+  @import url(https://db.onlinewebfonts.com/c/29295d2928c6bd76a76c9e789982bc85?family=Montserrat-Alt1+Med);
+
+  @font-face {
+    font-family: "Montserrat-Alt1 SemBd";
+    src: url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.eot");
+    src: url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.eot?#iefix")
+        format("embedded-opentype"),
+      url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.woff2")
+        format("woff2"),
+      url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.woff")
+        format("woff"),
+      url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.ttf")
+        format("truetype"),
+      url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.svg#Montserrat-Alt1 SemBd")
+        format("svg");
+  }
+
+  @font-face {
+    font-family: "Montserrat-Alt";
+    src: url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.eot");
+    src: url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.eot?#iefix")
+        format("embedded-opentype"),
+      url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.woff2")
+        format("woff2"),
+      url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.woff")
+        format("woff"),
+      url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.ttf")
+        format("truetype"),
+      url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.svg#Montserrat-Alt1 Med")
+        format("svg");
+  }
+  body {
+    background-image: url("images/business_account.jpg");
+    background-repeat: none;
+    background-size: cover;
+    font-family: "Montserrat-Alt1 SemBd";
+  }
+  placeholder {
+    font-family: "Montserrat-Alt1";
+  }
+  .container {
+    min-height: 100vh;
+    padding: 40px;
+    padding-right: 60px;
+  }
+  .card-signup {
+    width: 100%;
+    max-width: 700px;
+    padding: 0;
+    background-color: #ffffff17;
+    backdrop-filter: blur(20px);
+    color: #e7c8b3;
+  }
+  form {
+    border: none;
+  }
+
+  h3 {
+    font-weight: 700;
+    font-size: 40px;
+  }
+
+  .btn {
+    background-color: #e7c8b3;
+    /* box-shadow: inset 2px 2px 4px rgb(255, 255, 255), inset -2px -2px 4px #0d464c; */
+    color: #0d464c;
+    font-weight: bold;
+    border: none;
+  }
+  .button-sign-up {
+    margin-left: 450px;
+  }
+  .btn:hover,
+  .btn::after {
+    color: #e7c8b3;
+    background-color: #0d464c;
+    border: none;
+  }
+
+  /* toast (bottom-right) */
+  .toast-fixed {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 1100;
+  }
+</style>

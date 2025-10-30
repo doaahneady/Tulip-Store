@@ -1,0 +1,291 @@
+<footer>
+  <div class="footer-container">
+    <div class="row- mx-auto p-2">
+      <!-- logo -->
+      <div class="col-">
+        <img src="images/white_orange_logo.png" alt="" class="img-fluid" />
+      </div>
+
+      <!-- col 1 -->
+      <div class="col-">
+        <h3>Services</h3>
+        <ul class="list">
+          <li><a href="#">Return Policy</a></li>
+          <li><a href="#">Shipping Policy</a></li>
+          <li><a href="#">Help & FAQ</a></li>
+        </ul>
+      </div>
+
+      <!-- col 2 -->
+      <div class="col-">
+        <h3 class="info">Info</h3>
+        <ul class="list">
+          <li><a href="#">About Tulip Store</a></li>
+          <li><a href="/contact">Contact Us</a></li>
+          <li><a href="#">Shopping</a></li>
+        </ul>
+      </div>
+
+      <!-- col 3 -->
+      <div class="col-">
+        <h3>Follow Us</h3>
+        <div class="social-media">
+          <!-- facebook -->
+          <a class="f" href="https://www.facebook.com/TulipStoreOfficial">
+            <i class="fa-brands fa-facebook"></i>
+          </a>
+
+          <!-- instagram -->
+          <a class="i" href="https://www.instagram.com/tulip.store.83">
+            <i class="fa-brands fa-instagram"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- busniess -->
+      <div class="col-">
+        <button class="learn-more">
+          <span class="circle" aria-hidden="true">
+            <span class="icon arrow"></span>
+          </span>
+          <a href="/business">
+            <span class="button-text">business Account</span></a
+          >
+        </button>
+      </div>
+    </div>
+    <!-- copyrights -->
+    <div class="copyrights">
+      <h6 style="margin-top: 5px; bottom: 0">© 2025 Tulip Store</h6>
+    </div>
+  </div>
+</footer>
+
+<style>
+  /* footer */
+  footer {
+    bottom: 0;
+    background-color: #0d464c;
+    padding-top: 20px;
+    color: #f05928;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    width: 100%;
+  }
+  .footer-container {
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 1px;
+    position: relative;
+  }
+  .row- {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    text-align: center;
+  }
+  .col- {
+    flex: 1 1 0;
+    min-width: 220px;
+    box-sizing: border-box;
+  }
+
+  .col- img {
+    width: auto;
+    padding: 0px;
+    margin-left: 20px;
+    margin-top: 10px;
+    margin-bottom: 50px;
+  }
+
+  .col- h3 {
+    position: relative;
+    text-align: center;
+  }
+
+  .list {
+    text-decoration: none;
+    text-align: left;
+    margin-left: 60px;
+  }
+  .info {
+    margin-right: 30px;
+  }
+  .list li {
+    text-decoration: none;
+    list-style-type: none;
+    padding: 5px;
+  }
+
+  .list li a {
+    text-decoration: none;
+    color: #ffffff;
+  }
+
+  .list li a:hover {
+    text-shadow: 1px 0 5px #000000;
+    font-weight: bold;
+    transition: 0.1s;
+  }
+
+  /* business */
+  button {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    outline: none;
+    border: 0;
+    vertical-align: middle;
+    text-decoration: none;
+    background: transparent;
+    padding-left: 10px;
+    font-size: inherit;
+    font-family: inherit;
+  }
+
+  button.learn-more {
+    width: 15rem;
+    height: auto;
+  }
+
+  button.learn-more .circle {
+    transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
+    position: relative;
+    display: block;
+    margin: 0;
+    width: 3rem;
+    height: 3rem;
+    background: #f05928;
+    border-radius: 1.625rem;
+  }
+
+  button.learn-more .circle .icon {
+    transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    background: #fff;
+  }
+
+  button.learn-more .circle .icon.arrow {
+    transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
+    left: 0.625rem;
+    width: 1.125rem;
+    height: 0.125rem;
+    background: none;
+  }
+
+  button.learn-more .circle .icon.arrow::before {
+    position: absolute;
+    content: "";
+    top: -0.29rem;
+    right: 0.0625rem;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-top: 0.125rem solid #fff;
+    border-right: 0.125rem solid #fff;
+    transform: rotate(45deg);
+  }
+
+  button.learn-more .button-text {
+    transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0.85rem 0;
+    margin: 0 0 0 3rem;
+    color: #f05928;
+    font-weight: 700;
+    line-height: 1.6;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  button:hover .circle {
+    width: 100%;
+  }
+
+  button:hover .circle .icon.arrow {
+    background: #fff;
+    transform: translate(1rem, 0);
+  }
+
+  button:hover .button-text {
+    color: #fff;
+  }
+
+  .copyrights {
+    width: 100%;
+    text-align: center;
+    color: #f05928;
+    margin-top: 30px;
+    margin-bottom: 0;
+    padding-bottom: 10px;
+    font-size: 15px;
+    position: relative;
+  }
+  @media (max-width: 991px) {
+    .col- {
+      max-width: 50%;
+      min-width: 200px;
+      padding: 10px 10px;
+    }
+    .row- {
+      flex-wrap: wrap;
+      gap: 0;
+    }
+  }
+  @media (max-width: 767px) {
+    .footer-container {
+      padding: 0 5px;
+    }
+    .row- {
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .col- {
+      max-width: 100%;
+      min-width: 0;
+      width: 100%;
+      padding: 10px 0;
+      margin: 0;
+      align-items: center;
+      text-align: center;
+    }
+    .col- form {
+      justify-content: center;
+    }
+    .copyrights {
+      margin-top: 20px;
+      padding-bottom: 10px;
+      font-size: 14px;
+    }
+  }
+
+  .social-media .i,
+  .f {
+    font-size: 30px;
+    margin: 5px;
+    text-decoration: none;
+    color: #ffffff;
+    text-shadow: 0 2px 2px #151717;
+  }
+
+  .f:hover,
+  .i:hover {
+    color: #f05928;
+    transition: 0.2s;
+    text-shadow: 0 2px 2px #000000;
+  }
+</style>

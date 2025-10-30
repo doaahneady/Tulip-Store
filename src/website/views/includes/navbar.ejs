@@ -1,0 +1,531 @@
+<nav class="navbar navbar-expand-lg flex-column p-0 m-0">
+  <div class="container-fluid navbar1 d-flex justify-content-between">
+    <!-- logo -->
+    <a class="navbar-brand logo" href="/">
+      <img class="img-fluid" src="images/logo_wep___.png" alt="logo" />
+    </a>
+
+    <!-- ||| -->
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <div class="button" style="margin-left: 100px">
+        <div class="button-wrapper">
+          <div class="text">Gift arrangement</div>
+          <span class="icon">
+            <i class="fa-solid fa-gift"></i>
+          </span>
+        </div>
+      </div>
+
+      <div class="search-container">
+        <div class="search-box">
+          <svg
+            class="search-icon"
+            focusable="false"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+            ></path>
+          </svg>
+
+          <input
+            type="text"
+            class="search-input"
+            placeholder="What are you searching for?"
+          />
+
+          <div class="category-dropdown">
+            <select class="category-select">
+              <option value="all">All</option>
+              <option value="bestSeller">Best Seller</option>
+              <option value="fashion">fashion</option>
+              <option value=" electronics">Electronics</option>
+              <option value=" sport">Sport</option>
+              <option value="school">School</option>
+              <option value=" jewelry">Jewelry</option>
+              <option value="kitchenHome">Kitchen & Home</option>
+              <option value="toys">Toys</option>
+              <option value=" Beauty">Beauty & Makeup</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <ul class="navbar-nav ms-auto d-flex align-items-center gap-2">
+        <!-- lang -->
+        <li class="nav-item lang">
+          <div class="dropdown nav-btn">
+            <a
+              class="btn"
+              href="#"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22px"
+                height="22px"
+                fill="currentColor"
+                class="bi bi-translate"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M4.545 6.714 4.11 8H3l1.862-5h1.284L8 8H6.833l-.435-1.286zm1.634-.736L5.5 3.956h-.049l-.679 2.022z"
+                />
+                <path
+                  d="M0 2a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v3h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-3H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zm7.138 9.995q.289.451.63.846c-.748.575-1.673 1.001-2.768 1.292.178.217.451.635.555.867 1.125-.359 2.08-.844 2.886-1.494.777.665 1.739 1.165 2.93 1.472.133-.254.414-.673.629-.89-1.125-.253-2.057-.694-2.82-1.284.681-.747 1.222-1.651 1.621-2.757H14V8h-3v1.047h.765c-.318.844-.74 1.546-1.272 2.13a6 6 0 0 1-.415-.492 2 2 0 0 1-.94.31"
+                />
+              </svg>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <button class="dropdown-item px-3" type="button">
+                  English
+                </button>
+              </li>
+              <li>
+                <button class="dropdown-item px-3" type="button">
+                  العربية
+                </button>
+              </li>
+            </ul>
+          </div>
+        </li>
+        <!-- before sign -->
+        <li class="nav-item sign-in">
+          <button type="button" class="login-btn nav-btn btn" id="loginBtn">
+            <a role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22px"
+                height="22px"
+                fill="currentColor"
+                class="bi bi-box-arrow-in-left"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 3.5a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 1 1 0v2A1.5 1.5 0 0 1 9.5 14h-8A1.5 1.5 0 0 1 0 12.5v-9A1.5 1.5 0 0 1 1.5 2h8A1.5 1.5 0 0 1 11 3.5v2a.5.5 0 0 1-1 0z"
+                />
+                <path
+                  fill-rule="evenodd"
+                  d="M4.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H14.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708z"
+                />
+              </svg>
+              Sign In
+            </a>
+          </button>
+        </li>
+        <!-- after sign -->
+        <li class="nav-item" style="display: none">
+          <div class="dropdown after-s">
+            <button
+              class="btn dropdown-toggle no-arrow after-s"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              full name
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#">Edit profile</a></li>
+              <li><a class="dropdown-item" href="#">orders</a></li>
+              <li><a class="dropdown-item" href="#">settings</a></li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a class="dropdown-item" href="#">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="red"
+                    class="bi bi-box-arrow-right"
+                    viewBox="0 0 16 16"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"
+                    />
+                    <path
+                      fill-rule="evenodd"
+                      d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"
+                    />
+                  </svg>
+                  Sign out
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+
+        <!-- cart -->
+        <li class="nav-item cart">
+          <button
+            class="btn position-relative nav-btn"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#offcanvasRight"
+            aria-controls="offcanvasRight"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22px"
+              height="22px"
+              fill="currentColor"
+              class="bi bi-cart"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2"
+              />
+            </svg>
+            Cart
+            <span
+              class="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+            >
+              0
+            </span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="navbar2 w-100">
+    <div class="container-fluid">
+      <ul
+        class="navbar-nav me-auto d-flex align-items-center gap-2 justify-content-start"
+      >
+        <li><a class="nav-link-" href="#">Tulip Mart</a></li>
+        <li><a class="nav-link-" href="#">Gift arrangement</a></li>
+        <li><a class="nav-link-" href="#">Today's Deal</a></li>
+
+        <li><a class="nav-link-" href="#"> Gift Cards</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<style>
+  placeholder {
+    font-family: "Montserrat-Alt1";
+  }
+
+  .navbar {
+    padding: 10px 0px;
+    top: 0;
+    background-color: #ffffff4d;
+    backdrop-filter: blur(20px);
+    display: flex;
+    position: sticky;
+    z-index: 1000;
+  }
+
+  .logo img {
+    width: 150px;
+    padding: 0px;
+    margin-left: 30px;
+  }
+  /* search */
+  .search-container {
+    width: 100%;
+    max-width: 484px;
+    position: relative;
+  }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid #dfe1e5;
+    border-radius: 24px;
+    padding: 0 15px;
+    height: 35px;
+    font-size: 16px;
+    box-shadow: 2px 1px 8px #000000a2;
+    transition: box-shadow 0.2s;
+    background-color: #ffffff9f;
+  }
+
+  .search-box:hover,
+  .search-box:focus-within {
+    border-color: rgba(223, 225, 229, 0);
+  }
+
+  .search-icon {
+    width: 20px;
+    height: 20px;
+    color: #9aa0a6;
+    margin-right: 10px;
+  }
+
+  .search-input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    height: 100%;
+    background: transparent;
+  }
+
+  .category-dropdown {
+    position: relative;
+    margin-left: 10px;
+    color: #ffffffa8;
+  }
+
+  .category-select {
+    border: none;
+    background: transparent;
+    font-size: 15px;
+    text-align: right;
+    color: #0d464c;
+    font-weight: bold;
+    border-radius: 10px;
+    width: auto;
+    cursor: pointer;
+    outline: none;
+    padding: 5px 10px;
+  }
+
+  .category-select:hover {
+    color: #0d464c;
+  }
+
+  .search-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .search-btn {
+    background-color: #f8f9fa;
+    border: 1px solid #f8f9fa;
+    border-radius: 4px;
+    color: #3c4043;
+    padding: 10px 16px;
+    cursor: pointer;
+  }
+
+  .search-btn:hover {
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #dadce0;
+  }
+
+  .dropdown-toggle {
+    border-style: none;
+    color: #0d464c;
+    font-weight: bold;
+    border-radius: 5px 30px 30px 5px;
+    padding: 8px 9px;
+  }
+
+  ul .d-all {
+    min-width: 0;
+    width: auto;
+    white-space: nowrap;
+  }
+  li .dropdown-item:hover {
+    color: #fff;
+    background-color: #0d464c;
+  }
+  /* lang */
+  .lang a {
+    background: #ffffff9f;
+    box-shadow: 2px 1px 8px #000000a2;
+    color: #0d464c;
+    border: none;
+    border-radius: 40px;
+    height: 35px;
+    width: 35px;
+    padding: 5px 3px;
+    border: none;
+  }
+
+  .lang ul {
+    min-width: 0;
+    width: auto;
+    white-space: nowrap;
+  }
+
+  /* cart */
+  .cart button {
+    border: none;
+    background: #ffffff9f;
+    box-shadow: 2px 1px 8px #000000a2;
+    color: #0d464c;
+    border-radius: 60px;
+    height: 35px;
+    font-size: 14px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .cart button span {
+    background-color: #f05928;
+    box-shadow: inset 2px 2px 4px rgba(163, 177, 198, 0.6),
+      inset -2px -2px 4px #752b13;
+  }
+
+  /* sign in */
+  .sign-in button {
+    background: #ffffff9f;
+    box-shadow: 2px 1px 8px #000000a2;
+    color: #0d464c;
+    border: none;
+    border-radius: 20px;
+    height: 35px;
+    width: auto;
+    font-size: 14px;
+    padding: 5px 8px;
+  }
+  /* after sign */
+  .after-s button {
+    background: #ffffff9f;
+    box-shadow: 2px 1px 8px #000000a2;
+    color: #0d464c;
+    border: none;
+    border-radius: 20px;
+    height: 35px;
+    width: auto;
+    font-size: 14px;
+    padding: 5px 8px;
+  }
+  ul a .dropdown-item {
+    color: red;
+  }
+  .navbar2 {
+    background-color: #ffffff09;
+    backdrop-filter: blur(10px);
+    padding: 7px 0;
+    display: flex;
+    position: sticky;
+    z-index: 1000;
+    box-shadow: 2px 1px 8px #000000a2;
+  }
+  .nav-link- {
+    padding: 2px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bolder;
+    text-shadow: -1px 1px 2px #7a7d7d;
+    color: #0d464c;
+  }
+  .gift {
+    color: #f05928;
+    text-shadow: 0px 0px 1px #000000;
+    font-weight: bold;
+  }
+  .nav-link-:hover {
+    color: #f05928;
+    font-weight: bold;
+    text-shadow: 1px 0 2px #8f9494;
+  }
+  /* *******************gift */
+  .button {
+    --width: 140px;
+    --height: 35px;
+    --tooltip-height: 35px;
+    --tooltip-width: 90px;
+    --gap-between-tooltip-to-button: 18px;
+    --button-color: #ffffff9f;
+    --tooltip-color: #0d464c;
+    width: var(--width);
+    height: var(--height);
+    background: var(--button-color);
+    position: relative;
+    text-align: center;
+    border-radius: 20px;
+    padding: 0 10px;
+    font-family: "Arial";
+    transition: background 0.7s;
+  }
+
+  .button::after,
+  .button::before {
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.5s;
+  }
+
+  .text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .button-wrapper,
+  .text,
+  .icon {
+    overflow: hidden;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    color: #0d464c;
+  }
+
+  .text {
+    top: 0;
+  }
+
+  .text,
+  .icon {
+    transition: top 0.5s;
+  }
+
+  .icon {
+    color: #ffffffd2;
+    top: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .button:hover {
+    background: #0d464c;
+  }
+
+  .button:hover .text {
+    top: -100%;
+  }
+
+  .button:hover .icon {
+    top: 0;
+  }
+
+  .button:hover:before,
+  .button:hover:after {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .button:hover:after {
+    bottom: calc(var(--height) + var(--gap-between-tooltip-to-button) - 20px);
+  }
+
+  .button:hover:before {
+    bottom: calc(var(--height) + var(--gap-between-tooltip-to-button));
+  }
+</style>
