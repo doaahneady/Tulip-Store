@@ -10,8 +10,7 @@ module.exports.run = async () => {
   const mainRouter = require("./routes/index");
   const signUpRouter = require("./routes/signUp");
   const contactUsRouter = require("./routes/contactUs");
-  const productsRouter = require("./routes/products");
-  const businessRouter = require("./routes/buisness");
+  const businessRouter = require("./routes/business");
 
   app.config = config;
   app.usersData = require("../base/User");
@@ -32,11 +31,9 @@ module.exports.run = async () => {
   app.use(express.static(join(__dirname, "/public")));
   app.set("views", join(__dirname, "/views"));
   app.set("port", config.port);
-
   app.use("/", mainRouter);
   app.use("/signup", signUpRouter);
   app.use("/contact", contactUsRouter);
-  app.use("/products", productsRouter);
   app.use("/business", businessRouter);
 
   app.listen(app.get("port"), () => {

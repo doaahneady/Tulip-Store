@@ -1,10 +1,9 @@
-<!-- sign up form -->
 <%- include('./includes/head') %>
-
-<div class="container d-flex justify-content-end align-items-center">
+<!-- sign up form -->
+<div class="container d-flex align-items-center">
   <div class="card-signup shadow-sm">
     <div class="card-body p-4">
-      <h3 class="card-title text-center mb-4">Sign Up</h3>
+      <h3 class="card-title text-center mb-4">Business Account</h3>
 
       <form
         id="signupForm"
@@ -13,7 +12,7 @@
         onsubmit="return performSignup(event)"
       >
         <!-- business name -->
-        <div class="col-12 col-md-6">
+        <div class="col-12">
           <input
             type="text"
             class="form-control"
@@ -23,7 +22,7 @@
           <div class="invalid-feedback">Please enter your business name.</div>
         </div>
         <!-- email -->
-        <div class="col-12 col-md-6">
+        <div class="col-12">
           <input
             type="email"
             class="form-control"
@@ -36,7 +35,7 @@
         </div>
 
         <!-- phone number -->
-        <div class="col-12 col-md-6">
+        <div class="col-12">
           <input
             type="text"
             class="form-control"
@@ -47,7 +46,7 @@
         </div>
 
         <!-- password -->
-        <div class="col-12 col-md-6">
+        <div class="col-12">
           <input
             type="password"
             class="form-control"
@@ -60,7 +59,7 @@
         </div>
 
         <!-- prefer lang -->
-        <fieldset class="col-12" id="category-group">
+        <!-- <fieldset class="col-12" id="category-group">
           <legend class="col-form-label" style="font-size: 0.9rem">
             category:
           </legend>
@@ -187,7 +186,7 @@
           <div class="invalid-feedback">
             Please select a preferred category.
           </div>
-        </fieldset>
+        </fieldset> -->
 
         <!-- submit sign up -->
         <div class="col-12 d-flex justify-content-center px-0">
@@ -196,26 +195,6 @@
           </button>
         </div>
       </form>
-    </div>
-  </div>
-</div>
-
-<div class="toast-fixed">
-  <div
-    id="signupToast"
-    class="toast align-items-center text-bg-success border-0"
-    role="alert"
-    aria-live="assertive"
-    aria-atomic="true"
-  >
-    <div class="d-flex">
-      <div class="toast-body" id="toastMessage"></div>
-      <button
-        type="button"
-        class="btn-close btn-close-white me-2 m-auto"
-        data-bs-dismiss="toast"
-        aria-label="Close"
-      ></button>
     </div>
   </div>
 </div>
@@ -253,7 +232,7 @@
         format("svg");
   }
   body {
-    background-image: url("images/business_account.jpg");
+    background-image: url("images/business.jpg");
     background-repeat: none;
     background-size: cover;
     font-family: "Montserrat-Alt1 SemBd";
@@ -263,13 +242,13 @@
   }
   .container {
     min-height: 100vh;
-    padding: 40px;
-    padding-right: 60px;
+    padding: 80px;
+    /* padding-right: 60px; */
   }
   .card-signup {
     width: 100%;
     max-width: 700px;
-    padding: 0;
+    padding: 20px;
     background-color: #ffffff17;
     backdrop-filter: blur(20px);
     color: #e7c8b3;
@@ -300,11 +279,85 @@
     border: none;
   }
 
+  .form-select {
+    border-radius: 10px;
+    border: none;
+    font-weight: 500;
+    background-color: #ffffff;
+    color: #0d464c;
+  }
+
   /* toast (bottom-right) */
   .toast-fixed {
     position: fixed;
     bottom: 1rem;
     right: 1rem;
     z-index: 1100;
+  }
+
+  /* validate */
+  /* error message hidden by default */
+  .error-message {
+    color: #dc3545;
+    font-size: 0.85rem;
+    display: none;
+    margin-top: 0.25rem;
+  }
+
+  /* show when invalid */
+  .invalid .error-message {
+    display: block;
+  }
+
+  /* outline for invalid/valid */
+  .is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.1rem rgba(220, 53, 69, 0.15);
+  }
+  .is-valid {
+    border-color: #28a745 !important;
+    box-shadow: 0 0 0 0.1rem rgba(40, 167, 69, 0.12);
+  }
+
+  /* validation icon placed to the right of inputs */
+  .validation-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .validation-icon {
+    position: absolute;
+    right: 10px;
+    pointer-events: none;
+    font-size: 1.1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+  }
+  .validation-icon.valid {
+    color: #28a745;
+    display: inline;
+  }
+  .validation-icon.invalid {
+    color: #dc3545;
+    display: inline;
+  }
+
+  /* for fieldset groups (radios) */
+  .fieldset-invalid {
+    border: 1px solid rgba(220, 53, 69, 0.2);
+    padding: 0.6rem;
+    border-radius: 0.25rem;
+  }
+  .fieldset-valid {
+    border: 1px solid rgba(40, 167, 69, 0.15);
+    padding: 0.6rem;
+    border-radius: 0.25rem;
+  }
+
+  /* disable submit look */
+  button[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
   }
 </style>
