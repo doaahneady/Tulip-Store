@@ -507,6 +507,9 @@
         // call initial check
         // initialCheck();
 
+        // API base
+        const API_BASE = window.API_BASE || 'http://localhost:4000';
+
         // on submit
         form.addEventListener("submit", function (e) {
           e.preventDefault(); // prevent default to allow validation
@@ -528,13 +531,40 @@
             }
             return;
           }
-          // If everything valid, you can submit the form via AJAX or proceed.
-          // Here we'll simulate a successful submit: show a small success message below the form
-          showSuccess();
+          // Submit to backend API
+          const payload = {
+            name: inputName.value.trim(),
+            email: inputEmail.value.trim(),
+            password: inputPassword.value,
+          };
+
+          fetch(`${API_BASE}/api/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          })
+            .then(async (r) => {
+              const data = await r.json().catch(() => ({}));
+              if (!r.ok) {
+                const msg = data?.message || (data?.errors && data.errors.map(e => e.path + ': ' + e.msg).join(', ')) || 'Registration failed';
+                throw new Error(msg);
+              }
+              return data;
+            })
+            .then((data) => {
+              // store token for subsequent requests
+              if (data && data.token) {
+                localStorage.setItem('tulip_token', data.token);
+              }
+              showSuccess('Registration successful ✅');
+            })
+            .catch((err) => {
+              showError(err.message || 'Registration failed');
+            });
         });
 
         // success feedback (no alert)
-        function showSuccess() {
+        function showSuccess(text) {
           // create or reuse a success div
           let successDiv = document.getElementById("signup-success");
           if (!successDiv) {
@@ -544,11 +574,19 @@
             successDiv.className = "alert alert-success";
             form.parentElement.insertBefore(successDiv, form.nextSibling);
           }
-          successDiv.textContent =
-            "Registration successful ✅ — form is valid (here you can send to server).";
+          successDiv.textContent = text || "Success";
+        }
 
-          // Example: if you want to actually submit, uncomment the next line:
-          // form.submit(); // or send via fetch/ajax
+        function showError(text) {
+          let errDiv = document.getElementById('signup-error');
+          if (!errDiv) {
+            errDiv = document.createElement('div');
+            errDiv.id = 'signup-error';
+            errDiv.style.marginTop = '1rem';
+            errDiv.className = 'alert alert-danger';
+            form.parentElement.insertBefore(errDiv, form.nextSibling);
+          }
+          errDiv.textContent = text || 'An error occurred';
         }
 
         // optional: live re-check every 500ms if user pastes or changes using autocomplete (not necessary)
