@@ -104,23 +104,42 @@
     loginModal.style.display = "none";
   });
 
+  // API base
+  const API_BASE = window.API_BASE || 'http://localhost:4000';
+
   // Handle form submission
   loginForm.addEventListener("submit", function (event) {
     event.preventDefault();
 
-    // Get form values
-    const email = document.getElementById("email").value;
+    const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
 
-    // In a real application, you would send this data to a server
-    console.log("Login attempt with:", { email, password });
-
-    // Show success message and close modal
-    alert("Login successful!");
-    loginModal.style.display = "none";
-
-    // Clear form
-    loginForm.reset();
+    fetch(`${API_BASE}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    })
+      .then(async (r) => {
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          const msg = data?.message || 'Login failed';
+          throw new Error(msg);
+        }
+        return data;
+      })
+      .then((data) => {
+        if (data && data.token) {
+          localStorage.setItem('tulip_token', data.token);
+        }
+        // close modal
+        loginModal.style.display = "none";
+        // optional: toast/alert
+        alert('Logged in successfully');
+        loginForm.reset();
+      })
+      .catch((err) => {
+        alert(err.message || 'Login failed');
+      });
   });
 </script>
 

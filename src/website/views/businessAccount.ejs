@@ -11,193 +11,139 @@
         novalidate
         onsubmit="return performSignup(event)"
       >
-        <!-- business name -->
-        <div class="col-12">
-          <input
-            type="text"
-            class="form-control"
-            id="inputname"
-            placeholder="business name"
-          />
-          <div class="invalid-feedback">Please enter your business name.</div>
-        </div>
-        <!-- email -->
-        <div class="col-12">
-          <input
-            type="email"
-            class="form-control"
-            id="inputEmail4"
-            placeholder="E-mail"
-          />
-          <div class="invalid-feedback">
-            Please enter a valid email address.
+        <div class="front" id="front">
+          <div
+            class="d-flex justify-content-center button-front mb-3"
+            id="button_signIn"
+          >
+            <button type="button" class="btn btn-lg w-100">Sign In</button>
+          </div>
+
+          <div
+            class="d-flex justify-content-center button-front mb-3"
+            id="button_creat"
+          >
+            <button type="button" class="btn btn-lg w-100">
+              Creat Business Account
+            </button>
+          </div>
+
+          <div
+            class="d-flex justify-content-center button-front mb-3"
+            id="button_creat"
+          >
+            <button
+              type="button"
+              class="btn btn-lg w-100"
+              onclick="history.back()"
+            >
+              back to main page
+            </button>
           </div>
         </div>
 
-        <!-- phone number -->
-        <div class="col-12">
-          <input
-            type="text"
-            class="form-control"
-            id="inputphone"
-            placeholder="phone number"
-          />
-          <div class="invalid-feedback">Please enter a valid phone number.</div>
-        </div>
-
-        <!-- password -->
-        <div class="col-12">
-          <input
-            type="password"
-            class="form-control"
-            id="inputPassword"
-            placeholder="Password"
-          />
-          <div class="invalid-feedback">
-            Please enter a password (min 6 characters).
+        <div class="signIn_form" id="business_signIn">
+          <!-- business name -->
+          <div class="col-12 mb-3">
+            <input
+              type="text"
+              class="form-control"
+              id="inputname"
+              placeholder="business name"
+            />
+            <div class="invalid-feedback">Please enter your business name.</div>
+          </div>
+          <!-- password -->
+          <div class="col-12 mb-3">
+            <input
+              type="password"
+              class="form-control"
+              id="inputPassword"
+              placeholder="Password"
+            />
+            <div class="invalid-feedback">
+              Please enter a password (min 6 characters).
+            </div>
+          </div>
+          <p class="mb-3">
+            <a href="" class="forget-link" id="forgetLink"> forget password?</a>
+          </p>
+          <div class="col-12 d-flex justify-content-center px-0 mb-3">
+            <button type="submit" class="btn btn-lg w-100">Sign In</button>
+          </div>
+          <div class="col-12 d-flex justify-content-center px-0 mb-3">
+            <button class="btn btn-back btn-lg w-100" onclick="history.back()">
+              back
+            </button>
           </div>
         </div>
 
-        <!-- prefer lang -->
-        <!-- <fieldset class="col-12" id="category-group">
-          <legend class="col-form-label" style="font-size: 0.9rem">
-            category:
-          </legend>
-          <div class="d-flex gap-3">
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="category-1"
-                id="fashion"
-                value="fashion"
-                required
-              />
-              <label class="form-check-label" for="category-1">Fashion</label>
-            </div>
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="category-2"
-                id="electronics"
-                value="electronics"
-                required
-              />
-              <label class="form-check-label" for="category-2"
-                >electronics</label
-              >
-            </div>
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="category-3"
-                id="backToSchool"
-                value="backToSchool"
-                required
-              />
-              <label class="form-check-label" for="category-3"
-                >Back To School</label
-              >
-            </div>
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="category-4"
-                id="jewelry"
-                value="jewelry"
-                required
-              />
-              <label class="form-check-label" for="category-4">Jewelry</label>
-            </div>
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="category-5"
-                id="kitchenHome"
-                value="kitchenHome"
-                required
-              />
-              <label class="form-check-label" for="category-5"
-                >Kitchin&Home</label
-              >
-            </div>
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="category-6"
-                id="toys"
-                value="toys"
-                required
-              />
-              <label class="form-check-label" for="category-6">toys</label>
-            </div>
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="category-7"
-                id="beautyMakeUp"
-                value="beautyMakeUp"
-                required
-              />
-              <label class="form-check-label" for="category-7"
-                >Beauty&MakeUp</label
-              >
-            </div>
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="category-8"
-                id="grocery"
-                value="grocery"
-                required
-              />
-              <label class="form-check-label" for="category-8">Grocery</label>
-            </div>
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="category-9"
-                id="GiftBox"
-                value="GiftBox"
-                required
-              />
-              <label class="form-check-label" for="category-9">Gift Box</label>
-            </div>
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="category-10"
-                id="sport"
-                value="sport"
-                required
-              />
-              <label class="form-check-label" for="category-10">sport</label>
+        <div class="signUp_form" id="business_signUp">
+          <!-- business name -->
+          <div class="col-12 mb-3">
+            <input
+              type="text"
+              class="form-control"
+              id="inputname"
+              placeholder="business name"
+            />
+            <div class="invalid-feedback">Please enter your business name.</div>
+          </div>
+          <!-- email -->
+          <div class="col-12 mb-3">
+            <input
+              type="email"
+              class="form-control"
+              id="inputEmail4"
+              placeholder="E-mail"
+            />
+            <div class="invalid-feedback">
+              Please enter a valid email address.
             </div>
           </div>
-          <div class="invalid-feedback">
-            Please select a preferred category.
-          </div>
-        </fieldset> -->
 
-        <!-- submit sign up -->
-        <div class="col-12 d-flex justify-content-center px-0">
-          <button type="submit" class="btn btn-primary btn-lg w-auto">
-            Register
-          </button>
+          <!-- phone number -->
+          <div class="col-12 mb-3">
+            <input
+              type="text"
+              class="form-control"
+              id="inputphone"
+              placeholder="phone number"
+            />
+            <div class="invalid-feedback">
+              Please enter a valid phone number.
+            </div>
+          </div>
+
+          <!-- password -->
+          <div class="col-12 mb-3">
+            <input
+              type="password"
+              class="form-control"
+              id="inputPassword"
+              placeholder="Password"
+            />
+            <div class="invalid-feedback">
+              Please enter a password (min 6 characters).
+            </div>
+          </div>
+          <div class="col-12 d-flex justify-content-center px-0 mb-3"></div>
+          <!-- submit sign up -->
+          <div class="col-12 d-flex justify-content-center px-0 mb-3">
+            <button type="submit" class="btn btn-lg w-100">Next</button>
+          </div>
+          <!-- back -->
+          <div class="col-12 d-flex justify-content-center px-0 mb-3">
+            <button class="btn btn-back btn-lg w-100" onclick="history.back()">
+              back
+            </button>
+          </div>
         </div>
       </form>
     </div>
   </div>
 </div>
+
 <style>
   @import url(https://db.onlinewebfonts.com/c/ba155473d72fb574bd945b20f4598560?family=Montserrat-Alt1+SemBd);
   @import url(https://db.onlinewebfonts.com/c/29295d2928c6bd76a76c9e789982bc85?family=Montserrat-Alt1+Med);
@@ -242,19 +188,31 @@
   }
   .container {
     min-height: 100vh;
-    padding: 80px;
-    /* padding-right: 60px; */
+    padding: 40px;
+    width: 600px;
+  }
+  .signIn_form {
+    display: none;
+  }
+  .signUp_form {
+    display: none;
+  }
+  .front {
+    display: inline;
   }
   .card-signup {
+    border-radius: 40px;
     width: 100%;
-    max-width: 700px;
-    padding: 20px;
+    height: auto;
+
     background-color: #ffffff17;
     backdrop-filter: blur(20px);
     color: #e7c8b3;
   }
-  form {
+  form.button-front {
     border: none;
+    padding: 30px;
+    gap: 30px;
   }
 
   h3 {
@@ -361,3 +319,24 @@
     pointer-events: none;
   }
 </style>
+
+<script>
+  const main_front = document.getElementById("front");
+  const signIn_form = document.getElementById("business_signIn");
+  const signUp_form = document.getElementById("business_signUp");
+
+  const signIn_button = document.getElementById("button_signIn");
+  const signUp_button = document.getElementById("button_creat");
+
+  signIn_button.addEventListener("click", function () {
+    main_front.style.display = "none";
+    signIn_form.style.display = "inline";
+    signUp_form.style.display = "none";
+  });
+
+  signUp_button.addEventListener("click", function () {
+    main_front.style.display = "none";
+    signUp_form.style.display = "inline";
+    signIn_form.style.display = "none";
+  });
+</script>
