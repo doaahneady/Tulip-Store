@@ -61,6 +61,11 @@ The server listens on `http://localhost:4000` by default.
   - `userAgent`: string
   - `createdAt`: Date
 
+### Contact
+- POST `/api/contact`
+  - Body: `{ name: string, email: string, subject: string, message: string }`
+  - 201 Created: `{ id, createdAt }`
+
 ## Notes
 - If `MONGO_URI` is not set, it connects to `mongodb://127.0.0.1:27017/Tulip`.
 - Passwords are stored as strong hashes with bcrypt.
