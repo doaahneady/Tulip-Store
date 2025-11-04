@@ -1,4 +1,4 @@
-$RepoPath = "D:\tulip-store2\Tulip-Store"
+$RepoPath = "D:\Tulip-Store"
 $Branch = "main"
 
 while ($true) {
