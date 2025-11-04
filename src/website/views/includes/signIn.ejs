@@ -81,6 +81,8 @@
   const signupLink = document.getElementById("signupLink");
   const loginForm = document.getElementById("loginForm");
 
+  const after_s = document.getElementById("after_s");
+
   // Open modal when login button is clicked
   loginBtn.addEventListener("click", function () {
     loginModal.style.display = "flex";
@@ -105,7 +107,7 @@
   });
 
   // API base
-  const API_BASE = window.API_BASE || 'http://localhost:4000';
+  const API_BASE = window.API_BASE || "http://localhost:4000";
 
   // Handle form submission
   loginForm.addEventListener("submit", function (event) {
@@ -115,30 +117,33 @@
     const password = document.getElementById("password").value;
 
     fetch(`${API_BASE}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
     })
       .then(async (r) => {
         const data = await r.json().catch(() => ({}));
         if (!r.ok) {
-          const msg = data?.message || 'Login failed';
+          const msg = data?.message || "Login failed";
           throw new Error(msg);
         }
         return data;
       })
       .then((data) => {
         if (data && data.token) {
-          localStorage.setItem('tulip_token', data.token);
+          localStorage.setItem("tulip_token", data.token);
         }
         // close modal
         loginModal.style.display = "none";
         // optional: toast/alert
-        alert('Logged in successfully');
+        alert("Logged in successfully");
         loginForm.reset();
+        loginModal.style.display = "none";
+        after_s.style.display = "inline";
+        after_s.style.text = "";
       })
       .catch((err) => {
-        alert(err.message || 'Login failed');
+        alert(err.message || "Login failed");
       });
   });
 </script>
