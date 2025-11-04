@@ -3,6 +3,95 @@
   <!-- sign up form -->
   <%- include('./includes/head') %>
   <body>
+    <style>
+      @import url(https://db.onlinewebfonts.com/c/ba155473d72fb574bd945b20f4598560?family=Montserrat-Alt1+SemBd);
+      @import url(https://db.onlinewebfonts.com/c/29295d2928c6bd76a76c9e789982bc85?family=Montserrat-Alt1+Med);
+
+      @font-face {
+        font-family: "Montserrat-Alt1 SemBd";
+        src: url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.eot");
+        src: url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.eot?#iefix")
+            format("embedded-opentype"),
+          url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.woff2")
+            format("woff2"),
+          url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.woff")
+            format("woff"),
+          url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.ttf")
+            format("truetype"),
+          url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.svg#Montserrat-Alt1 SemBd")
+            format("svg");
+      }
+
+      @font-face {
+        font-family: "Montserrat-Alt";
+        src: url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.eot");
+        src: url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.eot?#iefix")
+            format("embedded-opentype"),
+          url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.woff2")
+            format("woff2"),
+          url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.woff")
+            format("woff"),
+          url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.ttf")
+            format("truetype"),
+          url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.svg#Montserrat-Alt1 Med")
+            format("svg");
+      }
+      body {
+        background-image: url("/images/signUp.jpg");
+        background-repeat: none;
+        background-size: cover;
+        font-family: "Montserrat-Alt1 SemBd";
+      }
+      placeholder {
+        font-family: "Montserrat-Alt1";
+      }
+      .container {
+        min-height: 100vh;
+        padding: 40px;
+        padding-right: 60px;
+      }
+      .card-signup {
+        width: 100%;
+        max-width: 700px;
+        padding: 0;
+        background-color: #ffffff17;
+        backdrop-filter: blur(20px);
+        color: #e7c8b3;
+      }
+      form {
+        border: none;
+      }
+
+      h3 {
+        font-weight: 700;
+        font-size: 40px;
+      }
+
+      .btn {
+        background-color: #e7c8b3;
+        /* box-shadow: inset 2px 2px 4px rgb(255, 255, 255), inset -2px -2px 4px #0d464c; */
+        color: #0d464c;
+        font-weight: bold;
+        border: none;
+      }
+      .button-sign-up {
+        margin-left: 450px;
+      }
+      .btn:hover,
+      .btn::after {
+        color: #e7c8b3;
+        background-color: #0d464c;
+        border: none;
+      }
+
+      .form-select {
+        border-radius: 10px;
+        border: none;
+        font-weight: 500;
+        background-color: #ffffff;
+        color: #0d464c;
+      }
+    </style>
     <div class="container d-flex justify-content-end align-items-center">
       <div class="card-signup shadow-sm">
         <div class="card-body p-4">
@@ -24,7 +113,7 @@
               <input
                 type="email"
                 class="form-control"
-                id="inputEmail4"
+                id="inputEmail"
                 placeholder="Example@gmail.com"
               />
               <!-- <div class="error-message">
@@ -34,15 +123,64 @@
 
             <!-- phone number -->
             <div class="col-12 col-md-6">
-              <input
-                type="text"
-                class="form-control"
-                id="inputphone"
-                placeholder="Phone Nomber"
-              />
-              <!-- <div class="error-message">
+              <div class="input-group mb-3">
+                <button
+                  class="btn btn-outline-secondary dropdown-toggle"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                  id="phonePrefix"
+                >
+                  +963
+                </button>
+                <ul class="dropdown-menu">
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="#"
+                      onclick="setPrefix('+963')"
+                      >🇸🇾 +963</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="#"
+                      onclick="setPrefix('+971')"
+                      >🇦🇪 +971</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="#"
+                      onclick="setPrefix('+966')"
+                      >🇸🇦 +966</a
+                    >
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="#" onclick="setPrefix('+20')"
+                      >🇪🇬 +20</a
+                    >
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="#" onclick="setPrefix('+90')"
+                      >🇹🇷 +90</a
+                    >
+                  </li>
+                </ul>
+
+                <input
+                  type="text"
+                  class="form-control"
+                  id="inputphone"
+                  placeholder="Phone Number"
+                />
+              </div>
+
+              <div class="error-message text-danger mt-1">
                 Please enter a valid phone number.
-              </div> -->
+              </div>
             </div>
 
             <!-- password -->
@@ -147,104 +285,13 @@
         </div>
       </div>
     </div>
-
-    <style>
-      @import url(https://db.onlinewebfonts.com/c/ba155473d72fb574bd945b20f4598560?family=Montserrat-Alt1+SemBd);
-      @import url(https://db.onlinewebfonts.com/c/29295d2928c6bd76a76c9e789982bc85?family=Montserrat-Alt1+Med);
-
-      @font-face {
-        font-family: "Montserrat-Alt1 SemBd";
-        src: url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.eot");
-        src: url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.eot?#iefix")
-            format("embedded-opentype"),
-          url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.woff2")
-            format("woff2"),
-          url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.woff")
-            format("woff"),
-          url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.ttf")
-            format("truetype"),
-          url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.svg#Montserrat-Alt1 SemBd")
-            format("svg");
-      }
-
-      @font-face {
-        font-family: "Montserrat-Alt";
-        src: url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.eot");
-        src: url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.eot?#iefix")
-            format("embedded-opentype"),
-          url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.woff2")
-            format("woff2"),
-          url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.woff")
-            format("woff"),
-          url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.ttf")
-            format("truetype"),
-          url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.svg#Montserrat-Alt1 Med")
-            format("svg");
-      }
-      body {
-        background-image: url("/images/signUp.jpg");
-        background-repeat: none;
-        background-size: cover;
-        font-family: "Montserrat-Alt1 SemBd";
-      }
-      placeholder {
-        font-family: "Montserrat-Alt1";
-      }
-      .container {
-        min-height: 100vh;
-        padding: 40px;
-        padding-right: 60px;
-      }
-      .card-signup {
-        width: 100%;
-        max-width: 700px;
-        padding: 0;
-        background-color: #ffffff17;
-        backdrop-filter: blur(20px);
-        color: #e7c8b3;
-      }
-      form {
-        border: none;
-      }
-
-      h3 {
-        font-weight: 700;
-        font-size: 40px;
-      }
-
-      .btn {
-        background-color: #e7c8b3;
-        /* box-shadow: inset 2px 2px 4px rgb(255, 255, 255), inset -2px -2px 4px #0d464c; */
-        color: #0d464c;
-        font-weight: bold;
-        border: none;
-      }
-      .button-sign-up {
-        margin-left: 450px;
-      }
-      .btn:hover,
-      .btn::after {
-        color: #e7c8b3;
-        background-color: #0d464c;
-        border: none;
-      }
-
-      .form-select {
-        border-radius: 10px;
-        border: none;
-        font-weight: 500;
-        background-color: #ffffff;
-        color: #0d464c;
-      }
-    </style>
-
     <script>
       (function () {
         // form and fields
         const form = document.getElementById("signupForm");
 
         const inputName = document.getElementById("inputname");
-        const inputEmail = document.getElementById("inputEmail4");
+        const inputEmail = document.getElementById("inputEmail");
         const inputPhone = document.getElementById("inputphone");
         const inputPassword = document.getElementById("inputPassword");
         const currency = document.getElementById("inputCurrency");
@@ -293,8 +340,11 @@
         }
         function validatePhone(value) {
           const v = value.replace(/\s+/g, "");
-          // allow + and digits, length between 7 and 15
-          return /^[+\d][\d]{6,14}$/.test(v);
+          // allow + and digits, length between 9 and 16
+          return /^[+\d][\d]{8,15}$/.test(v);
+        }
+        function setPrefix(prefix) {
+          document.getElementById("phonePrefix").textContent = prefix;
         }
         function validatePassword(value) {
           return value.length >= 6;
@@ -508,7 +558,7 @@
         // initialCheck();
 
         // API base
-        const API_BASE = window.API_BASE || 'http://localhost:4000';
+        const API_BASE = window.API_BASE || "http://localhost:4000";
 
         // on submit
         form.addEventListener("submit", function (e) {
@@ -539,14 +589,18 @@
           };
 
           fetch(`${API_BASE}/api/auth/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
           })
             .then(async (r) => {
               const data = await r.json().catch(() => ({}));
               if (!r.ok) {
-                const msg = data?.message || (data?.errors && data.errors.map(e => e.path + ': ' + e.msg).join(', ')) || 'Registration failed';
+                const msg =
+                  data?.message ||
+                  (data?.errors &&
+                    data.errors.map((e) => e.path + ": " + e.msg).join(", ")) ||
+                  "Registration failed";
                 throw new Error(msg);
               }
               return data;
@@ -554,12 +608,12 @@
             .then((data) => {
               // store token for subsequent requests
               if (data && data.token) {
-                localStorage.setItem('tulip_token', data.token);
+                localStorage.setItem("tulip_token", data.token);
               }
-              showSuccess('Registration successful ✅');
+              showSuccess("Registration successful ✅");
             })
             .catch((err) => {
-              showError(err.message || 'Registration failed');
+              showError(err.message || "Registration failed");
             });
         });
 
@@ -578,15 +632,15 @@
         }
 
         function showError(text) {
-          let errDiv = document.getElementById('signup-error');
+          let errDiv = document.getElementById("signup-error");
           if (!errDiv) {
-            errDiv = document.createElement('div');
-            errDiv.id = 'signup-error';
-            errDiv.style.marginTop = '1rem';
-            errDiv.className = 'alert alert-danger';
+            errDiv = document.createElement("div");
+            errDiv.id = "signup-error";
+            errDiv.style.marginTop = "1rem";
+            errDiv.className = "alert alert-danger";
             form.parentElement.insertBefore(errDiv, form.nextSibling);
           }
-          errDiv.textContent = text || 'An error occurred';
+          errDiv.textContent = text || "An error occurred";
         }
 
         // optional: live re-check every 500ms if user pastes or changes using autocomplete (not necessary)
