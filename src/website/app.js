@@ -11,7 +11,7 @@ module.exports.run = async () => {
   const signInRouter = require("./routes/signIn");
   const contactUsRouter = require("./routes/contactUs");
   const businessRouter = require("./routes/business");
-
+  const ReturnPolicy = require("./routes/ReturnPolicy");
   app.config = config;
   app.usersData = require("../base/User");
   app.Info = require("../base/Info");
@@ -35,6 +35,7 @@ module.exports.run = async () => {
   app.use("/signin", signInRouter);
   app.use("/contact", contactUsRouter);
   app.use("/business", businessRouter);
+  app.use("/ReturnPolicy", ReturnPolicy);
 
   app.listen(app.get("port"), () => {
     console.log(

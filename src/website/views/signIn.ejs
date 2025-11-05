@@ -3,134 +3,6 @@
   <!-- sign up form -->
   <%- include('./includes/head') %>
   <body>
-    <div class="container d-flex align-items-center">
-      <div class="card-signup shadow-sm">
-        <div class="card-body p-4">
-          <h3 class="card-title text-center mb-4">REGISTER</h3>
-          <form
-            id="signupForm"
-            class="row g-3"
-            novalidate
-            onsubmit="return performSignup(event)"
-          >
-            <!-- sign in -->
-            <div class="signIn_form" id="form_signIn">
-              <!-- full name -->
-              <div class="col-12 mb-3">
-                <input
-                  type="email"
-                  class="form-control"
-                  id="inputname"
-                  placeholder="E-mail"
-                />
-              </div>
-              <!-- password -->
-              <div class="col-12 mb-3">
-                <input
-                  type="password"
-                  class="form-control"
-                  id="inputPassword"
-                  placeholder="Password"
-                />
-              </div>
-              <div class="mb-3">
-                <a href="" class="forget-link" id="forgetLink">
-                  forget password?</a
-                >
-              </div>
-              <!-- submit -->
-              <div class="col-12 d-flex justify-content-center px-0 mb-3">
-                <button type="button" class="btn btn-lg w-100">Sign In</button>
-              </div>
-              <!-- back -->
-              <div class="col-12 d-flex justify-content-center px-0 mb-3">
-                <button
-                  class="btn btn-back btn-lg w-100"
-                  onclick="history.back()"
-                >
-                  back
-                </button>
-              </div>
-            </div>
-            <!-- forget pass -->
-            <div class="forget-Form" id="forgetForm">
-              <p>check your email</p>
-              <div class="col-12 d-flex justify-content-center px-0 mb-3">
-                <input
-                  type="text"
-                  class="form-control"
-                  id="inputcode"
-                  placeholder="enter code"
-                />
-              </div>
-              <!-- next -->
-              <div class="col-12 d-flex justify-content-center px-0 mb-3">
-                <button type="button" class="btn btn-lg w-100">Next</button>
-              </div>
-            </div>
-            <!-- sign up -->
-            <div class="signUp_form" id="form_signUp">
-              <!-- full name -->
-              <div class="col-12 mb-3">
-                <input
-                  type="text"
-                  class="form-control"
-                  id="inputname"
-                  placeholder="full name"
-                />
-              </div>
-
-              <!-- email -->
-              <div class="col-12 mb-3">
-                <input
-                  type="email"
-                  class="form-control"
-                  id="inputEmail"
-                  placeholder="E-mail"
-                />
-              </div>
-
-              <!-- phone number -->
-              <div class="col-12 mb-3">
-                <input
-                  type="text"
-                  class="form-control"
-                  id="inputphone"
-                  placeholder="phone number"
-                />
-              </div>
-
-              <!-- password -->
-              <div class="col-12 mb-3">
-                <input
-                  type="password"
-                  class="form-control"
-                  id="inputPassword"
-                  placeholder="Password"
-                />
-              </div>
-
-              <div class="col-12 d-flex justify-content-center px-0 mb-3">
-                <!-- submit sign up -->
-                <div class="col-6 d-flex justify-content-center px-0 mb-3">
-                  <button type="submit" class="btn btn-lg w-100">Next</button>
-                </div>
-                <!-- back -->
-                <div class="col-6 d-flex justify-content-center px-0 mb-3">
-                  <button
-                    class="btn btn-back btn-lg w-100"
-                    onclick="history.back()"
-                  >
-                    back
-                  </button>
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
     <style>
       @import url(https://db.onlinewebfonts.com/c/ba155473d72fb574bd945b20f4598560?family=Montserrat-Alt1+SemBd);
       @import url(https://db.onlinewebfonts.com/c/29295d2928c6bd76a76c9e789982bc85?family=Montserrat-Alt1+Med);
@@ -165,7 +37,7 @@
             format("svg");
       }
       body {
-        background-image: url("images/business.jpg");
+        background-image: url("images/signUp.jpg");
         background-repeat: none;
         background-size: cover;
         font-family: "Montserrat-Alt1 SemBd";
@@ -178,26 +50,38 @@
         padding: 20px;
         width: 500px;
       }
-      .signIn_form {
-        display: none;
+
+      .forget-link,
+      .signup-link {
+        background-color: transparent;
+        color: #e7c8b3;
+        text-decoration: underline;
+        font-weight: bold;
+        border: none;
       }
-      .signUp_form {
-        display: none;
+      .signup-link:hover,
+      .forget-link:hover {
+        font-weight: bold;
+        text-shadow: 1px 0 2px #000000;
+        transition: 0.2s;
       }
-      .front {
-        display: inline;
+      .text {
+        color: #f05928;
       }
-      .forget-Form {
+
+      #forgetForm {
         display: none;
       }
       .card-signup {
         border-radius: 40px;
         width: 100%;
         height: auto;
-
         background-color: #ffffff17;
         backdrop-filter: blur(20px);
         color: #e7c8b3;
+      }
+      .signUp_form {
+        display: none;
       }
       form.button-front {
         border: none;
@@ -244,111 +128,168 @@
         background-color: #ffffff;
         color: #0d464c;
       }
-
-      /* toast (bottom-right) */
-      .toast-fixed {
-        position: fixed;
-        bottom: 1rem;
-        right: 1rem;
-        z-index: 1100;
-      }
-
-      /* validate */
-      /* error message hidden by default */
-      .error-message {
-        color: #dc3545;
-        font-size: 0.85rem;
-        display: none;
-        margin-top: 0.25rem;
-      }
-
-      /* show when invalid */
-      .invalid .error-message {
-        display: block;
-      }
-
-      /* outline for invalid/valid */
-      .is-invalid {
-        border-color: #dc3545 !important;
-        box-shadow: 0 0 0 0.1rem rgba(220, 53, 69, 0.15);
-      }
-      .is-valid {
-        border-color: #28a745 !important;
-        box-shadow: 0 0 0 0.1rem rgba(40, 167, 69, 0.12);
-      }
-
-      /* validation icon placed to the right of inputs */
-      .validation-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
-      }
-      .validation-icon {
-        position: absolute;
-        right: 10px;
-        pointer-events: none;
-        font-size: 1.1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        display: none;
-      }
-      .validation-icon.valid {
-        color: #28a745;
-        display: inline;
-      }
-      .validation-icon.invalid {
-        color: #dc3545;
-        display: inline;
-      }
-
-      /* for fieldset groups (radios) */
-      .fieldset-invalid {
-        border: 1px solid rgba(220, 53, 69, 0.2);
-        padding: 0.6rem;
-        border-radius: 0.25rem;
-      }
-      .fieldset-valid {
-        border: 1px solid rgba(40, 167, 69, 0.15);
-        padding: 0.6rem;
-        border-radius: 0.25rem;
-      }
-
-      /* disable submit look */
-      button[disabled] {
-        opacity: 0.6;
-        pointer-events: none;
-      }
     </style>
 
+    <div class="container d-flex align-items-center">
+      <div class="card-signup shadow-sm">
+        <div class="card-body p-4">
+          <h3 class="card-title text-center mb-4">REGISTER</h3>
+          <form
+            id="signupForm"
+            class="row g-3"
+            novalidate
+            onsubmit="return performSignup(event)"
+          >
+            <!-- sign in -->
+            <div class="signIn_form" id="form_signIn">
+              <!-- email -->
+              <div class="col-12 mb-3">
+                <input
+                  type="email"
+                  class="form-control"
+                  id="inputname"
+                  placeholder="E-mail"
+                />
+                <div class="invalid-feedback">Invalid email address.</div>
+                <div class="valid-feedback">Email is correct.</div>
+              </div>
+
+              <!-- password -->
+              <div class="col-12 mb-3">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="inputPassword"
+                  placeholder="Password"
+                  value=""
+                />
+                <div class="invalid-feedback">Incorrect password.</div>
+                <div class="valid-feedback">Password is correct.</div>
+              </div>
+
+              <!-- forget pass -->
+              <div class="mb-3">
+                <button type="button" class="forget-link" id="forgetLink">
+                  forget password?
+                </button>
+              </div>
+
+              <!-- submit -->
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button
+                  type="submit"
+                  class="btn btn-lg w-100 btn-primary"
+                  id="signIn"
+                >
+                  Sign In
+                </button>
+              </div>
+
+              <!-- sign up -->
+              <p class="text">
+                Don't have an account?
+                <button type="button" class="signup-link" id="signupLink">
+                  Sign up here
+                </button>
+              </p>
+
+              <!-- or with -->
+              <p class="p line-or text-center">Or With</p>
+
+              <!-- back -->
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button type="button" class="btn btn-lg w-100" id="back">
+                  <span class="btn-text"><a class="aa" href="/">back</a></span>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <script>
-      const main_front = document.getElementById("front");
+      const errorEl = document.getElementById("error");
       const signIn_form = document.getElementById("form_signIn");
       const signUp_form = document.getElementById("form_signUp");
 
-      const signIn_button = document.getElementById("button_signIn");
-      const signUp_button = document.getElementById("button_creat");
+      const signIn_button = document.getElementById("signIn");
+      const signupLink = document.getElementById("signupLink");
 
       const forgetLink = document.getElementById("forgetLink");
       const forgetForm = document.getElementById("forgetForm");
 
-      signIn_button.addEventListener("click", function () {
-        main_front.style.display = "none";
-        signIn_form.style.display = "inline";
-        signUp_form.style.display = "none";
+      const signUpButton = document.getElementById("signUpButton");
+
+      const CORRECT_EMAIL = "doaahnidi@gmail.com";
+      const CORRECT_PASSWORD = "ddffhh";
+
+      const emailInput = document.getElementById("inputname");
+      const passwordInput = document.getElementById("inputPassword");
+      const signInBtn = document.getElementById("signIn");
+
+      signInBtn.addEventListener("click", function (event) {
+        event.preventDefault();
+
+        // remove previous state
+        emailInput.classList.remove("is-valid", "is-invalid");
+        passwordInput.classList.remove("is-valid", "is-invalid");
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        let hasError = false;
+
+        // validate email
+        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+        if (email === "" || !emailRegex.test(email)) {
+          emailInput.classList.add("is-invalid");
+          hasError = true;
+        } else if (email.toLowerCase() !== CORRECT_EMAIL.toLowerCase()) {
+          emailInput.classList.add("is-invalid");
+          hasError = true;
+        } else {
+          emailInput.classList.add("is-valid");
+        }
+
+        // validate password
+        if (password === "") {
+          passwordInput.classList.add("is-invalid");
+          hasError = true;
+        } else if (password !== CORRECT_PASSWORD) {
+          passwordInput.classList.add("is-invalid");
+          hasError = true;
+        } else {
+          passwordInput.classList.add("is-valid");
+        }
+
+        // success
+        if (!hasError) {
+          alert(" Logged in successfully!");
+          // Example: redirect to another page
+          // window.location.href = "/dashboard";
+        }
       });
 
-      signUp_button.addEventListener("click", function () {
-        main_front.style.display = "none";
-        signUp_form.style.display = "inline";
-        signIn_form.style.display = "none";
+      // optional: reset validation while typing
+      [emailInput, passwordInput].forEach((input) => {
+        input.addEventListener("input", () => {
+          input.classList.remove("is-valid", "is-invalid");
+        });
       });
-
+      // forget password
       forgetLink.addEventListener("click", function () {
         signIn_form.style.display = "none";
-        main_front.style.display = "none";
-        signUp_form.style.display = "none";
+
         forgetForm.style.display = "inline";
       });
+      // sign up form
+      signupLink.addEventListener("click", function () {
+        signIn_form.style.display = "none";
+        signUp_form.style.display = "inline";
+      });
+      // sign up validation
+      signUpButton.addEventListener("click", function () {});
     </script>
   </body>
 </html>
