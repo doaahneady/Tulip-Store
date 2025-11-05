@@ -2,7 +2,7 @@ const router = require("express").Router();
 
 router.get("/", async (req, res) => {
   const language = new (require(`../../languages/english`))();
-  res.render("signUp.ejs", {
+  res.render("signIn.ejs", {
     app: req.app,
     language: language,
   });
