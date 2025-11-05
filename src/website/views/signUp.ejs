@@ -3,6 +3,156 @@
   <!-- sign up form -->
   <%- include('./includes/head') %>
   <body>
+    <div class="container d-flex align-items-center">
+      <div class="card-signup shadow-sm">
+        <div class="card-body p-4">
+          <h3 class="card-title text-center mb-4">REGISTER</h3>
+          <form
+            id="signupForm"
+            class="row g-3"
+            novalidate
+            onsubmit="return performSignup(event)"
+          >
+            <!-- front -->
+            <div class="front" id="front">
+              <div
+                class="d-flex justify-content-center button-front mb-3"
+                id="button_signIn"
+              >
+                <button type="button" class="btn btn-lg w-100">Sign In</button>
+              </div>
+
+              <div
+                class="d-flex justify-content-center button-front mb-3"
+                id="button_creat"
+              >
+                <button type="button" class="btn btn-lg w-100">Sign Up</button>
+              </div>
+
+              <div
+                class="d-flex justify-content-center button-front mb-3"
+                id="button_creat"
+              >
+                <button type="button" class="btn btn-lg w-100">
+                  <a href="/">back to main page</a>
+                </button>
+              </div>
+            </div>
+            <!-- sign in -->
+            <div class="signIn_form" id="form_signIn">
+              <!-- full name -->
+              <div class="col-12 mb-3">
+                <input
+                  type="email"
+                  class="form-control"
+                  id="inputname"
+                  placeholder="E-mail"
+                />
+              </div>
+              <!-- password -->
+              <div class="col-12 mb-3">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="inputPassword"
+                  placeholder="Password"
+                />
+              </div>
+              <div class="mb-3">
+                <a href="" class="forget-link" id="forgetLink">
+                  forget password?</a
+                >
+              </div>
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button type="button" class="btn btn-lg w-100">Sign In</button>
+              </div>
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button
+                  class="btn btn-back btn-lg w-100"
+                  onclick="history.back()"
+                >
+                  back
+                </button>
+              </div>
+            </div>
+            <!-- forget pass -->
+            <div class="forget-Form" id="forgetForm">
+              <p>check your email</p>
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="inputcode"
+                  placeholder="enter code"
+                />
+              </div>
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button type="button" class="btn btn-lg w-100">Next</button>
+              </div>
+            </div>
+            <!-- sign up -->
+            <div class="signUp_form" id="form_signUp">
+              <!-- full name -->
+              <div class="col-12 mb-3">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="inputname"
+                  placeholder="full name"
+                />
+              </div>
+
+              <!-- email -->
+              <div class="col-12 mb-3">
+                <input
+                  type="email"
+                  class="form-control"
+                  id="inputEmail"
+                  placeholder="E-mail"
+                />
+              </div>
+
+              <!-- phone number -->
+              <div class="col-12 mb-3">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="inputphone"
+                  placeholder="phone number"
+                />
+              </div>
+
+              <!-- password -->
+              <div class="col-12 mb-3">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="inputPassword"
+                  placeholder="Password"
+                />
+              </div>
+
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <!-- submit sign up -->
+                <div class="col-6 d-flex justify-content-center px-0 mb-3">
+                  <button type="submit" class="btn btn-lg w-100">Next</button>
+                </div>
+                <!-- back -->
+                <div class="col-6 d-flex justify-content-center px-0 mb-3">
+                  <button
+                    class="btn btn-back btn-lg w-100"
+                    onclick="history.back()"
+                  >
+                    back
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <style>
       @import url(https://db.onlinewebfonts.com/c/ba155473d72fb574bd945b20f4598560?family=Montserrat-Alt1+SemBd);
       @import url(https://db.onlinewebfonts.com/c/29295d2928c6bd76a76c9e789982bc85?family=Montserrat-Alt1+Med);
@@ -37,7 +187,7 @@
             format("svg");
       }
       body {
-        background-image: url("/images/signUp.jpg");
+        background-image: url("images/business.jpg");
         background-repeat: none;
         background-size: cover;
         font-family: "Montserrat-Alt1 SemBd";
@@ -47,19 +197,34 @@
       }
       .container {
         min-height: 100vh;
-        padding: 40px;
-        padding-right: 60px;
+        padding: 20px;
+        width: 500px;
+      }
+      .signIn_form {
+        display: none;
+      }
+      .signUp_form {
+        display: none;
+      }
+      .front {
+        display: inline;
+      }
+      .forget-Form {
+        display: none;
       }
       .card-signup {
+        border-radius: 40px;
         width: 100%;
-        max-width: 700px;
-        padding: 0;
+        height: auto;
+
         background-color: #ffffff17;
         backdrop-filter: blur(20px);
         color: #e7c8b3;
       }
-      form {
+      form.button-front {
         border: none;
+        padding: 20px;
+        gap: 30px;
       }
 
       h3 {
@@ -84,6 +249,16 @@
         border: none;
       }
 
+      .btn a {
+        color: #0d464c;
+        text-decoration: none;
+        padding: 10px 90px;
+      }
+      .btn a:hover {
+        background-color: #0d464c;
+        color: #e7c8b3;
+        text-decoration: none;
+      }
       .form-select {
         border-radius: 10px;
         border: none;
@@ -91,562 +266,111 @@
         background-color: #ffffff;
         color: #0d464c;
       }
+
+      /* toast (bottom-right) */
+      .toast-fixed {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        z-index: 1100;
+      }
+
+      /* validate */
+      /* error message hidden by default */
+      .error-message {
+        color: #dc3545;
+        font-size: 0.85rem;
+        display: none;
+        margin-top: 0.25rem;
+      }
+
+      /* show when invalid */
+      .invalid .error-message {
+        display: block;
+      }
+
+      /* outline for invalid/valid */
+      .is-invalid {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 0.1rem rgba(220, 53, 69, 0.15);
+      }
+      .is-valid {
+        border-color: #28a745 !important;
+        box-shadow: 0 0 0 0.1rem rgba(40, 167, 69, 0.12);
+      }
+
+      /* validation icon placed to the right of inputs */
+      .validation-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      .validation-icon {
+        position: absolute;
+        right: 10px;
+        pointer-events: none;
+        font-size: 1.1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        display: none;
+      }
+      .validation-icon.valid {
+        color: #28a745;
+        display: inline;
+      }
+      .validation-icon.invalid {
+        color: #dc3545;
+        display: inline;
+      }
+
+      /* for fieldset groups (radios) */
+      .fieldset-invalid {
+        border: 1px solid rgba(220, 53, 69, 0.2);
+        padding: 0.6rem;
+        border-radius: 0.25rem;
+      }
+      .fieldset-valid {
+        border: 1px solid rgba(40, 167, 69, 0.15);
+        padding: 0.6rem;
+        border-radius: 0.25rem;
+      }
+
+      /* disable submit look */
+      button[disabled] {
+        opacity: 0.6;
+        pointer-events: none;
+      }
     </style>
-    <div class="container d-flex justify-content-end align-items-center">
-      <div class="card-signup shadow-sm">
-        <div class="card-body p-4">
-          <h3 class="card-title text-center mb-4">Sign Up</h3>
 
-          <form id="signupForm" class="row g-3" name="validationSignup">
-            <!-- full name -->
-            <div class="col-12 col-md-6">
-              <input
-                type="text"
-                class="form-control"
-                id="inputname"
-                placeholder="full name"
-              />
-              <!-- <div class="error-message">Please enter your full name.</div> -->
-            </div>
-            <!-- email -->
-            <div class="col-12 col-md-6">
-              <input
-                type="email"
-                class="form-control"
-                id="inputEmail"
-                placeholder="Example@gmail.com"
-              />
-              <!-- <div class="error-message">
-                Please enter a valid email address.
-              </div> -->
-            </div>
-
-            <!-- phone number -->
-            <div class="col-12 col-md-6">
-              <div class="input-group mb-3">
-                <button
-                  class="btn btn-outline-secondary dropdown-toggle"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                  id="phonePrefix"
-                >
-                  +963
-                </button>
-                <ul class="dropdown-menu">
-                  <li>
-                    <a
-                      class="dropdown-item"
-                      href="#"
-                      onclick="setPrefix('+963')"
-                      >🇸🇾 +963</a
-                    >
-                  </li>
-                  <li>
-                    <a
-                      class="dropdown-item"
-                      href="#"
-                      onclick="setPrefix('+971')"
-                      >🇦🇪 +971</a
-                    >
-                  </li>
-                  <li>
-                    <a
-                      class="dropdown-item"
-                      href="#"
-                      onclick="setPrefix('+966')"
-                      >🇸🇦 +966</a
-                    >
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#" onclick="setPrefix('+20')"
-                      >🇪🇬 +20</a
-                    >
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#" onclick="setPrefix('+90')"
-                      >🇹🇷 +90</a
-                    >
-                  </li>
-                </ul>
-
-                <input
-                  type="text"
-                  class="form-control"
-                  id="inputphone"
-                  placeholder="Phone Number"
-                />
-              </div>
-
-              <div class="error-message text-danger mt-1">
-                Please enter a valid phone number.
-              </div>
-            </div>
-
-            <!-- password -->
-            <div class="col-12 col-md-6">
-              <input
-                type="password"
-                class="form-control"
-                id="inputPassword"
-                placeholder="Password"
-              />
-              <div class="error-message">
-                Please enter a password (min 6 characters).
-              </div>
-            </div>
-
-            <!-- prefer lang -->
-            <fieldset class="col-12" id="lang-group">
-              <legend class="col-form-label" style="font-size: 0.9rem">
-                Preferred language:
-              </legend>
-              <div class="d-flex gap-3">
-                <div class="form-check">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    name="preferredLang"
-                    id="langEn"
-                    value="en"
-                    required
-                  />
-                  <label class="form-check-label" for="langEn">English</label>
-                </div>
-                <div class="form-check">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    name="preferredLang"
-                    id="langAr"
-                    value="ar"
-                  />
-                  <label class="form-check-label" for="langAr">العربية</label>
-                </div>
-              </div>
-              <!-- <div class="error-message">
-                Please select a preferred language.
-              </div> -->
-            </fieldset>
-
-            <!-- gender -->
-            <fieldset class="col-12" id="gender-group">
-              <legend class="col-form-label" style="font-size: 0.9rem">
-                Your gender:
-              </legend>
-              <div class="d-flex gap-3">
-                <div class="form-check">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    name="gender"
-                    id="gender-m"
-                    value="male"
-                    required
-                  />
-                  <label class="form-check-label" for="gender-m">male</label>
-                </div>
-                <div class="form-check">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    name="gender"
-                    id="gender-f"
-                    value="female"
-                  />
-                  <label class="form-check-label" for="gender-f">female</label>
-                </div>
-              </div>
-              <!-- <div class="error-message">Please select your gender.</div> -->
-            </fieldset>
-
-            <!-- Currency -->
-            <div class="col-12 col-md-3 Currency">
-              <select id="inputCurrency" class="form-select">
-                <option hidden>Currency</option>
-                <option>USD</option>
-                <option>SYP</option>
-                <option>AED</option>
-              </select>
-              <!-- <div class="error-message">Please select your gender.</div> -->
-            </div>
-
-            <!-- submit sign up & back -->
-            <div class="button-sign-up justify-content-end">
-              <button type="submit" class="btn btn-primary btn-lg w-auto">
-                Register
-              </button>
-              <button
-                class="btn btn-back btn-lg w-auto"
-                onclick="history.back()"
-              >
-                back
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
     <script>
-      (function () {
-        // form and fields
-        const form = document.getElementById("signupForm");
+      const main_front = document.getElementById("front");
+      const signIn_form = document.getElementById("form_signIn");
+      const signUp_form = document.getElementById("form_signUp");
 
-        const inputName = document.getElementById("inputname");
-        const inputEmail = document.getElementById("inputEmail");
-        const inputPhone = document.getElementById("inputphone");
-        const inputPassword = document.getElementById("inputPassword");
-        const currency = document.getElementById("inputCurrency");
+      const signIn_button = document.getElementById("button_signIn");
+      const signUp_button = document.getElementById("button_creat");
 
-        const langGroup = document.getElementById("lang-group"); // fieldset
-        const genderGroup = document.getElementById("gender-group");
+      const forgetLink = document.getElementById("forgetLink");
+      const forgetForm = document.getElementById("forgetForm");
 
-        const submitBtn = form.querySelector('button[type="submit"]');
+      signIn_button.addEventListener("click", function () {
+        main_front.style.display = "none";
+        signIn_form.style.display = "inline";
+        signUp_form.style.display = "none";
+      });
 
-        // helper: insert validation icon span next to input if not exists
-        function ensureValidationWrapper(input) {
-          // for fieldset/radio groups we handle separately
-          if (!input) return null;
-          // if wrapped already skip
-          if (
-            input.parentElement &&
-            input.parentElement.classList.contains("validation-wrapper")
-          )
-            return input.parentElement;
-          const wrapper = document.createElement("div");
-          wrapper.className = "validation-wrapper";
-          input.parentElement.insertBefore(wrapper, input);
-          wrapper.appendChild(input);
-          // add icon span
-          const icon = document.createElement("span");
-          icon.className = "validation-icon";
-          wrapper.appendChild(icon);
-          return wrapper;
-        }
+      signUp_button.addEventListener("click", function () {
+        main_front.style.display = "none";
+        signUp_form.style.display = "inline";
+        signIn_form.style.display = "none";
+      });
 
-        // call for inputs and select
-        [inputName, inputEmail, inputPhone, inputPassword, currency].forEach(
-          (el) => {
-            if (el) ensureValidationWrapper(el);
-          }
-        );
-
-        // validation rules
-        function validateName(value) {
-          return value.trim().length >= 2; // at least 2 chars
-        }
-        function validateEmail(value) {
-          // careful, simple but reasonable regex
-          const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          return re.test(value.trim());
-        }
-        function validatePhone(value) {
-          const v = value.replace(/\s+/g, "");
-          // allow + and digits, length between 7 and 19
-          return /^[+\d][\d]{6,18}$/.test(v);
-        }
-
-        function validatePassword(value) {
-          return value.length >= 6;
-        }
-        function validateCurrency(value) {
-          return value && value !== "" && value !== "Currency";
-        }
-        function validateRadioGroup(fieldName) {
-          return !!form.querySelector(`input[name="${fieldName}"]:checked`);
-        }
-
-        // mark helpers
-        function markValidInput(input) {
-          input.classList.remove("is-invalid");
-          input.classList.add("is-valid");
-          const wrapper = input.parentElement;
-          if (wrapper && wrapper.classList.contains("validation-wrapper")) {
-            const icon = wrapper.querySelector(".validation-icon");
-            icon.classList.add("valid");
-            icon.classList.remove("invalid");
-          }
-          // hide error-message wrapper parent
-          const err = input.parentElement.querySelector(".error-message");
-          if (err) err.style.display = "none";
-        }
-        function markInvalidInput(input, msg) {
-          input.classList.remove("is-valid");
-          input.classList.add("is-invalid");
-          const wrapper = input.parentElement;
-          if (wrapper && wrapper.classList.contains("validation-wrapper")) {
-            const icon = wrapper.querySelector(".validation-icon");
-            icon.classList.add("invalid");
-            icon.classList.remove("valid");
-          }
-          const err = input.parentElement.querySelector(".error-message");
-          if (err) {
-            err.style.display = "block";
-            if (msg) err.textContent = msg;
-          }
-        }
-        function clearValidationInput(input) {
-          input.classList.remove("is-valid", "is-invalid");
-          const wrapper = input.parentElement;
-          if (wrapper && wrapper.classList.contains("validation-wrapper")) {
-            const icon = wrapper.querySelector(".validation-icon");
-            icon.textContent = "";
-            icon.classList.remove("valid", "invalid");
-            icon.style.display = "none";
-          }
-          const err = input.parentElement.querySelector(".error-message");
-          if (err) err.style.display = "none";
-        }
-
-        // fieldset group visuals
-        function markFieldsetValid(fieldset) {
-          fieldset.classList.remove("fieldset-invalid");
-          fieldset.classList.add("fieldset-valid");
-          const err = fieldset.querySelector(".error-message");
-          if (err) err.style.display = "none";
-        }
-        function markFieldsetInvalid(fieldset, msg) {
-          fieldset.classList.remove("fieldset-valid");
-          fieldset.classList.add("fieldset-invalid");
-          const err = fieldset.querySelector(".error-message");
-          if (err) {
-            err.style.display = "block";
-            if (msg) err.textContent = msg;
-          }
-        }
-        function clearFieldset(fieldset) {
-          fieldset.classList.remove("fieldset-valid", "fieldset-invalid");
-          const err = fieldset.querySelector(".error-message");
-          if (err) err.style.display = "none";
-        }
-
-        // single field validators that return boolean
-        function validateFieldName() {
-          const ok = validateName(inputName.value);
-          if (ok) markValidInput(inputName);
-          else markInvalidInput(inputName, "Please enter your full name.");
-          return ok;
-        }
-        function validateFieldEmail() {
-          const ok = validateEmail(inputEmail.value);
-          if (ok) markValidInput(inputEmail);
-          else
-            markInvalidInput(inputEmail, "Please enter a valid email address.");
-          return ok;
-        }
-        function validateFieldPhone() {
-          const ok = validatePhone(inputPhone.value);
-          if (ok) markValidInput(inputPhone);
-          else
-            markInvalidInput(
-              inputPhone,
-              "Please enter a valid phone number (digits, 7-15)."
-            );
-          return ok;
-        }
-        function validateFieldPassword() {
-          const ok = validatePassword(inputPassword.value);
-          if (ok) markValidInput(inputPassword);
-          else
-            markInvalidInput(
-              inputPassword,
-              "Please enter a password (min 6 characters)."
-            );
-          return ok;
-        }
-        function validateFieldCurrency() {
-          const ok = validateCurrency(currency.value);
-          if (ok) {
-            currency.classList.remove("is-invalid");
-            currency.classList.add("is-valid");
-            const err = currency.parentElement.querySelector(".error-message");
-            if (err) err.style.display = "none";
-          } else {
-            currency.classList.remove("is-valid");
-            currency.classList.add("is-invalid");
-            const err = currency.parentElement.querySelector(".error-message");
-            if (err) {
-              err.style.display = "block";
-              err.textContent = "Please select what Currency your prefer";
-            }
-          }
-          return ok;
-        }
-        function validateFieldLang() {
-          const ok = validateRadioGroup("preferredLang");
-          if (ok) markFieldsetValid(langGroup);
-          else
-            markFieldsetInvalid(
-              langGroup,
-              "Please select a preferred language."
-            );
-          return ok;
-        }
-
-        function validateFieldGender() {
-          const ok = validateRadioGroup("gender");
-          if (ok) markFieldsetValid(genderGroup);
-          else markFieldsetInvalid(genderGroup, "Please select your gender.");
-          return ok;
-        }
-
-        // attach events for live validation
-        inputName.addEventListener("input", validateFieldName);
-        inputEmail.addEventListener("input", validateFieldEmail);
-        inputPhone.addEventListener("input", validateFieldPhone);
-        inputPassword.addEventListener("input", validateFieldPassword);
-        currency.addEventListener("change", validateFieldCurrency);
-
-        // radios: listen to change on each radio to revalidate group
-        Array.from(
-          form.querySelectorAll('input[name="preferredLang"]')
-        ).forEach((r) => {
-          r.addEventListener("change", validateFieldLang);
-        });
-        Array.from(form.querySelectorAll('input[name="gender"]')).forEach(
-          (r) => {
-            r.addEventListener("change", validateFieldGender);
-          }
-        );
-
-        // overall form validation function
-        function validateForm() {
-          const validators = [
-            validateFieldName,
-            validateFieldEmail,
-            validateFieldPhone,
-            validateFieldPassword,
-            validateFieldCurrency,
-            validateFieldLang,
-            validateFieldGender,
-          ];
-          const results = validators.map((fn) => {
-            try {
-              return fn();
-            } catch (e) {
-              return false;
-            }
-          });
-          const allValid = results.every((v) => v === true);
-          // enable/disable submit
-          submitBtn.disabled = !allValid;
-          return allValid;
-        }
-
-        // initial run to set submit state (but do not mark invalid right away)
-        function initialCheck() {
-          // if fields non-empty run their validators, otherwise clear visuals
-          if (inputName.value) validateFieldName();
-          else clearValidationInput(inputName);
-          if (inputEmail.value) validateFieldEmail();
-          else clearValidationInput(inputEmail);
-          if (inputPhone.value) validateFieldPhone();
-          else clearValidationInput(inputPhone);
-          if (inputPassword.value) validateFieldPassword();
-          else clearValidationInput(inputPassword);
-          if (currency.value) validateFieldCurrency();
-          else currency.classList.remove("is-invalid", "is-valid");
-          // radio groups: if nothing checked then clear
-          if (validateRadioGroup("preferredLang")) markFieldsetValid(langGroup);
-          else clearFieldset(langGroup);
-          if (validateRadioGroup("gender")) markFieldsetValid(genderGroup);
-          else clearFieldset(genderGroup);
-
-          validateForm();
-        }
-
-        // call initial check
-        // initialCheck();
-
-        // API base
-        const API_BASE = window.API_BASE || "http://localhost:4000";
-
-        // on submit
-        form.addEventListener("submit", function (e) {
-          e.preventDefault(); // prevent default to allow validation
-          const ok = validateForm();
-          if (!ok) {
-            // focus first invalid field (nice UX)
-            const firstInvalid = form.querySelector(
-              ".is-invalid, .fieldset-invalid"
-            );
-            if (firstInvalid) {
-              if (firstInvalid.tagName === "FIELDSET") {
-                firstInvalid.scrollIntoView({
-                  behavior: "smooth",
-                  block: "center",
-                });
-              } else {
-                firstInvalid.focus({ preventScroll: false });
-              }
-            }
-            return;
-          }
-          // Submit to backend API
-          const payload = {
-            name: inputName.value.trim(),
-            email: inputEmail.value.trim(),
-            password: inputPassword.value,
-          };
-
-          fetch(`${API_BASE}/api/auth/register`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          })
-            .then(async (r) => {
-              const data = await r.json().catch(() => ({}));
-              if (!r.ok) {
-                const msg =
-                  data?.message ||
-                  (data?.errors &&
-                    data.errors.map((e) => e.path + ": " + e.msg).join(", ")) ||
-                  "Registration failed";
-                throw new Error(msg);
-              }
-              return data;
-            })
-            .then((data) => {
-              // store token for subsequent requests
-              if (data && data.token) {
-                localStorage.setItem("tulip_token", data.token);
-              }
-              showSuccess("Registration successful ");
-            })
-            .catch((err) => {
-              showError(err.message || "Registration failed");
-            });
-        });
-
-        // success feedback (no alert)
-        function showSuccess(text) {
-          // create or reuse a success div
-          let successDiv = document.getElementById("signup-success");
-          if (!successDiv) {
-            successDiv = document.createElement("div");
-            successDiv.id = "signup-success";
-            successDiv.style.marginTop = "1rem";
-            successDiv.className = "alert alert-success";
-            form.parentElement.insertBefore(successDiv, form.nextSibling);
-          }
-          successDiv.textContent = text || "Success";
-        }
-
-        function showError(text) {
-          let errDiv = document.getElementById("signup-error");
-          if (!errDiv) {
-            errDiv = document.createElement("div");
-            errDiv.id = "signup-error";
-            errDiv.style.marginTop = "1rem";
-            errDiv.className = "alert alert-danger";
-            form.parentElement.insertBefore(errDiv, form.nextSibling);
-          }
-          errDiv.textContent = text || "An error occurred";
-        }
-
-        // optional: live re-check every 500ms if user pastes or changes using autocomplete (not necessary)
-        // but to keep it light we won't add a timer.
-      })();
+      forgetLink.addEventListener("click", function () {
+        signIn_form.style.display = "none";
+        main_front.style.display = "none";
+        signUp_form.style.display = "none";
+        forgetForm.style.display = "inline";
+      });
     </script>
   </body>
 </html>

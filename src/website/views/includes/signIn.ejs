@@ -7,6 +7,7 @@
     </div>
 
     <form id="loginForm">
+      <!-- email -->
       <div class="form-group">
         <input
           type="email"
@@ -15,7 +16,7 @@
           required
         />
       </div>
-
+      <!-- pass -->
       <div class="form-group">
         <input
           type="password"
@@ -24,7 +25,11 @@
           required
         />
       </div>
-
+      <!-- forget pass -->
+      <div class="form-group">
+        <span id="forget_pass">forget password?</span>
+      </div>
+      <!-- or with google -->
       <button type="submit" class="submit-btn">Login</button>
       <p class="p line-or">Or With</p>
       <!-- google -->
@@ -82,7 +87,8 @@
   const loginForm = document.getElementById("loginForm");
 
   const after_s = document.getElementById("after_s");
-
+  const forget_pass = document.getElementById("forget_pass");
+  forget_pass.addEventListener("click", function () {});
   // Open modal when login button is clicked
   loginBtn.addEventListener("click", function () {
     loginModal.style.display = "flex";
