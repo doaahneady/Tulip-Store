@@ -142,7 +142,6 @@
       <div
         class="card-signup shadow-sm"
         style="
-          border-color: #f05928;
           border-width: 2px;
           border-style: solid;
           background-color: #ffffff80;
@@ -223,7 +222,7 @@
               </div> -->
             </div>
             <!-- forgot password (1/2): request code -->
-            <div class="forget-Form" id="forgetEmailForm" style="display:none;">
+            <div class="forget-Form" id="forgetEmailForm" style="display: none">
               <p>Enter your account email to receive a reset code</p>
               <div class="col-12 d-flex justify-content-center px-0 mb-3">
                 <input
@@ -234,17 +233,26 @@
                 />
               </div>
               <div class="col-12 d-flex justify-content-center px-0 mb-3">
-                <button type="button" class="btn btn-lg w-100" id="sendResetCodeBtn">
+                <button
+                  type="button"
+                  class="btn btn-lg w-100"
+                  id="sendResetCodeBtn"
+                >
                   Send Code
                 </button>
               </div>
               <div class="col-12 d-flex justify-content-center px-0 mb-3">
-                <button class="btn btn-back btn-lg w-100" id="backToLogin1">Back</button>
+                <button class="btn btn-back btn-lg w-100" id="backToLogin1">
+                  Back
+                </button>
               </div>
             </div>
-
             <!-- forgot password (2/2): verify code + set new password -->
-            <div class="forget-Form" id="forgetVerifyForm" style="display:none;">
+            <div
+              class="forget-Form"
+              id="forgetVerifyForm"
+              style="display: none"
+            >
               <p>Enter the code sent to your email and new password</p>
               <div class="col-12 d-flex justify-content-center px-0 mb-3">
                 <input
@@ -271,14 +279,21 @@
                 />
               </div>
               <div class="col-12 d-flex justify-content-center px-0 mb-3">
-                <button type="button" class="btn btn-lg w-100" id="confirmResetBtn">
+                <button
+                  type="button"
+                  class="btn btn-lg w-100"
+                  id="confirmResetBtn"
+                >
                   Update Password
                 </button>
               </div>
               <div class="col-12 d-flex justify-content-center px-0 mb-3">
-                <button class="btn btn-back btn-lg w-100" id="backToLogin2">Back</button>
+                <button class="btn btn-back btn-lg w-100" id="backToLogin2">
+                  Back
+                </button>
               </div>
             </div>
+
             <!-- sign up -->
             <div class="signUp_form" id="form_signUp">
               <!-- full name -->
@@ -296,18 +311,35 @@
                 <input
                   type="email"
                   class="form-control"
-                  id="inputEmail"
+                  id="EmailAddress"
                   placeholder="E-mail"
                 />
               </div>
 
               <!-- phone number -->
-              <div class="col-12 mb-4">
+              <div class="col-12 mb-4 d-flex">
+                <select
+                  id="flag"
+                  class="form-select"
+                  style="width: 130px; border-radius: 5px 0 0 5px"
+                >
+                  <option hidden selected value="">Select country</option>
+                  <option value="+963">🇸🇾 Syria (+963)</option>
+                  <option value="+961">🇱🇧 Lebanon (+961)</option>
+                  <option value="+20">🇪🇬 Egypt (+20)</option>
+                  <option value="+966">🇸🇦 Saudi Arabia (+966)</option>
+                  <option value="+962">🇯🇴 Jordan (+962)</option>
+                  <option value="+964">🇮🇶 Iraq (+964)</option>
+                  <option value="+90">🇹🇷 Turkey (+90)</option>
+                  <option value="+1">🇺🇸 United States (+1)</option>
+                </select>
+
                 <input
                   type="text"
                   class="form-control"
                   id="inputphone"
-                  placeholder="phone number"
+                  placeholder="Phone number"
+                  style="border-radius: 0 5px 5px 0"
                 />
               </div>
 
@@ -316,7 +348,7 @@
                 <input
                   type="password"
                   class="form-control"
-                  id="inputPassword"
+                  id="Password"
                   placeholder="Password"
                 />
               </div>
@@ -325,26 +357,26 @@
                 <!-- language -->
                 <div class="col-md-4">
                   <select id="inputLanguage" class="form-select">
-                    <option hidden>Lang</option>
-                    <option>English</option>
-                    <option>العربية</option>
+                    <option hidden value="">Lang</option>
+                    <option value="en">English</option>
+                    <option value="ar">العربية</option>
                   </select>
                 </div>
                 <!-- gender -->
                 <div class="col-md-4">
-                  <select id="inputLanguage" class="form-select">
-                    <option hidden>Gender</option>
-                    <option>female</option>
-                    <option>male</option>
+                  <select id="inputGender" class="form-select">
+                    <option hidden value="">Gender</option>
+                    <option value="female">female</option>
+                    <option value="male">male</option>
                   </select>
                 </div>
                 <!-- Currency -->
                 <div class="col-md-4 mb-4">
                   <select id="inputCurrency" class="form-select">
-                    <option hidden>Currency</option>
-                    <option>USD</option>
-                    <option>SYP</option>
-                    <option>AED</option>
+                    <option hidden value="">Currency</option>
+                    <option value="usd">USD</option>
+                    <option value="syp">SYP</option>
+                    <option value="aed">AED</option>
                   </select>
                 </div>
               </div>
@@ -401,7 +433,6 @@
 
       // re password form
       const rePass = document.getElementById("rePass");
-
       const confirmePass = document.getElementById("confirmePass");
 
       // sign up form
@@ -447,24 +478,24 @@
 
         // Call backend login API
         try {
-          const response = await fetch('http://localhost:8000/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+          const response = await fetch("http://localhost:8000/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
           });
           const data = await response.json();
           if (data.success) {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-            localStorage.setItem('isloggedIn', 'true');
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
+            localStorage.setItem("isloggedIn", "true");
             window.location.href = "/";
           } else {
-            alert(data.message || 'Login failed.');
+            alert(data.message || "Login failed.");
             emailInput.classList.add("is-invalid");
             passwordInput.classList.add("is-invalid");
           }
         } catch (e) {
-          alert('Network error. Please try again.');
+          alert("Network error. Please try again.");
         }
       });
 
@@ -482,62 +513,97 @@
         forgetEmailForm.style.display = "inline";
       });
 
-      let forgotEmail = '';
-      sendResetCodeBtn.addEventListener('click', async function () {
-        const email = document.getElementById('forgotEmailInput').value.trim();
-        if (!email) { alert('Please enter your email'); return; }
+      let forgotEmail = "";
+      sendResetCodeBtn.addEventListener("click", async function () {
+        const email = document.getElementById("forgotEmailInput").value.trim();
+        if (!email) {
+          alert("Please enter your email");
+          return;
+        }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) { alert('Invalid email'); return; }
+        if (!emailRegex.test(email)) {
+          alert("Invalid email");
+          return;
+        }
         try {
-          const resp = await fetch('http://localhost:8000/api/auth/forgot-password', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
-          });
+          const resp = await fetch(
+            "http://localhost:8000/api/auth/forgot-password",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email }),
+            }
+          );
           const data = await resp.json();
           if (data.success) {
             forgotEmail = email;
-            alert('Reset code sent to your email');
-            forgetEmailForm.style.display = 'none';
-            forgetVerifyForm.style.display = 'inline';
+            alert("Reset code sent to your email");
+            forgetEmailForm.style.display = "none";
+            forgetVerifyForm.style.display = "inline";
           } else {
-            alert(data.message || 'Failed to send reset code');
+            alert(data.message || "Failed to send reset code");
           }
-        } catch (e) { alert('Network error. Please try again.'); }
+        } catch (e) {
+          alert("Network error. Please try again.");
+        }
       });
 
-      confirmResetBtn.addEventListener('click', async function () {
-        const code = document.getElementById('resetCodeInput').value.trim();
-        const pass1 = document.getElementById('newPasswordInput').value.trim();
-        const pass2 = document.getElementById('newPasswordInput2').value.trim();
-        if (!forgotEmail) { alert('Please send code first'); return; }
-        if (!code || code.length !== 6) { alert('Enter a valid 6-digit code'); return; }
-        if (!pass1 || pass1.length < 6) { alert('Password must be at least 6 characters'); return; }
-        if (pass1 !== pass2) { alert('Passwords do not match'); return; }
+      confirmResetBtn.addEventListener("click", async function () {
+        const code = document.getElementById("resetCodeInput").value.trim();
+        const pass1 = document.getElementById("newPasswordInput").value.trim();
+        const pass2 = document.getElementById("newPasswordInput2").value.trim();
+        if (!forgotEmail) {
+          alert("Please send code first");
+          return;
+        }
+        if (!code || code.length !== 6) {
+          alert("Enter a valid 6-digit code");
+          return;
+        }
+        if (!pass1 || pass1.length < 6) {
+          alert("Password must be at least 6 characters");
+          return;
+        }
+        if (pass1 !== pass2) {
+          alert("Passwords do not match");
+          return;
+        }
         try {
-          const resp = await fetch('http://localhost:8000/api/auth/reset-password', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: forgotEmail, verification_code: code, password: pass1, password_confirmation: pass2 })
-          });
+          const resp = await fetch(
+            "http://localhost:8000/api/auth/reset-password",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email: forgotEmail,
+                verification_code: code,
+                password: pass1,
+                password_confirmation: pass2,
+              }),
+            }
+          );
           const data = await resp.json();
           if (data.success) {
-            alert('Password updated successfully. Please login.');
-            forgetVerifyForm.style.display = 'none';
-            signIn_form.style.display = 'inline';
+            alert("Password updated successfully. Please login.");
+            forgetVerifyForm.style.display = "none";
+            signIn_form.style.display = "inline";
           } else {
-            alert(data.message || 'Failed to reset password');
+            alert(data.message || "Failed to reset password");
           }
-        } catch (e) { alert('Network error. Please try again.'); }
+        } catch (e) {
+          alert("Network error. Please try again.");
+        }
       });
 
-      backToLogin1.addEventListener('click', function (e) {
+      backToLogin1.addEventListener("click", function (e) {
         e.preventDefault();
-        forgetEmailForm.style.display = 'none';
-        signIn_form.style.display = 'inline';
+        forgetEmailForm.style.display = "none";
+        signIn_form.style.display = "inline";
       });
-      backToLogin2.addEventListener('click', function (e) {
+      backToLogin2.addEventListener("click", function (e) {
         e.preventDefault();
-        forgetVerifyForm.style.display = 'none';
-        signIn_form.style.display = 'inline';
+        forgetVerifyForm.style.display = "none";
+        signIn_form.style.display = "inline";
       });
 
       // *****************************************************************************
@@ -549,59 +615,131 @@
       // sign up validation + submit to backend
       signUpButton.addEventListener("click", async function () {
         const inputname = document.getElementById("inputname");
-        const inputEmail = document.getElementById("inputEmail");
+        const EmailAddress = document.getElementById("EmailAddress");
         const inputphone = document.getElementById("inputphone");
-        const inputPassword = document.getElementById("inputPassword");
-        const languageEl = document.getElementById("inputLanguage");
-        const genderEl = document.querySelectorAll('#inputLanguage')[1];
-        const currencyEl = document.getElementById("inputCurrency");
+        const Password = document.getElementById("Password");
+        const inputLanguage = document.getElementById("inputLanguage");
+        const inputGender = document.getElementById("inputGender");
+        const inputCurrency = document.getElementById("inputCurrency");
         const policyChecked = document.getElementById("policyChecked");
+        // **********************************************
+        // validate full name
+        inputname.classList.remove("is-valid", "is-invalid");
+        const name = inputname.value;
 
-        const fullName = inputname.value.trim();
-        const email = inputEmail.value.trim();
-        const phone = inputphone.value.trim();
-        const password = inputPassword.value.trim();
-        const language = languageEl && languageEl.value ? languageEl.value.toLowerCase() : 'english';
-        const gender = genderEl && genderEl.value ? genderEl.value.toLowerCase() : null;
-        const currency = currencyEl && currencyEl.value ? currencyEl.value : null;
-
-        let hasError = false;
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        if (!fullName || fullName.length < 2) { inputname.classList.add('is-invalid'); hasError = true; } else { inputname.classList.remove('is-invalid'); }
-        if (!email || !emailRegex.test(email)) { inputEmail.classList.add('is-invalid'); hasError = true; } else { inputEmail.classList.remove('is-invalid'); }
-        if (!password || password.length < 6) { inputPassword.classList.add('is-invalid'); hasError = true; } else { inputPassword.classList.remove('is-invalid'); }
-        if (!policyChecked.checked) { alert('Please agree to the policies'); hasError = true; }
-        if (hasError) return;
-
-        const username = email.split('@')[0] + '_' + Math.floor(Math.random()*1000);
-
-        try {
-          const resp = await fetch('http://localhost:8000/api/auth/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              username,
-              email,
-              password,
-              user_full_name: fullName,
-              mobile: phone,
-              language,
-              gender,
-              currency
-            })
-          });
-          const data = await resp.json();
-          if (data.success) {
-            alert('Account created. Please check your email for the verification code.');
-          } else {
-            let msg = data.message || 'Registration failed';
-            if (data.errors) { msg += ' - ' + Object.values(data.errors).flat().join(', '); }
-            alert(msg);
-          }
-        } catch (e) {
-          alert('Network error. Please try again.');
+        //Password verification
+        if (name === "") {
+          alert("input your full name");
+          inputname.classList.add("is-invalid");
+          PassError = true;
+        } else {
+          inputname.classList.add("is-valid");
         }
+        // **********************************************
+        // validate email
+        EmailAddress.classList.remove("is-valid", "is-invalid");
+
+        const emailAddress = EmailAddress.value;
+        if (/^[\w.-]+@gmail\.com$/.test(emailAddress)) {
+          EmailAddress.classList.add("is-valid");
+          alert("successful");
+        } else {
+          EmailAddress.classList.add("is-invalid");
+          alert("return");
+        }
+
+        // validate phone number
+        const flag = document.getElementById("flag");
+        flag.classList.remove("is-valid", "is-invalid");
+
+        flag.addEventListener("change", () => {
+          const selectedCode = flag.value;
+
+          if (selectedCode !== "") {
+            inputphone.value = selectedCode + " ";
+            flag.classList.add("is-valid");
+          } else {
+            flag.classList.add("is-invalid");
+          }
+          const countryCode = flag.value.trim();
+          const phone = inputphone.value.trim();
+
+          flag.classList.remove("is-valid", "is-invalid");
+          inputphone.classList.remove("is-valid", "is-invalid");
+
+          if (countryCode === "") {
+            alert(" Please select a country.");
+            flag.classList.add("is-invalid");
+            return;
+          }
+
+          const regex = /^[+0-9\s]+$/;
+          if (!regex.test(phone)) {
+            alert(" Phone number must contain only digits.");
+            inputphone.classList.add("is-invalid");
+            return;
+          } else {
+            alert(" Phone saved: " + phone);
+            flag.classList.add("is-valid");
+            inputphone.classList.add("is-valid");
+          }
+        });
+
+        // validate password
+        Password.classList.remove("is-valid", "is-invalid");
+
+        const pass = Password.value;
+
+        if (pass.length <= 8 || !/[A-Z]/.test(pass) || !/[0-9]/.test(pass)) {
+          Password.classList.add("is-invalid");
+          alert("return");
+        } else {
+          Password.classList.add("is-valid");
+          alert("sucessful");
+        }
+        // validate lang
+        inputLanguage.classList.remove("is-valid", "is-invalid");
+
+        const lang = inputLanguage.value;
+
+        if (lang === "") {
+          alert(" Please select a language before continuing.");
+          inputLanguage.classList.add("is-invalid");
+        } else {
+          inputLanguage.classList.remove("is-invalid");
+          inputLanguage.classList.add("is-valid");
+          alert(" Language saved: " + lang);
+        }
+        // validate inputGender
+        inputGender.classList.remove("is-valid", "is-invalid");
+
+        const Gender = inputGender.value;
+
+        if (Gender === "") {
+          alert(" Please select a language before continuing.");
+          inputGender.classList.add("is-invalid");
+        } else {
+          inputGender.classList.remove("is-invalid");
+          inputGender.classList.add("is-valid");
+          alert("Currency saved: " + lang);
+        }
+        // validate currency
+        inputCurrency.classList.remove("is-valid", "is-invalid");
+
+        const Currency = inputCurrency.value;
+
+        if (Currency === "") {
+          alert(" Please select a language before continuing.");
+          inputCurrency.classList.add("is-invalid");
+        } else {
+          inputCurrency.classList.remove("is-invalid");
+          inputCurrency.classList.add("is-valid");
+          alert("Currency saved: " + lang);
+        }
+        // validate checked
+
+        // اذا كان التحقق تمام بيعطي alert تم انشاء الحساب بنجاح ==>
+        //  ينتقل للواجهة الرئيسية
       });
     </script>
   </body>
