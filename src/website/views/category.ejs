@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head><title><%= cat.name %></title></head>
+  <body>
+    <h1><%= cat.name %></h1>
+    <form method="get">
+      <input type="text" name="q" placeholder="Search in <%= cat.name %>" />
+      <select name="order">
+        <option value="date">Newest</option>
+        <option value="price">Price</option>
+        <option value="rate">Rate</option>
+        <option value="sales">Popular</option>
+      </select>
+      <% Object.keys(filters || {}).forEach(function(key){ %>
+        <label><%= key %>:
+          <select name="<%= key %>">
+            <option value="">All</option>
+            <% (filters[key]||[]).forEach(function(v){ %>
+              <option value="<%= v %>"><%= v %></option>
+            <% }) %>
+          </select>
+        </label>
+      <% }); %>
+      <button type="submit">Apply</button>
+    </form>
+
+    <div>
+      <% (products.data || []).forEach(function(p){ %>
+        <div style="border:1px solid #ddd; margin:8px; padding:8px">
+          <h3><%= p.name %></h3>
+          <div>Price: $<%= p.price %></div>
+          <div>Rate: <%= p.rate %></div>
+        </div>
+      <% }) %>
+    </div>
+
+    <p><a href="/categories">Back to categories</a></p>
+  </body>
+</html>

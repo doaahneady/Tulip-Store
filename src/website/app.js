@@ -13,6 +13,7 @@ module.exports.run = async () => {
   const contactUsRouter = require("./routes/contactUs");
   const businessRouter = require("./routes/business");
   const ReturnPolicy = require("./routes/ReturnPolicy");
+  const catalogRouter = require("./routes/catalog");
   app.config = config;
   // Remove MongoDB-based models from the app context
   // app.usersData = require("../base/User");
@@ -38,6 +39,7 @@ module.exports.run = async () => {
   app.use("/contact", contactUsRouter);
   app.use("/business", businessRouter);
   app.use("/ReturnPolicy", ReturnPolicy);
+  app.use("/", catalogRouter);
 
   app.listen(app.get("port"), () => {
     console.log(

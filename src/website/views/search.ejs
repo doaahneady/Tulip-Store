@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head><title>Search</title></head>
+  <body>
+    <h1>Search</h1>
+    <form method="get">
+      <input type="text" name="q" value="<%= q || '' %>" placeholder="Search products" />
+      <select name="order">
+        <option value="date" <%= (order==='date')? 'selected':'' %>>Newest</option>
+        <option value="price" <%= (order==='price')? 'selected':'' %>>Price</option>
+        <option value="rate" <%= (order==='rate')? 'selected':'' %>>Rate</option>
+        <option value="sales" <%= (order==='sales')? 'selected':'' %>>Popular</option>
+      </select>
+      <button type="submit">Search</button>
+    </form>
+
+    <div>
+      <% (products.data || []).forEach(function(p){ %>
+        <div style="border:1px solid #ddd; margin:8px; padding:8px">
+          <h3><%= p.name %></h3>
+          <div>Price: $<%= p.price %></div>
+          <div>Rate: <%= p.rate %></div>
+        </div>
+      <% }) %>
+    </div>
+
+    <p><a href="/">Home</a></p>
+  </body>
+</html>

@@ -6,6 +6,7 @@
     <%- include('./includes/navbar')%>
     <main>
       <div class="products-view" id="main-view">
+        <div id="dynamic-categories" style="margin: 12px 0;"></div>
         <!-- panal -->
         <div
           id="carouselExampleAutoplaying"
@@ -949,6 +950,20 @@
               </li>
             </ol>
           </nav>
+          <!-- top filters (product page only) -->
+          <div id="product-filter-bar" style="margin: 8px 0 12px; padding: 10px 14px; display:none; gap:14px; align-items:center; background: #ffffffaa; backdrop-filter: blur(6px); border: 1px solid #e8ecef; border-radius: 10px; box-shadow: 0 6px 16px rgba(0,0,0,0.08);">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-weight:600; color:#0d464c;">Order</span>
+              <select id="orderSelect" style="padding:8px 10px; border-radius:8px; border:1px solid #d9dfe4;">
+                <option value="date">Newest</option>
+                <option value="price">Price</option>
+                <option value="rate">Rate</option>
+                <option value="sales">Popular</option>
+              </select>
+            </div>
+            <div id="attFilters" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+            <span id="activeCategory" style="margin-left:auto; font-weight:600; color:#0d464c;"></span>
+          </div>
           <!-- products -->
           <div class="container">
             <div class="header">
@@ -1651,15 +1666,244 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        const product_view = document.getElementById("product-view");
-        const main_view = document.getElementById("main-view");
-        const products_main = document.getElementById("products-cards");
+        const API = 'http://localhost:8000/api';
+        const main_view = document.getElementById('main-view');
+        const products_main = document.getElementById('products-cards');
+        const productFilterBar = document.getElementById('product-filter-bar');
+        const orderSelect = document.getElementById('orderSelect');
+        const attBar = document.getElementById('attFilters');
+        const activeCatSpan = document.getElementById('activeCategory');
+        const searchInputNavbar = document.querySelector('.search-input');
+        let currentCategorySlug = '';
 
-        product_view.addEventListener("click", function () {
-          products_main.style.display = "grid";
-          products_main.style.gridTemplateColumns = "20% auto";
-          products_main.style.gap = "20px";
-          main_view.style.display = "none";
+        function getParams(){
+          const params = {};
+          if (searchInputNavbar && searchInputNavbar.value) params.q = searchInputNavbar.value;
+          // read sidebar order
+          const of = document.querySelector('#orderField');
+          const od = document.querySelector('#orderDir');
+          if (of && of.value) params.order = of.value;
+          if (od && od.value) params.dir = od.value;
+          // read attribute selects
+          document.querySelectorAll('.filter .list-group select[data-att]').forEach(sel => {
+            const name = sel.getAttribute('data-att');
+            if (name && sel.value) params[name] = sel.value;
+          });
+          return params;
+        }
+
+        // Auto fetch & render according to current filters (category or global search)
+        async function fetchAndRender(){
+          const params = getParams();
+          const query = new URLSearchParams(params).toString();
+          try {
+            let prods, filterMap = {};
+            if (currentCategorySlug) {
+              const [filtersRes, prodsRes] = await Promise.all([
+                fetch(`${API}/categories/${currentCategorySlug}/filters`),
+                fetch(`${API}/categories/${currentCategorySlug}/products${query? ('?'+query):''}`)
+              ]);
+              filterMap = await filtersRes.json();
+              prods = await prodsRes.json();
+              productFilterBar.style.display = 'flex';
+              activeCatSpan.textContent = 'Category: ' + currentCategorySlug;
+            } else {
+              // Global search if no category is chosen
+              const prodsRes = await fetch(`${API}/products/search${query? ('?'+query): ''}`);
+              prods = await prodsRes.json();
+              productFilterBar.style.display = params.q ? 'flex' : 'none';
+              activeCatSpan.textContent = params.q ? ('Search: '+params.q) : '';
+            }
+
+            // show products area
+            products_main.style.display = 'grid';
+            products_main.style.gridTemplateColumns = '20% auto';
+            products_main.style.gap = '20px';
+            main_view.style.display = 'none';
+
+            // Build sidebar filters dynamically (under .filter .list-group)
+            const filterList = document.querySelector('.filter .list-group');
+            if (filterList) {
+              // preserve existing selections
+              const prevOrderField = document.querySelector('#orderField')?.value || 'date';
+              const prevOrderDir = document.querySelector('#orderDir')?.value || 'desc';
+              const prevAttValues = {};
+              document.querySelectorAll('.filter .list-group select[data-att]').forEach(sel => {
+                prevAttValues[sel.getAttribute('data-att')] = sel.value;
+              });
+
+              filterList.innerHTML = '';
+              // Order block
+              const orderDiv = document.createElement('div');
+              orderDiv.innerHTML = `
+                <li><strong>Order</strong></li>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                  <select id="orderField" style="padding:8px 10px; border-radius:8px; border:1px solid #d9dfe4;">
+                    <option value="date">Date</option>
+                    <option value="price">Price</option>
+                    <option value="rate">Rate</option>
+                    <option value="sales">Popular</option>
+                  </select>
+                  <select id="orderDir" style="padding:8px 10px; border-radius:8px; border:1px solid #d9dfe4;">
+                    <option value="desc">Descending</option>
+                    <option value="asc">Ascending</option>
+                  </select>
+                </div>
+              `;
+              filterList.appendChild(orderDiv);
+              const orderField = orderDiv.querySelector('#orderField');
+              const orderDir = orderDiv.querySelector('#orderDir');
+              // restore selection
+              orderField.value = prevOrderField;
+              orderDir.value = prevOrderDir;
+              if (orderField) orderField.addEventListener('change', fetchAndRender);
+              if (orderDir) orderDir.addEventListener('change', fetchAndRender);
+
+              // Attribute filters
+              if (currentCategorySlug) {
+                Object.keys(filterMap || {}).forEach(name => {
+                  const div = document.createElement('div');
+                  div.innerHTML = `<li><strong>${name}</strong></li>`;
+                  const sel = document.createElement('select');
+                  sel.setAttribute('data-att', name);
+                  sel.style.padding = '8px 10px';
+                  sel.style.border = '1px solid #d9dfe4';
+                  sel.style.borderRadius = '8px';
+                  sel.innerHTML = '<option value="">All</option>' + (filterMap[name]||[]).map(v => `<option value="${v}">${v}</option>`).join('');
+                  // restore previous value if available
+                  if (prevAttValues[name]) sel.value = prevAttValues[name];
+                  sel.addEventListener('change', fetchAndRender);
+                  div.appendChild(sel);
+                  filterList.appendChild(div);
+                });
+              }
+            }
+
+            // Render products grid
+            const productsGrid = document.querySelector('.products');
+            if (productsGrid) {
+              productsGrid.innerHTML = '';
+              (prods.data || []).forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'product';
+                card.innerHTML = `
+                  <div class="image"><img src="${p.image || 'images/category/phone.jpeg'}" alt="" /></div>
+                  <div class="name_price"><h3>${p.name}</h3><span>$${p.price}</span></div>
+                  <p>${p.description || ''}</p>
+                `;
+                productsGrid.appendChild(card);
+              });
+            }
+          } catch (e) {
+            console.error('Failed to load products', e);
+          }
+        }
+
+        // Hook existing navbar search
+        if (searchInputNavbar) {
+          searchInputNavbar.addEventListener('keyup', (e)=>{
+            if (e.key === 'Enter') {
+              currentCategorySlug = '';
+              // Show products grid area and fetch global search
+              products_main.style.display = 'grid';
+              products_main.style.gridTemplateColumns = '20% auto';
+              products_main.style.gap = '20px';
+              main_view.style.display = 'none';
+              fetchAndRender();
+            }
+          });
+        }
+
+        // Autocomplete dropdown for search
+        let dropdown;
+        function ensureDropdown(){
+          if (dropdown) return dropdown;
+          dropdown = document.createElement('div');
+          dropdown.style.position = 'fixed';
+          dropdown.style.background = '#fff';
+          dropdown.style.border = '1px solid #e5e9ef';
+          dropdown.style.borderRadius = '12px';
+          dropdown.style.boxShadow = '0 12px 28px rgba(0,0,0,0.12)';
+          dropdown.style.zIndex = '10000';
+          dropdown.style.maxHeight = '360px';
+          dropdown.style.overflowY = 'auto';
+          dropdown.style.padding = '6px';
+          // position under the search input
+          const rect = searchInputNavbar.getBoundingClientRect();
+          dropdown.style.left = rect.left + 'px';
+          dropdown.style.top = (rect.bottom + 6) + 'px';
+          dropdown.style.width = rect.width + 'px';
+          document.body.appendChild(dropdown);
+          return dropdown;
+        }
+        let debounceTimer;
+        if (searchInputNavbar) {
+          searchInputNavbar.addEventListener('input', ()=>{
+            clearTimeout(debounceTimer);
+            const q = searchInputNavbar.value.trim();
+            if (!q) { if (dropdown) dropdown.remove(); dropdown = null; return; }
+            debounceTimer = setTimeout(async ()=>{
+              try {
+                const res = await fetch(`${API}/products/search?q=${encodeURIComponent(q)}&order=date`);
+                const data = await res.json();
+                const dd = ensureDropdown();
+                dd.innerHTML = '';
+                (data.data || []).slice(0,10).forEach(p => {
+                  const item = document.createElement('div');
+                  item.style.padding = '10px 12px';
+                  item.style.cursor = 'pointer';
+                  item.style.display = 'flex';
+                  item.style.alignItems = 'center';
+                  item.style.gap = '10px';
+                  item.style.borderRadius = '10px';
+                  item.onmouseenter = ()=> item.style.background = '#f6f8fb';
+                  item.onmouseleave = ()=> item.style.background = 'transparent';
+                  const img = document.createElement('img');
+                  img.src = p.image || 'images/category/phone.jpeg';
+                  img.style.width = '40px';
+                  img.style.height = '40px';
+                  img.style.borderRadius = '8px';
+                  img.style.objectFit = 'cover';
+                  const txt = document.createElement('div');
+                  txt.innerHTML = `<div style=\"font-weight:700;color:#0d464c\">${p.name}</div><div style=\"font-size:12px;color:#6b7785\">$${p.price}</div>`;
+                  item.appendChild(img);
+                  item.appendChild(txt);
+                  item.addEventListener('click', ()=>{
+                    if (dropdown) { dropdown.remove(); dropdown = null; }
+                    currentCategorySlug = '';
+                    searchInputNavbar.value = p.name;
+                    // Show products and search
+                    products_main.style.display = 'grid';
+                    products_main.style.gridTemplateColumns = '20% auto';
+                    products_main.style.gap = '20px';
+                    main_view.style.display = 'none';
+                    fetchAndRender();
+                  });
+                  dd.appendChild(item);
+                });
+              } catch (e) {}
+            }, 250);
+          });
+        }
+
+        // Map existing cards to categories (basic mapping)
+        document.querySelectorAll('.cards .figure').forEach(fig => {
+          fig.addEventListener('click', (e)=>{
+            e.preventDefault();
+            // naive mapping by image path keywords
+            const img = fig.querySelector('img');
+            const src = img ? img.getAttribute('src') : '';
+            if (src.includes('1.')) currentCategorySlug = 'fashion';
+            else if (src.includes('2.')) currentCategorySlug = 'electronics';
+            else if (src.includes('6.')) currentCategorySlug = 'books';
+            else currentCategorySlug = 'electronics';
+
+            products_main.style.display = 'grid';
+            products_main.style.gridTemplateColumns = '20% auto';
+            products_main.style.gap = '20px';
+            main_view.style.display = 'none';
+            fetchAndRender();
+          });
         });
       });
     </script>

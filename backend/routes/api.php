@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,4 +27,12 @@ Route::prefix('auth')->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
     });
 });
+
+// Categories / Products / Search
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/{slug}', [CategoryController::class, 'show']);
+Route::get('/categories/{slug}/filters', [CategoryController::class, 'filters']);
+Route::get('/categories/{slug}/products', [ProductController::class, 'byCategory']);
+Route::get('/products/search', [ProductController::class, 'search']);
+Route::get('/products/{slug}', [ProductController::class, 'show']);
 
