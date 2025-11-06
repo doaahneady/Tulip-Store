@@ -4,7 +4,8 @@ const { join } = require("path");
 
 module.exports.run = async () => {
   const app = express();
-  require("../functions/database").connectData();
+  // Disabled MongoDB connection: backend uses MySQL (Laravel APIs)
+  // require("../functions/database").connectData();
 
   /* Routers */
   const mainRouter = require("./routes/index");
@@ -13,10 +14,11 @@ module.exports.run = async () => {
   const businessRouter = require("./routes/business");
   const ReturnPolicy = require("./routes/ReturnPolicy");
   app.config = config;
-  app.usersData = require("../base/User");
-  app.Info = require("../base/Info");
-  app.systemData = require("../base/System");
-  app.currencies = require("../base/Currencies");
+  // Remove MongoDB-based models from the app context
+  // app.usersData = require("../base/User");
+  // app.Info = require("../base/Info");
+  // app.systemData = require("../base/System");
+  // app.currencies = require("../base/Currencies");
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
