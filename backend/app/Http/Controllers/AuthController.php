@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\EmailVerification;
 use App\Mail\VerificationCodeMail;
+use App\Models\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -19,14 +20,31 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
+        // Normalize inputs to avoid false unique collisions
+        $request->merge([
+            'email' => strtolower(trim((string) $request->email)),
+            'username' => trim((string) $request->username),
+        ]);
+
+        // Debug: log email uniqueness check to diagnose false positives
+        try {
+            $normalizedEmail = $request->email;
+            $existingCount = \DB::table('users')->where('email', $normalizedEmail)->count();
+            \Log::info('Register email uniqueness check', ['email' => $normalizedEmail, 'count' => $existingCount]);
+        } catch (\Throwable $e) {
+            // ignore
+        }
+
         $validator = Validator::make($request->all(), [
             'username' => 'required|string|max:255|unique:users',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email:rfc|max:255|unique:users,email',
             'password' => 'required|string|min:6',
             'user_full_name' => 'nullable|string|max:255',
             'mobile' => 'nullable|string|max:255',
             'address' => 'nullable|string',
             'language' => 'nullable|string|max:255',
+            'gender' => 'nullable|string|max:50',
+            'currency' => 'nullable|string|max:10',
         ]);
 
         if ($validator->fails()) {
@@ -46,6 +64,8 @@ class AuthController extends Controller
             'mobile' => $request->mobile,
             'address' => $request->address,
             'language' => $request->language ?? 'english',
+            'gender' => $request->gender,
+            'currency' => $request->currency,
             'verified' => false,
         ]);
 
@@ -274,6 +294,111 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'user' => $request->user()
+        ], 200);
+    }
+
+    /**
+     * Request password reset code
+     */
+    public function forgotPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        // Invalidate old codes
+        PasswordReset::where('email', $request->email)
+            ->where('used', false)
+            ->update(['used' => true]);
+
+        $code = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        PasswordReset::create([
+            'email' => $request->email,
+            'verification_code' => $code,
+            'expires_at' => Carbon::now()->addMinutes(15),
+            'used' => false,
+        ]);
+
+        try {
+            Mail::send('emails.password_reset', [
+                'name' => $user->user_full_name ?? $user->username,
+                'code' => $code,
+            ], function ($message) use ($user) {
+                $message->to($user->email)->subject('Password Reset Code - Tulip Store');
+            });
+        } catch (\Exception $e) {
+            \Log::error('Failed to send password reset email: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send password reset email'
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password reset code sent successfully'
+        ], 200);
+    }
+
+    /**
+     * Reset password using code
+     */
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+            'verification_code' => 'required|string|size:6',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $reset = PasswordReset::where('email', $request->email)
+            ->where('verification_code', $request->verification_code)
+            ->where('used', false)
+            ->where('expires_at', '>', Carbon::now())
+            ->first();
+
+        if (!$reset) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired verification code'
+            ], 400);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        $reset->update(['used' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password has been reset successfully'
         ], 200);
     }
 }

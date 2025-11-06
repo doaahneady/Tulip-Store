@@ -101,7 +101,7 @@
             <li><a href="#">Settings</a></li>
             <li><hr /></li>
             <li>
-              <a href="#">
+              <a href="#" id="signOutLink">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 Sign out
               </a>
@@ -560,5 +560,47 @@
   if (isloggedIn) {
     loginBtn.style.display = "none";
     after_s.style.display = "inline";
+    try {
+      const userRaw = localStorage.getItem('user');
+      if (userRaw) {
+        const user = JSON.parse(userRaw);
+        const nameEl = document.querySelector('.profile-btn .btn-text');
+        if (nameEl) {
+          nameEl.textContent = (user.user_full_name && user.user_full_name.trim())
+            ? user.user_full_name
+            : (user.username || 'Account');
+        }
+      }
+    } catch (_) {}
+  }
+
+  const signOutLink = document.getElementById("signOutLink");
+  if (signOutLink) {
+    signOutLink.addEventListener("click", async function (e) {
+      e.preventDefault();
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          await fetch('http://localhost:8000/api/auth/logout', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+        }
+      } catch (_) {}
+
+      // Clear client state
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('isloggedIn');
+
+      // Update navbar UI
+      try {
+        loginBtn.style.display = "inline";
+        after_s.style.display = "none";
+      } catch (_) {}
+
+      // Redirect to home
+      window.location.href = "/";
+    });
   }
 </script>

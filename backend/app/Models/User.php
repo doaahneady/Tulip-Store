@@ -24,6 +24,8 @@ class User extends Authenticatable
         'mobile',
         'address',
         'language',
+        'gender',
+        'currency',
         'verified',
     ];
 

@@ -222,67 +222,61 @@
                 </button>
               </div> -->
             </div>
-            <!-- forget password -->
-            <div class="forget-Form" id="forgetForm">
-              <p>check your Email</p>
+            <!-- forgot password (1/2): request code -->
+            <div class="forget-Form" id="forgetEmailForm" style="display:none;">
+              <p>Enter your account email to receive a reset code</p>
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <input
+                  type="email"
+                  class="form-control"
+                  id="forgotEmailInput"
+                  placeholder="E-mail"
+                />
+              </div>
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button type="button" class="btn btn-lg w-100" id="sendResetCodeBtn">
+                  Send Code
+                </button>
+              </div>
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button class="btn btn-back btn-lg w-100" id="backToLogin1">Back</button>
+              </div>
+            </div>
+
+            <!-- forgot password (2/2): verify code + set new password -->
+            <div class="forget-Form" id="forgetVerifyForm" style="display:none;">
+              <p>Enter the code sent to your email and new password</p>
               <div class="col-12 d-flex justify-content-center px-0 mb-3">
                 <input
                   type="text"
                   class="form-control"
-                  id="inputcode"
-                  placeholder="enter code"
+                  id="resetCodeInput"
+                  placeholder="6-digit code"
                 />
               </div>
-              <div class="col-12 d-flex justify-content-center px-0 mb-3">
-                <span>Didn't receive a code?<a href="">Resend it</a></span>
-              </div>
-              <!-- resive code -->
-              <div class="col-12 d-flex justify-content-center px-0 mb-3">
-                <button type="button" class="btn btn-lg w-100" id="receiveCode">
-                  Register
-                </button>
-              </div>
-              <div class="col-12 d-flex justify-content-center px-0 mb-3">
-                <button
-                  class="btn btn-back btn-lg w-100"
-                  onclick="history.back()"
-                >
-                  back
-                </button>
-              </div>
-            </div>
-            <!-- repassword -->
-            <div class="rePass" id="rePass">
-              <p>Re-enter a new password for the account</p>
-              <!-- new password -->
               <div class="col-12 mb-3">
                 <input
                   type="password"
                   class="form-control"
-                  id="rePassword"
-                  placeholder="Password"
-                  value=""
+                  id="newPasswordInput"
+                  placeholder="New password"
                 />
               </div>
-              <!-- confirme pass -->
               <div class="col-12 mb-3">
                 <input
                   type="password"
                   class="form-control"
-                  id="rePassword2"
-                  placeholder=" Password"
-                  value=""
+                  id="newPasswordInput2"
+                  placeholder="Confirm new password"
                 />
               </div>
-              <!-- next -->
               <div class="col-12 d-flex justify-content-center px-0 mb-3">
-                <button
-                  type="button"
-                  class="btn btn-lg w-100"
-                  id="confirmePass"
-                >
-                  confirme
+                <button type="button" class="btn btn-lg w-100" id="confirmResetBtn">
+                  Update Password
                 </button>
+              </div>
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button class="btn btn-back btn-lg w-100" id="backToLogin2">Back</button>
               </div>
             </div>
             <!-- sign up -->
@@ -414,10 +408,6 @@
       const signUp_form = document.getElementById("form_signUp");
       const signUpButton = document.getElementById("signUpButton");
 
-      // data sign in
-      const CORRECT_EMAIL = "doaahnidi@gmail.com";
-      const CORRECT_PASSWORD = "ddffhh";
-
       // sign in input
       const emailInput = document.getElementById("inputEmail");
       const passwordInput = document.getElementById("inputPassword");
@@ -425,7 +415,7 @@
 
       // *****************************************************************************
       // sign in
-      signInBtn.addEventListener("click", function (event) {
+      signInBtn.addEventListener("click", async function (event) {
         event.preventDefault();
 
         // remove previous state
@@ -436,13 +426,9 @@
         const password = passwordInput.value.trim();
 
         let hasError = false;
-        let codeError = false;
         // validate email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (email === "" || !emailRegex.test(email)) {
-          emailInput.classList.add("is-invalid");
-          hasError = true;
-        } else if (email.toLowerCase() !== CORRECT_EMAIL.toLowerCase()) {
           emailInput.classList.add("is-invalid");
           hasError = true;
         } else {
@@ -453,87 +439,105 @@
         if (password === "") {
           passwordInput.classList.add("is-invalid");
           hasError = true;
-        } else if (password !== CORRECT_PASSWORD) {
-          passwordInput.classList.add("is-invalid");
-          hasError = true;
         } else {
           passwordInput.classList.add("is-valid");
         }
 
-        // success
-        if (!hasError) {
-          alert("wellcome.. Logged in successfully!");
-          window.location.href = "/";
-          localStorage.setItem("isloggedIn", "true");
+        if (hasError) return;
+
+        // Call backend login API
+        try {
+          const response = await fetch('http://localhost:8000/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+          const data = await response.json();
+          if (data.success) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('isloggedIn', 'true');
+            window.location.href = "/";
+          } else {
+            alert(data.message || 'Login failed.');
+            emailInput.classList.add("is-invalid");
+            passwordInput.classList.add("is-invalid");
+          }
+        } catch (e) {
+          alert('Network error. Please try again.');
         }
       });
 
       // *****************************************************************************
-      // forget password
+      // forget password - two-step flow
+      const forgetEmailForm = document.getElementById("forgetEmailForm");
+      const forgetVerifyForm = document.getElementById("forgetVerifyForm");
+      const sendResetCodeBtn = document.getElementById("sendResetCodeBtn");
+      const confirmResetBtn = document.getElementById("confirmResetBtn");
+      const backToLogin1 = document.getElementById("backToLogin1");
+      const backToLogin2 = document.getElementById("backToLogin2");
+
       forgetLink.addEventListener("click", function () {
         signIn_form.style.display = "none";
-        forgetForm.style.display = "inline";
+        forgetEmailForm.style.display = "inline";
       });
 
-      // code input
-      const inputcode = document.getElementById("inputcode");
-      const code = inputcode.value;
-      const CORRECT_CODE = "123123";
-      // *****************************************************************************
-      //resive code for forget password
-      receiveCode.addEventListener("click", function () {
-        if (code === CORRECT_CODE) {
-          inputcode.classList.add("is-valid");
-          codeError = false;
-        } else {
-          codeError = true;
-          inputcode.classList.add("is-invalid");
-        }
-
-        // success
-        if (codeError) {
-          alert("sent a code successfully!");
-          rePass.style.display = "inline";
-          forgetForm.style.display = "none";
-        }
+      let forgotEmail = '';
+      sendResetCodeBtn.addEventListener('click', async function () {
+        const email = document.getElementById('forgotEmailInput').value.trim();
+        if (!email) { alert('Please enter your email'); return; }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) { alert('Invalid email'); return; }
+        try {
+          const resp = await fetch('http://localhost:8000/api/auth/forgot-password', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          });
+          const data = await resp.json();
+          if (data.success) {
+            forgotEmail = email;
+            alert('Reset code sent to your email');
+            forgetEmailForm.style.display = 'none';
+            forgetVerifyForm.style.display = 'inline';
+          } else {
+            alert(data.message || 'Failed to send reset code');
+          }
+        } catch (e) { alert('Network error. Please try again.'); }
       });
-      // *****************************************************************************
-      //
-      confirmePass.addEventListener("click", function () {
-        let PassError = false;
 
-        const rePassword = document.getElementById("rePassword");
-        const rePassword2 = document.getElementById("rePassword2");
+      confirmResetBtn.addEventListener('click', async function () {
+        const code = document.getElementById('resetCodeInput').value.trim();
+        const pass1 = document.getElementById('newPasswordInput').value.trim();
+        const pass2 = document.getElementById('newPasswordInput2').value.trim();
+        if (!forgotEmail) { alert('Please send code first'); return; }
+        if (!code || code.length !== 6) { alert('Enter a valid 6-digit code'); return; }
+        if (!pass1 || pass1.length < 6) { alert('Password must be at least 6 characters'); return; }
+        if (pass1 !== pass2) { alert('Passwords do not match'); return; }
+        try {
+          const resp = await fetch('http://localhost:8000/api/auth/reset-password', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: forgotEmail, verification_code: code, password: pass1, password_confirmation: pass2 })
+          });
+          const data = await resp.json();
+          if (data.success) {
+            alert('Password updated successfully. Please login.');
+            forgetVerifyForm.style.display = 'none';
+            signIn_form.style.display = 'inline';
+          } else {
+            alert(data.message || 'Failed to reset password');
+          }
+        } catch (e) { alert('Network error. Please try again.'); }
+      });
 
-        rePassword.classList.remove("is-valid", "is-invalid");
-        rePassword2.classList.remove("is-valid", "is-invalid");
-
-        const passValue1 = rePassword.value.trim();
-        const passValue2 = rePassword2.value.trim();
-        //Password verification
-        if (passValue1.length < 8) {
-          alert("Password must be at least 8 characters.");
-          rePassword.classList.add("is-invalid");
-          PassError = true;
-        } else {
-          rePassword.classList.add("is-valid");
-        }
-        // confirm password
-        if (passValue1 !== passValue2) {
-          alert("Passwords do not match!");
-          rePassword2.classList.add("is-invalid");
-          PassError = true;
-          // successfully
-        } else if (!PassError) {
-          rePassword2.classList.add("is-valid");
-          alert("The password has been successfully changed.");
-
-          rePass.style.display = "none";
-          signIn_form.style.display = "inline";
-
-          // Save temporarily
-          localStorage.setItem("userPassword", passValue1);
-        }
+      backToLogin1.addEventListener('click', function (e) {
+        e.preventDefault();
+        forgetEmailForm.style.display = 'none';
+        signIn_form.style.display = 'inline';
+      });
+      backToLogin2.addEventListener('click', function (e) {
+        e.preventDefault();
+        forgetVerifyForm.style.display = 'none';
+        signIn_form.style.display = 'inline';
       });
 
       // *****************************************************************************
@@ -542,26 +546,62 @@
         signIn_form.style.display = "none";
         signUp_form.style.display = "inline";
       });
-      // sign up validation
-      signUpButton.addEventListener("click", function () {
+      // sign up validation + submit to backend
+      signUpButton.addEventListener("click", async function () {
         const inputname = document.getElementById("inputname");
         const inputEmail = document.getElementById("inputEmail");
         const inputphone = document.getElementById("inputphone");
         const inputPassword = document.getElementById("inputPassword");
-        const inputLanguage = document.getElementById("inputLanguage");
-        const inputCurrency = document.getElementById("inputLanguage");
+        const languageEl = document.getElementById("inputLanguage");
+        const genderEl = document.querySelectorAll('#inputLanguage')[1];
+        const currencyEl = document.getElementById("inputCurrency");
         const policyChecked = document.getElementById("policyChecked");
 
-        // validate full name
-        // validate email
-        // validate phone number
-        // validate password
-        // validate lang
-        // validate currency
-        // validate checked
+        const fullName = inputname.value.trim();
+        const email = inputEmail.value.trim();
+        const phone = inputphone.value.trim();
+        const password = inputPassword.value.trim();
+        const language = languageEl && languageEl.value ? languageEl.value.toLowerCase() : 'english';
+        const gender = genderEl && genderEl.value ? genderEl.value.toLowerCase() : null;
+        const currency = currencyEl && currencyEl.value ? currencyEl.value : null;
 
-        // اذا كان التحقق تمام بيعطي alert تم انشاء الحساب بنجاح ==>
-        //  ينتقل للواجهة الرئيسية
+        let hasError = false;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!fullName || fullName.length < 2) { inputname.classList.add('is-invalid'); hasError = true; } else { inputname.classList.remove('is-invalid'); }
+        if (!email || !emailRegex.test(email)) { inputEmail.classList.add('is-invalid'); hasError = true; } else { inputEmail.classList.remove('is-invalid'); }
+        if (!password || password.length < 6) { inputPassword.classList.add('is-invalid'); hasError = true; } else { inputPassword.classList.remove('is-invalid'); }
+        if (!policyChecked.checked) { alert('Please agree to the policies'); hasError = true; }
+        if (hasError) return;
+
+        const username = email.split('@')[0] + '_' + Math.floor(Math.random()*1000);
+
+        try {
+          const resp = await fetch('http://localhost:8000/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username,
+              email,
+              password,
+              user_full_name: fullName,
+              mobile: phone,
+              language,
+              gender,
+              currency
+            })
+          });
+          const data = await resp.json();
+          if (data.success) {
+            alert('Account created. Please check your email for the verification code.');
+          } else {
+            let msg = data.message || 'Registration failed';
+            if (data.errors) { msg += ' - ' + Object.values(data.errors).flat().join(', '); }
+            alert(msg);
+          }
+        } catch (e) {
+          alert('Network error. Please try again.');
+        }
       });
     </script>
   </body>
