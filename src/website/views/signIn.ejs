@@ -131,12 +131,19 @@
         background-color: #ffffff;
         color: #0d464c;
       }
+      .tolip img {
+        width: 200px;
+        align-items: center;
+      }
     </style>
 
     <div class="container d-flex align-items-center">
       <div class="card-signup shadow-sm">
         <div class="card-body p-4">
-          <h3 class="card-title text-center mb-4">REGISTER</h3>
+          <!-- <h3 class="card-title text-center mb-4">REGISTER</h3> -->
+          <div class="d-flex align-items-center tolip">
+            <img src="images/tulip.png" alt="tulip" />
+          </div>
           <form
             id="signupForm"
             class="row g-3"
@@ -233,7 +240,7 @@
             </div>
             <!-- repassword -->
             <div class="rePass" id="rePass">
-              <p>اعد كتابة كلمة مرور جديدة للحساب</p>
+              <p>Re-enter a new password for the account</p>
               <!-- new password -->
               <div class="col-12 mb-3">
                 <input
@@ -387,6 +394,7 @@
 
       // re password form
       const rePass = document.getElementById("rePass");
+
       const confirmePass = document.getElementById("confirmePass");
 
       // sign up form
@@ -470,23 +478,51 @@
         }
 
         // success
-        if (!codeError) {
+        if (codeError) {
           alert("sent a code successfully!");
           rePass.style.display = "inline";
           forgetForm.style.display = "none";
         }
       });
       // *****************************************************************************
-      // new password
+      //
       confirmePass.addEventListener("click", function () {
-        const rePassword = document.getElementById("rePassword").value;
-        const rePassword2 = document.getElementById("rePassword2").value;
+        let PassError = false;
 
-        // قواعد كتابة كلمة السر(تكون اكبر من 6 محارف و فيها ارقام و احرف و رموز)
-        // القيمة الثانية يجب ان تكون نفس القيمة الاولى
-        // اذا تم التحقق ينفله على صفحة تسجيل الدخول
-        // مع حفظ كلمة المرور الجديدة
+        const rePassword = document.getElementById("rePassword");
+        const rePassword2 = document.getElementById("rePassword2");
+
+        rePassword.classList.remove("is-valid", "is-invalid");
+        rePassword2.classList.remove("is-valid", "is-invalid");
+
+        const passValue1 = rePassword.value.trim();
+        const passValue2 = rePassword2.value.trim();
+        //Password verification
+        if (passValue1.length < 8) {
+          alert("Password must be at least 8 characters.");
+          rePassword.classList.add("is-invalid");
+          PassError = true;
+        } else {
+          rePassword.classList.add("is-valid");
+        }
+        // confirm password
+        if (passValue1 !== passValue2) {
+          alert("Passwords do not match!");
+          rePassword2.classList.add("is-invalid");
+          PassError = true;
+          // successfully
+        } else if (!PassError) {
+          rePassword2.classList.add("is-valid");
+          alert("The password has been successfully changed.");
+
+          rePass.style.display = "none";
+          signIn_form.style.display = "inline";
+
+          // Save temporarily
+          localStorage.setItem("userPassword", passValue1);
+        }
       });
+
       // *****************************************************************************
       // sign up form
       signupLink.addEventListener("click", function () {
