@@ -8,10 +8,10 @@ module.exports.run = async () => {
 
   /* Routers */
   const mainRouter = require("./routes/index");
-  const signUpRouter = require("./routes/signUp");
+  const signInRouter = require("./routes/signIn");
   const contactUsRouter = require("./routes/contactUs");
   const businessRouter = require("./routes/business");
-
+  const ReturnPolicy = require("./routes/ReturnPolicy");
   app.config = config;
   app.usersData = require("../base/User");
   app.Info = require("../base/Info");
@@ -32,9 +32,10 @@ module.exports.run = async () => {
   app.set("views", join(__dirname, "/views"));
   app.set("port", config.port);
   app.use("/", mainRouter);
-  app.use("/signup", signUpRouter);
+  app.use("/signin", signInRouter);
   app.use("/contact", contactUsRouter);
   app.use("/business", businessRouter);
+  app.use("/ReturnPolicy", ReturnPolicy);
 
   app.listen(app.get("port"), () => {
     console.log(

@@ -75,18 +75,22 @@
           <li>العربية</li>
         </ul>
       </li>
+
       <!-- before sign -->
       <li class="sign-in">
         <button type="button" class="login-btn nav-btn btn" id="loginBtn">
           <a role="button" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="fa-solid fa-right-to-bracket"></i>
-            <span class="btn-text">Sign In</span>
+            <span class="btn-text"
+              ><a class="aa" href="/signin">Sign In</a></span
+            >
           </a>
         </button>
       </li>
+
       <!-- after sign -->
       <li class="profile">
-        <div class="dropdown after-s">
+        <div class="dropdown after-s" id="after_s">
           <button class="profile-btn">
             <i class="fa-solid fa-user"></i>
             <span class="btn-text">full name</span>
@@ -321,6 +325,10 @@
     color: #0d464c;
     display: inline;
   }
+  .aa {
+    text-decoration: none;
+    color: #0d464c;
+  }
   /* lang */
 
   .lang-btn {
@@ -543,4 +551,14 @@
   const tooltipList = [...tooltipTriggerList].map(
     (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
   );
+
+  const loginBtn = document.getElementById("loginBtn");
+  const after_s = document.getElementById("after_s");
+
+  const isloggedIn = localStorage.getItem("isloggedIn");
+
+  if (isloggedIn) {
+    loginBtn.style.display = "none";
+    after_s.style.display = "inline";
+  }
 </script>

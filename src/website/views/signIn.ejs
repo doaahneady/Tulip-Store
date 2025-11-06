@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- sign up form -->
+  <%- include('./includes/head') %>
+  <body>
+    <style>
+      @import url(https://db.onlinewebfonts.com/c/ba155473d72fb574bd945b20f4598560?family=Montserrat-Alt1+SemBd);
+      @import url(https://db.onlinewebfonts.com/c/29295d2928c6bd76a76c9e789982bc85?family=Montserrat-Alt1+Med);
+
+      @font-face {
+        font-family: "Montserrat-Alt1 SemBd";
+        src: url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.eot");
+        src: url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.eot?#iefix")
+            format("embedded-opentype"),
+          url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.woff2")
+            format("woff2"),
+          url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.woff")
+            format("woff"),
+          url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.ttf")
+            format("truetype"),
+          url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.svg#Montserrat-Alt1 SemBd")
+            format("svg");
+      }
+
+      @font-face {
+        font-family: "Montserrat-Alt";
+        src: url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.eot");
+        src: url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.eot?#iefix")
+            format("embedded-opentype"),
+          url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.woff2")
+            format("woff2"),
+          url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.woff")
+            format("woff"),
+          url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.ttf")
+            format("truetype"),
+          url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.svg#Montserrat-Alt1 Med")
+            format("svg");
+      }
+      body {
+        background-image: url("images/signUp.jpg");
+        background-repeat: none;
+        background-size: cover;
+        font-family: "Montserrat-Alt1 SemBd";
+      }
+      placeholder {
+        font-family: "Montserrat-Alt1";
+      }
+      .container {
+        min-height: 100vh;
+        padding: 20px;
+        width: 500px;
+      }
+
+      .forget-link,
+      .signup-link {
+        background-color: transparent;
+        color: #e7c8b3;
+        text-decoration: underline;
+        font-weight: bold;
+        border: none;
+      }
+      .signup-link:hover,
+      .forget-link:hover {
+        font-weight: bold;
+        text-shadow: 1px 0 2px #000000;
+        transition: 0.2s;
+      }
+      .text {
+        color: #f05928;
+      }
+
+      #forgetForm {
+        display: none;
+      }
+      .card-signup {
+        border-radius: 40px;
+        width: 100%;
+        height: auto;
+        background-color: #ffffff17;
+        backdrop-filter: blur(20px);
+        color: #e7c8b3;
+      }
+      .signUp_form {
+        display: none;
+      }
+      .rePass {
+        display: none;
+      }
+      form.button-front {
+        border: none;
+        padding: 20px;
+        gap: 30px;
+      }
+
+      h3 {
+        font-weight: 700;
+        font-size: 40px;
+      }
+
+      .btn {
+        background-color: #e7c8b3;
+        /* box-shadow: inset 2px 2px 4px rgb(255, 255, 255), inset -2px -2px 4px #0d464c; */
+        color: #0d464c;
+        font-weight: bold;
+        border: none;
+      }
+      .button-sign-up {
+        margin-left: 450px;
+      }
+      .btn:hover,
+      .btn::after {
+        color: #e7c8b3;
+        background-color: #0d464c;
+        border: none;
+      }
+
+      .btn a {
+        color: #0d464c;
+        text-decoration: none;
+        padding: 10px 90px;
+      }
+      .btn a:hover {
+        background-color: #0d464c;
+        color: #e7c8b3;
+        text-decoration: none;
+      }
+      .form-select {
+        border-radius: 10px;
+        border: none;
+        font-weight: 500;
+        background-color: #ffffff;
+        color: #0d464c;
+      }
+    </style>
+
+    <div class="container d-flex align-items-center">
+      <div class="card-signup shadow-sm">
+        <div class="card-body p-4">
+          <h3 class="card-title text-center mb-4">REGISTER</h3>
+          <form
+            id="signupForm"
+            class="row g-3"
+            novalidate
+            onsubmit="return performSignup(event)"
+          >
+            <!-- sign in -->
+            <div class="signIn_form" id="form_signIn">
+              <!-- email -->
+              <div class="col-12 mb-3">
+                <input
+                  type="email"
+                  class="form-control"
+                  id="inputEmail"
+                  placeholder="E-mail"
+                />
+              </div>
+
+              <!-- password -->
+              <div class="col-12 mb-3">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="inputPassword"
+                  placeholder="Password"
+                  value=""
+                />
+              </div>
+
+              <!-- forget pass -->
+              <div class="mb-3">
+                <button type="button" class="forget-link" id="forgetLink">
+                  forget password?
+                </button>
+              </div>
+
+              <!-- submit -->
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button
+                  type="submit"
+                  class="btn btn-lg w-100 btn-primary"
+                  id="signIn"
+                >
+                  Sign In
+                </button>
+              </div>
+
+              <!-- sign up -->
+              <p class="text">
+                Don't have an account?
+                <button type="button" class="signup-link" id="signupLink">
+                  Sign up here
+                </button>
+              </p>
+
+              <!-- or with -->
+              <p class="p line-or text-center">Or With</p>
+
+              <!-- back -->
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button type="button" class="btn btn-lg w-100" id="back">
+                  <span class="btn-text"><a class="aa" href="/">back</a></span>
+                </button>
+              </div>
+            </div>
+            <!-- forget password -->
+            <div class="forget-Form" id="forgetForm">
+              <p>check your Email</p>
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="inputcode"
+                  placeholder="enter code"
+                />
+              </div>
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <span>Didn't receive a code?<a href="">Resend it</a></span>
+              </div>
+              <!-- resive code -->
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button type="button" class="btn btn-lg w-100" id="receiveCode">
+                  Register
+                </button>
+              </div>
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button
+                  class="btn btn-back btn-lg w-100"
+                  onclick="history.back()"
+                >
+                  back
+                </button>
+              </div>
+            </div>
+            <!-- repassword -->
+            <div class="rePass" id="rePass">
+              <p>اعد كتابة كلمة مرور جديدة للحساب</p>
+              <!-- new password -->
+              <div class="col-12 mb-3">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="rePassword"
+                  placeholder="Password"
+                  value=""
+                />
+              </div>
+              <!-- confirme pass -->
+              <div class="col-12 mb-3">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="rePassword2"
+                  placeholder=" Password"
+                  value=""
+                />
+              </div>
+              <!-- next -->
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button
+                  type="button"
+                  class="btn btn-lg w-100"
+                  id="confirmePass"
+                >
+                  confirme
+                </button>
+              </div>
+            </div>
+            <!-- sign up -->
+            <div class="signUp_form" id="form_signUp">
+              <!-- full name -->
+              <div class="col-12 mb-4">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="inputname"
+                  placeholder="full name"
+                />
+              </div>
+
+              <!-- email -->
+              <div class="col-12 mb-4">
+                <input
+                  type="email"
+                  class="form-control"
+                  id="inputEmail"
+                  placeholder="E-mail"
+                />
+              </div>
+
+              <!-- phone number -->
+              <div class="col-12 mb-4">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="inputphone"
+                  placeholder="phone number"
+                />
+              </div>
+
+              <!-- password -->
+              <div class="col-12 mb-4">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="inputPassword"
+                  placeholder="Password"
+                />
+              </div>
+              <!--dropdown -->
+              <div class="row mb-3">
+                <!-- language -->
+                <div class="col-md-4">
+                  <select id="inputLanguage" class="form-select">
+                    <option hidden>Lang</option>
+                    <option>English</option>
+                    <option>العربية</option>
+                  </select>
+                </div>
+                <!-- gender -->
+                <div class="col-md-4">
+                  <select id="inputLanguage" class="form-select">
+                    <option hidden>Gender</option>
+                    <option>female</option>
+                    <option>male</option>
+                  </select>
+                </div>
+                <!-- Currency -->
+                <div class="col-md-4 mb-4">
+                  <select id="inputCurrency" class="form-select">
+                    <option hidden>Currency</option>
+                    <option>USD</option>
+                    <option>SYP</option>
+                    <option>AED</option>
+                  </select>
+                </div>
+              </div>
+              <!-- Policy -->
+              <div class="form-check mb-5">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  value=""
+                  checked
+                  id="policyChecked"
+                />
+                <label class="form-check-label" for="checkDefault">
+                  I agree to the <a href="/ReturnPolicy">ReturnPolicy</a> &
+                  <a href="/ReturnPolicy">Shipping Policy</a>
+                </label>
+              </div>
+
+              <!-- submit sign up -->
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button
+                  type="button"
+                  class="btn btn-lg w-100"
+                  id="signUpButton"
+                >
+                  Creat Account
+                </button>
+              </div>
+              <!-- back -->
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button
+                  class="btn btn-back btn-lg w-100"
+                  onclick="history.back()"
+                >
+                  back
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // sign in form
+      const signIn_form = document.getElementById("form_signIn");
+      const signIn_button = document.getElementById("signIn");
+      const signupLink = document.getElementById("signupLink");
+
+      // forget pass form
+      const forgetLink = document.getElementById("forgetLink");
+      const receiveCode = document.getElementById("receiveCode");
+      const forgetForm = document.getElementById("forgetForm");
+
+      // re password form
+      const rePass = document.getElementById("rePass");
+      const confirmePass = document.getElementById("confirmePass");
+
+      // sign up form
+      const signUp_form = document.getElementById("form_signUp");
+      const signUpButton = document.getElementById("signUpButton");
+
+      // data sign in
+      const CORRECT_EMAIL = "doaahnidi@gmail.com";
+      const CORRECT_PASSWORD = "ddffhh";
+
+      // sign in input
+      const emailInput = document.getElementById("inputEmail");
+      const passwordInput = document.getElementById("inputPassword");
+      const signInBtn = document.getElementById("signIn");
+
+      // *****************************************************************************
+      // sign in
+      signInBtn.addEventListener("click", function (event) {
+        event.preventDefault();
+
+        // remove previous state
+        emailInput.classList.remove("is-valid", "is-invalid");
+        passwordInput.classList.remove("is-valid", "is-invalid");
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        let hasError = false;
+        let codeError = false;
+        // validate email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (email === "" || !emailRegex.test(email)) {
+          emailInput.classList.add("is-invalid");
+          hasError = true;
+        } else if (email.toLowerCase() !== CORRECT_EMAIL.toLowerCase()) {
+          emailInput.classList.add("is-invalid");
+          hasError = true;
+        } else {
+          emailInput.classList.add("is-valid");
+        }
+
+        // validate password
+        if (password === "") {
+          passwordInput.classList.add("is-invalid");
+          hasError = true;
+        } else if (password !== CORRECT_PASSWORD) {
+          passwordInput.classList.add("is-invalid");
+          hasError = true;
+        } else {
+          passwordInput.classList.add("is-valid");
+        }
+
+        // success
+        if (!hasError) {
+          alert("wellcome.. Logged in successfully!");
+          window.location.href = "/";
+          localStorage.setItem("isloggedIn", "true");
+        }
+      });
+
+      // *****************************************************************************
+      // forget password
+      forgetLink.addEventListener("click", function () {
+        signIn_form.style.display = "none";
+        forgetForm.style.display = "inline";
+      });
+
+      // code input
+      const inputcode = document.getElementById("inputcode");
+      const code = inputcode.value;
+      const CORRECT_CODE = "123123";
+      // *****************************************************************************
+      //resive code for forget password
+      receiveCode.addEventListener("click", function () {
+        if (code === CORRECT_CODE) {
+          inputcode.classList.add("is-valid");
+          codeError = false;
+        } else {
+          codeError = true;
+          inputcode.classList.add("is-invalid");
+        }
+
+        // success
+        if (!codeError) {
+          alert("sent a code successfully!");
+          rePass.style.display = "inline";
+          forgetForm.style.display = "none";
+        }
+      });
+      // *****************************************************************************
+      // new password
+      confirmePass.addEventListener("click", function () {
+        const rePassword = document.getElementById("rePassword").value;
+        const rePassword2 = document.getElementById("rePassword2").value;
+
+        // قواعد كتابة كلمة السر(تكون اكبر من 6 محارف و فيها ارقام و احرف و رموز)
+        // القيمة الثانية يجب ان تكون نفس القيمة الاولى
+        // اذا تم التحقق ينفله على صفحة تسجيل الدخول
+        // مع حفظ كلمة المرور الجديدة
+      });
+      // *****************************************************************************
+      // sign up form
+      signupLink.addEventListener("click", function () {
+        signIn_form.style.display = "none";
+        signUp_form.style.display = "inline";
+      });
+      // sign up validation
+      signUpButton.addEventListener("click", function () {
+        const inputname = document.getElementById("inputname");
+        const inputEmail = document.getElementById("inputEmail");
+        const inputphone = document.getElementById("inputphone");
+        const inputPassword = document.getElementById("inputPassword");
+        const inputLanguage = document.getElementById("inputLanguage");
+        const inputCurrency = document.getElementById("inputLanguage");
+        const policyChecked = document.getElementById("policyChecked");
+
+        // validate full name
+        // validate email
+        // validate phone number
+        // validate password
+        // validate lang
+        // validate currency
+        // validate checked
+
+        // اذا كان التحقق تمام بيعطي alert تم انشاء الحساب بنجاح ==>
+        //  ينتقل للواجهة الرئيسية
+      });
+    </script>
+  </body>
+</html>
