@@ -2,7 +2,7 @@
 <html lang="en">
   <!-- sign up form -->
   <%- include('./includes/head') %>
-  <body>
+  <body style="background-color: #0d464c">
     <style>
       @import url(https://db.onlinewebfonts.com/c/ba155473d72fb574bd945b20f4598560?family=Montserrat-Alt1+SemBd);
       @import url(https://db.onlinewebfonts.com/c/29295d2928c6bd76a76c9e789982bc85?family=Montserrat-Alt1+Med);
@@ -37,16 +37,17 @@
             format("svg");
       }
       body {
-        background-image: url("images/signUp.jpg");
-        background-repeat: none;
-        background-size: cover;
+        /* background-image: url("images/signUp.jpg"); */
+        /* background-repeat: none;
+        background-size: cover; */
+
         font-family: "Montserrat-Alt1 SemBd";
       }
       placeholder {
         font-family: "Montserrat-Alt1";
       }
       .container {
-        min-height: 100vh;
+        min-height: 600px;
         padding: 20px;
         width: 500px;
       }
@@ -54,7 +55,7 @@
       .forget-link,
       .signup-link {
         background-color: transparent;
-        color: #e7c8b3;
+        color: #0d464c;
         text-decoration: underline;
         font-weight: bold;
         border: none;
@@ -64,9 +65,6 @@
         font-weight: bold;
         text-shadow: 1px 0 2px #000000;
         transition: 0.2s;
-      }
-      .text {
-        color: #f05928;
       }
 
       #forgetForm {
@@ -78,7 +76,7 @@
         height: auto;
         background-color: #ffffff17;
         backdrop-filter: blur(20px);
-        color: #e7c8b3;
+        color: #0d464c;
       }
       .signUp_form {
         display: none;
@@ -93,14 +91,14 @@
       }
 
       h3 {
+        color: #0d464c;
         font-weight: 700;
         font-size: 40px;
       }
 
       .btn {
-        background-color: #e7c8b3;
-        /* box-shadow: inset 2px 2px 4px rgb(255, 255, 255), inset -2px -2px 4px #0d464c; */
-        color: #0d464c;
+        color: #e7c8b3;
+        background-color: #0d464c;
         font-weight: bold;
         border: none;
       }
@@ -109,8 +107,9 @@
       }
       .btn:hover,
       .btn::after {
+        background-color: #f05928;
+
         color: #e7c8b3;
-        background-color: #0d464c;
         border: none;
       }
 
@@ -131,19 +130,33 @@
         background-color: #ffffff;
         color: #0d464c;
       }
-      .tolip img {
+      .tolip {
+        background-image: url("images/tulip.png");
+        background-size: cover;
         width: 200px;
-        align-items: center;
+        height: 200px;
       }
     </style>
 
     <div class="container d-flex align-items-center">
-      <div class="card-signup shadow-sm">
+      <div
+        class="card-signup shadow-sm"
+        style="
+          border-color: #f05928;
+          border-width: 2px;
+          border-style: solid;
+          background-color: #ffffff80;
+          backdrop-filter: blur(20px);
+        "
+      >
         <div class="card-body p-4">
-          <!-- <h3 class="card-title text-center mb-4">REGISTER</h3> -->
-          <div class="d-flex align-items-center tolip">
-            <img src="images/tulip.png" alt="tulip" />
-          </div>
+          <div class="mx-auto d-block tolip"></div>
+          <h3
+            class="card-title text-center mb-4"
+            style="color: #0d464c; text-shadow: 1px 0 2px #000000"
+          >
+            REGISTER
+          </h3>
           <form
             id="signupForm"
             class="row g-3"
@@ -200,14 +213,14 @@
               </p>
 
               <!-- or with -->
-              <p class="p line-or text-center">Or With</p>
+              <!-- <p class="p line-or text-center">Or With</p> -->
 
               <!-- back -->
-              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+              <!-- <div class="col-12 d-flex justify-content-center px-0 mb-3">
                 <button type="button" class="btn btn-lg w-100" id="back">
                   <span class="btn-text"><a class="aa" href="/">back</a></span>
                 </button>
-              </div>
+              </div> -->
             </div>
             <!-- forget password -->
             <div class="forget-Form" id="forgetForm">
