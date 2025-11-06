@@ -6,3 +6,25 @@
     <h1>coming soooon!</h1>
   </body>
 </html>
+class="card-signup shadow-sm" style=" border-width: 2px; border-style: solid;
+background-color: #ffffff80; backdrop-filter: blur(20px); " // sign up form
+signupLink.addEventListener("click", function () { signIn_form.style.display =
+"none"; signUp_form.style.display = "inline"; }); // sign up validation
+signUpButton.addEventListener("click", function () { const inputname =
+document.getElementById("inputname"); const inputEmail =
+document.getElementById("inputEmail2"); const inputphone =
+document.getElementById("inputphone"); const inputPassword =
+document.getElementById("inputPassword"); const inputLanguage =
+document.getElementById("inputLanguage"); const inputCurrency =
+document.getElementById("inputLanguage"); const policyChecked =
+document.getElementById("policyChecked"); // validate full name //
+inputname.classList.remove("is-valid", "is-invalid"); // const name =
+inputname.value; // if (name === "") { // alert("return"); //
+inputname.classList.add("is-invalid"); // } else { // alert("name saved"); //
+inputname.classList.add("is-valid"); // } // validate email
+inputEmail.classList.remove("is-valid", "is-invalid"); const email_V =
+inputEmail.value; if (!email_V.endsWith("@gmail.com")) { alert("return");
+inputEmail.classList.add("is-invalid"); } else { alert("email saved");
+inputEmail.classList.add("is-valid"); } // validate phone number // validate
+password // validate lang // validate currency // validate checked // اذا كان
+التحقق تمام بيعطي alert تم انشاء الحساب بنجاح ==> // ينتقل للواجهة الرئيسية });
