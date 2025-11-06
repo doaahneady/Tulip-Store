@@ -10,6 +10,7 @@
     "start": "node src/index.js"
   },
   "dependencies": {
+    "axios": "^1.13.2",
     "connect-mongo": "^5.1.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
