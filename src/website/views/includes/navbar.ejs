@@ -551,4 +551,14 @@
   const tooltipList = [...tooltipTriggerList].map(
     (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
   );
+
+  const loginBtn = document.getElementById("loginBtn");
+  const after_s = document.getElementById("after_s");
+
+  const isloggedIn = localStorage.getItem("isloggedIn");
+
+  if (isloggedIn) {
+    loginBtn.style.display = "none";
+    after_s.style.display = "inline";
+  }
 </script>

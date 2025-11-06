@@ -83,6 +83,9 @@
       .signUp_form {
         display: none;
       }
+      .rePass {
+        display: none;
+      }
       form.button-front {
         border: none;
         padding: 20px;
@@ -147,11 +150,9 @@
                 <input
                   type="email"
                   class="form-control"
-                  id="inputname"
+                  id="inputEmail"
                   placeholder="E-mail"
                 />
-                <div class="invalid-feedback">Invalid email address.</div>
-                <div class="valid-feedback">Email is correct.</div>
               </div>
 
               <!-- password -->
@@ -163,8 +164,6 @@
                   placeholder="Password"
                   value=""
                 />
-                <div class="invalid-feedback">Incorrect password.</div>
-                <div class="valid-feedback">Password is correct.</div>
               </div>
 
               <!-- forget pass -->
@@ -203,31 +202,208 @@
                 </button>
               </div>
             </div>
+            <!-- forget password -->
+            <div class="forget-Form" id="forgetForm">
+              <p>check your Email</p>
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="inputcode"
+                  placeholder="enter code"
+                />
+              </div>
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <span>Didn't receive a code?<a href="">Resend it</a></span>
+              </div>
+              <!-- resive code -->
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button type="button" class="btn btn-lg w-100" id="receiveCode">
+                  Register
+                </button>
+              </div>
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button
+                  class="btn btn-back btn-lg w-100"
+                  onclick="history.back()"
+                >
+                  back
+                </button>
+              </div>
+            </div>
+            <!-- repassword -->
+            <div class="rePass" id="rePass">
+              <p>اعد كتابة كلمة مرور جديدة للحساب</p>
+              <!-- new password -->
+              <div class="col-12 mb-3">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="rePassword"
+                  placeholder="Password"
+                  value=""
+                />
+              </div>
+              <!-- confirme pass -->
+              <div class="col-12 mb-3">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="rePassword2"
+                  placeholder=" Password"
+                  value=""
+                />
+              </div>
+              <!-- next -->
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button
+                  type="button"
+                  class="btn btn-lg w-100"
+                  id="confirmePass"
+                >
+                  confirme
+                </button>
+              </div>
+            </div>
+            <!-- sign up -->
+            <div class="signUp_form" id="form_signUp">
+              <!-- full name -->
+              <div class="col-12 mb-4">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="inputname"
+                  placeholder="full name"
+                />
+              </div>
+
+              <!-- email -->
+              <div class="col-12 mb-4">
+                <input
+                  type="email"
+                  class="form-control"
+                  id="inputEmail"
+                  placeholder="E-mail"
+                />
+              </div>
+
+              <!-- phone number -->
+              <div class="col-12 mb-4">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="inputphone"
+                  placeholder="phone number"
+                />
+              </div>
+
+              <!-- password -->
+              <div class="col-12 mb-4">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="inputPassword"
+                  placeholder="Password"
+                />
+              </div>
+              <!--dropdown -->
+              <div class="row mb-3">
+                <!-- language -->
+                <div class="col-md-4">
+                  <select id="inputLanguage" class="form-select">
+                    <option hidden>Lang</option>
+                    <option>English</option>
+                    <option>العربية</option>
+                  </select>
+                </div>
+                <!-- gender -->
+                <div class="col-md-4">
+                  <select id="inputLanguage" class="form-select">
+                    <option hidden>Gender</option>
+                    <option>female</option>
+                    <option>male</option>
+                  </select>
+                </div>
+                <!-- Currency -->
+                <div class="col-md-4 mb-4">
+                  <select id="inputCurrency" class="form-select">
+                    <option hidden>Currency</option>
+                    <option>USD</option>
+                    <option>SYP</option>
+                    <option>AED</option>
+                  </select>
+                </div>
+              </div>
+              <!-- Policy -->
+              <div class="form-check mb-5">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  value=""
+                  checked
+                  id="policyChecked"
+                />
+                <label class="form-check-label" for="checkDefault">
+                  I agree to the <a href="/ReturnPolicy">ReturnPolicy</a> &
+                  <a href="/ReturnPolicy">Shipping Policy</a>
+                </label>
+              </div>
+
+              <!-- submit sign up -->
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button
+                  type="button"
+                  class="btn btn-lg w-100"
+                  id="signUpButton"
+                >
+                  Creat Account
+                </button>
+              </div>
+              <!-- back -->
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button
+                  class="btn btn-back btn-lg w-100"
+                  onclick="history.back()"
+                >
+                  back
+                </button>
+              </div>
+            </div>
           </form>
         </div>
       </div>
     </div>
 
     <script>
-      const errorEl = document.getElementById("error");
+      // sign in form
       const signIn_form = document.getElementById("form_signIn");
-      const signUp_form = document.getElementById("form_signUp");
-
       const signIn_button = document.getElementById("signIn");
       const signupLink = document.getElementById("signupLink");
 
+      // forget pass form
       const forgetLink = document.getElementById("forgetLink");
+      const receiveCode = document.getElementById("receiveCode");
       const forgetForm = document.getElementById("forgetForm");
 
+      // re password form
+      const rePass = document.getElementById("rePass");
+      const confirmePass = document.getElementById("confirmePass");
+
+      // sign up form
+      const signUp_form = document.getElementById("form_signUp");
       const signUpButton = document.getElementById("signUpButton");
 
+      // data sign in
       const CORRECT_EMAIL = "doaahnidi@gmail.com";
       const CORRECT_PASSWORD = "ddffhh";
 
-      const emailInput = document.getElementById("inputname");
+      // sign in input
+      const emailInput = document.getElementById("inputEmail");
       const passwordInput = document.getElementById("inputPassword");
       const signInBtn = document.getElementById("signIn");
 
+      // *****************************************************************************
+      // sign in
       signInBtn.addEventListener("click", function (event) {
         event.preventDefault();
 
@@ -239,9 +415,9 @@
         const password = passwordInput.value.trim();
 
         let hasError = false;
-
+        let codeError = false;
         // validate email
-        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (email === "" || !emailRegex.test(email)) {
           emailInput.classList.add("is-invalid");
           hasError = true;
@@ -265,31 +441,79 @@
 
         // success
         if (!hasError) {
-          alert(" Logged in successfully!");
-          // Example: redirect to another page
-          // window.location.href = "/dashboard";
+          alert("wellcome.. Logged in successfully!");
+          window.location.href = "/";
+          localStorage.setItem("isloggedIn", "true");
         }
       });
 
-      // optional: reset validation while typing
-      [emailInput, passwordInput].forEach((input) => {
-        input.addEventListener("input", () => {
-          input.classList.remove("is-valid", "is-invalid");
-        });
-      });
+      // *****************************************************************************
       // forget password
       forgetLink.addEventListener("click", function () {
         signIn_form.style.display = "none";
-
         forgetForm.style.display = "inline";
       });
+
+      // code input
+      const inputcode = document.getElementById("inputcode");
+      const code = inputcode.value;
+      const CORRECT_CODE = "123123";
+      // *****************************************************************************
+      //resive code for forget password
+      receiveCode.addEventListener("click", function () {
+        if (code === CORRECT_CODE) {
+          inputcode.classList.add("is-valid");
+          codeError = false;
+        } else {
+          codeError = true;
+          inputcode.classList.add("is-invalid");
+        }
+
+        // success
+        if (!codeError) {
+          alert("sent a code successfully!");
+          rePass.style.display = "inline";
+          forgetForm.style.display = "none";
+        }
+      });
+      // *****************************************************************************
+      // new password
+      confirmePass.addEventListener("click", function () {
+        const rePassword = document.getElementById("rePassword").value;
+        const rePassword2 = document.getElementById("rePassword2").value;
+
+        // قواعد كتابة كلمة السر(تكون اكبر من 6 محارف و فيها ارقام و احرف و رموز)
+        // القيمة الثانية يجب ان تكون نفس القيمة الاولى
+        // اذا تم التحقق ينفله على صفحة تسجيل الدخول
+        // مع حفظ كلمة المرور الجديدة
+      });
+      // *****************************************************************************
       // sign up form
       signupLink.addEventListener("click", function () {
         signIn_form.style.display = "none";
         signUp_form.style.display = "inline";
       });
       // sign up validation
-      signUpButton.addEventListener("click", function () {});
+      signUpButton.addEventListener("click", function () {
+        const inputname = document.getElementById("inputname");
+        const inputEmail = document.getElementById("inputEmail");
+        const inputphone = document.getElementById("inputphone");
+        const inputPassword = document.getElementById("inputPassword");
+        const inputLanguage = document.getElementById("inputLanguage");
+        const inputCurrency = document.getElementById("inputLanguage");
+        const policyChecked = document.getElementById("policyChecked");
+
+        // validate full name
+        // validate email
+        // validate phone number
+        // validate password
+        // validate lang
+        // validate currency
+        // validate checked
+
+        // اذا كان التحقق تمام بيعطي alert تم انشاء الحساب بنجاح ==>
+        //  ينتقل للواجهة الرئيسية
+      });
     </script>
   </body>
 </html>
