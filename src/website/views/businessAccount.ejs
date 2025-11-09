@@ -149,7 +149,6 @@
               id="inputPassword"
               placeholder="Password"
             />
-
             <div class="invalid-feedback" id="pass_1">
               - The password must contain at least 8 characters
             </div>
@@ -483,7 +482,7 @@
       if (countryCode === "" && phone === "") {
         message_num1.style.display = "block";
         flag.classList.add("is-invalid");
-        inputphone.classList.add("is-invalid");
+        pass_1.classList.add("is-invalid");
         businessError = true;
         return;
       }
@@ -512,26 +511,33 @@
     }
     // validate phone
     validatePhone();
-
+    const pass_1 = document.getElementById("pass_1");
+    const pass_2 = document.getElementById("pass_2");
+    const pass_3 = document.getElementById("pass_3");
     // validate password
     Password.classList.remove("is-valid", "is-invalid");
+    pass_1.classList.remove("is-valid", "is-invalid");
+    pass_2.classList.remove("is-valid", "is-invalid");
+    pass_3.classList.remove("is-valid", "is-invalid");
     const pass = Password.value;
     if (pass.length <= 8 || !/[A-Z]/.test(pass) || !/[0-9]/.test(pass)) {
+      Password.classList.add("is-invalid");
       if (pass.length <= 8) {
         Password.classList.add("is-invalid");
-        pass_1.style.display = "block";
+
         businessError = true;
       } else {
-        pass_1.style.display = "none";
+        pass_1.classList.add("is-valid");
       }
       if (!/[A-Z]/.test(pass)) {
-        pass_2.style.display = "block";
+        pass_2.classList.add("is-invalid");
       } else {
-        pass_2.style.display = "none";
+        pass_2.classList.add("is-valid");
       }
       if (!/[0-9]/.test(pass)) {
-        pass_3.style.display = "block";
+        pass_3.classList.add("is-invalid");
       } else {
+        pass_3.classList.add("is-valid");
       }
     } else {
       Password.classList.add("is-valid");
