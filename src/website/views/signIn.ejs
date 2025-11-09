@@ -94,14 +94,21 @@
         color: #0d464c;
         font-weight: 700;
         font-size: 40px;
+        text-shadow: 1px 0 2px #000000;
       }
-
+      .message-error {
+        color: red;
+        display: none;
+      }
       .btn {
         color: #e7c8b3;
         background-color: #0d464c;
-        font-weight: bold;
+        font-weight: bolder;
         border: none;
+        font-size: 22px;
+        box-shadow: 2px 0 4px #000000;
       }
+
       .button-sign-up {
         margin-left: 450px;
       }
@@ -150,12 +157,7 @@
       >
         <div class="card-body p-4">
           <div class="mx-auto d-block tolip"></div>
-          <h3
-            class="card-title text-center mb-4"
-            style="color: #0d464c; text-shadow: 1px 0 2px #000000"
-          >
-            REGISTER
-          </h3>
+          <h3 class="card-title text-center mb-4" id="card-title">SIGN IN</h3>
           <form
             id="signupForm"
             class="row g-3"
@@ -172,6 +174,9 @@
                   id="inputEmail"
                   placeholder="E-mail"
                 />
+                <div class="message-error" id="message_email">
+                  check your name
+                </div>
               </div>
 
               <!-- password -->
@@ -183,6 +188,9 @@
                   placeholder="Password"
                   value=""
                 />
+                <div class="message-error" id="message_pass">
+                  check your password
+                </div>
               </div>
 
               <!-- forget pass -->
@@ -293,7 +301,6 @@
                 </button>
               </div>
             </div>
-
             <!-- sign up -->
             <div class="signUp_form" id="form_signUp">
               <!-- full name -->
@@ -304,6 +311,9 @@
                   id="inputname"
                   placeholder="full name"
                 />
+                <div class="message-error" id="message_name">
+                  check your name
+                </div>
               </div>
 
               <!-- email -->
@@ -314,33 +324,46 @@
                   id="EmailAddress"
                   placeholder="E-mail"
                 />
+                <div class="message-error" id="message_email">
+                  check your email and try again.
+                </div>
               </div>
 
               <!-- phone number -->
-              <div class="col-12 mb-4 d-flex">
-                <select
-                  id="flag"
-                  class="form-select"
-                  style="width: 130px; border-radius: 5px 0 0 5px"
-                >
-                  <option hidden selected value="">Select country</option>
-                  <option value="+963">🇸🇾 Syria (+963)</option>
-                  <option value="+961">🇱🇧 Lebanon (+961)</option>
-                  <option value="+20">🇪🇬 Egypt (+20)</option>
-                  <option value="+966">🇸🇦 Saudi Arabia (+966)</option>
-                  <option value="+962">🇯🇴 Jordan (+962)</option>
-                  <option value="+964">🇮🇶 Iraq (+964)</option>
-                  <option value="+90">🇹🇷 Turkey (+90)</option>
-                  <option value="+1">🇺🇸 United States (+1)</option>
-                </select>
+              <div class="col-12 mb-4">
+                <div class="d-flex">
+                  <select
+                    id="flag"
+                    class="form-select"
+                    style="width: 130px; border-radius: 5px 0 0 5px"
+                  >
+                    <option hidden selected value="">Select</option>
+                    <option value="+963">🇸🇾 +963</option>
+                    <option value="+961">🇱🇧 +961</option>
+                    <option value="+20">🇪🇬 +20</option>
+                    <option value="+966">🇸🇦 +966</option>
+                    <option value="+962">🇯🇴 +962</option>
+                  </select>
 
-                <input
-                  type="text"
-                  class="form-control"
-                  id="inputphone"
-                  placeholder="Phone number"
-                  style="border-radius: 0 5px 5px 0"
-                />
+                  <input
+                    type="text"
+                    id="inputphone"
+                    class="form-control"
+                    placeholder="Phone number"
+                    style="border-radius: 0 5px 5px 0"
+                    disabled
+                  />
+                </div>
+                <div class="message-error" id="message_num1">
+                  - please select your country & phone number.
+                </div>
+                <div class="message-error" id="message_num2">
+                  - The key was selected(country) but phone number was not
+                  written
+                </div>
+                <div class="message-error" id="message_num3">
+                  - phone number was wrong try again.
+                </div>
               </div>
 
               <!-- password -->
@@ -351,6 +374,15 @@
                   id="Password"
                   placeholder="Password"
                 />
+                <div class="message-error" id="pass_1">
+                  - The password must contain at least 8 characters
+                </div>
+                <div class="message-error" id="pass_2">
+                  - it must contain the letters A-Z and a-z
+                </div>
+                <div class="message-error" id="pass_3">
+                  - it must contain numbers
+                </div>
               </div>
               <!--dropdown -->
               <div class="row mb-3">
@@ -388,6 +420,7 @@
                   value=""
                   checked
                   id="policyChecked"
+                  disabled
                 />
                 <label class="form-check-label" for="checkDefault">
                   I agree to the <a href="/ReturnPolicy">ReturnPolicy</a> &
@@ -421,6 +454,15 @@
     </div>
 
     <script>
+      // card title
+      const card_title = document.getElementById("card-title");
+
+      // message error
+      const message_name = document.getElementById("message_name");
+      const message_email = document.getElementById("message_email");
+      const message_num = document.getElementById("message_num");
+      const message_pass = document.getElementById("message_pass");
+
       // sign in form
       const signIn_form = document.getElementById("form_signIn");
       const signIn_button = document.getElementById("signIn");
@@ -461,17 +503,21 @@
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (email === "" || !emailRegex.test(email)) {
           emailInput.classList.add("is-invalid");
+          message_email.style.display = "block";
           hasError = true;
         } else {
           emailInput.classList.add("is-valid");
+          message_email.style.display = "none";
         }
 
         // validate password
         if (password === "") {
           passwordInput.classList.add("is-invalid");
+          message_pass.style.display = "block";
           hasError = true;
         } else {
           passwordInput.classList.add("is-valid");
+          message_pass.style.display = "none";
         }
 
         if (hasError) return;
@@ -509,6 +555,8 @@
       const backToLogin2 = document.getElementById("backToLogin2");
 
       forgetLink.addEventListener("click", function () {
+        //  title
+        card_title.textContent = "forget password";
         signIn_form.style.display = "none";
         forgetEmailForm.style.display = "inline";
       });
@@ -549,6 +597,7 @@
       });
 
       confirmResetBtn.addEventListener("click", async function () {
+        card_title.textContent = "request code";
         const code = document.getElementById("resetCodeInput").value.trim();
         const pass1 = document.getElementById("newPasswordInput").value.trim();
         const pass2 = document.getElementById("newPasswordInput2").value.trim();
@@ -609,10 +658,12 @@
       // *****************************************************************************
       // sign up form
       signupLink.addEventListener("click", function () {
+        card_title.textContent = "sign up";
         signIn_form.style.display = "none";
         signUp_form.style.display = "inline";
       });
-      // sign up validation + submit to backend
+
+      // sign up validation
       signUpButton.addEventListener("click", async function () {
         const inputname = document.getElementById("inputname");
         const EmailAddress = document.getElementById("EmailAddress");
@@ -622,124 +673,148 @@
         const inputGender = document.getElementById("inputGender");
         const inputCurrency = document.getElementById("inputCurrency");
         const policyChecked = document.getElementById("policyChecked");
-        // **********************************************
+        const flag = document.getElementById("flag");
+
+        const message_num1 = document.getElementById("message_num1");
+        const message_num2 = document.getElementById("message_num2");
+        const message_num3 = document.getElementById("message_num3");
+
+        const pass_1 = document.getElementById("pass_1");
+        const pass_2 = document.getElementById("pass_2");
+        const pass_3 = document.getElementById("pass_3");
+        let SignError = false;
         // validate full name
         inputname.classList.remove("is-valid", "is-invalid");
         const name = inputname.value;
-
-        //Password verification
         if (name === "") {
-          alert("input your full name");
           inputname.classList.add("is-invalid");
-          PassError = true;
+          SignError = true;
         } else {
           inputname.classList.add("is-valid");
         }
-        // **********************************************
+
         // validate email
         EmailAddress.classList.remove("is-valid", "is-invalid");
-
         const emailAddress = EmailAddress.value;
         if (/^[\w.-]+@gmail\.com$/.test(emailAddress)) {
           EmailAddress.classList.add("is-valid");
-          alert("successful");
         } else {
           EmailAddress.classList.add("is-invalid");
-          alert("return");
+          SignError = true;
         }
 
-        // validate phone number
-        const flag = document.getElementById("flag");
-        flag.classList.remove("is-valid", "is-invalid");
+        //  phone number
+        flag.addEventListener("change", validatePhone);
 
-        flag.addEventListener("change", () => {
-          const selectedCode = flag.value;
-
-          if (selectedCode !== "") {
-            inputphone.value = selectedCode + " ";
-            flag.classList.add("is-valid");
-          } else {
-            flag.classList.add("is-invalid");
-          }
+        function validatePhone() {
           const countryCode = flag.value.trim();
           const phone = inputphone.value.trim();
 
           flag.classList.remove("is-valid", "is-invalid");
           inputphone.classList.remove("is-valid", "is-invalid");
 
-          if (countryCode === "") {
-            alert(" Please select a country.");
+          if (countryCode === "" && phone === "") {
+            message_num1.style.display = "block";
             flag.classList.add("is-invalid");
+            inputphone.classList.add("is-invalid");
+            SignError = true;
             return;
+          }
+
+          if (countryCode !== "") {
+            if (!phone.startsWith(countryCode)) {
+              inputphone.disabled = false;
+              inputphone.value = countryCode + " ";
+            }
+            flag.classList.add("is-valid");
+            message_num1.style.display = "none";
+            message_num2.style.display = "block";
           }
 
           const regex = /^[+0-9\s]+$/;
-          if (!regex.test(phone)) {
-            alert(" Phone number must contain only digits.");
+          if (!regex.test(phone) && !inputphone.disabled) {
+            alert("test");
+            message_num3.style.display = "block";
             inputphone.classList.add("is-invalid");
+            SignError = true;
             return;
-          } else {
-            alert(" Phone saved: " + phone);
+          }
+
+          if (countryCode !== "" && phone.startsWith(countryCode)) {
             flag.classList.add("is-valid");
             inputphone.classList.add("is-valid");
+            message_num1.style.display = "none";
+            message_num2.style.display = "none";
+            message_num3.style.display = "none";
           }
-        });
+        }
+        // validate phone
+        validatePhone();
 
         // validate password
         Password.classList.remove("is-valid", "is-invalid");
-
         const pass = Password.value;
-
         if (pass.length <= 8 || !/[A-Z]/.test(pass) || !/[0-9]/.test(pass)) {
-          Password.classList.add("is-invalid");
-          alert("return");
+          if (pass.length <= 8) {
+            Password.classList.add("is-invalid");
+            pass_1.style.display = "block";
+            SignError = true;
+          } else {
+            pass_1.style.display = "none";
+          }
+          if (!/[A-Z]/.test(pass)) {
+            pass_2.style.display = "block";
+          } else {
+            pass_2.style.display = "none";
+          }
+          if (!/[0-9]/.test(pass)) {
+            pass_3.style.display = "block";
+          } else {
+            pass_3.style.display = "none";
+          }
         } else {
           Password.classList.add("is-valid");
-          alert("sucessful");
+          pass_1.style.display = "none";
+          pass_2.style.display = "none";
+          pass_3.style.display = "none";
         }
-        // validate lang
+
+        // validate language
         inputLanguage.classList.remove("is-valid", "is-invalid");
-
         const lang = inputLanguage.value;
-
         if (lang === "") {
-          alert(" Please select a language before continuing.");
           inputLanguage.classList.add("is-invalid");
+          SignError = true;
         } else {
-          inputLanguage.classList.remove("is-invalid");
           inputLanguage.classList.add("is-valid");
-          alert(" Language saved: " + lang);
         }
-        // validate inputGender
+
+        // validate gender
         inputGender.classList.remove("is-valid", "is-invalid");
-
         const Gender = inputGender.value;
-
         if (Gender === "") {
-          alert(" Please select a language before continuing.");
           inputGender.classList.add("is-invalid");
+          SignError = true;
         } else {
-          inputGender.classList.remove("is-invalid");
           inputGender.classList.add("is-valid");
-          alert("Currency saved: " + lang);
         }
+
         // validate currency
         inputCurrency.classList.remove("is-valid", "is-invalid");
-
         const Currency = inputCurrency.value;
-
         if (Currency === "") {
-          alert(" Please select a language before continuing.");
           inputCurrency.classList.add("is-invalid");
+          SignError = true;
         } else {
-          inputCurrency.classList.remove("is-invalid");
           inputCurrency.classList.add("is-valid");
-          alert("Currency saved: " + lang);
         }
-        // validate checked
 
-        // اذا كان التحقق تمام بيعطي alert تم انشاء الحساب بنجاح ==>
-        //  ينتقل للواجهة الرئيسية
+        if (SignError) {
+          return;
+        } else {
+          alert("Welcome");
+          window.location.href = "/";
+        }
       });
     </script>
   </body>
