@@ -29,9 +29,11 @@ class ProductController extends Controller
         else if ($order === 'rate') $query->orderBy('rate', $dir);
         else if ($order === 'sales') $query->orderBy('sales', $dir);
         // Custom attribute filters
-        $filters = $request->except(['q','order','page']);
+        $filters = $request->except(['q','order','dir','page']);
         foreach ($filters as $k => $v) {
-            if($k === 'currency' || $k==='gender') continue; // ignore non-attribute fields
+            // Ignore non-attribute or empty values ("All" from selects)
+            if ($k === 'currency' || $k === 'gender') continue;
+            if ($v === null || $v === '') continue;
             $query->whereHas('attributes', function($attQ) use($k,$v){
                 $attQ->where('name',$k)->where('value',$v);
             });
@@ -61,8 +63,9 @@ class ProductController extends Controller
         else if ($order === 'rate') $query->orderBy('rate', $dir);
         else if ($order === 'sales') $query->orderBy('sales', $dir);
         // custom filters
-        $filters = $request->except(['q','order','page']);
+        $filters = $request->except(['q','order','dir','page']);
         foreach ($filters as $k => $v) {
+            if ($v === null || $v === '') continue;
             $query->whereHas('attributes', function($attQ) use($k,$v){
                 $attQ->where('name',$k)->where('value',$v);
             });
