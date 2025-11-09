@@ -23,8 +23,11 @@ module.exports.run = async () => {
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-  app.engine("html", require("ejs").renderFile);
-  app.set("view engin", "ejs");
+  // Configure EJS correctly for both .ejs and .html templates
+  const ejs = require("ejs");
+  app.engine("ejs", ejs.renderFile);
+  app.engine("html", ejs.renderFile);
+  app.set("view engine", "ejs");
 
   app.use((req, res, next) => {
     req.app = app;
