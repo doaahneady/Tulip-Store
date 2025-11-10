@@ -34,15 +34,6 @@
 body {
   font-family: "Montserrat-Alt1 SemBd";
   font-weight: 400;
-  background: linear-gradient(
-    to bottom,
-    #ded2c2 0%,
-    #e9e1d6 60%,
-    #f5f2ec 70%,
-    #ffffff 100%
-  );
-  background-size: 100%;
-  background-repeat: no-repeat;
 }
 placeholder {
   font-family: "Montserrat-Alt1";
