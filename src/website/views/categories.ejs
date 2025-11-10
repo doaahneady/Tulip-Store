@@ -1,12 +1,29 @@
 <!DOCTYPE html>
-<html>
-  <head><title>Categories</title></head>
+<html lang="en">
+  <%- include('./includes/head') %>
   <body>
-    <h1>Categories</h1>
-    <ul>
-      <% (categories || []).forEach(function(cat){ %>
-        <li><a href="/category/<%= cat.slug %>"><%= cat.name %></a></li>
-      <% }) %>
-    </ul>
+    <%- include('./includes/navbar')%>
+    <main class="products-view" id="main-view">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/" data-i18n="home">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Categories</li>
+        </ol>
+      </nav>
+      <div class="container">
+        <div class="products">
+          <% (categories || []).forEach(function(cat){ %>
+            <div class="product">
+              <a href="/category/<%= cat.slug %>" style="cursor:pointer">
+                <div class="image"><img src="/images/category/phone.jpeg" alt="<%= cat.name %>" /></div>
+              </a>
+              <div class="name_price">
+                <h3><%= cat.name %></h3>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    </main>
   </body>
 </html>

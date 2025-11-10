@@ -134,7 +134,6 @@
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
   />
-
   <script src="https://accounts.google.com/gsi/client?hl=en" async></script>
   <script src="https://accounts.google.com/gsi/client" async></script>
 
@@ -142,4 +141,140 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
   <link rel="stylesheet" type="text/css" href="/css/home.css" />
+
+  <script>
+    (function(){
+      try {
+        var lang = (localStorage.getItem('lang')||'en').toLowerCase();
+        var html = document.documentElement;
+        if (lang === 'ar' || lang === 'arabic'){
+          html.setAttribute('dir','rtl');
+          html.setAttribute('lang','ar');
+          document.addEventListener('DOMContentLoaded', function(){
+            if (document.body) document.body.classList.add('rtl');
+          });
+        } else {
+          html.setAttribute('dir','ltr');
+          html.setAttribute('lang','en');
+          document.addEventListener('DOMContentLoaded', function(){
+            if (document.body) document.body.classList.remove('rtl');
+          });
+        }
+      } catch(_){}
+    })();
+  </script>
+  <style>
+    body.rtl { direction: rtl; text-align: right; }
+    body.rtl nav .grid-3 { flex-direction: row-reverse; }
+    body.rtl .breadcrumb { direction: rtl; }
+    body.rtl .breadcrumb .breadcrumb-item + .breadcrumb-item::before { content: "‹"; padding: 0 2px; }
+  </style>
+
+  <script>
+    // Minimal client-side i18n for key UI labels
+    (function(){
+      var dict = {
+        en: {
+          home: 'Home',
+          signIn: 'Sign In',
+          cart: 'Cart',
+          shareNow: 'Share now',
+          addToCart: 'Add To Cart',
+          buyNow: 'Buy Now',
+          description: 'Description',
+          additionalDetails: 'Additional Details',
+          category: 'Category',
+          code: 'Code',
+          products: 'products',
+          order: 'Order',
+          newest: 'Newest',
+          priceLabel: 'Price',
+          rate: 'Rate',
+          popular: 'Popular',
+          descending: 'Descending',
+          ascending: 'Ascending',
+          searchPlaceholder: 'What are you searching for?',
+          apply: 'Apply'
+        },
+        ar: {
+          home: 'الرئيسية',
+          signIn: 'تسجيل دخول',
+          cart: 'السلة',
+          shareNow: 'مشاركة',
+          addToCart: 'أضف إلى السلة',
+          buyNow: 'اشتري الآن',
+          description: 'الوصف',
+          additionalDetails: 'تفاصيل إضافية',
+          category: 'التصنيف',
+          code: 'الرمز',
+          products: 'المنتجات',
+          order: 'الترتيب',
+          newest: 'الأحدث',
+          priceLabel: 'السعر',
+          rate: 'التقييم',
+          popular: 'الأكثر شيوعاً',
+          descending: 'تنازلي',
+          ascending: 'تصاعدي',
+          searchPlaceholder: 'عمّ تبحث؟',
+          apply: 'تطبيق'
+        }
+      };
+      var phraseMap = {
+        enToAr: {
+          'Home':'الرئيسية',
+          'Products':'المنتجات',
+          'products':'المنتجات',
+          'Order':'الترتيب',
+          'Newest':'الأحدث',
+          'Price':'السعر',
+          'Rate':'التقييم',
+          'Popular':'الأكثر شيوعاً',
+          'Descending':'تنازلي',
+          'Ascending':'تصاعدي',
+          'All':'الكل',
+          "Today's Deal":'عروض اليوم',
+          'Gift Cards':'بطاقات الهدايا',
+          'Fashions':'أزياء',
+          'Shoes & Bags':'أحذية وحقائب',
+          'Smart':'أجهزة ذكية',
+          'electronics':'إلكترونيات',
+          'Toys':'ألعاب',
+          'Sports':'رياضة',
+          'Jewelry':'مجوهرات',
+          'Back To School':'العودة إلى المدرسة',
+          'care':'عناية',
+          'view products':'عرض المنتجات'
+        }
+      };
+      function applyI18N(){
+        try{
+          var lang = (localStorage.getItem('lang')||'en').toLowerCase();
+          var table = dict[lang.startsWith('ar') ? 'ar' : 'en'] || dict.en;
+          // data-i18n text
+          document.querySelectorAll('[data-i18n]').forEach(function(el){
+            var k = el.getAttribute('data-i18n');
+            if (table[k]) el.textContent = table[k];
+          });
+          // data-i18n-placeholder
+          document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
+            var k = el.getAttribute('data-i18n-placeholder');
+            if (table[k]) el.setAttribute('placeholder', table[k]);
+          });
+          // Generic phrase replacement for static labels (avoid product names)
+          if (lang.startsWith('ar')){
+            var map = phraseMap.enToAr;
+            var candidates = document.querySelectorAll('nav, footer, .breadcrumb, .filter, .section-title, .buttons, .header h1, label, option, .navbar2, .card-title, .figure-caption, #product-filter-bar, .category-select, .category-menu li');
+            candidates.forEach(function(el){
+              var txt = (el.textContent||'').trim();
+              if (map[txt]) el.textContent = map[txt];
+              if (el.tagName==='OPTION' && map[txt]) el.textContent = map[txt];
+            });
+          }
+        }catch(_){ }
+      }
+      document.addEventListener('DOMContentLoaded', applyI18N);
+      window.addEventListener('storage', function(e){ if (e.key==='lang') applyI18N(); });
+      window.applyI18N = applyI18N;
+    })();
+  </script>
 </head>

@@ -16,8 +16,9 @@
 
     <div>
       <% (products.data || []).forEach(function(p){ %>
+        <% const pslug = p.slug || String(p.id || p.code || p.sku || p.name || '').toLowerCase(); %>
         <div style="border:1px solid #ddd; margin:8px; padding:8px">
-          <h3><%= p.name %></h3>
+          <h3><a href="/product/<%= encodeURIComponent(String(pslug)) %>"><%= p.name %></a></h3>
           <div>Price: $<%= p.price %></div>
           <div>Rate: <%= p.rate %></div>
         </div>

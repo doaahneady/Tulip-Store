@@ -1,39 +1,75 @@
 <!DOCTYPE html>
-<html>
-  <head><title><%= cat.name %></title></head>
+<html lang="en">
+  <%- include('./includes/head') %>
   <body>
-    <h1><%= cat.name %></h1>
-    <form method="get">
-      <input type="text" name="q" placeholder="Search in <%= cat.name %>" />
-      <select name="order">
-        <option value="date">Newest</option>
-        <option value="price">Price</option>
-        <option value="rate">Rate</option>
-        <option value="sales">Popular</option>
-      </select>
-      <% Object.keys(filters || {}).forEach(function(key){ %>
-        <label><%= key %>:
-          <select name="<%= key %>">
-            <option value="">All</option>
-            <% (filters[key]||[]).forEach(function(v){ %>
-              <option value="<%= v %>"><%= v %></option>
-            <% }) %>
-          </select>
-        </label>
-      <% }); %>
-      <button type="submit">Apply</button>
-    </form>
+    <%- include('./includes/navbar')%>
+    <main class="products-view" id="main-view">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/" data-i18n="home">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page"><%= cat.name %></li>
+        </ol>
+      </nav>
 
-    <div>
-      <% (products.data || []).forEach(function(p){ %>
-        <div style="border:1px solid #ddd; margin:8px; padding:8px">
-          <h3><%= p.name %></h3>
-          <div>Price: $<%= p.price %></div>
-          <div>Rate: <%= p.rate %></div>
+      <form method="get" action="/category/<%= encodeURIComponent(slug || cat.slug || cat.id) %>">
+        <div id="product-filter-bar" class="filter" style="margin: 8px 0 12px; padding: 10px 14px; display:flex; gap:14px; align-items:center; background: #ffffffaa; backdrop-filter: blur(6px); border: 1px solid #e8ecef; border-radius: 10px; box-shadow: 0 6px 16px rgba(0,0,0,0.08);">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-weight:600; color:#0d464c;" data-i18n="order">Order</span>
+            <select name="order" style="padding:8px 10px; border-radius:8px; border:1px solid #d9dfe4;">
+              <option value="date" <%= (query && query.order === 'date') ? 'selected' : '' %> data-i18n="newest">Newest</option>
+              <option value="price" <%= (query && query.order === 'price') ? 'selected' : '' %> data-i18n="priceLabel">Price</option>
+              <option value="rate" <%= (query && query.order === 'rate') ? 'selected' : '' %> data-i18n="rate">Rate</option>
+              <option value="sales" <%= (query && query.order === 'sales') ? 'selected' : '' %> data-i18n="popular">Popular</option>
+            </select>
+          </div>
+          <input type="text" name="q" value="<%= (query && query.q) || '' %>" placeholder="What are you searching for?" data-i18n-placeholder="searchPlaceholder" style="flex:1; padding:8px 10px; border-radius:8px; border:1px solid #d9dfe4;" />
+          <div id="attFilters" style="display:flex; gap:8px; flex-wrap:wrap;">
+            <% Object.keys(filters || {}).forEach(function(key){ %>
+              <label style="display:flex; align-items:center; gap:6px; color:#0d464c; font-weight:600;">
+                <span><%= key %>:</span>
+                <select name="<%= key %>" style="padding:8px 10px; border-radius:8px; border:1px solid #d9dfe4;">
+                  <option value="">All</option>
+                  <% (filters[key]||[]).forEach(function(v){ %>
+                    <option value="<%= v %>" <%= (query && query[key] === v) ? 'selected' : '' %>><%= v %></option>
+                  <% }) %>
+                </select>
+              </label>
+            <% }); %>
+          </div>
+          <button type="submit" class="btn btn-sm btn-primary" data-i18n="apply">Apply</button>
         </div>
-      <% }) %>
-    </div>
+      </form>
 
-    <p><a href="/categories">Back to categories</a></p>
+      <div class="container">
+        <div class="header">
+          <h1><%= cat.name %></h1>
+        </div>
+        <div class="products">
+          <% (products.data || []).forEach(function(p){ %>
+            <% const pslug = p.slug || String(p.id || p.code || p.sku || p.name || '').toLowerCase(); %>
+            <div class="product" data-product-id="<%= pslug %>">
+              <a href="/product/<%= encodeURIComponent(String(pslug)) %>" style="cursor: pointer">
+                <div class="image">
+                  <img src="<%= p.image || '/images/category/phone.jpeg' %>" alt="<%= p.name %>" />
+                </div>
+              </a>
+              <div class="name_price">
+                <h3><%= p.name %></h3>
+                <span>$<%= Number(p.price || 0) %></span>
+              </div>
+              <p><%= (p.description || '') %></p>
+              <div class="add-cart">
+                <button type="button" class="add-btn" title="Add to cart">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-cart-plus" viewBox="0 0 16 16">
+                    <path d="M9 5.5a.5.5 0 0 0-1 0V7H6.5a.5.5 0 0 0 0 1H8v1.5a.5.5 0 0 0 1 0V8h1.5a.5.5 0 0 0 0-1H9z"/>
+                    <path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zm3.915 10L3.102 4h10.796l-1.313 7zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    </main>
   </body>
 </html>

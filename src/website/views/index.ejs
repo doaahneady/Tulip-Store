@@ -967,7 +967,7 @@
           <!-- products -->
           <div class="container">
             <div class="header">
-              <h1>products</h1>
+              <h1 data-i18n="products">products</h1>
             </div>
             <!-- make products a responsive grid; cards won't shrink below 230px -->
             <div class="products">
@@ -1528,9 +1528,11 @@
           align-items: start;
         }
 
-        .product {
+.product {
           position: relative;
-          justify-content: space-between;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
           background-color: #ffffff;
           box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
           width: 200px;
@@ -1582,9 +1584,13 @@
           background-color: #0d464c00;
           border: none;
         }
-        .add-cart {
-          position: absolute;
-          right: 20px;
+.add-cart {
+          position: static;
+          width: 100%;
+          margin-top: auto;
+          padding-top: 8px;
+          display: flex;
+          justify-content: flex-end;
         }
 
         .add-cart button {
@@ -1698,22 +1704,22 @@
           const query = new URLSearchParams(params).toString();
           try {
             let prods, filterMap = {};
-            if (currentCategorySlug) {
-              const [filtersRes, prodsRes] = await Promise.all([
-                fetch(`${API}/categories/${currentCategorySlug}/filters`),
-                fetch(`${API}/categories/${currentCategorySlug}/products${query? ('?'+query):''}`)
-              ]);
-              filterMap = await filtersRes.json();
-              prods = await prodsRes.json();
-              productFilterBar.style.display = 'flex';
-              activeCatSpan.textContent = 'Category: ' + currentCategorySlug;
-            } else {
-              // Global search if no category is chosen
-              const prodsRes = await fetch(`${API}/products/search${query? ('?'+query): ''}`);
-              prods = await prodsRes.json();
-              productFilterBar.style.display = params.q ? 'flex' : 'none';
-              activeCatSpan.textContent = params.q ? ('Search: '+params.q) : '';
-            }
+              if (currentCategorySlug) {
+                const [filtersRes, prodsRes] = await Promise.all([
+                  fetch(`${API}/categories/${currentCategorySlug}/filters`),
+                  fetch(`${API}/categories/${currentCategorySlug}/products${query? ('?'+query):''}`)
+                ]);
+                filterMap = await filtersRes.json();
+                prods = await prodsRes.json();
+                productFilterBar.style.display = 'none';
+                activeCatSpan.textContent = 'Category: ' + currentCategorySlug;
+              } else {
+                // Global search if no category is chosen
+                const prodsRes = await fetch(`${API}/products/search${query? ('?'+query): ''}`);
+                prods = await prodsRes.json();
+                productFilterBar.style.display = 'none';
+                activeCatSpan.textContent = params.q ? ('Search: '+params.q) : '';
+              }
 
             // show products area
             products_main.style.display = 'grid';
@@ -1786,10 +1792,32 @@
               (prods.data || []).forEach(p => {
                 const card = document.createElement('div');
                 card.className = 'product';
+                const pslug = p.slug || String(p.id || p.code || p.sku || p.name || '').toLowerCase();
+                const pid = p.id != null ? p.id : pslug; // numeric id for cart if available
+                const pimg = p.image || 'images/category/phone.jpeg';
+                const pname = p.name || 'Product';
+                const pprice = Number(p.price || 0);
+                card.setAttribute('data-product-id', pslug);
                 card.innerHTML = `
-                  <div class="image"><img src="${p.image || 'images/category/phone.jpeg'}" alt="" /></div>
-                  <div class="name_price"><h3>${p.name}</h3><span>$${p.price}</span></div>
-                  <p>${p.description || ''}</p>
+                  <a href="/product/${encodeURIComponent(pslug)}" style="text-decoration:none;color:inherit;">
+                    <div class="image"><img src="${pimg}" alt="" /></div>
+                    <div class="name_price"><h3>${pname}</h3><span>$${pprice}</span></div>
+                    <p>${p.description || ''}</p>
+                  </a>
+                  <div class="add-cart">
+                    <button
+                      type="button"
+                      class="add-btn"
+                      data-id="${pid}"
+                      data-name="${pname}"
+                      data-price="${pprice}"
+                      data-image="${pimg}"
+                      aria-pressed="false"
+                      title="Add to cart"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-cart-plus" viewBox="0 0 16 16"><path d="M9 5.5a.5.5 0 0 0-1 0V7H6.5a.5.5 0 0 0 0 1H8v1.5a.5.5 0 0 0 1 0V8h1.5a.5.5 0 0 0 0-1H9z"/><path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zm3.915 10L3.102 4h10.796l-1.313 7zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></svg>
+                    </button>
+                  </div>
                 `;
                 productsGrid.appendChild(card);
               });
@@ -1869,15 +1897,9 @@
                   item.appendChild(img);
                   item.appendChild(txt);
                   item.addEventListener('click', ()=>{
+                    const pid = p.slug || String(p.id || p.code || p.sku || p.name || '').toLowerCase();
                     if (dropdown) { dropdown.remove(); dropdown = null; }
-                    currentCategorySlug = '';
-                    searchInputNavbar.value = p.name;
-                    // Show products and search
-                    products_main.style.display = 'grid';
-                    products_main.style.gridTemplateColumns = '20% auto';
-                    products_main.style.gap = '20px';
-                    main_view.style.display = 'none';
-                    fetchAndRender();
+                    window.location.href = '/product/' + encodeURIComponent(pid);
                   });
                   dd.appendChild(item);
                 });

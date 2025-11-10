@@ -143,6 +143,90 @@
         width: 200px;
         height: 200px;
       }
+
+      /* Register phone row */
+      .phone-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+      }
+      .country-select-wrap {
+        position: relative;
+        flex: none;
+        width: 100%;
+        max-width: 100%;
+      }
+      .country-select {
+        height: 44px;
+        padding-left: 48px; /* room for flag */
+        border-radius: 12px;
+        border: 1px solid #e5e9ef;
+        background: #fff;
+        color: #0d464c;
+        font-weight: 600;
+      }
+      .country-select:focus { box-shadow: 0 0 0 0.2rem rgba(13,70,76,0.15); }
+      .flag-badge {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 24px;
+        height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px; /* emoji flag size */
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      }
+      .phone-input-group {
+        flex: none;
+        width: 100%;
+        height: auto;
+      }
+      .phone-input-group .input-group-text {
+        min-width: 74px;
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+        font-weight: 800;
+        color: #0d464c;
+        background: #fff;
+        border: 1px solid #e5e9ef;
+        border-right: 0;
+      }
+      .phone-input-group .form-control {
+        border-top-right-radius: 12px;
+        border-bottom-right-radius: 12px;
+        border: 1px solid #e5e9ef;
+        border-left: 0;
+        height: 44px;
+      }
+      .phone-input-group .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(13,70,76,0.15);
+        border-color: #a8c3c6;
+      }
+      /* Inline code prefix inside the same input */
+      .phone-input-wrap { position: relative; height: 44px; }
+      .code-prefix {
+        position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+        color: #0d464c; font-weight: 800; border-right: 1px solid #e5e9ef; padding-right: 10px; min-width: 64px; text-align: left;
+      }
+      .phone-with-code { padding-left: 96px; height: 44px; font-size: inherit; }
+      /* Custom country picker with flag images */
+      .country-picker {
+        width: 100%; height: 44px; border-radius: 12px; border: 1px solid #e5e9ef; background:#fff; color:#0d464c; font-weight: inherit; font-size: inherit;
+        display: flex; align-items: center; gap: 8px; padding: 0 12px; justify-content: space-between;
+      }
+      .country-picker img { border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+      .country-dropdown {
+        position: absolute; left: 0; right: 0; top: calc(100% + 6px); background:#fff; border:1px solid #e5e9ef; border-radius: 12px;
+        box-shadow: 0 12px 28px rgba(0,0,0,0.12); max-height: 260px; overflow-y: auto; z-index: 10000; padding: 6px; font-size: inherit;
+      }
+      .country-item { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; cursor:pointer; }
+      .country-item:hover { background:#f6f8fb; }
     </style>
 
     <div class="container d-flex align-items-center">
@@ -369,41 +453,30 @@
                 </div>
               </div>
 
-              <!-- phone number -->
+              <!-- phone number (custom picker + code inside the same input) -->
               <div class="col-12 mb-4">
-                <div class="d-flex">
-                  <select
-                    id="flag"
-                    class="form-select"
-                    style="width: 130px; border-radius: 5px 0 0 5px"
-                  >
-                    <option hidden selected value="">Select</option>
-                    <option value="+963">🇸🇾 +963</option>
-                    <option value="+961">🇱🇧 +961</option>
-                    <option value="+20">🇪🇬 +20</option>
-                    <option value="+966">🇸🇦 +966</option>
-                    <option value="+962">🇯🇴 +962</option>
-                  </select>
-
-                  <input
-                    type="text"
-                    id="inputphone"
-                    class="form-control"
-                    placeholder="Phone number"
-                    style="border-radius: 0 5px 5px 0"
-                    disabled
-                  />
+                <label class="form-label" style="color:#0d464c; font-weight:700;">Phone number</label>
+                <div class="phone-row">
+                  <!-- Country picker with flag images -->
+                  <div class="country-select-wrap">
+                    <button id="countryPicker" type="button" class="country-picker">
+                      <img id="countryFlagImg" alt="flag" width="24" height="18" style="visibility:hidden;" />
+                      <span id="countryPickerText">Select country</span>
+                      <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                    </button>
+                    <div id="countryDropdown" class="country-dropdown" style="display:none;"></div>
+                  </div>
+                  <!-- Code prefix shown inside the same input where user types -->
+                  <div class="phone-input-group">
+                    <div class="phone-input-wrap">
+                      <span id="codeInInput" class="code-prefix">+___</span>
+                      <input type="tel" id="inputphone" class="form-control phone-with-code" placeholder="Phone number" />
+                    </div>
+                  </div>
                 </div>
-                <div class="message-error" id="message_num1">
-                  - please select your country & phone number.
-                </div>
-                <div class="message-error" id="message_num2">
-                  - The key was selected(country) but phone number was not
-                  written
-                </div>
-                <div class="message-error" id="message_num3">
-                  - phone number was wrong try again.
-                </div>
+                <div class="message-error" id="message_num1">- please select your country & phone number.</div>
+                <div class="message-error" id="message_num2">- The country was selected but phone number was not written</div>
+                <div class="message-error" id="message_num3">- phone number was wrong, try again.</div>
               </div>
 
               <!-- password -->
@@ -724,6 +797,80 @@
         const formSignUp = document.getElementById('form_signUp');
         const verifyForm = document.getElementById('verifyForm');
 
+        // Country dropdown data and UI (native select)
+        let countries = [];
+        let selectedCountry = null;
+        function flagEmoji(iso2){
+          if (!iso2) return '🌐';
+          return iso2.toUpperCase().replace(/./g, c => String.fromCodePoint(127397 + c.charCodeAt()));
+        }
+        async function ensureCountries(){
+          if (countries.length) return countries;
+          try {
+            const resp = await fetch('/api/countries');
+            const data = await resp.json();
+            countries = Array.isArray(data) ? data.map(c => ({ name: c.name, iso2: c.iso2, dialCode: c.dial_code })).sort((a,b)=> a.name.localeCompare(b.name)) : [];
+          } catch(_) { countries = []; }
+          // Fallback if API unavailable
+          if (!countries.length) {
+            countries = [
+              { name:'United States', iso2:'us', dialCode:'1' },
+              { name:'United Arab Emirates', iso2:'ae', dialCode:'971' },
+              { name:'Saudi Arabia', iso2:'sa', dialCode:'966' },
+              { name:'Syria', iso2:'sy', dialCode:'963' },
+              { name:'Lebanon', iso2:'lb', dialCode:'961' },
+              { name:'Egypt', iso2:'eg', dialCode:'20' },
+              { name:'Jordan', iso2:'jo', dialCode:'962' }
+            ];
+          }
+          return countries;
+        }
+        (async function setupCountryPicker(){
+          const picker = document.getElementById('countryPicker');
+          const list = document.getElementById('countryDropdown');
+          const flagImg = document.getElementById('countryFlagImg');
+          const pickerText = document.getElementById('countryPickerText');
+          const codeEl = document.getElementById('codeInInput');
+          if (!picker || !list || !codeEl) return;
+          await ensureCountries();
+          function flagUrl(iso2){ return `https://flagcdn.com/24x18/${String(iso2||'').toLowerCase()}.png`; }
+          function updatePhonePadding(){
+            const code = document.getElementById('codeInInput');
+            const input = document.getElementById('inputphone');
+            if (!code || !input) return;
+            const w = code.offsetWidth || 0;
+            input.style.paddingLeft = Math.max(88, w + 22) + 'px';
+          }
+          // Populate dropdown
+          list.innerHTML = '';
+          countries.forEach(c => {
+            const item = document.createElement('div');
+            item.className = 'country-item';
+            item.innerHTML = `<img src="${flagUrl(c.iso2)}" width="24" height="18" alt="${c.iso2}"> <span>${c.name} (+${c.dialCode})</span>`;
+            item.addEventListener('click', ()=>{
+              selectedCountry = c;
+              if (flagImg) { flagImg.src = flagUrl(c.iso2); flagImg.style.visibility = 'visible'; }
+              if (pickerText) pickerText.textContent = `${c.name} (+${c.dialCode})`;
+              codeEl.textContent = '+' + c.dialCode;
+              updatePhonePadding();
+              list.style.display = 'none';
+            });
+            list.appendChild(item);
+          });
+          // Initial padding calc and on resize
+          updatePhonePadding();
+          window.addEventListener('resize', updatePhonePadding);
+          // Toggle dropdown
+          picker.addEventListener('click', (e)=>{
+            e.preventDefault();
+            list.style.display = (list.style.display === 'block') ? 'none' : 'block';
+          });
+          // Close when clicking outside
+          document.addEventListener('click', (e)=>{
+            if (!picker.contains(e.target) && !list.contains(e.target)) list.style.display = 'none';
+          });
+        })();
+
         function show(el){ if(el) el.style.display='block'; }
         function hide(el){ if(el) el.style.display='none'; }
 
@@ -829,7 +976,6 @@
             const inputLanguage = document.getElementById('inputLanguage');
             const inputGender = document.getElementById('inputGender');
             const inputCurrency = document.getElementById('inputCurrency');
-            const flag = document.getElementById('flag');
 
             const message_num1 = document.getElementById('message_num1');
             const message_num2 = document.getElementById('message_num2');
@@ -856,33 +1002,27 @@
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if(!emailRegex.test(email)){ EmailAddress.classList.add('is-invalid'); hasError = true; } else { EmailAddress.classList.add('is-valid'); }
 
-            // Phone
-            flag.classList.remove('is-valid','is-invalid');
+            // Phone (custom validation)
             inputphone.classList.remove('is-valid','is-invalid');
-            const countryCode = flag.value.trim();
-            const phone = inputphone.value.trim();
+            const phone = (inputphone.value || '').replace(/\D/g,'');
+            const hasCountry = !!selectedCountry && !!selectedCountry.dialCode;
             message_num1.style.display = 'none';
             message_num2.style.display = 'none';
             message_num3.style.display = 'none';
-            if(countryCode === '' && phone === ''){
+            if(!hasCountry && phone === ''){
               message_num1.style.display = 'block';
-              flag.classList.add('is-invalid');
+              inputphone.classList.add('is-invalid');
+              hasError = true;
+            } else if (hasCountry && !phone) {
+              message_num2.style.display = 'block';
+              inputphone.classList.add('is-invalid');
+              hasError = true;
+            } else if (phone && (phone.length < 6 || phone.length > 15)){
+              message_num3.style.display = 'block';
               inputphone.classList.add('is-invalid');
               hasError = true;
             } else {
-              if(countryCode !== '' && !phone){
-                message_num2.style.display = 'block';
-                flag.classList.add('is-valid');
-                inputphone.classList.add('is-invalid');
-                hasError = true;
-              } else if (phone && !/^[+0-9\s]+$/.test(phone)){
-                message_num3.style.display = 'block';
-                inputphone.classList.add('is-invalid');
-                hasError = true;
-              } else {
-                if (countryCode) flag.classList.add('is-valid');
-                if (phone) inputphone.classList.add('is-valid');
-              }
+              if (phone) inputphone.classList.add('is-valid');
             }
 
             // Password
@@ -913,7 +1053,7 @@
             if (hasError) { return false; }
 
             const language = (langSel === 'ar') ? 'arabic' : 'english';
-            const mobile = (countryCode && phone) ? (countryCode + phone) : null;
+            const mobile = (phone && hasCountry) ? ('+' + selectedCountry.dialCode + phone) : null;
 
             const r = await api('/auth/register','POST',{
               username, email, password: pass, user_full_name: full, mobile, language, gender
@@ -933,11 +1073,7 @@
           return false;
         }
 
-        // Enable phone input when country selected
-        document.getElementById('flag').addEventListener('change', function(){
-          const phone = document.getElementById('inputphone');
-          phone.disabled = !this.value;
-        });
+        // Phone input handled by custom dropdown; no extra enable/disable needed
 
         // Verify email
         document.getElementById('verifyBtn').addEventListener('click', async function(){

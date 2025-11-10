@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CountryController;
 use App\Http\Controllers\CategoryController;
 
 /*
@@ -35,4 +36,7 @@ Route::get('/categories/{slug}/filters', [CategoryController::class, 'filters'])
 Route::get('/categories/{slug}/products', [ProductController::class, 'byCategory']);
 Route::get('/products/search', [ProductController::class, 'search']);
 Route::get('/products/{slug}', [ProductController::class, 'show']);
+
+// Countries
+Route::get('/countries', [CountryController::class, 'index']);
 

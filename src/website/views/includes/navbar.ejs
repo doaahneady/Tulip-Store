@@ -1,7 +1,7 @@
 <nav>
   <div class="navbar1">
-    <a class="logo">
-      <img class="img-fluid" src="images/logo_wep___.png" alt="logo" />
+    <a class="logo" href="/" aria-label="Go to home">
+      <img class="img-fluid" src="images/logo_wep___.png" alt="Tulip Store" />
     </a>
 
     <div class="grid-2">
@@ -32,6 +32,7 @@
             type="text"
             class="search-input"
             placeholder="What are you searching for?"
+            data-i18n-placeholder="searchPlaceholder"
           />
 
           <div class="category-dropdown">
@@ -76,15 +77,13 @@
           <li>العربية</li>
         </ul>
       </li>
-
+      
       <!-- before sign -->
       <li class="sign-in">
         <button type="button" class="login-btn nav-btn btn" id="loginBtn">
           <a role="button" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="fa-solid fa-right-to-bracket"></i>
-            <span class="btn-text"
-              ><a class="aa" href="/signin">Sign In</a></span
-            >
+            <span class="btn-text"><a class="aa" href="/signin" data-i18n="signIn">Sign In</a></span>
           </a>
         </button>
       </li>
@@ -121,7 +120,7 @@
           aria-controls="offcanvasRight"
         >
           <i class="fa-solid fa-cart-shopping"></i>
-          <span class="btn-text"> Cart </span>
+          <span class="btn-text" data-i18n="cart">Cart</span>
           <span
             class="position-absolute top-0 start-100 translate-middle badge rounded-pill num"
           >
@@ -222,6 +221,89 @@
     });
     // Keyboard support when icon focused
     if (icon) icon.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.keyCode === 13) { e.preventDefault(); submitLikeEnter(); } });
+  })();
+</script>
+<script>
+  // Global search suggestions with navigation to product details
+  (function(){
+    if (window.__SEARCH_DD_BOUND) return; // avoid double-binding on pages that already attach
+    window.__SEARCH_DD_BOUND = true;
+    const API = '/api';
+    const box = document.querySelector('.search-box');
+    const input = document.querySelector('.search-input');
+    if (!box || !input) return;
+    let dd, timer;
+    function ensureDD(){
+      if (dd) return dd;
+      dd = document.createElement('div');
+      dd.id = 'navSearchDD';
+      dd.style.position = 'fixed';
+      dd.style.background = '#fff';
+      dd.style.border = '1px solid #e5e9ef';
+      dd.style.borderRadius = '12px';
+      dd.style.boxShadow = '0 12px 28px rgba(0,0,0,0.12)';
+      dd.style.zIndex = '10000';
+      dd.style.maxHeight = '360px';
+      dd.style.overflowY = 'auto';
+      dd.style.padding = '6px';
+      positionDD();
+      document.body.appendChild(dd);
+      window.addEventListener('resize', positionDD);
+      window.addEventListener('scroll', positionDD, true);
+      return dd;
+    }
+    function positionDD(){
+      const rect = input.getBoundingClientRect();
+      if (!dd) return;
+      dd.style.left = rect.left + 'px';
+      dd.style.top = (rect.bottom + 6) + 'px';
+      dd.style.width = rect.width + 'px';
+    }
+    function clearDD(){ if (dd){ dd.remove(); dd = null; } }
+    document.addEventListener('click', (e)=>{ if (dd && !dd.contains(e.target) && !box.contains(e.target)) clearDD(); });
+    input.addEventListener('input', ()=>{
+      clearTimeout(timer);
+      const q = input.value.trim();
+      if (!q) { clearDD(); return; }
+      timer = setTimeout(async ()=>{
+        try{
+          const res = await fetch(`${API}/products/search?q=${encodeURIComponent(q)}&order=date`);
+          const data = await res.json();
+          const list = Array.isArray(data?.data) ? data.data.slice(0,10) : [];
+          if (!list.length) { clearDD(); return; }
+          const el = ensureDD();
+          el.innerHTML = '';
+          list.forEach(p=>{
+            const pid = p.slug || String(p.id || p.code || p.sku || p.name || '').toLowerCase();
+            const item = document.createElement('div');
+            item.style.padding = '10px 12px';
+            item.style.cursor = 'pointer';
+            item.style.display = 'flex';
+            item.style.alignItems = 'center';
+            item.style.gap = '10px';
+            item.style.borderRadius = '10px';
+            item.onmouseenter = ()=> item.style.background = '#f6f8fb';
+            item.onmouseleave = ()=> item.style.background = 'transparent';
+            const img = document.createElement('img');
+            img.src = p.image || 'images/category/phone.jpeg';
+            img.style.width = '40px'; img.style.height = '40px'; img.style.borderRadius = '8px'; img.style.objectFit = 'cover';
+            const txt = document.createElement('div');
+            txt.innerHTML = `<div style="font-weight:700;color:#0d464c">${p.name}</div><div style="font-size:12px;color:#6b7785">$${p.price ?? ''}</div>`;
+            item.appendChild(img); item.appendChild(txt);
+            item.addEventListener('click', ()=>{ window.location.href = '/product/' + encodeURIComponent(pid); });
+            el.appendChild(item);
+          });
+          positionDD();
+        } catch(_){}
+      }, 250);
+    });
+    input.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter') {
+        // go to search results page
+        const q = input.value.trim();
+        if (q) window.location.href = '/search?q=' + encodeURIComponent(q);
+      }
+    });
   })();
 </script>
 
@@ -629,6 +711,28 @@
     }
   }
 </style>
+<!-- Language switcher -->
+<script>
+  (function(){
+    try{
+      var langLis = document.querySelectorAll('.category-dropdown .category-menu li');
+      var btn = document.querySelector('.lang-btn');
+      function label(){
+        var lang = (localStorage.getItem('lang')||'en').toLowerCase();
+        if (btn) btn.setAttribute('title', 'Language: ' + (lang.startsWith('ar') ? 'العربية' : 'English'));
+      }
+      langLis.forEach(function(li){
+        li.addEventListener('click', function(){
+          var t = (li.textContent||'').trim();
+          var isAr = /العربية|arabic/i.test(t);
+          localStorage.setItem('lang', isAr ? 'ar' : 'en');
+          window.location.reload();
+        });
+      });
+      label();
+    }catch(_){ }
+  })();
+</script>
 <!-- gift -->
 <script>
   const gift = document.getElementById("gift");
