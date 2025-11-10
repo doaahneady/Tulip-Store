@@ -1,7 +1,8 @@
 const router = require("express").Router();
 const axios = require("axios");
 
-const API = "http://localhost:8000/api";
+const API = "/api";
+const DIRECT_API = "http://localhost:8000/api"; // fallback if proxy has issues
 
 router.get("/categories", async (req, res) => {
   try {
@@ -34,15 +35,28 @@ router.get("/category/:slug", async (req, res) => {
 
 router.get("/search", async (req, res) => {
   const { q, order, ...filters } = req.query;
+  const params = { q, order, ...filters };
+  Object.keys(params).forEach((k) => {
+    if (params[k] === "" || params[k] == null) delete params[k];
+  });
   try {
-    const params = { q, order, ...filters };
-    Object.keys(params).forEach((k) => {
-      if (params[k] === "" || params[k] == null) delete params[k];
-    });
+    // Try via proxy first
     const { data } = await axios.get(`${API}/products/search`, { params });
-    res.render("search.ejs", { q, order, products: data });
-  } catch (e) {
-    res.status(500).send("Failed to search");
+    return res.render("search.ejs", { q, order, products: data });
+  } catch (err1) {
+    try {
+      // Fallback: call Laravel directly
+      const { data } = await axios.get(`${DIRECT_API}/products/search`, { params });
+      return res.render("search.ejs", { q, order, products: data });
+    } catch (err2) {
+      console.error("Search failed", {
+        proxyStatus: err1?.response?.status,
+        proxyData: err1?.response?.data,
+        directStatus: err2?.response?.status,
+        directData: err2?.response?.data,
+      });
+      return res.status(500).send("Failed to search");
+    }
   }
 });
 

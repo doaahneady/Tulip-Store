@@ -20,7 +20,7 @@
       <!-- search -->
       <div class="search-container">
         <div class="search-box">
-          <div class="search-icon">
+          <div class="search-icon" role="button" tabindex="0" aria-label="Search">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path
                 d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
@@ -142,6 +142,88 @@
     </ul>
   </div>
 </nav>
+
+<script>
+  (function(){
+    function displayNameFrom(user){
+      return (
+        user?.user_full_name ||
+        user?.userFullName ||
+        user?.name ||
+        user?.username ||
+        'Account'
+      );
+    }
+    function updateAuthUI(){
+      try {
+        const userRaw = localStorage.getItem('user');
+        const token = localStorage.getItem('token');
+        const signInLi = document.querySelector('li.sign-in');
+        const afterDiv = document.getElementById('after_s');
+        const nameSpan = afterDiv ? afterDiv.querySelector('.btn-text') : null;
+        if (userRaw && token) {
+          let user = null;
+          try { user = JSON.parse(userRaw); } catch(_){}
+          const nameText = displayNameFrom(user);
+          if (nameSpan) nameSpan.textContent = nameText;
+          if (signInLi) signInLi.style.display = 'none';
+          if (afterDiv) afterDiv.style.display = 'block';
+        } else {
+          if (nameSpan) nameSpan.textContent = 'Account';
+          if (afterDiv) afterDiv.style.display = 'none';
+          if (signInLi) signInLi.style.display = 'list-item';
+        }
+      } catch(_){}
+    }
+    document.addEventListener('DOMContentLoaded', updateAuthUI);
+    window.addEventListener('pageshow', updateAuthUI);
+    window.addEventListener('storage', updateAuthUI);
+    // run once more after other scripts
+    setTimeout(updateAuthUI, 0);
+    document.addEventListener('click', function(e){
+      if (e.target && e.target.id === 'signOutLink'){
+        e.preventDefault();
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        updateAuthUI();
+        // reload to refresh server-rendered state if needed
+        window.location.href = '/';
+      }
+    });
+  })();
+</script>
+<script>
+  // Navbar search: allow mouse click on icon to trigger search
+  (function(){
+    const box = document.querySelector('.search-box');
+    if (!box) return;
+    const input = box.querySelector('.search-input');
+    const icon = box.querySelector('.search-icon');
+    function submitLikeEnter(){
+      if (!input) return;
+      const form = (input.closest && input.closest('form')) || input.form || null;
+      if (form) {
+        if (typeof form.requestSubmit === 'function') form.requestSubmit(); else form.submit();
+        return;
+      }
+      // No form present: dispatch Enter key events so existing handlers run
+      input.focus();
+      const evDown = new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true });
+      const evPress = new KeyboardEvent('keypress', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true });
+      const evUp = new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true });
+      input.dispatchEvent(evDown);
+      input.dispatchEvent(evPress);
+      input.dispatchEvent(evUp);
+    }
+    // Click support on the icon and its children (SVG/path)
+    if (box) box.addEventListener('click', function(e){
+      const el = e.target;
+      if (icon && (el === icon || icon.contains(el))) { e.preventDefault(); submitLikeEnter(); }
+    });
+    // Keyboard support when icon focused
+    if (icon) icon.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.keyCode === 13) { e.preventDefault(); submitLikeEnter(); } });
+  })();
+</script>
 
 <style>
   placeholder {
@@ -324,7 +406,8 @@
   }
   .btn-text {
     color: #0d464c;
-    display: inline;
+    display: inline-block;
+    white-space: nowrap;    /* prevent line break between first/last name */
   }
   .aa {
     text-decoration: none;
@@ -404,6 +487,7 @@
   .after-s {
     position: relative;
     display: none;
+    width: auto;            /* allow content to size naturally */
   }
 
   .profile-btn {
@@ -413,16 +497,17 @@
     border: none;
     border-radius: 40px;
     height: 35px;
-    width: 120px;
+    width: auto;             /* let the name define width */
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    padding: 5px;
-    display: flex;
+    padding: 5px 12px;       /* add horizontal room */
+    display: inline-flex;    /* avoid wrapping issues */
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 6px;
     outline: none;
+    white-space: nowrap;     /* keep first and last name on one line */
   }
 
   .profile-btn::after {

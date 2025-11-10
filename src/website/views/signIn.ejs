@@ -301,8 +301,48 @@
                 </button>
               </div>
             </div>
+
+            <!-- email verification after register or if login requires verification -->
+            <div class="verify_form" id="verifyForm" style="display:none">
+              <p>A verification code was sent to your email. Enter it below:</p>
+              <div class="col-12 mb-3">
+                <input type="email" class="form-control" id="verifyEmail" placeholder="E-mail" />
+              </div>
+              <div class="col-12 mb-3">
+                <input type="text" class="form-control" id="verifyCode" placeholder="6-digit code" />
+              </div>
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button type="button" class="btn btn-lg w-100" id="verifyBtn">Verify Email</button>
+              </div>
+              <!-- Timer row (visible during countdown) -->
+              <div class="col-12 d-flex justify-content-center px-0 mb-2" id="resendTimerRow" style="display:none">
+                <div class="w-100 text-center" style="color:#0d464c; font-weight:600;">
+                  You can resend a new code in <span id="resendTimerText">00:30</span>
+                </div>
+              </div>
+              <!-- Resend button (appears when timer hits 0) -->
+              <div class="col-12 d-flex justify-content-center px-0 mb-3" id="resendBtnRow" style="display:none">
+                <button type="button" class="btn btn-lg w-100" id="resendCodeBtn">Resend Code</button>
+              </div>
+              <div class="col-12 d-flex justify-content-center px-0 mb-3">
+                <button class="btn btn-back btn-lg w-100" id="backToLogin3">Back to Login</button>
+              </div>
+            </div>
+
             <!-- sign up -->
             <div class="signUp_form" id="form_signUp">
+              <!-- username -->
+              <div class="col-12 mb-4">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="inputUsername"
+                  placeholder="username"
+                />
+                <div class="message-error" id="message_username">
+                  username is required
+                </div>
+              </div>
               <!-- full name -->
               <div class="col-12 mb-4">
                 <input
@@ -431,11 +471,11 @@
               <!-- submit sign up -->
               <div class="col-12 d-flex justify-content-center px-0 mb-3">
                 <button
-                  type="button"
+                  type="submit"
                   class="btn btn-lg w-100"
                   id="signUpButton"
                 >
-                  Creat Account
+                  Create Account
                 </button>
               </div>
               <!-- back -->
@@ -558,7 +598,7 @@
         //  title
         card_title.textContent = "forget password";
         signIn_form.style.display = "none";
-        forgetEmailForm.style.display = "inline";
+        forgetEmailForm.style.display = "block";
       });
 
       let forgotEmail = "";
@@ -587,7 +627,7 @@
             forgotEmail = email;
             alert("Reset code sent to your email");
             forgetEmailForm.style.display = "none";
-            forgetVerifyForm.style.display = "inline";
+            forgetVerifyForm.style.display = "block";
           } else {
             alert(data.message || "Failed to send reset code");
           }
@@ -635,7 +675,7 @@
           if (data.success) {
             alert("Password updated successfully. Please login.");
             forgetVerifyForm.style.display = "none";
-            signIn_form.style.display = "inline";
+            signIn_form.style.display = "block";
           } else {
             alert(data.message || "Failed to reset password");
           }
@@ -647,12 +687,12 @@
       backToLogin1.addEventListener("click", function (e) {
         e.preventDefault();
         forgetEmailForm.style.display = "none";
-        signIn_form.style.display = "inline";
+        signIn_form.style.display = "block";
       });
       backToLogin2.addEventListener("click", function (e) {
         e.preventDefault();
         forgetVerifyForm.style.display = "none";
-        signIn_form.style.display = "inline";
+        signIn_form.style.display = "block";
       });
 
       // *****************************************************************************
@@ -660,162 +700,311 @@
       signupLink.addEventListener("click", function () {
         card_title.textContent = "sign up";
         signIn_form.style.display = "none";
-        signUp_form.style.display = "inline";
+        signUp_form.style.display = "block";
       });
 
-      // sign up validation
-      signUpButton.addEventListener("click", async function () {
-        const inputname = document.getElementById("inputname");
-        const EmailAddress = document.getElementById("EmailAddress");
-        const inputphone = document.getElementById("inputphone");
-        const Password = document.getElementById("Password");
-        const inputLanguage = document.getElementById("inputLanguage");
-        const inputGender = document.getElementById("inputGender");
-        const inputCurrency = document.getElementById("inputCurrency");
-        const policyChecked = document.getElementById("policyChecked");
-        const flag = document.getElementById("flag");
-
-        const message_num1 = document.getElementById("message_num1");
-        const message_num2 = document.getElementById("message_num2");
-        const message_num3 = document.getElementById("message_num3");
-
-        const pass_1 = document.getElementById("pass_1");
-        const pass_2 = document.getElementById("pass_2");
-        const pass_3 = document.getElementById("pass_3");
-        let SignError = false;
-        // validate full name
-        inputname.classList.remove("is-valid", "is-invalid");
-        const name = inputname.value;
-        if (name === "") {
-          inputname.classList.add("is-invalid");
-          SignError = true;
-        } else {
-          inputname.classList.add("is-valid");
-        }
-
-        // validate email
-        EmailAddress.classList.remove("is-valid", "is-invalid");
-        const emailAddress = EmailAddress.value;
-        if (/^[\w.-]+@gmail\.com$/.test(emailAddress)) {
-          EmailAddress.classList.add("is-valid");
-        } else {
-          EmailAddress.classList.add("is-invalid");
-          SignError = true;
-        }
-
-        //  phone number
-        flag.addEventListener("change", validatePhone);
-
-        function validatePhone() {
-          const countryCode = flag.value.trim();
-          const phone = inputphone.value.trim();
-
-          flag.classList.remove("is-valid", "is-invalid");
-          inputphone.classList.remove("is-valid", "is-invalid");
-
-          if (countryCode === "" && phone === "") {
-            message_num1.style.display = "block";
-            flag.classList.add("is-invalid");
-            inputphone.classList.add("is-invalid");
-            SignError = true;
-            return;
+      // sign up: delegate to form submit handler (performSignup)
+      if (signUpButton) {
+        signUpButton.addEventListener("click", function (e) {
+          e.preventDefault();
+          const form = document.getElementById('signupForm');
+          if (form && typeof form.requestSubmit === 'function') {
+            form.requestSubmit();
+          } else if (form) {
+            form.submit();
           }
+        });
+      }
+    </script>
+    <script>
+      (function(){
+        const API = '/api'; // proxied to Laravel by Express
+        const signupForm = document.getElementById('signupForm');
+        const formSignIn = document.getElementById('form_signIn');
+        const formSignUp = document.getElementById('form_signUp');
+        const verifyForm = document.getElementById('verifyForm');
 
-          if (countryCode !== "") {
-            if (!phone.startsWith(countryCode)) {
-              inputphone.disabled = false;
-              inputphone.value = countryCode + " ";
+        function show(el){ if(el) el.style.display='block'; }
+        function hide(el){ if(el) el.style.display='none'; }
+
+        // nav between modes
+        document.getElementById('signupLink').addEventListener('click', function(){
+          hide(formSignIn); hide(verifyForm); show(formSignUp);
+          document.getElementById('card-title').textContent = 'SIGN UP';
+          stopResendCountdown();
+        });
+        document.getElementById('forgetLink').addEventListener('click', function(){
+            hide(formSignIn); hide(formSignUp); show(document.getElementById('forgetEmailForm'));
+            document.getElementById('card-title').textContent = 'FORGOT PASSWORD';
+            stopResendCountdown();
+        });
+        document.getElementById('backToLogin1').addEventListener('click', function(e){ e.preventDefault(); show(formSignIn); hide(document.getElementById('forgetEmailForm')); document.getElementById('card-title').textContent = 'SIGN IN'; stopResendCountdown();});
+        document.getElementById('backToLogin2').addEventListener('click', function(e){ e.preventDefault(); show(formSignIn); hide(document.getElementById('forgetVerifyForm')); document.getElementById('card-title').textContent = 'SIGN IN'; stopResendCountdown();});
+        document.getElementById('backToLogin3').addEventListener('click', function(e){ e.preventDefault(); show(formSignIn); hide(verifyForm); document.getElementById('card-title').textContent = 'SIGN IN'; stopResendCountdown();});
+
+        async function api(path, method, body){
+          const headers = { 'Content-Type': 'application/json' };
+          const token = localStorage.getItem('token');
+          if (token) headers['Authorization'] = 'Bearer ' + token;
+          let res = await fetch(API + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+          let data = await res.json().catch(()=>({}));
+          // Fallback: if proxy 404s, try hitting Laravel directly
+          if (res.status === 404) {
+            try {
+              const direct = await fetch('http://localhost:8000' + API + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+              const directData = await direct.json().catch(()=>({}));
+              return { ok: direct.ok, status: direct.status, data: directData };
+            } catch (e) {
+              // ignore, return original
             }
-            flag.classList.add("is-valid");
-            message_num1.style.display = "none";
-            message_num2.style.display = "block";
           }
-
-          const regex = /^[+0-9\s]+$/;
-          if (!regex.test(phone) && !inputphone.disabled) {
-            alert("test");
-            message_num3.style.display = "block";
-            inputphone.classList.add("is-invalid");
-            SignError = true;
-            return;
-          }
-
-          if (countryCode !== "" && phone.startsWith(countryCode)) {
-            flag.classList.add("is-valid");
-            inputphone.classList.add("is-valid");
-            message_num1.style.display = "none";
-            message_num2.style.display = "none";
-            message_num3.style.display = "none";
-          }
+          return { ok: res.ok, status: res.status, data };
         }
-        // validate phone
-        validatePhone();
 
-        // validate password
-        Password.classList.remove("is-valid", "is-invalid");
-        const pass = Password.value;
-        if (pass.length <= 8 || !/[A-Z]/.test(pass) || !/[0-9]/.test(pass)) {
-          if (pass.length <= 8) {
-            Password.classList.add("is-invalid");
-            pass_1.style.display = "block";
-            SignError = true;
+        // Resend countdown logic
+        let _resendInt = null;
+        function startResendCountdown(){
+          const row = document.getElementById('resendTimerRow');
+          const txt = document.getElementById('resendTimerText');
+          const btnRow = document.getElementById('resendBtnRow');
+          if (_resendInt) clearInterval(_resendInt);
+          let left = 30; // seconds
+          if (row) row.style.display = '';
+          if (btnRow) btnRow.style.display = 'none';
+          function render(){
+            const mm = '00';
+            const ss = (left<10? '0':'') + left;
+            if (txt) txt.textContent = mm+':'+ss;
+          }
+          render();
+          _resendInt = setInterval(()=>{
+            left -= 1;
+            if (left <= 0){
+              // ensure UI shows 00:00 before toggling
+              if (txt) txt.textContent = '00:00';
+              clearInterval(_resendInt); _resendInt = null;
+              if (row) row.style.display = 'none';
+              if (btnRow) btnRow.style.display = '';
+            } else {
+              render();
+            }
+          }, 1000);
+        }
+        function stopResendCountdown(){
+          if (_resendInt){ clearInterval(_resendInt); _resendInt = null; }
+          const row = document.getElementById('resendTimerRow');
+          const btnRow = document.getElementById('resendBtnRow');
+          if (row) row.style.display = 'none';
+          if (btnRow) btnRow.style.display = '';
+        }
+
+        // Sign in or Sign up based on visible form
+        window.performSignup = async function(e){
+          e.preventDefault();
+          if (formSignIn.style.display !== 'none'){
+            // LOGIN
+            const email = document.getElementById('inputEmail').value.trim();
+            const password = document.getElementById('inputPassword').value;
+            const r = await api('/auth/login','POST',{ email, password });
+            if (r.ok){
+              localStorage.setItem('token', r.data.token);
+              localStorage.setItem('user', JSON.stringify(r.data.user));
+              window.location.href = '/';
+            } else if (r.data && r.data.requires_verification){
+              // show verify form
+              hide(formSignIn); show(verifyForm);
+              document.getElementById('verifyEmail').value = email;
+              startResendCountdown();
+              alert('Please verify your email before logging in. We sent you a code.');
+            } else {
+              alert(r.data?.message || 'Login failed');
+            }
+          } else if (formSignUp.style.display !== 'none'){
+            // REGISTER with validation
+            const inputname = document.getElementById('inputname');
+            const inputUsername = document.getElementById('inputUsername');
+            const EmailAddress = document.getElementById('EmailAddress');
+            const inputphone = document.getElementById('inputphone');
+            const Password = document.getElementById('Password');
+            const inputLanguage = document.getElementById('inputLanguage');
+            const inputGender = document.getElementById('inputGender');
+            const inputCurrency = document.getElementById('inputCurrency');
+            const flag = document.getElementById('flag');
+
+            const message_num1 = document.getElementById('message_num1');
+            const message_num2 = document.getElementById('message_num2');
+            const message_num3 = document.getElementById('message_num3');
+            const pass_1 = document.getElementById('pass_1');
+            const pass_2 = document.getElementById('pass_2');
+            const pass_3 = document.getElementById('pass_3');
+
+            let hasError = false;
+
+            // Username
+            inputUsername.classList.remove('is-valid','is-invalid');
+            const username = inputUsername.value.trim();
+            if(!username){ inputUsername.classList.add('is-invalid'); hasError = true; } else { inputUsername.classList.add('is-valid'); }
+
+            // Full name
+            inputname.classList.remove('is-valid','is-invalid');
+            const full = inputname.value.trim();
+            if(!full){ inputname.classList.add('is-invalid'); hasError = true; } else { inputname.classList.add('is-valid'); }
+
+            // Email
+            EmailAddress.classList.remove('is-valid','is-invalid');
+            const email = EmailAddress.value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if(!emailRegex.test(email)){ EmailAddress.classList.add('is-invalid'); hasError = true; } else { EmailAddress.classList.add('is-valid'); }
+
+            // Phone
+            flag.classList.remove('is-valid','is-invalid');
+            inputphone.classList.remove('is-valid','is-invalid');
+            const countryCode = flag.value.trim();
+            const phone = inputphone.value.trim();
+            message_num1.style.display = 'none';
+            message_num2.style.display = 'none';
+            message_num3.style.display = 'none';
+            if(countryCode === '' && phone === ''){
+              message_num1.style.display = 'block';
+              flag.classList.add('is-invalid');
+              inputphone.classList.add('is-invalid');
+              hasError = true;
+            } else {
+              if(countryCode !== '' && !phone){
+                message_num2.style.display = 'block';
+                flag.classList.add('is-valid');
+                inputphone.classList.add('is-invalid');
+                hasError = true;
+              } else if (phone && !/^[+0-9\s]+$/.test(phone)){
+                message_num3.style.display = 'block';
+                inputphone.classList.add('is-invalid');
+                hasError = true;
+              } else {
+                if (countryCode) flag.classList.add('is-valid');
+                if (phone) inputphone.classList.add('is-valid');
+              }
+            }
+
+            // Password
+            Password.classList.remove('is-valid','is-invalid');
+            pass_1.style.display = 'none'; pass_2.style.display='none'; pass_3.style.display='none';
+            const pass = Password.value;
+            if (pass.length <= 8 || !/[A-Z]/.test(pass) || !/[0-9]/.test(pass)){
+              if (pass.length <= 8) { pass_1.style.display='block'; }
+              if (!/[A-Z]/.test(pass)) { pass_2.style.display='block'; }
+              if (!/[0-9]/.test(pass)) { pass_3.style.display='block'; }
+              Password.classList.add('is-invalid');
+              hasError = true;
+            } else {
+              Password.classList.add('is-valid');
+            }
+
+            // Language/Gender/Currency
+            inputLanguage.classList.remove('is-valid','is-invalid');
+            inputGender.classList.remove('is-valid','is-invalid');
+            inputCurrency.classList.remove('is-valid','is-invalid');
+            const langSel = inputLanguage.value;
+            const gender = inputGender.value || null;
+            const currency = inputCurrency.value || null;
+            if(!langSel){ inputLanguage.classList.add('is-invalid'); hasError = true; } else { inputLanguage.classList.add('is-valid'); }
+            if(!gender){ inputGender.classList.add('is-invalid'); hasError = true; } else { inputGender.classList.add('is-valid'); }
+            if(!currency){ inputCurrency.classList.add('is-invalid'); hasError = true; } else { inputCurrency.classList.add('is-valid'); }
+
+            if (hasError) { return false; }
+
+            const language = (langSel === 'ar') ? 'arabic' : 'english';
+            const mobile = (countryCode && phone) ? (countryCode + phone) : null;
+
+            const r = await api('/auth/register','POST',{
+              username, email, password: pass, user_full_name: full, mobile, language, gender
+            });
+            if (r.ok){
+              hide(formSignUp); show(verifyForm);
+              document.getElementById('verifyEmail').value = email;
+              document.getElementById('card-title').textContent = 'VERIFY EMAIL';
+              startResendCountdown();
+              alert('Registration successful. Please check your email for the code.');
+            } else {
+              const msg = r.data?.message || 'Registration failed';
+              const errs = r.data?.errors ? ('\n' + JSON.stringify(r.data.errors)) : '';
+              alert(msg + errs);
+            }
+          }
+          return false;
+        }
+
+        // Enable phone input when country selected
+        document.getElementById('flag').addEventListener('change', function(){
+          const phone = document.getElementById('inputphone');
+          phone.disabled = !this.value;
+        });
+
+        // Verify email
+        document.getElementById('verifyBtn').addEventListener('click', async function(){
+          const email = document.getElementById('verifyEmail').value.trim();
+          const verification_code = document.getElementById('verifyCode').value.trim();
+          const r = await api('/auth/verify-email','POST',{ email, verification_code });
+          if (r.ok){
+            alert('Email verified. You can now sign in.');
+            show(formSignIn); hide(verifyForm);
+            document.getElementById('card-title').textContent = 'SIGN IN';
+            // prefill login email
+            document.getElementById('inputEmail').value = email;
           } else {
-            pass_1.style.display = "none";
+            alert(r.data?.message || 'Verification failed');
           }
-          if (!/[A-Z]/.test(pass)) {
-            pass_2.style.display = "block";
+        });
+
+        // Resend verification code
+        document.getElementById('resendCodeBtn').addEventListener('click', async function(){
+          const btn = this;
+          btn.disabled = true;
+          const email = document.getElementById('verifyEmail').value.trim();
+          const r = await api('/auth/resend-verification','POST',{ email });
+          if (r.ok){ 
+            alert('Verification code resent.'); 
+            // Hide button and restart countdown
+            const btnRow = document.getElementById('resendBtnRow');
+            const row = document.getElementById('resendTimerRow');
+            if (btnRow) btnRow.style.display = 'none';
+            if (row) row.style.display = '';
+            startResendCountdown();
+          } else { 
+            alert(r.data?.message || 'Could not resend'); 
+            // Keep the button visible to allow retry
+          }
+          btn.disabled = false;
+        });
+
+        // Forgot password flow
+        document.getElementById('sendResetCodeBtn').addEventListener('click', async function(){
+          const email = document.getElementById('forgotEmailInput').value.trim();
+          const r = await api('/auth/forgot-password','POST',{ email });
+          if (r.ok){
+            hide(document.getElementById('forgetEmailForm')); show(document.getElementById('forgetVerifyForm'));
           } else {
-            pass_2.style.display = "none";
+            alert(r.data?.message || 'Could not send reset code');
           }
-          if (!/[0-9]/.test(pass)) {
-            pass_3.style.display = "block";
+        });
+        document.getElementById('confirmResetBtn').addEventListener('click', async function(){
+          const email = document.getElementById('forgotEmailInput').value.trim();
+          const verification_code = document.getElementById('resetCodeInput').value.trim();
+          const password = document.getElementById('newPasswordInput').value;
+          const password_confirmation = document.getElementById('newPasswordInput2').value;
+          const r = await api('/auth/reset-password','POST',{ email, verification_code, password, password_confirmation });
+          if (r.ok){
+            alert('Password updated. Please sign in.');
+            show(formSignIn); hide(document.getElementById('forgetVerifyForm'));
+            document.getElementById('card-title').textContent = 'SIGN IN';
+            document.getElementById('inputEmail').value = email;
           } else {
-            pass_3.style.display = "none";
+            alert(r.data?.message || 'Could not reset password');
           }
-        } else {
-          Password.classList.add("is-valid");
-          pass_1.style.display = "none";
-          pass_2.style.display = "none";
-          pass_3.style.display = "none";
-        }
+        });
 
-        // validate language
-        inputLanguage.classList.remove("is-valid", "is-invalid");
-        const lang = inputLanguage.value;
-        if (lang === "") {
-          inputLanguage.classList.add("is-invalid");
-          SignError = true;
-        } else {
-          inputLanguage.classList.add("is-valid");
-        }
-
-        // validate gender
-        inputGender.classList.remove("is-valid", "is-invalid");
-        const Gender = inputGender.value;
-        if (Gender === "") {
-          inputGender.classList.add("is-invalid");
-          SignError = true;
-        } else {
-          inputGender.classList.add("is-valid");
-        }
-
-        // validate currency
-        inputCurrency.classList.remove("is-valid", "is-invalid");
-        const Currency = inputCurrency.value;
-        if (Currency === "") {
-          inputCurrency.classList.add("is-invalid");
-          SignError = true;
-        } else {
-          inputCurrency.classList.add("is-valid");
-        }
-
-        if (SignError) {
-          return;
-        } else {
-          alert("Welcome");
-          window.location.href = "/";
-        }
-      });
+        // Initial state
+        show(formSignIn); hide(formSignUp); hide(verifyForm);
+      })();
     </script>
   </body>
 </html>
