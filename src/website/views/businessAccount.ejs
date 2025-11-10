@@ -3,7 +3,7 @@
 <div class="container d-flex align-items-center">
   <div class="card-signup shadow-sm">
     <div class="card-body p-4">
-      <h3 class="card-title text-center mb-4">Business Account</h3>
+      <h3 class="card-title text-center mb-4" id="card-title"></h3>
 
       <form
         id="signupForm"
@@ -65,9 +65,11 @@
               Please enter a password (min 8 characters).
             </div>
           </div>
-          <p class="mb-3">
-            <a href="" class="forget-link" id="forgetLink"> forget password?</a>
-          </p>
+          <div class="mb-3">
+            <button type="button" class="forget-link" id="forgetLink">
+              forget password?
+            </button>
+          </div>
           <div class="col-12 d-flex justify-content-center px-0 mb-3">
             <button type="click" class="btn btn-lg w-100" id="register">
               Sign In
@@ -76,6 +78,70 @@
           <div class="col-12 d-flex justify-content-center px-0 mb-3">
             <button class="btn btn-back btn-lg w-100" onclick="history.back()">
               back
+            </button>
+          </div>
+        </div>
+        <!-- forgot password (1/2): request code -->
+        <div class="forget-Form" id="forgetEmailForm" style="display: none">
+          <p>Enter your account email to receive a reset code</p>
+          <div class="col-12 d-flex justify-content-center px-0 mb-3">
+            <input
+              type="email"
+              class="form-control"
+              id="forgotEmailInput"
+              placeholder="E-mail"
+            />
+          </div>
+          <div class="col-12 d-flex justify-content-center px-0 mb-3">
+            <button
+              type="button"
+              class="btn btn-lg w-100"
+              id="sendResetCodeBtn"
+            >
+              Send Code
+            </button>
+          </div>
+          <div class="col-12 d-flex justify-content-center px-0 mb-3">
+            <button class="btn btn-back btn-lg w-100" id="backToLogin1">
+              Back
+            </button>
+          </div>
+        </div>
+        <!-- forgot password (2/2): verify code + set new password -->
+        <div class="forget-Form" id="forgetVerifyForm" style="display: none">
+          <p>Enter the code sent to your email and new password</p>
+          <div class="col-12 d-flex justify-content-center px-0 mb-3">
+            <input
+              type="text"
+              class="form-control"
+              id="resetCodeInput"
+              placeholder="6-digit code"
+            />
+          </div>
+          <div class="col-12 mb-3">
+            <input
+              type="password"
+              class="form-control"
+              id="newPasswordInput"
+              placeholder="New password"
+            />
+          </div>
+          <div class="col-12 mb-3">
+            <input
+              type="password"
+              class="form-control"
+              id="newPasswordInput2"
+              placeholder="Confirm new password"
+            />
+          </div>
+          <div class="col-12 d-flex justify-content-center px-0 mb-3">
+            <button type="button" class="btn btn-lg w-100" id="confirmResetBtn">
+              Update Password
+            </button>
+          </div>
+          <div class="col-12 d-flex justify-content-center px-0 mb-3">
+            <button class="btn btn-back btn-lg w-100" id="backToLogin2">
+              Back
             </button>
           </div>
         </div>
@@ -244,6 +310,21 @@
   .signIn_form {
     display: none;
   }
+  .forget-link,
+  .signup-link {
+    background-color: transparent;
+    color: #ffffff;
+    text-decoration: underline;
+    font-weight: bold;
+    border: none;
+  }
+  .signup-link:hover,
+  .forget-link:hover {
+    font-weight: bold;
+    text-shadow: 1px 0 2px #000000;
+    transition: 0.2s;
+  }
+
   .signUp_form {
     display: none;
   }
@@ -374,6 +455,8 @@
 </style>
 
 <script>
+  const card_title = document.getElementById("card-title");
+
   const main_front = document.getElementById("front");
   const signIn_form = document.getElementById("business_signIn");
   const signUp_form = document.getElementById("business_signUp");
@@ -381,25 +464,28 @@
   const signIn_button = document.getElementById("button_signIn");
   const signUp_button = document.getElementById("button_creat");
 
+  // show sign in form
   signIn_button.addEventListener("click", function () {
+    card_title.textContent = "sign in";
     main_front.style.display = "none";
     signIn_form.style.display = "inline";
     signUp_form.style.display = "none";
   });
-
+  // show sign up form
   signUp_button.addEventListener("click", function () {
+    card_title.textContent = "Creat Business account";
     main_front.style.display = "none";
     signUp_form.style.display = "inline";
     signIn_form.style.display = "none";
   });
+
   // sign in
   const register = document.getElementById("register");
   const businessName = document.getElementById("businessName");
   const businessPassword = document.getElementById("businessPassword");
 
-  // sign in validation
   // *****************************************************************************
-  // sign in
+  // sign in validation
   register.addEventListener("click", async function (event) {
     event.preventDefault();
 
@@ -431,6 +517,117 @@
     }
 
     if (registerError) return;
+  });
+
+  // *****************************************************************************
+  // forget password - two-step flow
+  const forgetEmailForm = document.getElementById("forgetEmailForm");
+  const forgetVerifyForm = document.getElementById("forgetVerifyForm");
+  const sendResetCodeBtn = document.getElementById("sendResetCodeBtn");
+  const confirmResetBtn = document.getElementById("confirmResetBtn");
+  const backToLogin1 = document.getElementById("backToLogin1");
+  const backToLogin2 = document.getElementById("backToLogin2");
+  const forgetLink = document.getElementById("forgetLink");
+
+  forgetLink.addEventListener("click", function () {
+    //  title
+    card_title.textContent = "forget password";
+    signIn_form.style.display = "none";
+    forgetEmailForm.style.display = "inline";
+  });
+
+  let forgotEmail = "";
+  sendResetCodeBtn.addEventListener("click", async function () {
+    const email = document.getElementById("forgotEmailInput").value.trim();
+    if (!email) {
+      alert("Please enter your email");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert("Invalid email");
+      return;
+    }
+    try {
+      const resp = await fetch(
+        "http://localhost:8000/api/auth/forgot-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
+      const data = await resp.json();
+      if (data.success) {
+        forgotEmail = email;
+        alert("Reset code sent to your email");
+        forgetEmailForm.style.display = "none";
+        forgetVerifyForm.style.display = "inline";
+      } else {
+        alert(data.message || "Failed to send reset code");
+      }
+    } catch (e) {
+      alert("Network error. Please try again.");
+    }
+  });
+
+  confirmResetBtn.addEventListener("click", async function () {
+    card_title.textContent = "request code";
+    const code = document.getElementById("resetCodeInput").value.trim();
+    const pass1 = document.getElementById("newPasswordInput").value.trim();
+    const pass2 = document.getElementById("newPasswordInput2").value.trim();
+    if (!forgotEmail) {
+      alert("Please send code first");
+      return;
+    }
+    if (!code || code.length !== 6) {
+      alert("Enter a valid 6-digit code");
+      return;
+    }
+    if (!pass1 || pass1.length < 6) {
+      alert("Password must be at least 6 characters");
+      return;
+    }
+    if (pass1 !== pass2) {
+      alert("Passwords do not match");
+      return;
+    }
+    try {
+      const resp = await fetch(
+        "http://localhost:8000/api/auth/reset-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: forgotEmail,
+            verification_code: code,
+            password: pass1,
+            password_confirmation: pass2,
+          }),
+        }
+      );
+      const data = await resp.json();
+      if (data.success) {
+        alert("Password updated successfully. Please login.");
+        forgetVerifyForm.style.display = "none";
+        signIn_form.style.display = "inline";
+      } else {
+        alert(data.message || "Failed to reset password");
+      }
+    } catch (e) {
+      alert("Network error. Please try again.");
+    }
+  });
+
+  backToLogin1.addEventListener("click", function (e) {
+    e.preventDefault();
+    forgetEmailForm.style.display = "none";
+    signIn_form.style.display = "inline";
+  });
+  backToLogin2.addEventListener("click", function (e) {
+    e.preventDefault();
+    forgetVerifyForm.style.display = "none";
+    signIn_form.style.display = "inline";
   });
 
   //  sign up

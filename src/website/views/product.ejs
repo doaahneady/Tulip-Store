@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <!-- Breadcrumb -->
+    <div class="container mt-3">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">
+            Product Details
+          </li>
+        </ol>
+      </nav>
+    </div>
+
+    <!-- Product Section -->
+    <div class="container my-5">
+      <div class="row">
+        <!-- Product Image -->
+        <div class="col-md-6 product-image">
+          <div class="mb-3 position-relative">
+            <img
+              id="mainProductImage"
+              src="images/cover_phone.jpg"
+              class="img-fluid rounded w-100"
+              alt="Trendy Brown Coat"
+            />
+            <div
+              class="d-flex align-items-center mt-3"
+              style="width: 100%; position: absolute; left: 0; bottom: -110px"
+            >
+              <button id="thumbLeft" class="btn btn-light me-2" type="button">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+              <div
+                id="thumbScroll"
+                class="d-flex overflow-auto"
+                style="
+                  gap: 16px;
+                  width: 100%;
+                  max-width: 100%;
+                  scroll-behavior: smooth;
+                  direction: rtl;
+                  padding-bottom: 8px;
+                "
+              >
+                <img
+                  src="images/cover_phone.jpg"
+                  class="img-thumbnail thumb-img"
+                  style="
+                    width: 110px;
+                    height: 110px;
+                    object-fit: cover;
+                    cursor: pointer;
+                  "
+                  alt="Thumbnail 1"
+                />
+                <img
+                  src="images/tap.jpg"
+                  class="img-thumbnail thumb-img"
+                  style="
+                    width: 110px;
+                    height: 110px;
+                    object-fit: cover;
+                    cursor: pointer;
+                  "
+                  alt="Thumbnail 2"
+                />
+                <img
+                  src="images/covers.jpg"
+                  class="img-thumbnail thumb-img"
+                  style="
+                    width: 110px;
+                    height: 110px;
+                    object-fit: cover;
+                    cursor: pointer;
+                  "
+                  alt="Thumbnail 3"
+                />
+                <img
+                  src="images/cover_phone.jpg"
+                  class="img-thumbnail thumb-img"
+                  style="
+                    width: 110px;
+                    height: 110px;
+                    object-fit: cover;
+                    cursor: pointer;
+                  "
+                  alt="Thumbnail 4"
+                />
+                <img
+                  src="images/tap.jpg"
+                  class="img-thumbnail thumb-img"
+                  style="
+                    width: 110px;
+                    height: 110px;
+                    object-fit: cover;
+                    cursor: pointer;
+                  "
+                  alt="Thumbnail 5"
+                />
+                <img
+                  src="images/covers.jpg"
+                  class="img-thumbnail thumb-img"
+                  style="
+                    width: 110px;
+                    height: 110px;
+                    object-fit: cover;
+                    cursor: pointer;
+                  "
+                  alt="Thumbnail 6"
+                />
+              </div>
+              <button id="thumbRight" class="btn btn-light ms-2" type="button">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+          <div style="height: 120px"></div>
+        </div>
+
+        <!-- Product Details -->
+        <div class="col-md-6">
+          <h1 class="product-title">product name</h1>
+          <div class="category-name">category one</div>
+          <div class="price">
+            <span class="sale-price">$</span>
+          </div>
+
+          <p class="mb-4">description...</p>
+
+          <!-- attribute -->
+          <div class="mb-3 attribute">
+            <div style="margin-bottom: 8px">attributes:</div>
+            <strong>Color :</strong>
+            <div class="mt-2 d-flex gap-2 flex-wrap">
+              <label class="attr-radio-btn">
+                <input type="radio" name="color" value="brown" checked />
+              </label>
+              <label class="attr-radio-btn">
+                <input type="radio" name="color" value="gray" />
+              </label>
+              <label class="attr-radio-btn">
+                <input type="radio" name="color" value="green" />
+              </label>
+              <label class="attr-radio-btn">
+                <input type="radio" name="color" value="red" />
+              </label>
+            </div>
+          </div>
+
+          <div class="mb-3 attribute">
+            <strong>Size :</strong>
+            <div class="mt-2 d-flex gap-2 flex-wrap">
+              <label class="attr-radio-btn">
+                <input type="radio" name="size" value="S" checked />
+                S
+              </label>
+              <label class="attr-radio-btn">
+                <input type="radio" name="size" value="M" />
+                M
+              </label>
+              <label class="attr-radio-btn">
+                <input type="radio" name="size" value="L" />
+                L
+              </label>
+              <label class="attr-radio-btn">
+                <input type="radio" name="size" value="XL" />
+                XL
+              </label>
+            </div>
+          </div>
+
+          <!-- count -->
+          <div class="d-flex align-items-center mb-4">
+            <div class="quantity-selector">
+              <span class="quantity-btn">-</span>
+              <input type="text" class="quantity-input" value="1" />
+              <span class="quantity-btn">+</span>
+            </div>
+          </div>
+          <!-- button -->
+          <div class="d-flex mb-4 buttons">
+            <a href=""> <button class="btn btn-share-now">Share now</button></a>
+
+            <a href="cart"
+              ><button class="btn btn-add-to-cart">Add To Cart</button></a
+            >
+
+            <a href="checkout.html"
+              ><button class="btn btn-buy-now">Buy Now</button></a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Description Tabs -->
+    <div class="container my-5">
+      <ul class="nav nav-tabs" id="productTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link active"
+            id="description-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#description"
+            type="button"
+            role="tab"
+          >
+            Description
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="information-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#information"
+            type="button"
+            role="tab"
+          >
+            Additional Information
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="review-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#review"
+            type="button"
+            role="tab"
+          >
+            Review
+          </button>
+        </li>
+      </ul>
+
+      <div
+        class="tab-content p-3 border border-top-0 rounded-bottom"
+        id="productTabsContent"
+      >
+        <div class="tab-pane fade show active" id="description" role="tabpanel">
+          <p></p>
+          <p></p>
+        </div>
+
+        <div class="tab-pane fade" id="information" role="tabpanel">
+          <table class="spec-table">
+            <tr>
+              <td>Material</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Size:</td>
+            </tr>
+            <tr>
+              <td>Color:</td>
+            </tr>
+            <tr>
+              <td>code:</td>
+              <td></td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="tab-pane fade" id="review" role="tabpanel">
+          <p></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related Products -->
+    <div class="container">
+      <div class="header">
+        <h1>products</h1>
+      </div>
+      <!-- Responsive products grid -->
+
+      <style>
+        body {
+          font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+          background-color: #fefefe;
+          color: #333;
+        }
+
+        /* .navbar-brand {
+  font-weight: bold;
+ 
+}
+
+.breadcrumb {
+  background-color: transparent;
+  padding: 0;
+} */
+
+        .product-title {
+          font-size: 1.8rem;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+        }
+
+        .price {
+          margin-bottom: 1rem;
+        }
+
+        .original-price {
+          text-decoration: line-through;
+          color: #888;
+          margin-right: 0.5rem;
+        }
+
+        .sale-price {
+          color: var(--primary-color);
+          font-weight: bold;
+          font-size: 1.5rem;
+        }
+
+        .quantity-selector {
+          display: inline-flex;
+          align-items: center;
+          margin-right: 15px;
+        }
+
+        .quantity-btn {
+          background-color: #f0f0f0;
+          border: 1px solid #ddd;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+        }
+
+        .quantity-input {
+          width: 50px;
+          height: 30px;
+          text-align: center;
+          border: 1px solid #ddd;
+          margin: 0 5px;
+        }
+
+        a .btn {
+          color: #fff;
+          background-color: #0d464c;
+          padding: 6px 12px;
+          margin-right: 10px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.509);
+          font-size: 15px;
+          font-weight: bold;
+        }
+        a .btn:hover,
+        .btn:focus {
+          color: #0d464c;
+        }
+        .btn.me-2,
+        .btn.ms-2 {
+          height: 48px;
+          width: 48px;
+          border-radius: 50%;
+        }
+        .social-icons a {
+          color: #555;
+          margin-right: 10px;
+          font-size: 1.2rem;
+        }
+
+        .related-product {
+          margin-bottom: 20px;
+        }
+
+        .related-product img {
+          width: 100%;
+          height: 200px;
+          object-fit: cover;
+          margin-bottom: 10px;
+        }
+
+        .rating {
+          color: #ffd700;
+        }
+
+        .nav-tabs .nav-link.active {
+          color: var(--primary-color);
+          font-weight: bold;
+          border-bottom: 2px solid var(--primary-color);
+        }
+
+        .nav-tabs .nav-link {
+          color: #666;
+        }
+
+        .spec-table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        .spec-table td {
+          padding: 10px;
+          border-bottom: 1px solid #eee;
+        }
+
+        .spec-table tr:last-child td {
+          border-bottom: none;
+        }
+
+        .spec-table td:first-child {
+          font-weight: bold;
+          width: 30%;
+        }
+
+        footer {
+          background-color: var(--secondary-color);
+          padding: 30px 0;
+          margin-top: 50px;
+        }
+
+        @media (max-width: 768px) {
+          .product-image {
+            margin-bottom: 30px;
+          }
+        }
+      </style>
+    </div>
+  </body>
+</html>
