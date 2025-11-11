@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('./includes/head') %>
+  <body>
+    <%- include('./includes/navbar')%>
+    <div class="checkout-container">
+      <div class="products-container text-center">
+        <h3>Cart</h3>
+      </div>
+      <div class="steps-container text-center">
+        <h3>Checkout</h3>
+        <div style="padding: 20px 150px">
+          <div class="position-relative m-5" style="max-width: 400px">
+            <!-- الخط -->
+            <div
+              class="progress"
+              role="progressbar"
+              aria-label="Progress"
+              aria-valuenow="33"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              style="height: 3px"
+            >
+              <div class="progress-bar bg-primary" style="width: 50%"></div>
+            </div>
+
+            <!-- الأزرار -->
+            <button
+              type="button"
+              class="position-absolute top-0 start-0 translate-middle btn btn-sm btn-primary rounded-pill"
+              style="width: 2.3rem; height: 2.3rem"
+              id="step1"
+            >
+              1
+            </button>
+
+            <button
+              type="button"
+              class="position-absolute top-0 start-50 translate-middle btn btn-sm btn-secondary rounded-pill"
+              style="width: 2.3rem; height: 2.3rem"
+              id="step2"
+            >
+              2
+            </button>
+
+            <button
+              type="button"
+              class="position-absolute top-0 start-100 translate-middle btn btn-sm btn-secondary rounded-pill"
+              style="width: 2.3rem; height: 2.3rem"
+              id="step3"
+            >
+              3
+            </button>
+          </div>
+        </div>
+        <div class="step1" id="form1">
+          <h5>Delivery information</h5>
+          <div class="site-container">
+            <div class="add-site mb-3" id="add-site">
+              <button type="button" class="add-btn" id="add-btn">
+                <i class="fa-solid fa-location-dot"></i>
+                Add Location
+              </button>
+            </div>
+            <div class="new-site" id="new-site">
+              <div>
+                <div id="map"></div>
+                <div style="margin: 10px; font-family: sans-serif">
+                  <div class="col-12 mb-3">
+                    <input
+                      type="text"
+                      id="coordinates"
+                      size="50"
+                      readonly
+                      placeholder="Click on the map to locate your position"
+                    />
+                    <div class="message-error" id="message_email">
+                      Please Click on the map so we can send the request.
+                    </div>
+                  </div>
+                  <div class="col-12 mb-3">
+                    <input
+                      type="text"
+                      id="Location_accurately"
+                      size="50"
+                      placeholder="More details about your site?"
+                    />
+                    <div class="message-error" id="message_email">
+                      Give us more details so we know which floor you are on,
+                      for example?
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button class="back me-md-2" onclick="history.back()">back</button>
+            <button type="button" id="step1-complet" class="next">next</button>
+          </div>
+          <div class="d-md-flex justify-content-md-end"></div>
+        </div>
+        <div class="step2" id="form2">Payment information</div>
+        <div class="step3" id="form3">Confirm the operation</div>
+      </div>
+    </div>
+    <style>
+      @import url(https://db.onlinewebfonts.com/c/ba155473d72fb574bd945b20f4598560?family=Montserrat-Alt1+SemBd);
+      @import url(https://db.onlinewebfonts.com/c/29295d2928c6bd76a76c9e789982bc85?family=Montserrat-Alt1+Med);
+
+      @font-face {
+        font-family: "Montserrat-Alt1 SemBd";
+        src: url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.eot");
+        src: url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.eot?#iefix")
+            format("embedded-opentype"),
+          url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.woff2")
+            format("woff2"),
+          url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.woff")
+            format("woff"),
+          url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.ttf")
+            format("truetype"),
+          url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.svg#Montserrat-Alt1 SemBd")
+            format("svg");
+      }
+
+      @font-face {
+        font-family: "Montserrat-Alt";
+        src: url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.eot");
+        src: url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.eot?#iefix")
+            format("embedded-opentype"),
+          url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.woff2")
+            format("woff2"),
+          url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.woff")
+            format("woff"),
+          url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.ttf")
+            format("truetype"),
+          url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.svg#Montserrat-Alt1 Med")
+            format("svg");
+      }
+      .step1 {
+        padding: 30px;
+        border: 2px solid #f05928;
+      }
+      .checkout-container {
+        display: grid;
+        grid-template-columns: 40% 60%;
+        height: 600px;
+      }
+      .products-container {
+        color: #0d464c;
+        background-color: #ffffff;
+        padding: 30px;
+        overflow: auto;
+      }
+      .steps-container {
+        color: #f05928;
+        background-color: #0d464c;
+        padding: 30px;
+      }
+      h3 {
+        font-weight: 700;
+        font-size: 40px;
+        text-shadow: 1px 0 2px #000000;
+      }
+      .step1 {
+        /* display: none; */
+      }
+      input {
+        border-radius: 10px;
+        border: 1px solid #e5e9ef;
+        border-left: 0;
+        font-size: 18px;
+        padding: 2px 10px;
+      }
+      .add-btn {
+        color: #ffff;
+        border-radius: 10px;
+        border-color: #f05928;
+        border-style: dashed;
+        border-width: 2px;
+        background-color: transparent;
+        padding: 10px 20px;
+        font-size: 20px;
+      }
+      .add-site {
+        display: block;
+      }
+      .next {
+        background-color: #ffffff;
+        color: #f05928;
+        font-weight: bolder;
+        border: none;
+        font-size: 22px;
+        box-shadow: 2px 0 4px #000000;
+        border-radius: 5px;
+        padding: 1px 20px;
+        transition: 0.2s;
+      }
+      .back {
+        background-color: #ffffff;
+        color: #0d464c;
+        font-weight: bolder;
+        border: none;
+        font-size: 22px;
+        box-shadow: 2px 0 4px #000000;
+        border-radius: 5px;
+        padding: 1px 20px;
+        transition: 0.2s;
+      }
+      .back:hover {
+        background-color: #0d464c;
+        color: #ffffff;
+        border: none;
+        border-radius: 20px;
+        transition: 0.2s;
+      }
+      .next:hover {
+        background-color: #f05928;
+        color: #ffffff;
+        border: none;
+        border-radius: 20px;
+        transition: 0.2s;
+      }
+      .new-site {
+        display: none;
+      }
+      .step2 {
+        display: none;
+      }
+      .step3 {
+        display: none;
+      }
+      /* google */
+      #map {
+        height: 300px;
+        width: 90%;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+
+    <script>
+      const form1 = document.getElementById("form1");
+      const form2 = document.getElementById("form2");
+      const form3 = document.getElementById("form3");
+
+      const add_btn = document.getElementById("add-btn");
+      const add_site = document.getElementById("add-site");
+      const new_site = document.getElementById("new-site");
+
+      add_btn.addEventListener("click", function () {
+        add_site.style.display = "none";
+        new_site.style.display = "block";
+      });
+      //   select in map
+      let selectedMarker = null;
+      let selectSite = false;
+      async function initMap() {
+        //libary
+        const { Map } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement } = await google.maps.importLibrary(
+          "marker"
+        );
+
+        //    select As-Suwayda borders
+        const suwaydaCenter = { lat: 32.7, lng: 36.433 };
+
+        const map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 30,
+          center: suwaydaCenter,
+          mapId: "DEMO_MAP_ID",
+        });
+
+        map.addListener("click", (mapsMouseEvent) => {
+          const clickedLatLng = mapsMouseEvent.latLng;
+          const lat = clickedLatLng.lat();
+          const lng = clickedLatLng.lng();
+          const coordinatesInput = document.getElementById("coordinates");
+
+          const formattedCoordinates = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
+          coordinatesInput.value = formattedCoordinates;
+
+          if (selectedMarker) {
+            selectedMarker.map = null;
+          }
+
+          selectedMarker = new google.maps.marker.AdvancedMarkerElement({
+            position: clickedLatLng,
+            map,
+            title: "user location",
+          });
+        });
+      }
+
+      initMap();
+      //   validation before moving to step2
+      const step1_complet = document.getElementById("step1-complet");
+      step1_complet.addEventListener("click", function () {});
+    </script>
+
+    <!-- google -->
+    <script>
+      ((g) => {
+        var h,
+          a,
+          k,
+          p = "The Google Maps JavaScript API",
+          c = "google",
+          l = "importLibrary",
+          q = "__ib__",
+          m = document,
+          b = window;
+        b = b[c] || (b[c] = {});
+        var d = b.maps || (b.maps = {}),
+          r = new Set(),
+          e = new URLSearchParams(),
+          u = () =>
+            h ||
+            (h = new Promise(async (f, n) => {
+              await (a = m.createElement("script"));
+              e.set("libraries", [...r] + "");
+              for (k in g)
+                e.set(
+                  k.replace(/[A-Z]/g, (t) => "_" + t[0].toLowerCase()),
+                  g[k]
+                );
+              e.set("callback", c + ".maps." + q);
+              a.src = `https://maps.${c}apis.com/maps/api/js?` + e;
+              d[q] = f;
+              a.onerror = () => (h = n(Error(p + " could not load.")));
+              a.nonce = m.querySelector("script[nonce]")?.nonce || "";
+              m.head.append(a);
+            }));
+        d[l]
+          ? console.warn(p + " only loads once. Ignoring:", g)
+          : (d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)));
+      })({ key: "AIzaSyAfMwgHWCuYShUHZbx91zMfIM2B2OkMioo", v: "weekly" });
+    </script>
+  </body>
+</html>
