@@ -1,0 +1,4 @@
+/* Main application styles */
+@import './navbar.css';
+@import './home.css';
+@import './product.css';
