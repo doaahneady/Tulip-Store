@@ -2,9 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return response()->json([
-        'message' => 'Tulip Store API',
-        'version' => '1.0.0'
-    ]);
-});
+// SPA: serve React build (index.html) for any non-API route
+Route::get('/{any?}', function () {
+    return response()->file(public_path('index.html'));
+})->where('any', '^(?!api\/).*$');
