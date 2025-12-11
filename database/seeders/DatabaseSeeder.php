@@ -16,6 +16,11 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CountriesSeeder::class,
             CategorySeeder::class,
+            TulipStoreSeeder::class, // example products & categories for search
+            CouponSeeder::class,
+            ProductVariantSeeder::class,
+            ActivityLogSeeder::class,
+            RefundSeeder::class,
         ]);
 
         // Seed example users that match the register/login form

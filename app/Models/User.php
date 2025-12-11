@@ -17,16 +17,25 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'name',
         'username',
         'email',
         'password',
         'user_full_name',
         'mobile',
+        'phone',
+        'birth_date',
         'address',
         'language',
         'gender',
         'currency',
         'verified',
+        'google_id',
+        'is_trader',
+        'is_admin',
+        'is_it_super',
+        'is_it',
+        'role_id',
     ];
 
     /**
@@ -50,6 +59,63 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'verified' => 'boolean',
+            'is_trader' => 'boolean',
         ];
+    }
+
+    /**
+     * Get the orders for the user.
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Get the role for the user.
+     */
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    /**
+     * Get the support tickets created by the user.
+     */
+    public function supportTickets()
+    {
+        return $this->hasMany(SupportTicket::class);
+    }
+
+    /**
+     * Get the support tickets assigned to the user (CS Agent).
+     */
+    public function assignedTickets()
+    {
+        return $this->hasMany(SupportTicket::class, 'assigned_to');
+    }
+
+    /**
+     * Get the customer feedback submitted by the user.
+     */
+    public function customerFeedback()
+    {
+        return $this->hasMany(CustomerFeedback::class);
+    }
+
+    /**
+     * Check if user has a specific permission.
+     */
+    public function hasPermission($permission)
+    {
+        return $this->role && $this->role->hasPermission($permission);
+    }
+
+    /**
+     * Check if user has a specific role.
+     */
+    public function hasRole($role)
+    {
+        return $this->role && $this->role->name === $role;
     }
 }

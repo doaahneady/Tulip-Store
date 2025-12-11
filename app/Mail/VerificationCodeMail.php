@@ -19,10 +19,10 @@ class VerificationCodeMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct($name, $code)
+    public function __construct($code, $name)
     {
-        $this->name = $name;
         $this->code = $code;
+        $this->name = $name;
     }
 
     /**

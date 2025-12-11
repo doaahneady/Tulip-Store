@@ -12,6 +12,7 @@ class EmailVerification extends Model
     protected $fillable = [
         'email',
         'verification_code',
+        'token',
         'expires_at',
         'used',
     ];

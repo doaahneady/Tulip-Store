@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Order;
+use App\Models\Driver;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class OrderConfirmationController extends Controller
+{
+    public function show($orderId, $token)
+    {
+        $order = Order::with(['items.product', 'assignedDriver'])
+            ->where('id', $orderId)
+            ->where('confirmation_token', $token)
+            ->firstOrFail();
+        
+        // Check if already confirmed
+        if ($order->confirmed_at) {
+            return view('order-confirmed-already', compact('order'));
+        }
+        
+        return view('order-confirmation', compact('order'));
+    }
+    
+    public function confirm(Request $request, $orderId, $token)
+    {
+        try {
+            $request->validate([
+                'signature' => 'required|string'
+            ]);
+            
+            $order = Order::where('id', $orderId)
+                ->where('confirmation_token', $token)
+                ->firstOrFail();
+            
+            // Check if already confirmed
+            if ($order->confirmed_at) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'تم تأكيد هذا الطلب مسبقاً'
+                ]);
+            }
+            
+            // Get the assigned driver ID before updating
+            $driverId = $order->assigned_driver_id;
+            
+            // Update order status to 'delivered' using DB to bypass foreign key issues
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            
+            DB::table('orders')->where('id', $orderId)->update([
+                'confirmed_at' => now(),
+                'customer_signature' => $request->signature,
+                'status' => 'delivered',
+                'updated_at' => now()
+            ]);
+            
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            
+            // Update driver status back to 'available'
+            if ($driverId) {
+                Driver::where('id', $driverId)->update([
+                    'status' => 'available'
+                ]);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'تم تأكيد استلام الطلب بنجاح'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+}

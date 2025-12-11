@@ -1,0 +1,196 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Category;
+use App\Models\Product;
+use Illuminate\Database\Seeder;
+
+class TulipStoreSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // Create categories
+        $categories = [
+            [
+                'name' => 'الزهور الطازة',
+                'slug' => 'fresh-flowers',
+                'description' => 'مجموعة متنوعة من الزهور الطازة',
+                'image' => 'https://via.placeholder.com/300x300?text=Fresh+Flowers',
+                'display_order' => 1,
+            ],
+            [
+                'name' => 'الهدايا والمفاجآت',
+                'slug' => 'gifts',
+                'description' => 'هدايا فاخرة لأحبائك',
+                'image' => 'https://via.placeholder.com/300x300?text=Gifts',
+                'display_order' => 2,
+            ],
+            [
+                'name' => 'الشوكولاتة والحلويات',
+                'slug' => 'chocolates',
+                'description' => 'شوكولاتة وحلويات عالية الجودة',
+                'image' => 'https://via.placeholder.com/300x300?text=Chocolates',
+                'display_order' => 3,
+            ],
+            [
+                'name' => 'البالونات والديكور',
+                'slug' => 'balloons',
+                'description' => 'بالونات وديكورات احتفالية',
+                'image' => 'https://via.placeholder.com/300x300?text=Balloons',
+                'display_order' => 4,
+            ],
+        ];
+
+        foreach ($categories as $categoryData) {
+            Category::updateOrCreate(
+                ['slug' => $categoryData['slug']],
+                $categoryData
+            );
+        }
+
+        // Create products
+        $products = [
+            // Fresh Flowers
+            [
+                'name' => 'باقة الورود الحمراء الفاخرة',
+                'slug' => 'red-roses-premium',
+                'description' => 'باقة جميلة من 24 وردة حمراء طازة',
+                'details' => 'تحتوي على: 24 وردة حمراء طازة، أوراق خضراء مختارة، تغليف فاخر',
+                'category_id' => 1,
+                'price' => 299.99,
+                'discount_price' => null,
+                'stock' => 50,
+                'image' => 'https://via.placeholder.com/300x300?text=Red+Roses',
+                'rating' => 5,
+                'reviews_count' => 45,
+                'is_featured' => true,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'باقة الزهور المتعددة الألوان',
+                'slug' => 'mixed-flowers',
+                'description' => 'مزيج جميل من الزهور الملونة',
+                'details' => 'تحتوي على: ورود، ستاتس، يوكاليبتس، تغليف فاخر',
+                'category_id' => 1,
+                'price' => 199.99,
+                'discount_price' => 149.99,
+                'stock' => 60,
+                'image' => 'https://via.placeholder.com/300x300?text=Mixed+Flowers',
+                'rating' => 4,
+                'reviews_count' => 28,
+                'is_featured' => true,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'باقة الزنبق البيضاء',
+                'slug' => 'white-lilies',
+                'description' => 'باقة أنيقة من الزنبق الأبيض',
+                'category_id' => 1,
+                'price' => 249.99,
+                'stock' => 40,
+                'image' => 'https://via.placeholder.com/300x300?text=White+Lilies',
+                'rating' => 5,
+                'reviews_count' => 22,
+                'is_featured' => false,
+                'is_active' => true,
+            ],
+
+            // Gifts
+            [
+                'name' => 'صندوق الهدايا الذهبي',
+                'slug' => 'gold-gift-box',
+                'description' => 'صندوق هدايا فاخر بألوان ذهبية',
+                'category_id' => 2,
+                'price' => 149.99,
+                'stock' => 30,
+                'image' => 'https://via.placeholder.com/300x300?text=Gift+Box',
+                'rating' => 4,
+                'reviews_count' => 15,
+                'is_featured' => true,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'مجموعة الشموع العطرية',
+                'slug' => 'scented-candles',
+                'description' => 'مجموعة شموع عطرية فاخرة',
+                'category_id' => 2,
+                'price' => 99.99,
+                'discount_price' => 79.99,
+                'stock' => 50,
+                'image' => 'https://via.placeholder.com/300x300?text=Candles',
+                'rating' => 5,
+                'reviews_count' => 34,
+                'is_featured' => false,
+                'is_active' => true,
+            ],
+
+            // Chocolates
+            [
+                'name' => 'صندوق الشوكولاتة البلجيكية الفاخرة',
+                'slug' => 'belgian-chocolates',
+                'description' => 'شوكولاتة بلجيكية عالية الجودة',
+                'details' => 'تحتوي على 20 قطعة شوكولاتة بنكهات متنوعة',
+                'category_id' => 3,
+                'price' => 179.99,
+                'stock' => 40,
+                'image' => 'https://via.placeholder.com/300x300?text=Chocolates',
+                'rating' => 5,
+                'reviews_count' => 56,
+                'is_featured' => true,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'حلويات الفواكه الطازة',
+                'slug' => 'fruit-sweets',
+                'description' => 'حلويات لذيذة بنكهات الفواكه',
+                'category_id' => 3,
+                'price' => 89.99,
+                'stock' => 45,
+                'image' => 'https://via.placeholder.com/300x300?text=Fruit+Sweets',
+                'rating' => 4,
+                'reviews_count' => 18,
+                'is_featured' => false,
+                'is_active' => true,
+            ],
+
+            // Balloons
+            [
+                'name' => 'باقة البالونات الملونة',
+                'slug' => 'colorful-balloons',
+                'description' => 'بالونات ملونة للحفلات والمناسبات',
+                'category_id' => 4,
+                'price' => 69.99,
+                'stock' => 100,
+                'image' => 'https://via.placeholder.com/300x300?text=Balloons',
+                'rating' => 4,
+                'reviews_count' => 12,
+                'is_featured' => true,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'بالونات الهيليوم الفضية',
+                'slug' => 'silver-helium-balloons',
+                'description' => 'بالونات هيليوم فضية أنيقة',
+                'category_id' => 4,
+                'price' => 119.99,
+                'discount_price' => 99.99,
+                'stock' => 60,
+                'image' => 'https://via.placeholder.com/300x300?text=Silver+Balloons',
+                'rating' => 5,
+                'reviews_count' => 27,
+                'is_featured' => false,
+                'is_active' => true,
+            ],
+        ];
+
+        foreach ($products as $productData) {
+            Product::updateOrCreate(
+                ['slug' => $productData['slug']],
+                $productData
+            );
+        }
+
+        $this->command->info('Tulip Store data seeded successfully!');
+    }
+}

@@ -69,13 +69,15 @@ class AuthController extends Controller
             'verified' => false,
         ]);
 
-        // Generate verification code
+        // Generate verification code and token
         $verificationCode = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+        $token = Str::random(64);
         
-        // Store verification code (expires in 15 minutes)
+        // Store verification code with token (expires in 15 minutes)
         EmailVerification::create([
             'email' => $user->email,
             'verification_code' => $verificationCode,
+            'token' => $token,
             'expires_at' => Carbon::now()->addMinutes(15),
             'used' => false,
         ]);
@@ -191,10 +193,12 @@ class AuthController extends Controller
             ->where('used', false)
             ->update(['used' => true]);
 
-        // Store new verification code
+        // Store new verification code with token
+        $token = Str::random(64);
         EmailVerification::create([
             'email' => $user->email,
             'verification_code' => $verificationCode,
+            'token' => $token,
             'expires_at' => Carbon::now()->addMinutes(15),
             'used' => false,
         ]);

@@ -3,9 +3,10 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\CountryController;
-use App\Http\Controllers\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,14 +30,32 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-// Categories / Products / Search
+// Categories
 Route::get('/categories', [CategoryController::class, 'index']);
-Route::get('/categories/{slug}', [CategoryController::class, 'show']);
-Route::get('/categories/{slug}/filters', [CategoryController::class, 'filters']);
-Route::get('/categories/{slug}/products', [ProductController::class, 'byCategory']);
+Route::get('/categories/{id}', [CategoryController::class, 'show']);
+
+// Products
+Route::get('/products', [ProductController::class, 'index']);
+Route::get('/products/featured', [ProductController::class, 'featured']);
+// IMPORTANT: search route must come BEFORE the /products/{id} route
 Route::get('/products/search', [ProductController::class, 'search']);
-Route::get('/products/{slug}', [ProductController::class, 'show']);
+Route::get('/products/{id}', [ProductController::class, 'show']);
+Route::get('/products/category/{categoryId}', [ProductController::class, 'byCategory']);
+
+// Cart (Protected)
+Route::middleware('auth:sanctum')->prefix('cart')->group(function () {
+    Route::get('/', [CartController::class, 'index']);
+    Route::post('/add', [CartController::class, 'addItem']);
+    Route::put('/items/{itemId}', [CartController::class, 'updateItem']);
+    Route::delete('/items/{itemId}', [CartController::class, 'removeItem']);
+    Route::delete('/clear', [CartController::class, 'clear']);
+});
 
 // Countries
 Route::get('/countries', [CountryController::class, 'index']);
+
+// User Activity & Personalization
+use App\Http\Controllers\UserActivityController;
+Route::post('/activity/track', [UserActivityController::class, 'track']);
+Route::get('/activity/recommendations', [UserActivityController::class, 'getRecommendations']);
 

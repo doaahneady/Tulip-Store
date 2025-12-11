@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ابدأ التتبع - Tulip Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 40px 30px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .steps {
+            text-align: right;
+            margin-bottom: 40px;
+            background: #f7fafc;
+            padding: 30px;
+            border-radius: 20px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .step:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            margin-left: 15px;
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            color: #2d3748;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .btn-start {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(72, 187, 120, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-start:active {
+            transform: translateY(-1px);
+        }
+
+        .info-box {
+            background: #fff5f5;
+            border: 2px solid #fc8181;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .info-title {
+            color: #c53030;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .info-text {
+            color: #742a2a;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .permission-demo {
+            background: #edf2f7;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .permission-demo img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .demo-text {
+            color: #4a5568;
+            font-size: 14px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .pulse {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #48bb78;
+            border-radius: 50%;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.5;
+                transform: scale(1.1);
+            }
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .feature {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .feature-text {
+            color: #4a5568;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            .logo {
+                font-size: 60px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🚗</div>
+        <h1>مرحباً بك في نظام التتبع</h1>
+        <p class="subtitle">
+            نظام تتبع GPS للسائقين<br>
+            Tulip Store Driver Tracking
+        </p>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-text">تأكد من تشغيل بيانات الجوال</div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-text">تأكد من تشغيل GPS في هاتفك</div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-text">اضغط على زر "ابدأ التتبع" أدناه</div>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-text">اسمح بالوصول إلى موقعك</div>
+            </div>
+        </div>
+
+        <button class="btn-start" onclick="startTracking()">
+            🚀 ابدأ التتبع الآن
+        </button>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">📍</div>
+                <div class="feature-text">تتبع دقيق</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-text">تحديثات فورية</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔋</div>
+                <div class="feature-text">موفر للبطارية</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <div class="feature-text">آمن ومحمي</div>
+            </div>
+        </div>
+
+        <div class="permission-demo">
+            <div class="demo-text">⚠️ عند الضغط على "ابدأ التتبع"، سيطلب منك الهاتف السماح بالوصول للموقع</div>
+            <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                <div style="color: #2d3748; font-weight: 600; margin-bottom: 10px;">
+                    اضغط على "السماح" أو "Allow"
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <div style="padding: 8px 20px; background: #e2e8f0; border-radius: 6px; font-size: 14px;">
+                        رفض
+                    </div>
+                    <div style="padding: 8px 20px; background: #48bb78; color: white; border-radius: 6px; font-size: 14px; font-weight: 600;">
+                        ✓ السماح
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <div class="info-title">
+                ⚠️ مهم جداً
+            </div>
+            <div class="info-text">
+                • لا تغلق المتصفح أثناء التوصيل<br>
+                • أبقِ بيانات الجوال مشغلة<br>
+                • استخدم شاحن السيارة<br>
+                • تأكد من تشغيل GPS
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function startTracking() {
+            // Check if geolocation is supported
+            if (!navigator.geolocation) {
+                alert('عذراً، هاتفك لا يدعم تحديد الموقع');
+                return;
+            }
+
+            // Request location permission first
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    // Success - redirect to GPS tracking page
+                    window.location.href = '/driver-gps.html';
+                },
+                function(error) {
+                    // Error handling
+                    let message = '';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            message = '⚠️ تم رفض الإذن!\n\nالرجاء:\n1. اذهب إلى إعدادات المتصفح\n2. اسمح بالوصول للموقع\n3. أعد تحميل الصفحة';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            message = '⚠️ معلومات الموقع غير متوفرة\n\nتأكد من:\n1. تشغيل GPS\n2. الخروج للخارج أو الاقتراب من النافذة';
+                            break;
+                        case error.TIMEOUT:
+                            message = '⚠️ انتهت مهلة طلب الموقع\n\nحاول مرة أخرى';
+                            break;
+                        default:
+                            message = '⚠️ حدث خطأ في تحديد الموقع';
+                    }
+                    alert(message);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        // Check if coming back from GPS page
+        if (window.location.hash === '#back') {
+            document.querySelector('.subtitle').innerHTML = 
+                '✅ تم منح الإذن بنجاح!<br>يمكنك الآن بدء التتبع';
+            document.querySelector('.subtitle').style.color = '#48bb78';
+        }
+    </script>
+</body>
+</html>

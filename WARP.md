@@ -2,81 +2,274 @@
 
 This file provides guidance to WARP (warp.dev) when working with code in this repository.
 
-## Commands you’ll use most
+## Quick Start Commands
 
-### Backend (Laravel API in `backend/`)
+### Development Setup
+```powershell
+# Install dependencies
+composer install
+npm install
 
-- Install deps and set up env
-  ```bash
-  cd backend
-  composer install
-  # create .env and app key (first run only)
-  copy .env.example .env   # on Windows PowerShell
-  php artisan key:generate
-  ```
-- Database
-  ```bash
-  php artisan migrate --seed            # create schema + seed test data
-  php artisan migrate:fresh --seed      # rebuild from scratch (destructive)
-  ```
-- Run the API locally
-  ```bash
-  php artisan serve                     # serves on http://localhost:8000
-  ```
-- Tests
-  ```bash
-  php artisan test                      # run all tests (sqlite in-memory per phpunit.xml)
-  php artisan test --testsuite=Feature  # just Feature tests
-  php artisan test --filter ExampleTest # run a single test class
-  php artisan test --filter "Tests\\Feature\\ExampleTest::test_the_application_returns_a_successful_response"  # single test method
-  ```
-- PHP lint/format (Laravel Pint)
-  ```bash
-  vendor/bin/pint --test   # check
-  vendor/bin/pint          # fix
-  ```
+# Copy and configure environment
+Copy-Item .env.example .env
+php artisan key:generate
 
-### Frontend (Express/EJS in `src/`)
+# Setup database
+php artisan migrate
+php artisan db:seed
+```
 
-- Install deps and run the site
-  ```bash
-  npm install
-  npm start                 # serves the site on http://localhost:3000
-  ```
-- Backend API base URL used by the frontend is hardcoded as `http://localhost:8000/api` in `src/website/routes/catalog.js`. If your API port/host differs, update that constant (or introduce an env-based config).
+### Running the Application
 
-## High-level architecture
+**Option 1: Development with Hot Reload (2 terminals)**
+```powershell
+# Terminal 1 - Laravel backend (API)
+php artisan serve
+# Runs on http://localhost:8000
 
-Monorepo with two apps that run side-by-side during development:
+# Terminal 2 - Vite dev server (Frontend)
+npm run dev
+# Runs on http://localhost:5173
+```
 
-- Frontend site (Node/Express + EJS)
-  - Location: `src/website`
-  - Entrypoint: `src/index.js` → `src/website/app.js`
-  - Rendering: server-side EJS views under `src/website/views`
-  - Routing: `src/website/routes/*` (home, sign-in, contact, business, return policy, catalog)
-  - Data access: routes call the Laravel API using `axios` on the server (no shared DB). The catalog flow hits:
-    - `GET /categories` → list
-    - `GET /categories/{slug}` and `/categories/{slug}/filters`
-    - `GET /categories/{slug}/products` and `/products/search` with query/filters
+**Option 2: Production Build**
+```powershell
+npm run build
+php artisan serve
+# Access on http://localhost:8000
+```
 
-- Backend API (Laravel 10)
-  - Location: `backend/`
-  - Auth: email/password with verification codes (mail), tokens via Sanctum
-  - Primary controllers and routes (`backend/routes/api.php`):
-    - `POST /api/auth/register`, `verify-email`, `resend-verification`, `login`
-    - Protected (Sanctum): `GET /api/auth/me`, `POST /api/auth/logout`
-    - Catalog: `GET /api/categories`, `/api/categories/{slug}`, `/api/categories/{slug}/filters`, `/api/categories/{slug}/products`, `/api/products/search`, `/api/products/{slug}`
-  - Data model (Eloquent):
-    - `User` (email verification state, Sanctum tokens)
-    - `EmailVerification` and `PasswordReset` (6-digit codes, expiry, used flags)
-    - `Category` → `hasMany(Product)`; `Product` → `hasMany(ProductAttribute)` for dynamic filter facets
-  - Defaults and middleware:
-    - Rate limiting 60/min (see `backend/app/Providers/RouteServiceProvider.php`)
-    - Global CORS enabled (adjust allowlist in `backend/config/cors.php` for production)
-  - Testing configuration:
-    - `backend/phpunit.xml` boots an in-memory sqlite DB and array mailer; use `php artisan test`
+### Common Commands
 
-## Notes for Warp
+| Command | Purpose |
+|---------|---------|
+| `composer install` | Install PHP dependencies |
+| `npm install` | Install JavaScript dependencies |
+| `php artisan migrate` | Run database migrations |
+| `php artisan db:seed` | Seed database with test data |
+| `php artisan tinker` | Interactive PHP shell (for testing) |
+| `npm run dev` | Start Vite with hot reload |
+| `npm run build` | Build production frontend assets |
+| `npm run preview` | Preview production build |
+| `php artisan route:list` | View all routes |
+| `php artisan route:list --path=api` | View API routes |
 
-- There is no existing WARP.md, CLAUDE/Cursor/Copilot rules in the repo.
-- The “API proxy” mentioned in `CONNECTION_GUIDE.md` (a `src/website/routes/api.js` router) is not present; the current frontend calls the backend directly via `axios`. If you need a same-origin `/api/*` proxy on port 3000, add a small Express router to forward to `http://localhost:8000/api/*` and mount it in `app.js`.
+## Architecture Overview
+
+### Monolithic Laravel + React Structure
+
+This is a **unified monolith** combining Laravel backend and React frontend:
+
+- **Backend Framework**: Laravel 10 (PHP 8.1+)
+- **Frontend Framework**: React 18 (TypeScript)
+- **Build Tool**: Vite (with Laravel plugin)
+- **Styling**: Tailwind CSS
+- **API Communication**: Axios
+- **Database**: MySQL 8.0+
+
+### Directory Structure
+
+```
+Tulip-Store/
+├── app/                      # Laravel application code
+│   ├── Http/Controllers/     # API controllers (AuthController, ProductController, etc.)
+│   ├── Models/               # Eloquent models (User, Product, Category, etc.)
+│   ├── Mail/                 # Email classes
+│   ├── Console/              # Artisan commands
+│   └── Exceptions/           # Exception handlers
+├── bootstrap/                # Laravel bootstrap files
+├── config/                   # Laravel configuration (database, mail, cors, etc.)
+├── database/
+│   ├── migrations/           # Database schema migrations
+│   └── seeders/              # Database seeders for test data
+├── public/                   # Web server root
+│   ├── images/               # Product and category images
+│   └── build/                # Built React/CSS (generated by Vite)
+├── resources/
+│   ├── js/                   # React components and TypeScript
+│   │   ├── main.tsx          # React entry point
+│   │   ├── router.tsx        # React Router configuration
+│   │   ├── App.tsx           # Main App component
+│   │   ├── pages/            # Page components (Home, SignIn, Product, etc.)
+│   │   ├── shared/           # Shared components (Navbar, Footer, etc.)
+│   │   ├── components/       # Reusable components
+│   │   ├── layouts/          # Layout wrappers
+│   │   └── lib/              # Utilities and API client (api.ts, types.ts, i18n.ts)
+│   ├── css/                  # Stylesheets (Tailwind config compiled here)
+│   └── views/                # Blade templates (primarily app.blade.php)
+├── routes/
+│   ├── api.php               # API routes (all endpoints prefixed with /api)
+│   └── web.php               # Web routes (serves React app)
+├── storage/                  # Application storage (logs, files, cache)
+├── vendor/                   # Composer packages
+├── node_modules/             # npm packages
+├── .env.example              # Environment template
+├── composer.json             # PHP dependencies
+├── package.json              # Node.js dependencies
+├── vite.config.ts            # Vite bundler configuration
+├── tailwind.config.js        # Tailwind CSS configuration
+└── postcss.config.js         # PostCSS configuration
+```
+
+### Key Architectural Patterns
+
+#### API Layer (Laravel Backend)
+- **Location**: `app/Http/Controllers/`
+- **Endpoints**: All under `/api/*` prefix (see `routes/api.php`)
+- **Authentication**: Sanctum (token-based)
+- **CORS**: Configured for local development
+- **Key Controllers**:
+  - `AuthController` - Registration, login, logout, email verification
+  - `ProductController` - Product listing, search, filtering
+  - `CategoryController` - Category management
+  - `CountryController` - Country data
+
+#### React Frontend (SPA)
+- **Location**: `resources/js/`
+- **Routing**: React Router (configured in `router.tsx`)
+- **State**: localStorage for authentication tokens and user data
+- **Key Pages**:
+  - `pages/Home.tsx` - Product listing with categories
+  - `pages/SignIn.tsx` - Login and signup forms
+  - `pages/Product.tsx` - Product details
+  - `pages/Category.tsx` - Category filtering
+- **Shared Components**:
+  - `Navbar.tsx` - Navigation with language toggle
+  - `CartOffcanvas.tsx` - Shopping cart
+
+#### Data Models
+- **User**: Registered users with email verification
+- **Product**: Items with category, pricing, and images
+- **Category**: Product groupings
+- **Cart**: Stored in localStorage client-side
+
+#### Internationalization (i18n)
+- **File**: `resources/js/lib/i18n.ts`
+- **Languages**: English (en), Arabic (ar)
+- **Implementation**: Key-value translation object with language selection in localStorage
+- **Usage**: `t(key, language)` function; RTL support for Arabic
+
+## Key Workflows
+
+### Adding a New API Endpoint
+
+1. Create or update a controller in `app/Http/Controllers/`
+2. Define route in `routes/api.php`
+3. Call via Axios in React: `const { data } = await api.get('/endpoint')`
+
+Example:
+```php
+// routes/api.php
+Route::get('/new-endpoint', [NewController::class, 'index']);
+
+// app/Http/Controllers/NewController.php
+public function index() {
+    return response()->json(['data' => Model::all()]);
+}
+```
+
+### Database Changes
+
+1. Create migration: `php artisan make:migration create_table_name`
+2. Edit migration in `database/migrations/`
+3. Run migration: `php artisan migrate`
+4. If needed, create model: `php artisan make:model ModelName`
+5. Update API controller to use new model
+
+### Frontend Component Changes
+
+- React components in `resources/js/pages/` and `resources/js/components/`
+- Changes are hot-reloaded via Vite (`npm run dev`)
+- API calls use `resources/js/lib/api.ts` (Axios wrapper)
+- TypeScript types defined in `resources/js/lib/types.ts`
+
+### Testing API Endpoints
+
+1. Visit `http://localhost:5173/debug` for a test console (if implemented)
+2. Or use browser Dev Tools Network tab to inspect API calls
+3. Console logs show all API requests (formatted with 🔵 for requests, ✅ for success, ❌ for errors)
+
+## Development Guidelines
+
+### API Response Format
+All API endpoints return JSON:
+```json
+{
+  "success": true,
+  "data": [...],
+  "message": "Optional message"
+}
+```
+
+Or for errors:
+```json
+{
+  "success": false,
+  "error": "Error message"
+}
+```
+
+### Authentication Flow
+1. User registers/logs in via `POST /api/auth/login` or `POST /api/auth/register`
+2. Response includes `token` (bearer token) and `user` object
+3. Token stored in `localStorage` as `token`
+4. All protected requests include `Authorization: Bearer {token}` header
+5. Use `auth:sanctum` middleware in routes to protect endpoints
+
+### Frontend-Backend Communication
+- Proxy configured: `/api/*` requests automatically route to backend
+- Vite dev server runs on 5173, Laravel on 8000
+- CORS configured in `config/cors.php` for local development
+
+### Code Organization Notes
+- **Reusable logic**: Place in `resources/js/lib/`
+- **UI Components**: `resources/js/components/` or `resources/js/shared/`
+- **Pages**: `resources/js/pages/`
+- **Types**: `resources/js/lib/types.ts`
+- **API calls**: Centralize in `resources/js/lib/api.ts`
+
+## Testing
+
+### Running Tests
+```powershell
+# PHP unit tests (if configured)
+php artisan test
+```
+
+Refer to `TESTING_GUIDE.md` for comprehensive testing procedures including manual verification steps and debugging console logs.
+
+## Troubleshooting
+
+### Common Issues
+
+**Port Already in Use**
+```powershell
+php artisan serve --port=8001      # Different port
+npm run dev -- --port 5174          # Different port
+```
+
+**API Returns 404**
+- Verify route exists in `routes/api.php`
+- Run `php artisan route:list --path=api` to verify
+- Check Laravel logs: `storage/logs/laravel.log`
+
+**Database Connection Error**
+- Ensure `.env` has correct `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD`
+- Verify MySQL is running
+- Check database exists: `CREATE DATABASE tulip_store;`
+
+**React Components Not Updating**
+- Restart `npm run dev` for hot reload
+- Clear browser cache (Ctrl+Shift+Delete)
+- Check browser console for errors (F12)
+
+Comprehensive troubleshooting in `TROUBLESHOOTING.md`.
+
+## Important Notes
+
+- **Monolithic Deployment**: Both backend and frontend are served from root Laravel installation
+- **Build Required**: Run `npm run build` before production deployment
+- **Environment Files**: Never commit `.env` (use `.env.example`)
+- **Database Migrations**: Always run migrations on deployment
+- **Static Assets**: Images stored in `public/images/`
+- **API Endpoint Discovery**: Use `php artisan route:list --path=api` to see all available endpoints
