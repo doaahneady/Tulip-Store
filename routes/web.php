@@ -250,10 +250,25 @@ Route::middleware(['auth'])->prefix('it')->name('it.')->group(function () {
 // Customer Service Dashboard routes
 Route::middleware(['auth'])->prefix('cs')->name('cs.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\CS\CustomerServiceController::class, 'index'])->name('dashboard');
+    
+    // Tickets Management
+    Route::get('/tickets', [\App\Http\Controllers\CS\CustomerServiceController::class, 'tickets'])->name('tickets.index');
+    Route::get('/tickets/create', [\App\Http\Controllers\CS\CustomerServiceController::class, 'createTicket'])->name('tickets.create');
+    Route::post('/tickets', [\App\Http\Controllers\CS\CustomerServiceController::class, 'storeTicket'])->name('tickets.store');
     Route::get('/tickets/{ticket}', [\App\Http\Controllers\CS\CustomerServiceController::class, 'showTicket'])->name('tickets.show');
+    Route::get('/tickets/{ticket}/edit', [\App\Http\Controllers\CS\CustomerServiceController::class, 'editTicket'])->name('tickets.edit');
+    Route::put('/tickets/{ticket}', [\App\Http\Controllers\CS\CustomerServiceController::class, 'updateTicket'])->name('tickets.update');
     Route::post('/tickets/{ticket}/assign', [\App\Http\Controllers\CS\CustomerServiceController::class, 'assignTicket'])->name('tickets.assign');
     Route::post('/tickets/{ticket}/status', [\App\Http\Controllers\CS\CustomerServiceController::class, 'updateTicketStatus'])->name('tickets.status');
     Route::post('/tickets/{ticket}/reply', [\App\Http\Controllers\CS\CustomerServiceController::class, 'replyToTicket'])->name('tickets.reply');
+    
+    // Customer Feedback
+    Route::get('/feedback', [\App\Http\Controllers\CS\CustomerServiceController::class, 'feedback'])->name('feedback.index');
+    Route::get('/feedback/{feedback}', [\App\Http\Controllers\CS\CustomerServiceController::class, 'showFeedback'])->name('feedback.show');
+    Route::post('/feedback/{feedback}/respond', [\App\Http\Controllers\CS\CustomerServiceController::class, 'respondToFeedback'])->name('feedback.respond');
+    
+    // Reports
+    Route::get('/reports', [\App\Http\Controllers\CS\CustomerServiceController::class, 'reports'])->name('reports');
 });
 
 // Accounting Dashboard routes (Full الأمين-style system)

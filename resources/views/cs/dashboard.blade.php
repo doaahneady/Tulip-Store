@@ -638,19 +638,19 @@ tbody tr:hover {
 <div class="container">
 <!-- Quick Actions -->
 <div class="quick-actions">
-<div class="quick-action" onclick="location.href='/cs/tickets?status=open'">
+<div class="quick-action" onclick="location.href='{{ route('cs.tickets.index', ['status' => 'open']) }}'">
 <i class="fas fa-folder-open"></i>
 <span>التذاكر المفتوحة</span>
 </div>
-<div class="quick-action" onclick="location.href='/cs/tickets?priority=urgent'">
+<div class="quick-action" onclick="location.href='{{ route('cs.tickets.index', ['priority' => 'urgent']) }}'">
 <i class="fas fa-exclamation-triangle"></i>
 <span>التذاكر العاجلة</span>
 </div>
-<div class="quick-action" onclick="location.href='/cs/feedback'">
+<div class="quick-action" onclick="location.href='{{ route('cs.feedback.index') }}'">
 <i class="fas fa-comments"></i>
 <span>آراء العملاء</span>
 </div>
-<div class="quick-action" onclick="location.href='/cs/reports'">
+<div class="quick-action" onclick="location.href='{{ route('cs.reports') }}'">
 <i class="fas fa-chart-bar"></i>
 <span>التقارير</span>
 </div>
@@ -839,7 +839,7 @@ stroke-dashoffset="{{ 2 * pi() * 40 * (1 - ($avgSatisfaction / 5)) }}"/>
 </td>
 <td>{{ $ticket->created_at->diffForHumans() }}</td>
 <td>
-<button class="action-btn" onclick="location.href='/cs/tickets/{{ $ticket->id }}'">
+<button class="action-btn" onclick="location.href='{{ route('cs.tickets.show', $ticket->id) }}'">
 <i class="fas fa-eye"></i> عرض
 </button>
 </td>
@@ -1130,19 +1130,19 @@ setInterval(function() {
 
 // Quick Actions
 function createNewTicket() {
-    window.location.href = '/cs/tickets/create';
+    window.location.href = '{{ route("cs.tickets.create") }}';
 }
 
 function viewUrgentTickets() {
-    window.location.href = '/cs/tickets?priority=urgent';
+    window.location.href = '{{ route("cs.tickets.index", ["priority" => "urgent"]) }}';
 }
 
 function viewOpenTickets() {
-    window.location.href = '/cs/tickets?status=open';
+    window.location.href = '{{ route("cs.tickets.index", ["status" => "open"]) }}';
 }
 
 function viewReports() {
-    window.location.href = '/cs/reports';
+    window.location.href = '{{ route("cs.reports") }}';
 }
 
 // Keyboard shortcuts

@@ -418,4 +418,345 @@ class CustomerServiceController extends Controller
             'resolutionTime'
         ));
     }
+
+    public function tickets(Request $request)
+    {
+        $user = auth()->user();
+        
+        if (!$user->is_cs_agent) {
+            abort(403, 'Unauthorized - Customer Service Access Required');
+        }
+
+        $query = SupportTicket::with(['user', 'assignedAgent']);
+
+        // Apply filters
+        if ($request->has('status') && $request->status) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('priority') && $request->priority) {
+            $query->where('priority', $request->priority);
+        }
+
+        if ($request->has('category') && $request->category) {
+            $query->where('category', $request->category);
+        }
+
+        if ($request->has('assigned_to') && $request->assigned_to) {
+            $query->where('assigned_to', $request->assigned_to);
+        }
+
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('subject', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('ticket_number', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%")
+                               ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $tickets = $query->orderBy('created_at', 'desc')->paginate(20);
+
+        // Get filter options
+        $csAgents = User::where('is_cs_agent', true)->get();
+        $statuses = ['open', 'in_progress', 'waiting_customer', 'resolved', 'closed'];
+        $priorities = ['low', 'medium', 'high', 'urgent'];
+        $categories = ['technical', 'billing', 'general', 'complaint', 'feature_request'];
+
+        // Calculate comprehensive statistics with error handling
+        try {
+            $stats = [
+                'total' => $tickets->total(),
+                'open' => SupportTicket::where('status', 'open')->count(),
+                'in_progress' => SupportTicket::where('status', 'in_progress')->count(),
+                'waiting_customer' => SupportTicket::where('status', 'waiting_customer')->count(),
+                'resolved' => SupportTicket::where('status', 'resolved')->count(),
+                'closed' => SupportTicket::where('status', 'closed')->count(),
+                'urgent' => SupportTicket::where('priority', 'urgent')->count(),
+                'high' => SupportTicket::where('priority', 'high')->count(),
+                'medium' => SupportTicket::where('priority', 'medium')->count(),
+                'low' => SupportTicket::where('priority', 'low')->count(),
+                'active' => SupportTicket::whereIn('status', ['open', 'in_progress'])->count(),
+                'unassigned' => SupportTicket::whereNull('assigned_to')->count(),
+                'overdue' => SupportTicket::where('created_at', '<', Carbon::now()->subHours(24))
+                                        ->whereNull('first_response_at')
+                                        ->whereNotIn('status', ['resolved', 'closed'])
+                                        ->count(),
+                'today' => SupportTicket::whereDate('created_at', Carbon::today())->count(),
+                'this_week' => SupportTicket::where('created_at', '>=', Carbon::now()->startOfWeek())->count(),
+                'this_month' => SupportTicket::where('created_at', '>=', Carbon::now()->startOfMonth())->count()
+            ];
+        } catch (\Exception $e) {
+            // Fallback statistics if database queries fail
+            $stats = [
+                'total' => $tickets->total(),
+                'open' => 0,
+                'in_progress' => 0,
+                'waiting_customer' => 0,
+                'resolved' => 0,
+                'closed' => 0,
+                'urgent' => 0,
+                'high' => 0,
+                'medium' => 0,
+                'low' => 0,
+                'active' => 0,
+                'unassigned' => 0,
+                'overdue' => 0,
+                'today' => 0,
+                'this_week' => 0,
+                'this_month' => 0
+            ];
+        }
+
+        return view('cs.tickets.index', compact(
+            'tickets',
+            'csAgents',
+            'statuses',
+            'priorities',
+            'categories',
+            'stats'
+        ));
+    }
+
+    public function createTicket()
+    {
+        $user = auth()->user();
+        
+        if (!$user->is_cs_agent) {
+            abort(403, 'Unauthorized - Customer Service Access Required');
+        }
+
+        $customers = User::where('is_admin', false)
+                        ->where('is_cs_agent', false)
+                        ->orderBy('name')
+                        ->get();
+
+        $csAgents = User::where('is_cs_agent', true)->get();
+        $priorities = ['low', 'medium', 'high', 'urgent'];
+        $categories = ['technical', 'billing', 'general', 'complaint', 'feature_request'];
+
+        return view('cs.tickets.create', compact(
+            'customers',
+            'csAgents',
+            'priorities',
+            'categories'
+        ));
+    }
+
+    public function storeTicket(Request $request)
+    {
+        $user = auth()->user();
+        
+        if (!$user->is_cs_agent) {
+            abort(403, 'Unauthorized - Customer Service Access Required');
+        }
+
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'subject' => 'required|string|max:255',
+            'description' => 'required|string',
+            'category' => 'required|in:technical,billing,general,complaint,feature_request',
+            'priority' => 'required|in:low,medium,high,urgent',
+            'assigned_to' => 'nullable|exists:users,id'
+        ]);
+
+        // Generate unique ticket number
+        $ticketNumber = 'TKT-' . date('Ymd') . '-' . str_pad(SupportTicket::count() + 1, 4, '0', STR_PAD_LEFT);
+
+        $ticket = SupportTicket::create([
+            'ticket_number' => $ticketNumber,
+            'user_id' => $request->user_id,
+            'assigned_to' => $request->assigned_to,
+            'subject' => $request->subject,
+            'description' => $request->description,
+            'category' => $request->category,
+            'priority' => $request->priority,
+            'status' => $request->assigned_to ? 'in_progress' : 'open',
+        ]);
+
+        return redirect()->route('cs.tickets.show', $ticket->id)
+                        ->with('success', 'تم إنشاء التذكرة بنجاح');
+    }
+
+    public function editTicket($ticketId)
+    {
+        $user = auth()->user();
+        
+        if (!$user->is_cs_agent) {
+            abort(403, 'Unauthorized - Customer Service Access Required');
+        }
+
+        $ticket = SupportTicket::with(['user', 'assignedAgent'])->findOrFail($ticketId);
+        
+        $customers = User::where('is_admin', false)
+                        ->where('is_cs_agent', false)
+                        ->orderBy('name')
+                        ->get();
+
+        $csAgents = User::where('is_cs_agent', true)->get();
+        $priorities = ['low', 'medium', 'high', 'urgent'];
+        $categories = ['technical', 'billing', 'general', 'complaint', 'feature_request'];
+
+        return view('cs.tickets.edit', compact(
+            'ticket',
+            'customers',
+            'csAgents',
+            'priorities',
+            'categories'
+        ));
+    }
+
+    public function updateTicket(Request $request, $ticketId)
+    {
+        $user = auth()->user();
+        
+        if (!$user->is_cs_agent) {
+            abort(403, 'Unauthorized - Customer Service Access Required');
+        }
+
+        $ticket = SupportTicket::findOrFail($ticketId);
+
+        $request->validate([
+            'subject' => 'required|string|max:255',
+            'description' => 'required|string',
+            'category' => 'required|in:technical,billing,general,complaint,feature_request',
+            'priority' => 'required|in:low,medium,high,urgent',
+            'assigned_to' => 'nullable|exists:users,id',
+            'status' => 'required|in:open,in_progress,waiting_customer,resolved,closed'
+        ]);
+
+        $updateData = $request->only(['subject', 'description', 'category', 'priority', 'assigned_to', 'status']);
+
+        if ($request->status === 'resolved' && !$ticket->resolved_at) {
+            $updateData['resolved_at'] = now();
+        }
+
+        if ($request->status === 'closed' && !$ticket->closed_at) {
+            $updateData['closed_at'] = now();
+        }
+
+        $ticket->update($updateData);
+
+        return redirect()->route('cs.tickets.show', $ticket->id)
+                        ->with('success', 'تم تحديث التذكرة بنجاح');
+    }
+
+    public function feedback(Request $request)
+    {
+        $user = auth()->user();
+        
+        if (!$user->is_cs_agent) {
+            abort(403, 'Unauthorized - Customer Service Access Required');
+        }
+
+        $query = CustomerFeedback::with(['user', 'order']);
+
+        // Apply filters
+        if ($request->has('status') && $request->status) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('type') && $request->type) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->has('rating') && $request->rating) {
+            $query->where('rating', $request->rating);
+        }
+
+        $feedback = $query->orderBy('created_at', 'desc')->paginate(20);
+
+        return view('cs.feedback.index', compact('feedback'));
+    }
+
+    public function showFeedback($feedbackId)
+    {
+        $user = auth()->user();
+        
+        if (!$user->is_cs_agent) {
+            abort(403, 'Unauthorized - Customer Service Access Required');
+        }
+
+        $feedback = CustomerFeedback::with(['user', 'order', 'reviewer'])->findOrFail($feedbackId);
+
+        return view('cs.feedback.show', compact('feedback'));
+    }
+
+    public function respondToFeedback(Request $request, $feedbackId)
+    {
+        $user = auth()->user();
+        
+        if (!$user->is_cs_agent) {
+            return response()->json(['success' => false, 'message' => 'غير مصرح']);
+        }
+
+        $request->validate([
+            'response' => 'required|string'
+        ]);
+
+        $feedback = CustomerFeedback::findOrFail($feedbackId);
+        
+        $feedback->update([
+            'response' => $request->response,
+            'status' => 'responded',
+            'reviewed_by' => $user->id,
+            'reviewed_at' => now()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم إرسال الرد بنجاح'
+        ]);
+    }
+
+    public function reports()
+    {
+        $user = auth()->user();
+        
+        if (!$user->is_cs_agent) {
+            abort(403, 'Unauthorized - Customer Service Access Required');
+        }
+
+        // Generate comprehensive reports data
+        $totalTickets = SupportTicket::count();
+        $resolvedTickets = SupportTicket::whereIn('status', ['resolved', 'closed'])->count();
+        $avgSatisfaction = SupportTicket::whereNotNull('satisfaction_rating')->avg('satisfaction_rating');
+        
+        // Monthly statistics
+        $monthlyStats = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $date = Carbon::now()->subMonths($i);
+            $monthlyStats[] = [
+                'month' => $date->format('M Y'),
+                'tickets' => SupportTicket::whereYear('created_at', $date->year)
+                                        ->whereMonth('created_at', $date->month)
+                                        ->count(),
+                'resolved' => SupportTicket::whereYear('resolved_at', $date->year)
+                                         ->whereMonth('resolved_at', $date->month)
+                                         ->count()
+            ];
+        }
+
+        // Agent performance
+        $agentStats = User::where('is_cs_agent', true)
+            ->withCount([
+                'assignedTickets',
+                'assignedTickets as resolved_count' => function($query) {
+                    $query->whereIn('status', ['resolved', 'closed']);
+                }
+            ])
+            ->get();
+
+        return view('cs.reports.index', compact(
+            'totalTickets',
+            'resolvedTickets',
+            'avgSatisfaction',
+            'monthlyStats',
+            'agentStats'
+        ));
+    }
 }
