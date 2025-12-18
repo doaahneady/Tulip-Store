@@ -35,6 +35,11 @@ class User extends Authenticatable
         'is_admin',
         'is_it_super',
         'is_it',
+        'is_hr',
+        'is_cs',
+        'is_finance',
+        'is_accountant',
+        'is_driver_supervisor',
         'role_id',
     ];
 
@@ -72,11 +77,45 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the role for the user.
+     * Get the roles for the user (many-to-many).
+     */
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'user_roles')
+                    ->withPivot(['assigned_at', 'assigned_by', 'expires_at', 'is_active'])
+                    ->wherePivot('is_active', true);
+    }
+
+    /**
+     * Get the role for the user (legacy support).
      */
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+
+    /**
+     * Get the employee record for the user.
+     */
+    public function employee()
+    {
+        return $this->hasOne(Employee::class);
+    }
+
+    /**
+     * Get the driver record for the user.
+     */
+    public function driver()
+    {
+        return $this->hasOne(Driver::class);
+    }
+
+    /**
+     * Get the store owned by the user.
+     */
+    public function ownedStore()
+    {
+        return $this->hasOne(Store::class, 'owner_id');
     }
 
     /**
@@ -108,7 +147,9 @@ class User extends Authenticatable
      */
     public function hasPermission($permission)
     {
-        return $this->role && $this->role->hasPermission($permission);
+        return $this->roles->contains(function ($role) use ($permission) {
+            return $role->hasPermission($permission);
+        });
     }
 
     /**
@@ -116,6 +157,58 @@ class User extends Authenticatable
      */
     public function hasRole($role)
     {
-        return $this->role && $this->role->name === $role;
+        if (is_string($role)) {
+            return $this->roles->contains('name', $role);
+        }
+        
+        if (is_array($role)) {
+            return $this->roles->whereIn('name', $role)->isNotEmpty();
+        }
+        
+        return false;
+    }
+
+    /**
+     * Check if user has any of the specified roles.
+     */
+    public function hasAnyRole($roles)
+    {
+        if (is_string($roles)) {
+            $roles = explode(',', $roles);
+        }
+        
+        return $this->roles->whereIn('name', $roles)->isNotEmpty();
+    }
+
+    /**
+     * Assign a role to the user.
+     */
+    public function assignRole($role, $assignedBy = null)
+    {
+        if (is_string($role)) {
+            $role = Role::where('name', $role)->first();
+        }
+        
+        if ($role && !$this->hasRole($role->name)) {
+            $this->roles()->attach($role->id, [
+                'assigned_at' => now(),
+                'assigned_by' => $assignedBy,
+                'is_active' => true,
+            ]);
+        }
+    }
+
+    /**
+     * Remove a role from the user.
+     */
+    public function removeRole($role)
+    {
+        if (is_string($role)) {
+            $role = Role::where('name', $role)->first();
+        }
+        
+        if ($role) {
+            $this->roles()->detach($role->id);
+        }
     }
 }

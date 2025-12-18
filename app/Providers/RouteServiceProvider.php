@@ -35,6 +35,13 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
+
+            // Dashboard routes with auth and role-based access control
+            // Requirements: 2.1 - Role-based access control for dashboard routes
+            Route::middleware(['web', 'auth'])
+                ->prefix('dashboard')
+                ->name('dashboard.')
+                ->group(base_path('routes/dashboard.php'));
         });
     }
 }

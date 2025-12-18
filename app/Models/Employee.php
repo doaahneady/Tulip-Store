@@ -65,4 +65,12 @@ class Employee extends Model
     {
         return "{$this->first_name} {$this->last_name}";
     }
+
+    /**
+     * Get the driver record associated with this employee (if they are a driver)
+     */
+    public function driver()
+    {
+        return $this->hasOne(Driver::class, 'user_id', 'user_id');
+    }
 }

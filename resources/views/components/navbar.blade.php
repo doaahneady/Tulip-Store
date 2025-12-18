@@ -56,56 +56,42 @@
             <span>الإشعارات</span>
             <span id="notificationDropdownBadge" style="display:none;position:absolute;top:50%;left:10px;transform:translateY(-50%);width:8px;height:8px;background:#ff6b35;border-radius:50%;box-shadow:0 2px 6px rgba(255,107,53,0.4)"></span>
           </div>
-          @if(Auth::user()->is_admin ?? false)
-          <div class="dropdown-item" onclick="window.location.href='/admin/dashboard'">
-            <i class="fas fa-chart-line"></i>
-            <span>لوحة الإدارة</span>
-          </div>
+          {{-- Dashboard Access - Only show user's specific dashboard --}}
+          @php
+            $userDashboards = [];
+            if(Auth::user()->is_admin ?? false) $userDashboards[] = ['url' => '/dashboard/admin', 'icon' => 'fas fa-shield-alt', 'name' => 'لوحة الإدارة'];
+            if((Auth::user()->is_it_super ?? false) || (Auth::user()->is_it ?? false)) $userDashboards[] = ['url' => '/dashboard/it', 'icon' => 'fas fa-laptop-code', 'name' => 'لوحة تقنية المعلومات'];
+            if(Auth::user()->is_cs ?? false) $userDashboards[] = ['url' => '/dashboard/cs', 'icon' => 'fas fa-headset', 'name' => 'لوحة خدمة العملاء'];
+            if((Auth::user()->is_accountant ?? false) || (Auth::user()->is_finance ?? false)) $userDashboards[] = ['url' => '/dashboard/finance', 'icon' => 'fas fa-calculator', 'name' => 'لوحة المالية'];
+            if(Auth::user()->is_driver_supervisor ?? false) $userDashboards[] = ['url' => '/dashboard/delivery', 'icon' => 'fas fa-truck', 'name' => 'لوحة مشرف التوصيل'];
+            if(Auth::user()->is_hr ?? false) $userDashboards[] = ['url' => '/dashboard/hr', 'icon' => 'fas fa-users-cog', 'name' => 'لوحة الموارد البشرية'];
+            if(Auth::user()->is_trader ?? false) $userDashboards[] = ['url' => '/dashboard/store', 'icon' => 'fas fa-store', 'name' => 'لوحة المتجر'];
+          @endphp
+          
+          @if(count($userDashboards) == 1)
+            {{-- Single dashboard - direct access --}}
+            <div class="dropdown-item" onclick="window.location.href='{{ $userDashboards[0]['url'] }}'">
+              <i class="{{ $userDashboards[0]['icon'] }}"></i>
+              <span>{{ $userDashboards[0]['name'] }}</span>
+            </div>
+          @elseif(count($userDashboards) > 1)
+            {{-- Multiple dashboards - submenu --}}
+            <div class="dropdown-item has-submenu" id="dashboardItem">
+              <i class="fas fa-tachometer-alt"></i>
+              <span>لوحات التحكم</span>
+              <i class="fas fa-chevron-right submenu-arrow"></i>
+              
+              <!-- Dashboard Submenu -->
+              <div class="dropdown-submenu" id="dashboardSubmenu">
+                @foreach($userDashboards as $dashboard)
+                <div class="dropdown-item" onclick="window.location.href='{{ $dashboard['url'] }}'">
+                  <i class="{{ $dashboard['icon'] }}"></i>
+                  <span>{{ $dashboard['name'] }}</span>
+                </div>
+                @endforeach
+              </div>
+            </div>
           @endif
-          @if(Auth::user()->is_it_super ?? false)
-          <div class="dropdown-item" onclick="window.location.href='/it/dashboard'">
-            <i class="fas fa-laptop-code"></i>
-            <span>لوحة IT Supervisor</span>
-          </div>
-          @endif
-          @if(Auth::user()->is_it ?? false)
-          <div class="dropdown-item" onclick="window.location.href='/it/dashboard'">
-            <i class="fas fa-laptop"></i>
-            <span>لوحة IT Crew</span>
-          </div>
-          @endif
-          @if(Auth::user()->is_cs_agent ?? false)
-          <div class="dropdown-item" onclick="window.location.href='/cs/dashboard'">
-            <i class="fas fa-headset"></i>
-            <span>لوحة خدمة العملاء</span>
-          </div>
-          @endif
-          @if(Auth::user()->is_accountant ?? false)
-          <div class="dropdown-item" onclick="window.location.href='/accounting/dashboard'">
-            <i class="fas fa-calculator"></i>
-            <span>لوحة المحاسبة</span>
-          </div>
-          @endif
-          @if(Auth::user()->is_driver_supervisor ?? false)
-          <div class="dropdown-item" onclick="window.location.href='/delivery/supervisor/dashboard'">
-            <i class="fas fa-truck"></i>
-            <span>لوحة مشرف التوصيل</span>
-          </div>
-          @endif
-          @if(Auth::user()->is_hr ?? false)
-          <div class="dropdown-item" onclick="window.location.href='/hr/dashboard'">
-            <i class="fas fa-users-cog"></i>
-            <span>لوحة الموارد البشرية</span>
-          </div>
-          @endif
-          <div class="dropdown-item {{ Auth::user()->is_trader ?? false ? '' : 'disabled' }}" onclick="{{ Auth::user()->is_trader ?? false ? 'window.location.href=\'/control-panel\'' : 'return false;' }}">
-            <i class="fas fa-tachometer-alt"></i>
-            <span>لوحة التحكم</span>
-          </div>
-          <div class="dropdown-item {{ Auth::user()->is_trader ?? false ? '' : 'disabled' }}" onclick="{{ Auth::user()->is_trader ?? false ? 'window.location.href=\'/my-store\'' : 'return false;' }}">
-            <i class="fas fa-store"></i>
-            <span>متجري</span>
-          </div>
           <div class="dropdown-item logout-item" onclick="handleLogout()">
             <i class="fas fa-sign-out-alt"></i>
             <span>تسجيل خروج</span>
@@ -477,6 +463,30 @@ function changeLanguage(lang) {
         body: JSON.stringify({ language: lang })
     }).catch(err => console.log('Language preference saved locally'));
 }
+
+// Dashboard submenu functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const dashboardItem = document.getElementById('dashboardItem');
+    const dashboardSubmenu = document.getElementById('dashboardSubmenu');
+    
+    if (dashboardItem && dashboardSubmenu) {
+        dashboardItem.addEventListener('mouseenter', function() {
+            dashboardSubmenu.style.display = 'block';
+        });
+        
+        dashboardItem.addEventListener('mouseleave', function() {
+            setTimeout(() => {
+                if (!dashboardSubmenu.matches(':hover')) {
+                    dashboardSubmenu.style.display = 'none';
+                }
+            }, 100);
+        });
+        
+        dashboardSubmenu.addEventListener('mouseleave', function() {
+            dashboardSubmenu.style.display = 'none';
+        });
+    }
+});
 
 // Translate navbar
 function translateNavbar(lang) {
