@@ -16,7 +16,7 @@
 @endif
 
 <!-- SMOOTH INTRO ANIMATION - SHOW ONLY ONCE -->
-<div id="introAnimation" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; display:none; align-items:center; justify-content:center; font-family:'El Messiri',sans-serif; overflow:hidden; background:linear-gradient(135deg, #000 0%, #1a1a1a 100%);">
+<div id="introAnimation" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; display:none; align-items:center; justify-content:center; overflow:hidden; background:linear-gradient(135deg, #000 0%, #1a1a1a 100%);">
     
     <!-- Girl Logo as Background - Grows Big with Blur (Slower & Smoother) -->
     <div id="girlBackground" style="position:absolute; inset:0; background-image:url('/images/logo-girl.jpg'); background-size:cover; background-position:center; filter:blur(25px); opacity:0; transform:scale(1.2);">
@@ -36,7 +36,8 @@
         </div>
         
         <!-- Text - Types Out in White -->
-        <h1 id="animatedText" style="font-family:'El Messiri',sans-serif; font-size:6rem; font-weight:700; margin:0; line-height:1.2; color:#fff; text-shadow:0 4px 15px rgba(0,0,0,0.5); min-height:7.2rem; letter-spacing:0.02em;">
+        <h1 id="animatedText" style="font-family:'El Messiri',sans-serif; font-size:6rem; font-weight:700; margin:0; line-height:1.2; 
+        color:#fff; text-shadow:0 4px 15px rgba(0,0,0,0.5); min-height:7.2rem; letter-spacing:0.02em;">
         </h1>
     </div>
 </div>
@@ -154,8 +155,8 @@
 </script>
 
 <!-- BANNER SLIDER - REDUCED HEIGHT, SMALLER BUTTONS -->
-<section style="position:relative; height:350px; overflow:hidden; background:linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding:2rem 0;">
-    <div style="max-width:1400px; margin:0 auto; position:relative; height:100%;">
+<section style="position:relative; height:350px; overflow:hidden; background:white; padding:2rem 1.2rem;">
+    <div style="max-width:600px; margin:0 auto; position:relative; height:100%;">
         <div id="modernSlider" style="position:relative; height:100%; display:flex; align-items:center; justify-content:center;">
             <!-- Slides will be inserted here -->
         </div>
@@ -242,7 +243,7 @@
     <div style="max-width:1400px; margin:0 auto; position:relative;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
             <h2 style="font-family:'El Messiri',sans-serif; font-size:1.6rem; font-weight:800; color:#1a1a1a; margin:0;">
-                تسوق حسب الفئة
+                 تسوق حسب الفئة
             </h2>
             <a href="/store" style="color:#2a7080; font-size:1rem; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:0.5rem; transition:all 0.3s;" onmouseover="this.style.gap='0.8rem'" onmouseout="this.style.gap='0.5rem'">
                 عرض الكل <i class="fas fa-arrow-left"></i>
@@ -484,29 +485,103 @@ document.addEventListener('DOMContentLoaded', loadHomepagePackages);
 </section>
 
 <!-- MERCHANT SECTION - PHOTO ONLY BACKGROUND -->
-<section style="position:relative; height:250px; display:flex; align-items:center; justify-content:center; margin:2.5rem 1.5rem; border-radius:16px; overflow:hidden;">
-    <div style="position:absolute; inset:0; background-image:url('/images/footer.jpg'); background-size:cover; background-position:center;"></div>
+<section style="position:relative; height:230px; display:flex; align-items:center; justify-content:center;margin:2rem 1rem;  border-radius:16px; overflow:hidden;">
+    <div style="position:absolute; inset:0; background-image:url('/images/footer.jpg'); background-size:stretch
+    ; background-position:center;"></div>
     <div style="position:relative; text-align:center; padding:2rem; max-width:650px;">
         <h2 style="font-size:2rem; font-weight:700; color:#fff; margin:0 0 1rem 0; text-shadow:0 4px 15px rgba(0,0,0,0.6);">أعرض منتجاتك لدينا</h2>
         <p style="font-size:1.1rem; color:#fff; margin-bottom:1.5rem; text-shadow:0 3px 12px rgba(0,0,0,0.6);">انشئ حسابك التجاري وابدأ التجارة معنا اليوم</p>
-        <button onclick="window.location.href='/store'" style="background:#ff6b35; color:#fff; border:none; padding:1rem 3rem; font-size:1.1rem; font-weight:700; cursor:pointer; font-family:'El Messiri',sans-serif; border-radius:50px; transition:all 0.3s; box-shadow:0 8px 20px rgba(255,107,53,0.4);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(255,107,53,0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(255,107,53,0.4)'">
+        <button onclick="window.location.href='/store'" style="background:#ff6b35; color:#fff; border:none; padding:1rem 3rem; font-size:1.1rem;font-family:'El Messiri',sans-serf;
+         font-weight:700; cursor:pointer; border-radius:50px; transition:all 0.3s; box-shadow:0 8px 20px rgba(255,107,53,0.4);
+         " onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(255,107,53,0.5)'" 
+         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(255,107,53,0.4)'">
             أنشئ حسابك الآن
         </button>
     </div>
 </section>
 
 <!-- FOOTER -->
-<footer style="background:#0d1f1f; padding:4rem 3rem 2rem; position:relative;">
+<footer style="background:#0D464C; padding:1.8rem 3rem 2rem; position:relative;">
+    <style>
+        /* Responsive overrides (use !important to override inline styles) */
+        footer { padding:1.4rem 1rem 1.6rem !important; box-sizing:border-box; }
+        footer > div { max-width:1400px; margin:0 auto; padding:0 1rem; box-sizing:border-box; }
+        footer > img { /* background image subtle */ width:100%; height:100%; object-fit:cover; opacity:0.03; pointer-events:none; }
+
+        /* Grid container (first inner div) - center everything */
+        footer > div > div:first-of-type {
+            display:grid !important;
+            grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)) !important;
+            gap:2.5rem !important;
+            margin-bottom:2rem !important;
+            align-items:start;
+            justify-items:center !important; /* center columns content */
+            text-align:center !important;     /* center text inside columns */
+        }
+
+        footer h2 { margin-top:0.6rem !important; margin-bottom:0.8rem !important; font-size:1rem !important; text-align:center !important; }
+        footer p { font-size:0.95rem !important; line-height:1.6 !important; text-align:center !important; }
+
+        /* Logo & social icons */
+        footer > div > div:first-of-type > div:first-of-type img { height:110px !important; margin-bottom:0.6rem !important; display:block; margin-left:auto; margin-right:auto; }
+        footer > div > div:first-of-type > div:first-of-type .social-wrap { display:flex; gap:0.9rem; flex-wrap:wrap; margin-top:0.6rem; justify-content:center; }
+
+        /* Make links inline-block to allow centered spacing and hover padding */
+        footer > div > div:first-of-type a { display:inline-block; text-align:center; }
+
+        /* Bottom row centered */
+        footer > div > div:last-of-type {
+            padding-top:1.4rem !important;
+            border-top:1px solid rgba(255,255,255,0.1) !important;
+            display:flex !important;
+            justify-content:center !important;
+            align-items:center !important;
+            gap:1rem !important;
+            flex-wrap:wrap;
+            text-align:center;
+        }
+        footer > div > div:last-of-type p { margin:0 !important; font-size:0.9rem !important; color:rgba(255,255,255,0.55) !important; text-align:center !important; }
+
+        footer > div > div:last-of-type .payments { display:flex; gap:1.2rem; align-items:center; flex-wrap:wrap; justify-content:center; }
+
+        footer img.payment-icon { height:26px !important; opacity:0.6 !important; }
+
+        /* Responsive breakpoints */
+        @media (max-width:1200px) {
+            footer > div > div:first-of-type { grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)) !important; gap:1.4rem !important; }
+            footer > div > div:first-of-type > div:first-of-type img { height:95px !important; }
+        }
+
+        @media (max-width:800px) {
+            footer { padding:1rem 0.8rem 1rem !important; }
+            footer > div > div:first-of-type { grid-template-columns:1fr !important; gap:1rem !important; }
+            footer > div > div:first-of-type > div { text-align:center !important; }
+            footer > div > div:first-of-type > div:not(:first-of-type) a { display:inline-block !important; }
+            /* center social icons */
+            footer > div > div:first-of-type > div:first-of-type .social-wrap { justify-content:center; margin:0.6rem auto 0; }
+            /* bottom row stack */
+            footer > div > div:last-of-type { flex-direction:column !important; align-items:center !important; text-align:center !important; gap:0.8rem !important; }
+            footer > div > div:last-of-type .payments { justify-content:center; }
+        }
+
+        @media (max-width:420px) {
+            footer h2 { font-size:0.95rem !important; }
+            footer p { font-size:0.9rem !important; }
+            footer > div > div:first-of-type > div:first-of-type img { height:78px !important; }
+            footer img.payment-icon { height:22px !important; }
+        }
+    </style>
+
     <img src="/images/footer.jpg" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.03;">
     
     <div style="max-width:1400px; margin:0 auto; position:relative;">
-        <div style="display:grid; grid-template-columns:2.5fr 1fr 1fr 1fr; gap:4rem; margin-bottom:3rem;">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:2.5rem; margin-bottom:2rem; justify-items:center; text-align:center;">
             <div>
-                <img src="/images/white_orange_logo.png" style="height:75px; margin-bottom:1.8rem;">
-                <p style="color:rgba(255,255,255,0.7); line-height:1.8; font-size:1rem; margin-bottom:2rem; max-width:380px;">
+                <img src="/images/white_orange_logo.png" style="height:130px;margin-bottom:0.8rem; display:block; margin-left:auto; margin-right:auto;">
+                <p style="color:rgba(255,255,255,0.7); line-height:1.8; font-size:1rem; margin-bottom:1rem; max-width:480px; margin-left:auto; margin-right:auto;">
                     متجر فاخر للهدايا والمنتجات المميزة. نساعدك في إرسال ابتسامتك لأحبائك أينما كانوا.
                 </p>
-                <div style="display:flex; gap:0.9rem;">
+                <div class="social-wrap" style="display:flex; gap:0.9rem; justify-content:center; margin-top:0.6rem;">
                     <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
                         <i class="fab fa-instagram"></i>
                     </a>
@@ -514,7 +589,7 @@ document.addEventListener('DOMContentLoaded', loadHomepagePackages);
                         <i class="fab fa-facebook"></i>
                     </a>
                     <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
-                        <i class="fab fa-twitter"></i>
+                        <i class="fab fa-x"></i>
                     </a>
                     <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
                         <i class="fab fa-snapchat"></i>
@@ -523,8 +598,8 @@ document.addEventListener('DOMContentLoaded', loadHomepagePackages);
             </div>
             
             <div>
-                <h4 style="color:#ff6b35; font-weight:800; margin-bottom:1.8rem; font-size:1.05rem;">روابط سريعة</h4>
-                <div style="display:flex; flex-direction:column; gap:1.1rem;">
+                <h2 style="color:#ff6b35; font-weight:800; margin-bottom:1rem;margin-top:1rem ">روابط سريعة</h2>
+                <div style="display:flex; flex-direction:column; gap:1.1rem; align-items:center;">
                     <a href="/store" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">المتجر</a>
                     <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">من نحن؟</a>
                     <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">تواصل معنا</a>
@@ -532,8 +607,8 @@ document.addEventListener('DOMContentLoaded', loadHomepagePackages);
             </div>
             
             <div>
-                <h4 style="color:#ff6b35; font-weight:800; margin-bottom:1.8rem; font-size:1.05rem;">الدعم التقني</h4>
-                <div style="display:flex; flex-direction:column; gap:1.1rem;">
+                <h2 style="color:#ff6b35; font-weight:800; margin-bottom:1rem;margin-top:1rem ">الدعم التقني</h2>
+                <div style="display:flex; flex-direction:column; gap:1.1rem; align-items:center;">
                     <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">الأسئلة الشائعة</a>
                     <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الشحن</a>
                     <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الإرجاع</a>
@@ -542,23 +617,25 @@ document.addEventListener('DOMContentLoaded', loadHomepagePackages);
             </div>
             
             <div>
-                <h4 style="color:#ff6b35; font-weight:800; margin-bottom:1.8rem; font-size:1.05rem;">الأقسام الخاصة</h4>
-                <div style="display:flex; flex-direction:column; gap:1.1rem;">
+                <h2 style="color:#ff6b35; font-weight:800; margin-bottom:1rem;margin-top:1rem ">الأقسام الخاصة</h2>
+                <div style="display:flex; flex-direction:column; gap:1.1rem; align-items:center;">
                     <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">توليب مارت</a>
                     <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">توليب للتنسيق العطايا</a>
                 </div>
             </div>
         </div>
         
-        <div style="padding-top:2rem; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
+        <div style="padding-top:2rem; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:center; align-items:center; gap:1.2rem; flex-wrap:wrap;">
             <p style="color:rgba(255,255,255,0.5); margin:0; font-size:0.95rem;">© 2025 Tulip Store. جميع الحقوق محفوظة</p>
-            <div style="display:flex; gap:1.8rem; align-items:center;">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" style="height:30px; opacity:0.5;">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" style="height:30px; opacity:0.5;">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" style="height:30px; opacity:0.5;">
+            <div class="payments" style="display:flex; gap:1.2rem; align-items:center; justify-content:center;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" class="payment-icon" style="height:30px; opacity:0.5;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" class="payment-icon" style="height:30px; opacity:0.5;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" class="payment-icon" style="height:30px; opacity:0.5;">
+                <img src="https://i.ibb.co/Q32tLdZg/Syriatel-Cash.png" class="payment-icon" style="height:30px; opacity:0.5;" alt="syriatelCash">
             </div>
         </div>
     </div>
+    
 </footer>
 
 <script src="/js/home-final.js?v={{ time() }}"></script>
