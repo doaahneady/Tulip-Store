@@ -88,11 +88,10 @@ class AdminDashboardService
         ];
     }
 
-
     /**
      * Get chart data for revenue trends
      *
-     * @param string $period Period: 'week', 'month', 'year'
+     * @param  string  $period  Period: 'week', 'month', 'year'
      * @return array Chart data with labels and values
      */
     public function getRevenueChartData(string $period = 'month'): array
@@ -146,7 +145,7 @@ class AdminDashboardService
     /**
      * Get chart data for order volume
      *
-     * @param string $period Period: 'week', 'month', 'year'
+     * @param  string  $period  Period: 'week', 'month', 'year'
      * @return array Chart data with labels and values
      */
     public function getOrderChartData(string $period = 'month'): array
@@ -200,9 +199,8 @@ class AdminDashboardService
     /**
      * Search users by name, email, or phone
      *
-     * @param string $query Search query
-     * @param array $filters Additional filters
-     * @return LengthAwarePaginator
+     * @param  string  $query  Search query
+     * @param  array  $filters  Additional filters
      */
     public function searchUsers(string $query, array $filters = []): LengthAwarePaginator
     {
@@ -212,8 +210,7 @@ class AdminDashboardService
     /**
      * Get all users with pagination and filters
      *
-     * @param array $filters Filters including per_page, role, verified, etc.
-     * @return LengthAwarePaginator
+     * @param  array  $filters  Filters including per_page, role, verified, etc.
      */
     public function getUsers(array $filters = []): LengthAwarePaginator
     {
@@ -223,8 +220,7 @@ class AdminDashboardService
     /**
      * Get all orders with pagination and filters
      *
-     * @param array $filters Filters including per_page, status, search, etc.
-     * @return LengthAwarePaginator
+     * @param  array  $filters  Filters including per_page, status, search, etc.
      */
     public function getOrders(array $filters = []): LengthAwarePaginator
     {
@@ -234,8 +230,7 @@ class AdminDashboardService
     /**
      * Get all stores with pagination and filters
      *
-     * @param array $filters Filters including per_page, status, search, etc.
-     * @return LengthAwarePaginator
+     * @param  array  $filters  Filters including per_page, status, search, etc.
      */
     public function getStores(array $filters = []): LengthAwarePaginator
     {
@@ -245,8 +240,7 @@ class AdminDashboardService
     /**
      * Get recent orders
      *
-     * @param int $limit Number of orders to return
-     * @return Collection
+     * @param  int  $limit  Number of orders to return
      */
     public function getRecentOrders(int $limit = 10): Collection
     {
@@ -256,8 +250,7 @@ class AdminDashboardService
     /**
      * Get top performing stores
      *
-     * @param int $limit Number of stores to return
-     * @return Collection
+     * @param  int  $limit  Number of stores to return
      */
     public function getTopStores(int $limit = 10): Collection
     {
@@ -267,8 +260,7 @@ class AdminDashboardService
     /**
      * Get system alerts (errors and warnings from system logs)
      *
-     * @param int $limit Number of alerts to return
-     * @return Collection
+     * @param  int  $limit  Number of alerts to return
      */
     public function getSystemAlerts(int $limit = 10): Collection
     {
@@ -278,14 +270,14 @@ class AdminDashboardService
             ->get();
     }
 
-
     /**
      * Process bulk actions on users with transaction support
      * Rolls back all changes if any action fails
      *
-     * @param string $action Action to perform: 'activate', 'deactivate', 'delete', 'verify'
-     * @param array $userIds Array of user IDs to process
+     * @param  string  $action  Action to perform: 'activate', 'deactivate', 'delete', 'verify'
+     * @param  array  $userIds  Array of user IDs to process
      * @return array Result with success status and processed count
+     *
      * @throws \Exception If any action fails (triggers rollback)
      */
     public function processBulkUserAction(string $action, array $userIds): array
@@ -299,7 +291,7 @@ class AdminDashboardService
             foreach ($userIds as $userId) {
                 $user = $this->userRepository->findById($userId);
 
-                if (!$user) {
+                if (! $user) {
                     throw new \Exception("User with ID {$userId} not found");
                 }
 
@@ -355,9 +347,10 @@ class AdminDashboardService
      * Process bulk actions on orders with transaction support
      * Rolls back all changes if any action fails
      *
-     * @param string $action Action to perform: 'cancel', 'complete', 'process'
-     * @param array $orderIds Array of order IDs to process
+     * @param  string  $action  Action to perform: 'cancel', 'complete', 'process'
+     * @param  array  $orderIds  Array of order IDs to process
      * @return array Result with success status and processed count
+     *
      * @throws \Exception If any action fails (triggers rollback)
      */
     public function processBulkOrderAction(string $action, array $orderIds): array
@@ -370,7 +363,7 @@ class AdminDashboardService
             foreach ($orderIds as $orderId) {
                 $order = $this->orderRepository->findById($orderId);
 
-                if (!$order) {
+                if (! $order) {
                     throw new \Exception("Order with ID {$orderId} not found");
                 }
 
@@ -421,9 +414,10 @@ class AdminDashboardService
      * Process bulk actions on stores with transaction support
      * Rolls back all changes if any action fails
      *
-     * @param string $action Action to perform: 'approve', 'suspend', 'delete'
-     * @param array $storeIds Array of store IDs to process
+     * @param  string  $action  Action to perform: 'approve', 'suspend', 'delete'
+     * @param  array  $storeIds  Array of store IDs to process
      * @return array Result with success status and processed count
+     *
      * @throws \Exception If any action fails (triggers rollback)
      */
     public function processBulkStoreAction(string $action, array $storeIds): array
@@ -436,7 +430,7 @@ class AdminDashboardService
             foreach ($storeIds as $storeId) {
                 $store = $this->storeRepository->findById($storeId);
 
-                if (!$store) {
+                if (! $store) {
                     throw new \Exception("Store with ID {$storeId} not found");
                 }
 

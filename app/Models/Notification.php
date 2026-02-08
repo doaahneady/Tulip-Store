@@ -15,14 +15,14 @@ class Notification extends Model
         'color',
         'link',
         'is_read',
-        'read_at'
+        'read_at',
     ];
 
     protected $casts = [
         'is_read' => 'boolean',
         'read_at' => 'datetime',
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     public function user()
@@ -34,7 +34,7 @@ class Notification extends Model
     {
         $this->update([
             'is_read' => true,
-            'read_at' => now()
+            'read_at' => now(),
         ]);
     }
 }

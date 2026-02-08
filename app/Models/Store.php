@@ -5,15 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Schema;
 
 class Store extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'user_id', 'name', 'slug', 'description', 'logo', 'banner',
+        'organization_id', 'owner_id', 'user_id', 'name', 'slug', 'description', 'logo', 'banner',
         'phone', 'email', 'address', 'status', 'commission_rate',
-        'total_sales', 'total_commission', 'balance', 'is_featured'
+        'total_sales', 'total_commission', 'balance', 'is_featured',
     ];
 
     protected $casts = [
@@ -26,7 +27,9 @@ class Store extends Model
 
     public function owner()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        $fk = Schema::hasColumn('stores', 'owner_id') ? 'owner_id' : 'user_id';
+
+        return $this->belongsTo(User::class, $fk);
     }
 
     public function products()

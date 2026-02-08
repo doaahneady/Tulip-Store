@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -140,6 +140,7 @@ $daysLeft = \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($order->esti
 <td>
 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
 <button class="btn-details" onclick="showOrderDetails({{ $order->id }})"><i class="fas fa-eye"></i> التفاصيل</button>
+<a class="btn-details" style="background:#6f42c1;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem;" href="{{ route('order.invoice.download', $order->id) }}"><i class="fas fa-file-pdf"></i> تحميل الفاتورة</a>
 @if($order->status === 'delivered' && $order->customer_signature)
 <button class="btn-details" style="background:#28a745;" onclick="showDeliveryReceipt({{ $order->id }})"><i class="fas fa-file-signature"></i> الفاتورة</button>
 @endif

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            if (!Schema::hasColumn('orders', 'estimated_delivery')) {
+            if (! Schema::hasColumn('orders', 'estimated_delivery')) {
                 $table->timestamp('estimated_delivery')->nullable()->after('payment_status');
             }
         });

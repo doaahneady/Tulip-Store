@@ -24,10 +24,10 @@ class UserRepository implements UserRepositoryInterface
         $builder = $this->model->newQuery()
             ->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
-                  ->orWhere('email', 'like', "%{$query}%")
-                  ->orWhere('phone', 'like', "%{$query}%")
-                  ->orWhere('mobile', 'like', "%{$query}%")
-                  ->orWhere('user_full_name', 'like', "%{$query}%");
+                    ->orWhere('email', 'like', "%{$query}%")
+                    ->orWhere('phone', 'like', "%{$query}%")
+                    ->orWhere('mobile', 'like', "%{$query}%")
+                    ->orWhere('user_full_name', 'like', "%{$query}%");
             });
 
         return $this->applyFilters($builder, $filters)
@@ -37,7 +37,7 @@ class UserRepository implements UserRepositoryInterface
     public function getByRole(string $role): Collection
     {
         $roleField = $this->getRoleField($role);
-        
+
         if ($roleField === null) {
             return collect();
         }
@@ -76,26 +76,26 @@ class UserRepository implements UserRepositoryInterface
 
     protected function applyFilters($query, array $filters)
     {
-        if (!empty($filters['role'])) {
+        if (! empty($filters['role'])) {
             $roleField = $this->getRoleField($filters['role']);
             if ($roleField !== null) {
                 $query->where($roleField, true);
             }
         }
 
-        if (!empty($filters['verified'])) {
+        if (! empty($filters['verified'])) {
             $query->where('verified', $filters['verified'] === 'true' || $filters['verified'] === true);
         }
 
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->where('created_at', '>=', $filters['date_from']);
         }
 
-        if (!empty($filters['date_to'])) {
+        if (! empty($filters['date_to'])) {
             $query->where('created_at', '<=', $filters['date_to']);
         }
 
-        if (!empty($filters['sort_by'])) {
+        if (! empty($filters['sort_by'])) {
             $direction = $filters['sort_direction'] ?? 'asc';
             $query->orderBy($filters['sort_by'], $direction);
         } else {

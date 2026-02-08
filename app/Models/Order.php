@@ -9,8 +9,51 @@ class Order extends Model
 {
     use HasFactory;
 
+    protected static function booted(): void
+    {
+        static::creating(function (Order $order) {
+            if (! $order->customer_id && $order->user_id) {
+                $order->customer_id = $order->user_id;
+            }
+            if (! $order->user_id && $order->customer_id) {
+                $order->user_id = $order->customer_id;
+            }
+
+            if ($order->total_amount === null && $order->total !== null) {
+                $order->total_amount = $order->total;
+            }
+            if ($order->total === null && $order->total_amount !== null) {
+                $order->total = $order->total_amount;
+            }
+
+            if ($order->subtotal === null) {
+                $order->subtotal = $order->total_amount ?? $order->total ?? 0;
+            }
+
+            if ($order->shipping_address === null) {
+                $order->shipping_address = [];
+            }
+        });
+
+        static::saving(function (Order $order) {
+            if ($order->total_amount === null && $order->total !== null) {
+                $order->total_amount = $order->total;
+            }
+            if ($order->total === null && $order->total_amount !== null) {
+                $order->total = $order->total_amount;
+            }
+            if (! $order->customer_id && $order->user_id) {
+                $order->customer_id = $order->user_id;
+            }
+            if (! $order->user_id && $order->customer_id) {
+                $order->user_id = $order->customer_id;
+            }
+        });
+    }
+
     protected $fillable = [
         'user_id',
+        'customer_id',
         'store_id',
         'order_number',
         'recipient_name',
@@ -21,13 +64,20 @@ class Order extends Model
         'longitude',
         'delivery_method',
         'payment_method',
+        'payment_reference',
         'status',
         'payment_status',
         'payment_receipt',
         'subtotal',
+        'tax_amount',
+        'shipping_cost',
         'delivery_cost',
         'service_fee',
         'total',
+        'discount_amount',
+        'total_amount',
+        'shipping_address',
+        'billing_address',
         'estimated_delivery',
         'assigned_driver_id',
         'assigned_at',
@@ -36,24 +86,36 @@ class Order extends Model
         'confirmed_at',
         'customer_signature',
         'signed_at',
-        'delivery_notes'
+        'delivery_notes',
+        'tracking_number',
     ];
 
     protected $casts = [
         'latitude' => 'decimal:7',
         'longitude' => 'decimal:7',
         'subtotal' => 'decimal:2',
+        'tax_amount' => 'decimal:2',
+        'shipping_cost' => 'decimal:2',
         'delivery_cost' => 'decimal:2',
         'service_fee' => 'decimal:2',
         'total' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'total_amount' => 'decimal:2',
+        'shipping_address' => 'array',
+        'billing_address' => 'array',
         'estimated_delivery' => 'datetime',
         'assigned_at' => 'datetime',
-        'confirmed_at' => 'datetime'
+        'confirmed_at' => 'datetime',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(User::class, 'customer_id');
     }
 
     public function store()
@@ -65,14 +127,24 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
-    
+
     public function assignedDriver()
     {
         return $this->belongsTo(Driver::class, 'assigned_driver_id');
     }
-    
+
     public function assignedBy()
     {
         return $this->belongsTo(User::class, 'assigned_by');
+    }
+
+    public function deliveryAssignment()
+    {
+        return $this->hasOne(DeliveryAssignment::class, 'order_id');
+    }
+
+    public function deliveryAssignments()
+    {
+        return $this->hasMany(DeliveryAssignment::class, 'order_id');
     }
 }

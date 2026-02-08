@@ -4,13 +4,13 @@ namespace Tests\Property;
 
 use App\Models\User;
 use App\Repositories\Eloquent\UserRepository;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 /**
  * Property-Based Tests for Pagination
- * 
+ *
  * These tests verify the correctness properties of pagination
  * by running multiple iterations with randomly generated test data.
  */
@@ -26,9 +26,9 @@ class PaginationPropertyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create users table if it doesn't exist
-        if (!Schema::hasTable('users')) {
+        if (! Schema::hasTable('users')) {
             Schema::create('users', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -49,8 +49,8 @@ class PaginationPropertyTest extends TestCase
                 $table->timestamps();
             });
         }
-        
-        $this->userRepository = new UserRepository(new User());
+
+        $this->userRepository = new UserRepository(new User);
     }
 
     protected function tearDown(): void
@@ -59,7 +59,7 @@ class PaginationPropertyTest extends TestCase
         if (Schema::hasTable('users')) {
             \DB::table('users')->truncate();
         }
-        
+
         parent::tearDown();
     }
 
@@ -70,20 +70,20 @@ class PaginationPropertyTest extends TestCase
     {
         $users = [];
         $timestamp = now();
-        
+
         for ($i = 0; $i < $count; $i++) {
             $users[] = [
-                'name' => 'Test User ' . $i,
-                'email' => 'testuser' . $i . '_' . uniqid() . '@example.com',
+                'name' => 'Test User '.$i,
+                'email' => 'testuser'.$i.'_'.uniqid().'@example.com',
                 'password' => 'hashed_password',
-                'phone' => '123456789' . $i,
+                'phone' => '123456789'.$i,
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ];
         }
-        
+
         // Batch insert for efficiency
-        if (!empty($users)) {
+        if (! empty($users)) {
             foreach (array_chunk($users, 100) as $chunk) {
                 \DB::table('users')->insert($chunk);
             }
@@ -109,10 +109,10 @@ class PaginationPropertyTest extends TestCase
     /**
      * **Feature: dashboard-system-rebuild, Property 7: Pagination Bounds**
      * **Validates: Requirements 4.1**
-     * 
-     * *For any* dataset and *for any* valid page size (10, 25, 50, 100), 
+     *
+     * *For any* dataset and *for any* valid page size (10, 25, 50, 100),
      * the returned page SHALL contain at most `pageSize` items.
-     * 
+     *
      * @test
      */
     public function property_pagination_bounds_respects_page_size(): void
@@ -121,33 +121,33 @@ class PaginationPropertyTest extends TestCase
         for ($i = 0; $i < 100; $i++) {
             // Clean up from previous iteration
             \DB::table('users')->truncate();
-            
+
             // Generate random dataset size
             $datasetSize = $this->getRandomDatasetSize();
-            
+
             // Generate random users
             $this->generateRandomUsers($datasetSize);
-            
+
             // Pick a random valid page size
             $pageSize = $this->getRandomValidPageSize();
-            
+
             // Reset page
             request()->merge(['page' => 1]);
-            
+
             // Get paginated results
             $result = $this->userRepository->getAll(['per_page' => $pageSize]);
-            
+
             // Property: The number of items on the current page should be at most pageSize
             $itemsOnPage = $result->count();
-            
+
             $this->assertLessThanOrEqual(
                 $pageSize,
                 $itemsOnPage,
-                "Iteration $i: Page should contain at most $pageSize items, but got $itemsOnPage " .
+                "Iteration $i: Page should contain at most $pageSize items, but got $itemsOnPage ".
                 "(dataset size: $datasetSize, page size: $pageSize)"
             );
-            
-            // Additional property: If dataset has more items than page size, 
+
+            // Additional property: If dataset has more items than page size,
             // the page should contain exactly pageSize items (for first page)
             if ($datasetSize > $pageSize) {
                 $this->assertEquals(
@@ -156,7 +156,7 @@ class PaginationPropertyTest extends TestCase
                     "Iteration $i: First page should contain exactly $pageSize items when dataset ($datasetSize) > page size"
                 );
             }
-            
+
             // Additional property: If dataset has fewer items than page size,
             // the page should contain all items
             if ($datasetSize <= $pageSize && $datasetSize > 0) {
@@ -166,7 +166,7 @@ class PaginationPropertyTest extends TestCase
                     "Iteration $i: Page should contain all $datasetSize items when dataset <= page size ($pageSize)"
                 );
             }
-            
+
             // Property: Total count should match dataset size
             $this->assertEquals(
                 $datasetSize,
@@ -178,39 +178,39 @@ class PaginationPropertyTest extends TestCase
 
     /**
      * Additional test: Verify all valid page sizes work correctly
-     * 
+     *
      * @test
      */
     public function property_all_valid_page_sizes_work(): void
     {
         // Clean up
         \DB::table('users')->truncate();
-        
+
         // Create a fixed dataset larger than the largest page size
         $datasetSize = 150;
         $this->generateRandomUsers($datasetSize);
-        
+
         // Test each valid page size
         foreach ($this->validPageSizes as $pageSize) {
             // Reset page
             request()->merge(['page' => 1]);
-            
+
             $result = $this->userRepository->getAll(['per_page' => $pageSize]);
-            
+
             // Property: First page should have exactly pageSize items
             $this->assertEquals(
                 $pageSize,
                 $result->count(),
                 "Page size $pageSize: First page should have exactly $pageSize items"
             );
-            
+
             // Property: Total should match dataset size
             $this->assertEquals(
                 $datasetSize,
                 $result->total(),
                 "Page size $pageSize: Total should match dataset size"
             );
-            
+
             // Property: Last page should be calculated correctly
             $expectedLastPage = (int) ceil($datasetSize / $pageSize);
             $this->assertEquals(

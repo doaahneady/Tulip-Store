@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Staff Redirect</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .test-link { display: block; margin: 10px 0; padding: 10px; background: #f0f0f0; text-decoration: none; color: #333; }
+        .test-link:hover { background: #e0e0e0; }
+    </style>
+</head>
+<body>
+    <h1>Test Staff Route Redirect</h1>
+    <p>Click the links below to test the staff route redirect:</p>
+    
+    <a href="/staff" class="test-link">
+        🔗 /staff (should redirect to employee login)
+    </a>
+    
+    <a href="/employee/login" class="test-link">
+        🔗 /employee/login (direct employee login)
+    </a>
+    
+    <a href="/" class="test-link">
+        🔗 / (home page)
+    </a>
+    
+    <script>
+        // Log any redirects
+        console.log('Current URL:', window.location.href);
+        console.log('Referrer:', document.referrer);
+        
+        // Test the staff route with fetch
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/staff', { redirect: 'manual' })
+                .then(response => {
+                    console.log('Staff route response:', {
+                        status: response.status,
+                        redirected: response.redirected,
+                        url: response.url,
+                        headers: Object.fromEntries(response.headers.entries())
+                    });
+                })
+                .catch(error => {
+                    console.error('Error testing staff route:', error);
+                });
+        });
+    </script>
+</body>
+</html>

@@ -13,7 +13,7 @@ class PerformanceReview extends Model
         'employee_id', 'reviewer_id', 'review_period', 'review_date',
         'performance_score', 'attendance_score', 'quality_score',
         'teamwork_score', 'overall_rating', 'strengths',
-        'areas_for_improvement', 'goals', 'comments'
+        'areas_for_improvement', 'goals', 'comments',
     ];
 
     protected $casts = [

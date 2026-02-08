@@ -47,7 +47,7 @@ class Shift extends Model
             $totalMinutes = $end->diffInMinutes($start);
             $breakMinutes = $this->break_duration * 60;
             $workedMinutes = $totalMinutes - $breakMinutes;
-            
+
             $this->hours_worked = round($workedMinutes / 60, 2);
             $this->overtime_hours = max(0, $this->hours_worked - 8);
             $this->save();

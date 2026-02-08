@@ -13,7 +13,7 @@ class Attendance extends Model
 
     protected $fillable = [
         'employee_id', 'date', 'check_in', 'check_out',
-        'work_hours', 'overtime_hours', 'status', 'notes'
+        'work_hours', 'overtime_hours', 'status', 'notes',
     ];
 
     protected $casts = [

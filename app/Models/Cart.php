@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Cart extends Model
 {
@@ -25,6 +25,6 @@ class Cart extends Model
 
     public function getTotalAttribute()
     {
-        return $this->items->sum(fn($item) => $item->price * $item->quantity);
+        return $this->items->sum(fn ($item) => $item->total_price ?? ((float) $item->price * (int) $item->quantity));
     }
 }

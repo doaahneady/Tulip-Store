@@ -2,12 +2,6 @@
 
 namespace App\Exceptions\Dashboard;
 
-use Exception;
+use RuntimeException;
 
-class ImmutableRecordException extends DashboardException
-{
-    public function __construct(string $message = 'This record cannot be modified')
-    {
-        parent::__construct($message);
-    }
-}
+class ImmutableRecordException extends RuntimeException {}

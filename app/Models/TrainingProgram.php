@@ -11,7 +11,7 @@ class TrainingProgram extends Model
 
     protected $fillable = [
         'title', 'description', 'trainer', 'start_date', 'end_date',
-        'duration_hours', 'location', 'cost', 'max_participants', 'status'
+        'duration_hours', 'location', 'cost', 'max_participants', 'status',
     ];
 
     protected $casts = [

@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Finance Dashboard Service
- * 
+ *
  * Provides financial KPIs, transaction management, and payout approval workflow.
- * 
+ *
  * @see Requirements 13.1, 13.2, 13.3, 13.5
  */
 class FinanceDashboardService
@@ -32,8 +32,9 @@ class FinanceDashboardService
 
     /**
      * Get financial KPI metrics
-     * 
+     *
      * @return array Array containing daily_revenue, monthly_revenue, pending_payouts, profit_margin
+     *
      * @see Requirements 13.1
      */
     public function getKPIMetrics(): array
@@ -56,7 +57,6 @@ class FinanceDashboardService
         );
         $dailyGrowth = $this->metricsService->calculateGrowthPercentage($dailyRevenue, $yesterdayRevenue);
 
-
         // Monthly revenue
         $monthlyRevenue = $this->orderRepository->getTotalRevenue($currentMonthStart, $currentMonthEnd);
         $previousMonthRevenue = $this->orderRepository->getTotalRevenue($previousMonthStart, $previousMonthEnd);
@@ -69,9 +69,17 @@ class FinanceDashboardService
         // Calculate profit margin (revenue - expenses - payouts)
         $totalExpenses = $this->transactionRepository->getTotalByType('expense', $currentMonthStart, $currentMonthEnd);
         $totalPayouts = $this->transactionRepository->getTotalByType('payout', $currentMonthStart, $currentMonthEnd);
-        $profitMargin = $monthlyRevenue > 0 
-            ? (($monthlyRevenue - $totalExpenses - $totalPayouts) / $monthlyRevenue) * 100 
+        $profitMargin = $monthlyRevenue > 0
+            ? (($monthlyRevenue - $totalExpenses - $totalPayouts) / $monthlyRevenue) * 100
             : 0;
+
+        $vipUserIds = User::where('tags', 'like', '%VIP%')->pluck('id');
+        $vipRevenue = FinancialTransaction::whereIn('user_id', $vipUserIds)
+            ->where('type', 'order_payment')
+            ->where('status', 'completed')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('amount');
 
         return [
             'daily_revenue' => [
@@ -85,6 +93,10 @@ class FinanceDashboardService
                 'formatted' => $this->metricsService->formatCurrency($monthlyRevenue),
                 'previous' => $previousMonthRevenue,
                 'growth' => $this->metricsService->formatPercentage($monthlyGrowth),
+            ],
+            'vip_revenue' => [
+                'value' => $vipRevenue,
+                'formatted' => $this->metricsService->formatCurrency($vipRevenue),
             ],
             'pending_payouts' => [
                 'value' => $pendingPayouts,
@@ -104,9 +116,9 @@ class FinanceDashboardService
 
     /**
      * Get transactions with filters
-     * 
-     * @param array $filters Filters including type, status, date_from, date_to, search, per_page
-     * @return LengthAwarePaginator
+     *
+     * @param  array  $filters  Filters including type, status, date_from, date_to, search, per_page
+     *
      * @see Requirements 13.2
      */
     public function getTransactions(array $filters = []): LengthAwarePaginator
@@ -116,10 +128,10 @@ class FinanceDashboardService
 
     /**
      * Get transactions by type
-     * 
-     * @param string $type Transaction type: income, expense, payout, refund
-     * @param array $filters Additional filters
-     * @return LengthAwarePaginator
+     *
+     * @param  string  $type  Transaction type: income, expense, payout, refund
+     * @param  array  $filters  Additional filters
+     *
      * @see Requirements 13.2
      */
     public function getTransactionsByType(string $type, array $filters = []): LengthAwarePaginator
@@ -129,8 +141,7 @@ class FinanceDashboardService
 
     /**
      * Get pending payouts
-     * 
-     * @return Collection
+     *
      * @see Requirements 13.5
      */
     public function getPendingPayouts(): Collection
@@ -143,35 +154,35 @@ class FinanceDashboardService
 
     /**
      * Get all payouts with pagination
-     * 
-     * @param array $filters Filters including status, store_id, per_page
-     * @return LengthAwarePaginator
+     *
+     * @param  array  $filters  Filters including status, store_id, per_page
+     *
      * @see Requirements 13.5
      */
     public function getPayouts(array $filters = []): LengthAwarePaginator
     {
         $query = Payout::with(['store', 'store.owner', 'processor']);
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['store_id'])) {
+        if (! empty($filters['store_id'])) {
             $query->where('store_id', $filters['store_id']);
         }
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->whereHas('store', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%");
             });
         }
 
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->where('created_at', '>=', $filters['date_from']);
         }
 
-        if (!empty($filters['date_to'])) {
+        if (! empty($filters['date_to'])) {
             $query->where('created_at', '<=', $filters['date_to']);
         }
 
@@ -184,21 +195,21 @@ class FinanceDashboardService
         return $query->paginate($perPage);
     }
 
-
     /**
      * Approve a payout
      * Creates an immutable audit record
-     * 
-     * @param int $payoutId The payout ID
-     * @param User $approver The user approving the payout
+     *
+     * @param  int  $payoutId  The payout ID
+     * @param  User  $approver  The user approving the payout
      * @return Payout|null The approved payout or null if not found
+     *
      * @see Requirements 13.3
      */
     public function approvePayout(int $payoutId, User $approver): ?Payout
     {
         $payout = Payout::find($payoutId);
 
-        if (!$payout || $payout->status !== 'pending') {
+        if (! $payout || $payout->status !== 'pending') {
             return null;
         }
 
@@ -218,8 +229,8 @@ class FinanceDashboardService
                 'type' => 'payout',
                 'amount' => $payout->amount,
                 'status' => 'approved',
-                'reference' => 'PAYOUT-' . $payout->id,
-                'description' => 'Payout to store: ' . ($payout->store->name ?? 'Unknown'),
+                'reference' => 'PAYOUT-'.$payout->id,
+                'description' => 'Payout to store: '.($payout->store->name ?? 'Unknown'),
                 'approved_by' => $approver->id,
                 'approved_at' => now(),
                 'is_immutable' => true,
@@ -251,17 +262,17 @@ class FinanceDashboardService
 
     /**
      * Reject a payout
-     * 
-     * @param int $payoutId The payout ID
-     * @param User $rejector The user rejecting the payout
-     * @param string|null $reason Rejection reason
+     *
+     * @param  int  $payoutId  The payout ID
+     * @param  User  $rejector  The user rejecting the payout
+     * @param  string|null  $reason  Rejection reason
      * @return Payout|null The rejected payout or null if not found
      */
     public function rejectPayout(int $payoutId, User $rejector, ?string $reason = null): ?Payout
     {
         $payout = Payout::find($payoutId);
 
-        if (!$payout || $payout->status !== 'pending') {
+        if (! $payout || $payout->status !== 'pending') {
             return null;
         }
 
@@ -290,8 +301,8 @@ class FinanceDashboardService
 
     /**
      * Get revenue chart data
-     * 
-     * @param string $period Period: 'week', 'month', 'year'
+     *
+     * @param  string  $period  Period: 'week', 'month', 'year'
      * @return array Chart data with labels and values
      */
     public function getRevenueChartData(string $period = 'month'): array
@@ -342,11 +353,10 @@ class FinanceDashboardService
         ];
     }
 
-
     /**
      * Get expenses chart data
-     * 
-     * @param string $period Period: 'week', 'month', 'year'
+     *
+     * @param  string  $period  Period: 'week', 'month', 'year'
      * @return array Chart data with labels and values
      */
     public function getExpensesChartData(string $period = 'month'): array
@@ -402,9 +412,9 @@ class FinanceDashboardService
 
     /**
      * Get store settlements (pending and completed payouts to store owners)
-     * 
-     * @param array $filters Filters including status, per_page
-     * @return LengthAwarePaginator
+     *
+     * @param  array  $filters  Filters including status, per_page
+     *
      * @see Requirements 13.5
      */
     public function getStoreSettlements(array $filters = []): LengthAwarePaginator
@@ -414,9 +424,10 @@ class FinanceDashboardService
 
     /**
      * Generate balance sheet data
-     * 
-     * @param Carbon $asOfDate The date for the balance sheet
+     *
+     * @param  Carbon  $asOfDate  The date for the balance sheet
      * @return array Balance sheet data
+     *
      * @see Requirements 13.4
      */
     public function generateBalanceSheet(Carbon $asOfDate): array
@@ -456,10 +467,11 @@ class FinanceDashboardService
 
     /**
      * Generate income statement data
-     * 
-     * @param Carbon $startDate Start date
-     * @param Carbon $endDate End date
+     *
+     * @param  Carbon  $startDate  Start date
+     * @param  Carbon  $endDate  End date
      * @return array Income statement data
+     *
      * @see Requirements 13.4
      */
     public function generateIncomeStatement(Carbon $startDate, Carbon $endDate): array
@@ -495,10 +507,11 @@ class FinanceDashboardService
 
     /**
      * Generate cash flow report
-     * 
-     * @param Carbon $startDate Start date
-     * @param Carbon $endDate End date
+     *
+     * @param  Carbon  $startDate  Start date
+     * @param  Carbon  $endDate  End date
      * @return array Cash flow data
+     *
      * @see Requirements 13.4
      */
     public function generateCashFlowReport(Carbon $startDate, Carbon $endDate): array
@@ -535,9 +548,8 @@ class FinanceDashboardService
 
     /**
      * Get recent transactions
-     * 
-     * @param int $limit Number of transactions to return
-     * @return Collection
+     *
+     * @param  int  $limit  Number of transactions to return
      */
     public function getRecentTransactions(int $limit = 10): Collection
     {
@@ -549,9 +561,9 @@ class FinanceDashboardService
 
     /**
      * Get transaction summary by type
-     * 
-     * @param Carbon $startDate Start date
-     * @param Carbon $endDate End date
+     *
+     * @param  Carbon  $startDate  Start date
+     * @param  Carbon  $endDate  End date
      * @return array Summary by transaction type
      */
     public function getTransactionSummary(Carbon $startDate, Carbon $endDate): array

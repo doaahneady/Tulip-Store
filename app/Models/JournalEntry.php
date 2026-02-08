@@ -22,25 +22,33 @@ class JournalEntry extends Model
         'reversed_entry_id',
         'notes',
         'reference_type',
-        'reference_id'
+        'reference_id',
     ];
 
     protected $casts = [
         'entry_date' => 'date',
         'posted_at' => 'datetime',
-        'approved_at' => 'datetime'
+        'approved_at' => 'datetime',
     ];
 
     const STATUS_DRAFT = 'draft';
+
     const STATUS_POSTED = 'posted';
+
     const STATUS_APPROVED = 'approved';
+
     const STATUS_REVERSED = 'reversed';
 
     const TYPE_GENERAL = 'general';
+
     const TYPE_SALES = 'sales';
+
     const TYPE_PURCHASE = 'purchase';
+
     const TYPE_PAYMENT = 'payment';
+
     const TYPE_RECEIPT = 'receipt';
+
     const TYPE_ADJUSTMENT = 'adjustment';
 
     public function lines()
@@ -82,7 +90,8 @@ class JournalEntry extends Model
     {
         $lastEntry = self::orderBy('id', 'desc')->first();
         $nextNumber = $lastEntry ? intval(substr($lastEntry->entry_number, 3)) + 1 : 1;
-        return 'JE-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+
+        return 'JE-'.str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
     }
 
     public static function getEntryTypes()
@@ -93,7 +102,7 @@ class JournalEntry extends Model
             self::TYPE_PURCHASE => 'قيد مشتريات',
             self::TYPE_PAYMENT => 'قيد دفع',
             self::TYPE_RECEIPT => 'قيد قبض',
-            self::TYPE_ADJUSTMENT => 'قيد تسوية'
+            self::TYPE_ADJUSTMENT => 'قيد تسوية',
         ];
     }
 }

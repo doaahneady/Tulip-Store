@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Form Request for bulk user actions
- * 
+ *
  * @see Requirements 7.5, 15.2
  */
 class BulkUserActionRequest extends FormRequest

@@ -5,8 +5,8 @@ namespace App\Services\Dashboard;
 use App\Models\User;
 use App\Services\Dashboard\Contracts\ExportServiceInterface;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Collection;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExportService implements ExportServiceInterface
@@ -23,10 +23,9 @@ class ExportService implements ExportServiceInterface
     /**
      * Export data to CSV format with streaming response
      *
-     * @param Collection $data The data to export
-     * @param array $columns Column definitions ['key' => 'Header Label']
-     * @param string $filename The filename for the download
-     * @return StreamedResponse
+     * @param  Collection  $data  The data to export
+     * @param  array  $columns  Column definitions ['key' => 'Header Label']
+     * @param  string  $filename  The filename for the download
      */
     public function exportToCSV(Collection $data, array $columns, string $filename): StreamedResponse
     {
@@ -43,13 +42,13 @@ class ExportService implements ExportServiceInterface
 
         $callback = function () use ($data, $columns) {
             $handle = fopen('php://output', 'w');
-            
+
             // Add BOM for UTF-8 Excel compatibility
             fwrite($handle, "\xEF\xBB\xBF");
-            
+
             // Write header row
             fputcsv($handle, array_values($columns));
-            
+
             // Write data rows
             foreach ($data as $row) {
                 $rowData = [];
@@ -59,22 +58,51 @@ class ExportService implements ExportServiceInterface
                 }
                 fputcsv($handle, $rowData);
             }
-            
+
             fclose($handle);
         };
 
         return new StreamedResponse($callback, 200, $headers);
     }
 
+    public function exportToXLS(Collection $data, array $columns, string $filename): Response
+    {
+        $this->auditService->logExport('xls_export', $data->count());
+
+        $html = '<html><head><meta charset="UTF-8"></head><body><table border="1"><thead><tr>';
+        foreach (array_values($columns) as $label) {
+            $html .= '<th>'.e((string) $label).'</th>';
+        }
+        $html .= '</tr></thead><tbody>';
+
+        foreach ($data as $row) {
+            $html .= '<tr>';
+            foreach (array_keys($columns) as $key) {
+                $value = $this->getNestedValue($row, $key);
+                $cell = $this->formatCsvValue($value);
+                $html .= '<td>'.e($cell).'</td>';
+            }
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody></table></body></html>';
+
+        return response($html, 200, [
+            'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ]);
+    }
 
     /**
      * Export data to PDF format using DomPDF
      *
-     * @param Collection $data The data to export
-     * @param array $columns Column definitions ['key' => 'Header Label']
-     * @param string $template The blade template to use for PDF
-     * @param array $metadata Additional metadata (title, subtitle, etc.)
-     * @return Response
+     * @param  Collection  $data  The data to export
+     * @param  array  $columns  Column definitions ['key' => 'Header Label']
+     * @param  string  $template  The blade template to use for PDF
+     * @param  array  $metadata  Additional metadata (title, subtitle, etc.)
      */
     public function exportToPDF(Collection $data, array $columns, string $template, array $metadata = []): Response
     {
@@ -95,11 +123,11 @@ class ExportService implements ExportServiceInterface
         ];
 
         $pdf = Pdf::loadView($template, $viewData);
-        
+
         // Set paper size and orientation
         $pdf->setPaper('a4', 'landscape');
-        
-        $filename = $metadata['filename'] ?? 'export_' . now()->format('Y-m-d_His') . '.pdf';
+
+        $filename = $metadata['filename'] ?? 'export_'.now()->format('Y-m-d_His').'.pdf';
 
         return $pdf->download($filename);
     }
@@ -107,25 +135,24 @@ class ExportService implements ExportServiceInterface
     /**
      * Queue a large export for async processing (datasets > 1000 rows)
      *
-     * @param Collection $data The data to export
-     * @param array $columns Column definitions
-     * @param string $format Export format ('csv' or 'pdf')
-     * @param User $user The user requesting the export
-     * @return void
+     * @param  Collection  $data  The data to export
+     * @param  array  $columns  Column definitions
+     * @param  string  $format  Export format ('csv' or 'pdf')
+     * @param  User  $user  The user requesting the export
      */
     public function queueLargeExport(Collection $data, array $columns, string $format, User $user): void
     {
         // Log the queued export action
-        $this->auditService->logExport('queued_' . $format . '_export', $data->count());
+        $this->auditService->logExport('queued_'.$format.'_export', $data->count());
 
         // For now, we'll dispatch a job to handle the export
         // In a real implementation, this would dispatch to a queue
         dispatch(function () use ($data, $columns, $format, $user) {
-            $filename = 'export_' . now()->format('Y-m-d_His') . '.' . $format;
-            $path = storage_path('app/exports/' . $user->id . '/' . $filename);
-            
+            $filename = 'export_'.now()->format('Y-m-d_His').'.'.$format;
+            $path = storage_path('app/exports/'.$user->id.'/'.$filename);
+
             // Ensure directory exists
-            if (!is_dir(dirname($path))) {
+            if (! is_dir(dirname($path))) {
                 mkdir(dirname($path), 0755, true);
             }
 
@@ -143,7 +170,7 @@ class ExportService implements ExportServiceInterface
     /**
      * Check if a dataset should be queued for async export
      *
-     * @param Collection $data The data to check
+     * @param  Collection  $data  The data to check
      * @return bool True if dataset exceeds threshold
      */
     public function shouldQueueExport(Collection $data): bool
@@ -153,8 +180,6 @@ class ExportService implements ExportServiceInterface
 
     /**
      * Get the export threshold (number of rows)
-     *
-     * @return int
      */
     public function getExportThreshold(): int
     {
@@ -163,9 +188,6 @@ class ExportService implements ExportServiceInterface
 
     /**
      * Set the export threshold (useful for testing)
-     *
-     * @param int $threshold
-     * @return void
      */
     public function setExportThreshold(int $threshold): void
     {
@@ -175,21 +197,20 @@ class ExportService implements ExportServiceInterface
     /**
      * Get nested value from array or object using dot notation
      *
-     * @param mixed $item The item to extract value from
-     * @param string $key The key (supports dot notation)
-     * @return mixed
+     * @param  mixed  $item  The item to extract value from
+     * @param  string  $key  The key (supports dot notation)
      */
     protected function getNestedValue(mixed $item, string $key): mixed
     {
         if (is_array($item)) {
             return data_get($item, $key);
         }
-        
+
         if (is_object($item)) {
             // Handle dot notation for objects
             $keys = explode('.', $key);
             $value = $item;
-            
+
             foreach ($keys as $k) {
                 if (is_object($value) && isset($value->{$k})) {
                     $value = $value->{$k};
@@ -199,58 +220,56 @@ class ExportService implements ExportServiceInterface
                     return null;
                 }
             }
-            
+
             return $value;
         }
-        
+
         return null;
     }
 
     /**
      * Format a value for CSV output
      *
-     * @param mixed $value The value to format
-     * @return string
+     * @param  mixed  $value  The value to format
      */
     protected function formatCsvValue(mixed $value): string
     {
         if (is_null($value)) {
             return '';
         }
-        
+
         if (is_bool($value)) {
             return $value ? 'Yes' : 'No';
         }
-        
+
         if (is_array($value)) {
             return json_encode($value);
         }
-        
+
         if ($value instanceof \DateTimeInterface) {
             return $value->format('Y-m-d H:i:s');
         }
-        
+
         return (string) $value;
     }
 
     /**
      * Generate a CSV file and save to disk
      *
-     * @param Collection $data The data to export
-     * @param array $columns Column definitions
-     * @param string $path File path to save
-     * @return void
+     * @param  Collection  $data  The data to export
+     * @param  array  $columns  Column definitions
+     * @param  string  $path  File path to save
      */
     protected function generateCsvFile(Collection $data, array $columns, string $path): void
     {
         $handle = fopen($path, 'w');
-        
+
         // Add BOM for UTF-8 Excel compatibility
         fwrite($handle, "\xEF\xBB\xBF");
-        
+
         // Write header row
         fputcsv($handle, array_values($columns));
-        
+
         // Write data rows
         foreach ($data as $row) {
             $rowData = [];
@@ -260,17 +279,16 @@ class ExportService implements ExportServiceInterface
             }
             fputcsv($handle, $rowData);
         }
-        
+
         fclose($handle);
     }
 
     /**
      * Generate a PDF file and save to disk
      *
-     * @param Collection $data The data to export
-     * @param array $columns Column definitions
-     * @param string $path File path to save
-     * @return void
+     * @param  Collection  $data  The data to export
+     * @param  array  $columns  Column definitions
+     * @param  string  $path  File path to save
      */
     protected function generatePdfFile(Collection $data, array $columns, string $path): void
     {
@@ -293,12 +311,11 @@ class ExportService implements ExportServiceInterface
      * Export data with role-based filtering applied
      * This ensures exported data matches what the user can see in the dashboard
      *
-     * @param Collection $data The pre-filtered data (already filtered by role)
-     * @param array $columns Column definitions
-     * @param string $format Export format ('csv' or 'pdf')
-     * @param string $filename The filename for the download
-     * @param User $user The user requesting the export
-     * @return StreamedResponse|Response
+     * @param  Collection  $data  The pre-filtered data (already filtered by role)
+     * @param  array  $columns  Column definitions
+     * @param  string  $format  Export format ('csv' or 'pdf')
+     * @param  string  $filename  The filename for the download
+     * @param  User  $user  The user requesting the export
      */
     public function exportWithRoleFilter(
         Collection $data,
@@ -307,18 +324,29 @@ class ExportService implements ExportServiceInterface
         string $filename,
         User $user
     ): StreamedResponse|Response {
-        // The data passed in should already be filtered by the calling code
-        // based on the user's role. This method just performs the export
-        // and logs it appropriately.
-        
         if ($format === 'csv') {
             return $this->exportToCSV($data, $columns, $filename);
         }
-        
+
         return $this->exportToPDF($data, $columns, 'dashboard.exports.pdf-template', [
             'filename' => $filename,
             'title' => 'Export Report',
             'user' => $user->name,
         ]);
+    }
+
+    public function saveExportToStorage(Collection $data, array $columns, string $format, string $path): void
+    {
+        if (! is_dir(dirname($path))) {
+            mkdir(dirname($path), 0755, true);
+        }
+
+        if ($format === 'csv') {
+            $this->generateCsvFile($data, $columns, $path);
+
+            return;
+        }
+
+        $this->generatePdfFile($data, $columns, $path);
     }
 }

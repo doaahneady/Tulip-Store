@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Form Request for calculating payroll
- * 
+ *
  * @see Requirements 10.4, 15.2
  */
 class CalculatePayrollRequest extends FormRequest

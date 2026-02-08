@@ -4,7 +4,7 @@ echo "Testing Dashboard Views...\n\n";
 
 $views = [
     'Super Admin' => 'resources/views/dashboards/super-admin/index.blade.php',
-    'Finance' => 'resources/views/dashboards/finance/index.blade.php', 
+    'Finance' => 'resources/views/dashboards/finance/index.blade.php',
     'HR' => 'resources/views/dashboards/hr/index.blade.php',
     'IT' => 'resources/views/dashboards/it/index.blade.php',
     'Supervisor' => 'resources/views/dashboards/supervisor/index.blade.php',
@@ -16,14 +16,14 @@ foreach ($views as $name => $path) {
         echo "✓ {$name} Dashboard View EXISTS\n";
     } else {
         echo "✗ {$name} Dashboard View MISSING - Creating...\n";
-        
+
         // Create the directory if it doesn't exist
         $dir = dirname($path);
-        if (!is_dir($dir)) {
+        if (! is_dir($dir)) {
             mkdir($dir, 0755, true);
             echo "  Created directory: {$dir}\n";
         }
-        
+
         // Create a basic view file
         $viewContent = "@extends('dashboards.layouts.app', ['title' => '{$name} Dashboard'])
 
@@ -46,7 +46,7 @@ foreach ($views as $name => $path) {
     </div>
 </div>
 @endsection";
-        
+
         file_put_contents($path, $viewContent);
         echo "  Created view file: {$path}\n";
     }

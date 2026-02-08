@@ -9,9 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('financial_transactions', function (Blueprint $table) {
-            $table->foreignId('approved_by')->nullable()->constrained('users')->onDelete('set null');
-            $table->timestamp('approved_at')->nullable();
-            $table->boolean('is_immutable')->default(false);
+            if (! Schema::hasColumn('financial_transactions', 'approved_by')) {
+                $table->foreignId('approved_by')->nullable()->constrained('users')->onDelete('set null');
+            }
+            if (! Schema::hasColumn('financial_transactions', 'approved_at')) {
+                $table->timestamp('approved_at')->nullable();
+            }
+            if (! Schema::hasColumn('financial_transactions', 'is_immutable')) {
+                $table->boolean('is_immutable')->default(false);
+            }
         });
     }
 

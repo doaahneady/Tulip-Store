@@ -39,6 +39,6 @@ class DeliveryRoute extends Model
     public function assignments()
     {
         return $this->hasMany(DeliveryAssignment::class, 'driver_id', 'driver_id')
-                    ->whereDate('assigned_at', $this->route_date);
+            ->whereDate('assigned_at', $this->route_date);
     }
 }

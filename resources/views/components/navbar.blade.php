@@ -18,12 +18,16 @@
       @auth
       <div class="nav-icon-item user-logged-in" id="userMenu">
         <span class="user-name-pill" style="position:relative">
-          {{ Auth::user()->name }}
+          {{ is_array(data_get(Auth::user(),'name')) ? json_encode(data_get(Auth::user(),'name')) : data_get(Auth::user(),'name') }}
           <span id="notificationBadge" style="display:none;position:absolute;top:-5px;right:-5px;width:10px;height:10px;background:#ff6b35;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 8px rgba(255,107,53,0.4)"></span>
         </span>
         
         <!-- User Dropdown -->
         <div class="user-dropdown" id="userDropdown">
+          <div class="dropdown-item" onclick="window.location.href='/profile'">
+            <i class="fas fa-user-circle"></i>
+            <span>الملف الشخصي</span>
+          </div>
           <div class="dropdown-item" onclick="window.location.href='/settings'">
             <i class="fas fa-cog"></i>
             <span>الإعدادات</span>
@@ -47,51 +51,7 @@
               </div>
             </div>
           </div>
-          <div class="dropdown-item" onclick="window.location.href='/my-orders'">
-            <i class="fas fa-shopping-bag"></i>
-            <span>طلباتي</span>
-          </div>
-          <div class="dropdown-item" onclick="window.location.href='/notifications'" style="position:relative">
-            <i class="fas fa-bell"></i>
-            <span>الإشعارات</span>
-            <span id="notificationDropdownBadge" style="display:none;position:absolute;top:50%;left:10px;transform:translateY(-50%);width:8px;height:8px;background:#ff6b35;border-radius:50%;box-shadow:0 2px 6px rgba(255,107,53,0.4)"></span>
-          </div>
-          {{-- Dashboard Access - Only show user's specific dashboard --}}
-          @php
-            $userDashboards = [];
-            if(Auth::user()->is_admin ?? false) $userDashboards[] = ['url' => '/dashboard/admin', 'icon' => 'fas fa-shield-alt', 'name' => 'لوحة الإدارة'];
-            if((Auth::user()->is_it_super ?? false) || (Auth::user()->is_it ?? false)) $userDashboards[] = ['url' => '/dashboard/it', 'icon' => 'fas fa-laptop-code', 'name' => 'لوحة تقنية المعلومات'];
-            if(Auth::user()->is_cs ?? false) $userDashboards[] = ['url' => '/dashboard/cs', 'icon' => 'fas fa-headset', 'name' => 'لوحة خدمة العملاء'];
-            if((Auth::user()->is_accountant ?? false) || (Auth::user()->is_finance ?? false)) $userDashboards[] = ['url' => '/dashboard/finance', 'icon' => 'fas fa-calculator', 'name' => 'لوحة المالية'];
-            if(Auth::user()->is_driver_supervisor ?? false) $userDashboards[] = ['url' => '/dashboard/delivery', 'icon' => 'fas fa-truck', 'name' => 'لوحة مشرف التوصيل'];
-            if(Auth::user()->is_hr ?? false) $userDashboards[] = ['url' => '/dashboard/hr', 'icon' => 'fas fa-users-cog', 'name' => 'لوحة الموارد البشرية'];
-            if(Auth::user()->is_trader ?? false) $userDashboards[] = ['url' => '/dashboard/store', 'icon' => 'fas fa-store', 'name' => 'لوحة المتجر'];
-          @endphp
-          
-          @if(count($userDashboards) == 1)
-            {{-- Single dashboard - direct access --}}
-            <div class="dropdown-item" onclick="window.location.href='{{ $userDashboards[0]['url'] }}'">
-              <i class="{{ $userDashboards[0]['icon'] }}"></i>
-              <span>{{ $userDashboards[0]['name'] }}</span>
-            </div>
-          @elseif(count($userDashboards) > 1)
-            {{-- Multiple dashboards - submenu --}}
-            <div class="dropdown-item has-submenu" id="dashboardItem">
-              <i class="fas fa-tachometer-alt"></i>
-              <span>لوحات التحكم</span>
-              <i class="fas fa-chevron-right submenu-arrow"></i>
-              
-              <!-- Dashboard Submenu -->
-              <div class="dropdown-submenu" id="dashboardSubmenu">
-                @foreach($userDashboards as $dashboard)
-                <div class="dropdown-item" onclick="window.location.href='{{ $dashboard['url'] }}'">
-                  <i class="{{ $dashboard['icon'] }}"></i>
-                  <span>{{ $dashboard['name'] }}</span>
-                </div>
-                @endforeach
-              </div>
-            </div>
-          @endif
+
           <div class="dropdown-item logout-item" onclick="handleLogout()">
             <i class="fas fa-sign-out-alt"></i>
             <span>تسجيل خروج</span>
@@ -120,11 +80,20 @@
       </div>
 
       <!-- Gift Icon -->
-      <div class="nav-icon-item">
+      <div class="nav-icon-item" onclick="window.location.href='/gifts'">
         <i class="fas fa-gift icon-gift"></i>
         <span class="icon-label gift-label">
           <i class="fas fa-gift"></i>
-          <span>تنسيق هدايا</span>
+          <span>هدايا توليب</span>
+        </span>
+      </div>
+
+      <!-- Tulip Mart Icon (Main Store) -->
+      <div class="nav-icon-item" onclick="window.location.href='/mart'">
+        <i class="fas fa-store icon-store"></i>
+        <span class="icon-label store-label">
+          <i class="fas fa-store"></i>
+          <span>توليب مارت</span>
         </span>
       </div>
 
@@ -493,7 +462,8 @@ function translateNavbar(lang) {
     const translations = {
         ar: {
             search: 'ابحث عن المنتج الذي تريده',
-            gifts: 'تنسيق هدايا',
+            gifts: 'هدايا توليب',
+            store: 'توليب مارت',
             cart: 'سلة التسوق',
             login: 'تسجيل الدخول',
             settings: 'الإعدادات',
@@ -507,7 +477,8 @@ function translateNavbar(lang) {
         },
         en: {
             search: 'Search for the product you want',
-            gifts: 'Gift Arrangements',
+            gifts: 'Tulip Gifts',
+            store: 'Tulip Mart',
             cart: 'Shopping Cart',
             login: 'Login',
             settings: 'Settings',
@@ -540,6 +511,19 @@ function translateNavbar(lang) {
     // Update language item text specifically
     const langItem = document.querySelector('.dropdown-item.has-submenu > span');
     if (langItem) langItem.textContent = t.language;
+    
+    // Update icon labels
+    const giftLabel = document.querySelector('.gift-label > span:last-child');
+    if (giftLabel) giftLabel.textContent = t.gifts;
+    
+    const storeLabel = document.querySelector('.store-label > span:last-child');
+    if (storeLabel) storeLabel.textContent = t.store;
+    
+    const cartLabel = document.querySelector('.cart-label > span:last-child');
+    if (cartLabel) cartLabel.textContent = t.cart;
+    
+    const loginLabel = document.querySelector('.user-label > span:last-child');
+    if (loginLabel) loginLabel.textContent = t.login;
 }
 @endauth
 
@@ -685,6 +669,23 @@ async function loadNavbarCartCount() {
 
 // Load cart count when page loads
 window.addEventListener('DOMContentLoaded', loadNavbarCartCount);
+</script>
+
+<script>
+@auth
+window.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/wishlist')
+        .then(r => r.json())
+        .then(d => {
+            const countElement = document.getElementById('favoritesCount');
+            if (countElement) {
+                const c = d.count || (Array.isArray(d.items) ? d.items.length : 0) || 0;
+                countElement.textContent = c > 99 ? '+99' : c;
+            }
+        })
+        .catch(() => {});
+});
+@endauth
 </script>
 
 

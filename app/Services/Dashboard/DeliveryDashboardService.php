@@ -4,7 +4,6 @@ namespace App\Services\Dashboard;
 
 use App\Models\DeliveryAssignment;
 use App\Models\Driver;
-use App\Models\DriverLocation;
 use App\Models\Order;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -13,9 +12,9 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Delivery Dashboard Service
- * 
+ *
  * Provides driver location tracking, delivery assignment, and performance metrics.
- * 
+ *
  * @see Requirements 11.1, 11.3, 11.4
  */
 class DeliveryDashboardService
@@ -27,31 +26,32 @@ class DeliveryDashboardService
 
     /**
      * Get Delivery KPI metrics
-     * 
+     *
      * @return array Array containing active_drivers, pending_deliveries, completed_today, avg_delivery_time
+     *
      * @see Requirements 11.1
      */
     public function getKPIMetrics(): array
     {
         $today = Carbon::today();
-        
+
         // Active drivers (available or busy)
-        $activeDrivers = Driver::where('is_active', true)
-            ->whereIn('status', ['available', 'busy'])
+        $activeDrivers = Driver::where('status', 'active')
+            ->whereIn('availability', ['available', 'busy'])
             ->count();
-        
-        $totalDrivers = Driver::where('is_active', true)->count();
-        
+
+        $totalDrivers = Driver::where('status', 'active')->count();
+
         // Pending deliveries (orders ready for dispatch)
         $pendingDeliveries = Order::whereIn('status', ['processing', 'ready'])
             ->whereNull('assigned_driver_id')
             ->count();
-        
+
         // Completed deliveries today
         $completedToday = DeliveryAssignment::whereDate('delivered_at', $today)
             ->where('status', 'delivered')
             ->count();
-        
+
         // Average delivery time today (in minutes)
         $avgDeliveryTime = DeliveryAssignment::whereDate('delivered_at', $today)
             ->where('status', 'delivered')
@@ -59,7 +59,7 @@ class DeliveryDashboardService
             ->whereNotNull('delivered_at')
             ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, assigned_at, delivered_at)) as avg_time')
             ->value('avg_time');
-        
+
         // In-transit deliveries
         $inTransit = DeliveryAssignment::whereIn('status', ['assigned', 'picked_up', 'in_transit'])
             ->count();
@@ -68,8 +68,8 @@ class DeliveryDashboardService
             'active_drivers' => [
                 'value' => $activeDrivers,
                 'total' => $totalDrivers,
-                'percentage' => $totalDrivers > 0 
-                    ? round(($activeDrivers / $totalDrivers) * 100, 1) 
+                'percentage' => $totalDrivers > 0
+                    ? round(($activeDrivers / $totalDrivers) * 100, 1)
                     : 0,
             ],
             'pending_deliveries' => [
@@ -90,24 +90,28 @@ class DeliveryDashboardService
 
     /**
      * Get all drivers with their current status and location
-     * 
-     * @param array $filters Filters including status, search, per_page
-     * @return LengthAwarePaginator
+     *
+     * @param  array  $filters  Filters including status, search, per_page
+     *
      * @see Requirements 11.1
      */
     public function getDrivers(array $filters = []): LengthAwarePaginator
     {
         $query = Driver::query();
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
         if (isset($filters['is_active'])) {
-            $query->where('is_active', $filters['is_active']);
+            if (\Illuminate\Support\Facades\Schema::hasColumn('drivers', 'is_active')) {
+                $query->where('is_active', $filters['is_active']);
+            } else {
+                $query->where('status', $filters['is_active'] ? 'active' : 'inactive');
+            }
         }
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -128,14 +132,16 @@ class DeliveryDashboardService
 
     /**
      * Get active drivers with their current locations for map display
-     * 
-     * @return Collection
+     *
      * @see Requirements 11.1
      */
     public function getActiveDriverLocations(): Collection
     {
-        return Driver::where('is_active', true)
-            ->whereIn('status', ['available', 'busy'])
+        $query = Driver::query();
+        if (\Illuminate\Support\Facades\Schema::hasColumn('drivers', 'is_active')) {
+            $query->where('is_active', true);
+        }
+        $query->whereIn('availability', ['available', 'busy'])
             ->whereNotNull('current_latitude')
             ->whereNotNull('current_longitude')
             ->select([
@@ -155,9 +161,6 @@ class DeliveryDashboardService
 
     /**
      * Get driver by ID with full details
-     * 
-     * @param int $driverId
-     * @return Driver|null
      */
     public function getDriver(int $driverId): ?Driver
     {
@@ -169,25 +172,19 @@ class DeliveryDashboardService
 
     /**
      * Update driver location
-     * 
-     * @param int $driverId
-     * @param float $latitude
-     * @param float $longitude
-     * @param float|null $speed
-     * @param float|null $accuracy
-     * @return Driver|null
+     *
      * @see Requirements 11.1
      */
     public function updateDriverLocation(
-        int $driverId, 
-        float $latitude, 
-        float $longitude, 
-        ?float $speed = null, 
+        int $driverId,
+        float $latitude,
+        float $longitude,
+        ?float $speed = null,
         ?float $accuracy = null
     ): ?Driver {
         $driver = Driver::find($driverId);
 
-        if (!$driver) {
+        if (! $driver) {
             return null;
         }
 
@@ -198,11 +195,6 @@ class DeliveryDashboardService
 
     /**
      * Get driver location history
-     * 
-     * @param int $driverId
-     * @param Carbon|null $from
-     * @param Carbon|null $to
-     * @return Collection
      */
     public function getDriverLocationHistory(int $driverId, ?Carbon $from = null, ?Carbon $to = null): Collection
     {
@@ -221,9 +213,7 @@ class DeliveryDashboardService
 
     /**
      * Get pending deliveries (orders ready for dispatch)
-     * 
-     * @param array $filters
-     * @return LengthAwarePaginator
+     *
      * @see Requirements 11.2
      */
     public function getPendingDeliveries(array $filters = []): LengthAwarePaginator
@@ -232,7 +222,7 @@ class DeliveryDashboardService
             ->whereNull('assigned_driver_id')
             ->with(['user:id,name,phone', 'items']);
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('order_number', 'like', "%{$search}%")
@@ -252,32 +242,30 @@ class DeliveryDashboardService
 
     /**
      * Get delivery assignments with filters
-     * 
-     * @param array $filters
-     * @return LengthAwarePaginator
+     *
      * @see Requirements 11.2
      */
     public function getAssignments(array $filters = []): LengthAwarePaginator
     {
         $query = DeliveryAssignment::with(['driver:id,name,phone,status', 'order:id,order_number,recipient_name,phone,address_note,total']);
 
-        if (!empty($filters['driver_id'])) {
+        if (! empty($filters['driver_id'])) {
             $query->where('driver_id', $filters['driver_id']);
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->where('assigned_at', '>=', $filters['date_from']);
         }
 
-        if (!empty($filters['date_to'])) {
+        if (! empty($filters['date_to'])) {
             $query->where('assigned_at', '<=', $filters['date_to']);
         }
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->whereHas('order', function ($q) use ($search) {
                 $q->where('order_number', 'like', "%{$search}%")
@@ -296,11 +284,9 @@ class DeliveryDashboardService
 
     /**
      * Assign a driver to an order
-     * 
-     * @param int $orderId
-     * @param int $driverId
-     * @param int $assignedBy User ID who made the assignment
-     * @return DeliveryAssignment|null
+     *
+     * @param  int  $assignedBy  User ID who made the assignment
+     *
      * @see Requirements 11.3
      */
     public function assignDriver(int $orderId, int $driverId, int $assignedBy): ?DeliveryAssignment
@@ -308,7 +294,7 @@ class DeliveryDashboardService
         $order = Order::find($orderId);
         $driver = Driver::find($driverId);
 
-        if (!$order || !$driver) {
+        if (! $order || ! $driver) {
             return null;
         }
 
@@ -365,18 +351,14 @@ class DeliveryDashboardService
 
     /**
      * Update delivery assignment status
-     * 
-     * @param int $assignmentId
-     * @param string $status
-     * @param array $additionalData
-     * @return DeliveryAssignment|null
+     *
      * @see Requirements 11.5
      */
     public function updateAssignmentStatus(int $assignmentId, string $status, array $additionalData = []): ?DeliveryAssignment
     {
         $assignment = DeliveryAssignment::find($assignmentId);
 
-        if (!$assignment) {
+        if (! $assignment) {
             return null;
         }
 
@@ -424,7 +406,7 @@ class DeliveryDashboardService
                     $activeAssignments = DeliveryAssignment::where('driver_id', $driver->id)
                         ->whereIn('status', ['assigned', 'picked_up', 'in_transit'])
                         ->count();
-                    
+
                     if ($activeAssignments === 0) {
                         $driver->update(['status' => 'available']);
                     }
@@ -458,10 +440,10 @@ class DeliveryDashboardService
 
     /**
      * Get driver performance metrics
-     * 
-     * @param int|null $driverId Specific driver or null for all
-     * @param string $period 'week', 'month', 'year'
-     * @return array
+     *
+     * @param  int|null  $driverId  Specific driver or null for all
+     * @param  string  $period  'week', 'month', 'year'
+     *
      * @see Requirements 11.4
      */
     public function getDriverPerformance(?int $driverId = null, string $period = 'month'): array
@@ -486,15 +468,15 @@ class DeliveryDashboardService
 
         // Calculate average delivery time
         $avgDeliveryTime = $completed
-            ->filter(fn($a) => $a->assigned_at && $a->delivered_at)
-            ->avg(fn($a) => $a->assigned_at->diffInMinutes($a->delivered_at));
+            ->filter(fn ($a) => $a->assigned_at && $a->delivered_at)
+            ->avg(fn ($a) => $a->assigned_at->diffInMinutes($a->delivered_at));
 
         return [
             'total_assignments' => $assignments->count(),
             'completed' => $completed->count(),
             'failed' => $failed->count(),
-            'success_rate' => $assignments->count() > 0 
-                ? round(($completed->count() / $assignments->count()) * 100, 1) 
+            'success_rate' => $assignments->count() > 0
+                ? round(($completed->count() / $assignments->count()) * 100, 1)
                 : 0,
             'avg_delivery_time' => $avgDeliveryTime ? round($avgDeliveryTime) : 0,
             'period' => $period,
@@ -503,9 +485,8 @@ class DeliveryDashboardService
 
     /**
      * Get delivery chart data
-     * 
-     * @param string $period 'week' or 'month'
-     * @return array
+     *
+     * @param  string  $period  'week' or 'month'
      */
     public function getDeliveryChartData(string $period = 'week'): array
     {
@@ -535,10 +516,7 @@ class DeliveryDashboardService
 
     /**
      * Get top performing drivers
-     * 
-     * @param int $limit
-     * @param string $period
-     * @return Collection
+     *
      * @see Requirements 11.4
      */
     public function getTopDrivers(int $limit = 5, string $period = 'month'): Collection
@@ -550,7 +528,7 @@ class DeliveryDashboardService
             default => Carbon::now()->subMonth(),
         };
 
-        return Driver::where('is_active', true)
+        return Driver::where('status', 'active')
             ->withCount(['assignments as completed_deliveries' => function ($query) use ($startDate) {
                 $query->where('status', 'delivered')
                     ->where('delivered_at', '>=', $startDate);
@@ -562,16 +540,12 @@ class DeliveryDashboardService
 
     /**
      * Update driver status
-     * 
-     * @param int $driverId
-     * @param string $status
-     * @return Driver|null
      */
     public function updateDriverStatus(int $driverId, string $status): ?Driver
     {
         $driver = Driver::find($driverId);
 
-        if (!$driver) {
+        if (! $driver) {
             return null;
         }
 
@@ -593,22 +567,17 @@ class DeliveryDashboardService
 
     /**
      * Get available drivers for assignment
-     * 
-     * @return Collection
      */
     public function getAvailableDrivers(): Collection
     {
-        return Driver::where('is_active', true)
-            ->where('status', 'available')
+        return Driver::where('status', 'active')
+            ->where('availability', 'available')
             ->orderBy('name')
             ->get();
     }
 
     /**
      * Get recent assignments
-     * 
-     * @param int $limit
-     * @return Collection
      */
     public function getRecentAssignments(int $limit = 10): Collection
     {
@@ -620,8 +589,6 @@ class DeliveryDashboardService
 
     /**
      * Get in-transit deliveries
-     * 
-     * @return Collection
      */
     public function getInTransitDeliveries(): Collection
     {

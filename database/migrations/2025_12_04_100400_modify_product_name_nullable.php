@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -10,7 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement('ALTER TABLE order_items MODIFY product_name VARCHAR(255) NULL');
+        if (Schema::hasTable('order_items')) {
+            Schema::table('order_items', function (Blueprint $table) {
+                $table->string('product_name', 255)->nullable()->change();
+            });
+        }
     }
 
     /**
@@ -18,6 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement('ALTER TABLE order_items MODIFY product_name VARCHAR(255) NOT NULL');
+        if (Schema::hasTable('order_items')) {
+            Schema::table('order_items', function (Blueprint $table) {
+                $table->string('product_name', 255)->nullable(false)->change();
+            });
+        }
     }
 };

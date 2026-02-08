@@ -12,6 +12,20 @@ $colors = [
     'red' => 'from-red-500 to-red-700',
 ];
 $gradient = $colors[$color] ?? $colors['primary'];
+$changeDisplay = null;
+if ($change !== null) {
+    if (is_array($change)) {
+        $changeDisplay = $change['value'] ?? null;
+        if (is_array($changeDisplay)) {
+            $changeDisplay = null;
+        }
+    } else {
+        $changeDisplay = $change;
+    }
+    if (is_string($changeDisplay) && trim($changeDisplay) === '0.0%') {
+        $changeDisplay = null;
+    }
+}
 @endphp
 
 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-5 border border-gray-100 dark:border-gray-700 group">
@@ -22,18 +36,18 @@ $gradient = $colors[$color] ?? $colors['primary'];
             @if($subtitle)
                 <p class="text-gray-400 text-xs mt-1">{{ $subtitle }}</p>
             @endif
-            @if($change !== null)
+            @if($changeDisplay !== null && $changeDisplay !== '')
                 <div class="flex items-center gap-1 mt-2">
                     @if($changeType === 'up')
                         <span class="text-emerald-500 text-sm font-medium flex items-center gap-1">
-                            <i class="fas fa-arrow-up text-xs"></i> {{ $change }}
+                            <i class="fas fa-arrow-up text-xs"></i> {{ $changeDisplay }}
                         </span>
                     @elseif($changeType === 'down')
                         <span class="text-red-500 text-sm font-medium flex items-center gap-1">
-                            <i class="fas fa-arrow-down text-xs"></i> {{ $change }}
+                            <i class="fas fa-arrow-down text-xs"></i> {{ $changeDisplay }}
                         </span>
                     @else
-                        <span class="text-gray-400 text-sm font-medium">{{ $change }}</span>
+                        <span class="text-gray-400 text-sm font-medium">{{ $changeDisplay }}</span>
                     @endif
                 </div>
             @endif

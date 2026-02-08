@@ -15,11 +15,11 @@ class JournalEntryLine extends Model
         'type',
         'amount',
         'description',
-        'cost_center_id'
+        'cost_center_id',
     ];
 
     protected $casts = [
-        'amount' => 'decimal:2'
+        'amount' => 'decimal:2',
     ];
 
     public function journalEntry()

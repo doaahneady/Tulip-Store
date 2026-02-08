@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Form Request for creating employees
- * 
+ *
  * @see Requirements 10.1, 15.2
  */
 class StoreEmployeeRequest extends FormRequest

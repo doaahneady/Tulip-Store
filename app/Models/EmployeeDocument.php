@@ -11,7 +11,7 @@ class EmployeeDocument extends Model
 
     protected $fillable = [
         'employee_id', 'document_type', 'document_name',
-        'file_path', 'issue_date', 'expiry_date', 'notes'
+        'file_path', 'issue_date', 'expiry_date', 'notes',
     ];
 
     protected $casts = [

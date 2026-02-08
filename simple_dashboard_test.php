@@ -1,6 +1,7 @@
 <?php
+
 // Simple standalone test for dashboard
-echo "<!DOCTYPE html>
+echo '<!DOCTYPE html>
 <html>
 <head>
     <title>Dashboard Test</title>
@@ -12,7 +13,7 @@ echo "<!DOCTYPE html>
     </style>
 </head>
 <body>
-    <h1>🎯 6-Dashboard Webstore Platform - Test Results</h1>";
+    <h1>🎯 6-Dashboard Webstore Platform - Test Results</h1>';
 
 // Test 1: Check if Laravel is working
 try {
@@ -21,7 +22,7 @@ try {
     $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
     echo "<div class='card'><h3 class='success'>✅ Laravel Framework: LOADED</h3></div>";
 } catch (Exception $e) {
-    echo "<div class='card'><h3 class='error'>❌ Laravel Framework: ERROR</h3><p>" . $e->getMessage() . "</p></div>";
+    echo "<div class='card'><h3 class='error'>❌ Laravel Framework: ERROR</h3><p>".$e->getMessage().'</p></div>';
 }
 
 // Test 2: Check view files
@@ -39,7 +40,7 @@ foreach ($views as $name => $path) {
     $status = file_exists($path) ? "<span class='success'>✅ EXISTS</span>" : "<span class='error'>❌ MISSING</span>";
     echo "<li>{$name} Dashboard: {$status}</li>";
 }
-echo "</ul></div>";
+echo '</ul></div>';
 
 // Test 3: Check controller files
 echo "<div class='card'><h3>🎮 Controller Files Status</h3><ul>";
@@ -56,7 +57,7 @@ foreach ($controllers as $name => $path) {
     $status = file_exists($path) ? "<span class='success'>✅ EXISTS</span>" : "<span class='error'>❌ MISSING</span>";
     echo "<li>{$name}: {$status}</li>";
 }
-echo "</ul></div>";
+echo '</ul></div>';
 
 // Test 4: Check route files
 echo "<div class='card'><h3>🛣️ Route Files Status</h3><ul>";
@@ -70,7 +71,7 @@ foreach ($routes as $name => $path) {
     $status = file_exists($path) ? "<span class='success'>✅ EXISTS</span>" : "<span class='error'>❌ MISSING</span>";
     echo "<li>{$name}: {$status}</li>";
 }
-echo "</ul></div>";
+echo '</ul></div>';
 
 // Test 5: Architecture Summary
 echo "<div class='card'>
@@ -107,5 +108,4 @@ echo "<div class='card'>
     </ol>
 </div>";
 
-echo "</body></html>";
-?>
+echo '</body></html>';

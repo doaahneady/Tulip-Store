@@ -83,15 +83,6 @@
             }
         }
         
-        /* Syriatel Branding Colors */
-        .syriatel-primary {
-            background: linear-gradient(135deg, #E31E24 0%, #C41E3A 100%);
-        }
-        
-        .syriatel-text {
-            color: #E31E24;
-        }
-        
         /* Payment Method Cards Hover */
         .payment-option:hover {
             transform: translateY(-2px);
@@ -543,34 +534,6 @@
                                 <i class="far fa-circle" style="font-size:1.5rem; color:#ccc;"></i>
                             </div>
                         </div>
-                        
-                        <!-- Option 3: Syriatel Cash (SYP only) -->
-                        <div onclick="selectPayment('syriatel')" class="payment-option" data-type="syriatel" style="background:#fff; padding:1.5rem; border-radius:12px; margin-bottom:1rem; cursor:pointer; border:3px solid #e0e0e0; transition:all 0.3s; display:flex; align-items:center; gap:1rem;">
-                            <div style="flex-shrink:0;">
-                                <i class="fas fa-mobile-alt" style="font-size:2.5rem; color:#2a7080;"></i>
-                            </div>
-                            <div style="flex:1;">
-                                <h3 style="font-family:'El Messiri',sans-serif; font-size:1.2rem; font-weight:700; color:#1a1a1a; margin:0 0 0.3rem 0;">Syriatel Cash</h3>
-                                <p style="font-family:'El Messiri',sans-serif; font-size:0.95rem; color:#666; margin:0;">ادفع عبر تطبيق سيرياتيل كاش (بالليرة السورية فقط)</p>
-                            </div>
-                            <div style="flex-shrink:0;">
-                                <i class="far fa-circle" style="font-size:1.5rem; color:#ccc;"></i>
-                            </div>
-                        </div>
-                        
-                        <!-- Option 4: تحويل بنكي -->
-                        <div onclick="selectPayment('bank')" class="payment-option" data-type="bank" style="background:#fff; padding:1.5rem; border-radius:12px; cursor:pointer; border:3px solid #e0e0e0; transition:all 0.3s; display:flex; align-items:center; gap:1rem;">
-                            <div style="flex-shrink:0;">
-                                <i class="fas fa-university" style="font-size:2.5rem; color:#2a7080;"></i>
-                            </div>
-                            <div style="flex:1;">
-                                <h3 style="font-family:'El Messiri',sans-serif; font-size:1.2rem; font-weight:700; color:#1a1a1a; margin:0 0 0.3rem 0;">تحويل بنكي</h3>
-                                <p style="font-family:'El Messiri',sans-serif; font-size:0.95rem; color:#666; margin:0;">حوّل المبلغ إلى حسابنا البنكي</p>
-                            </div>
-                            <div style="flex-shrink:0;">
-                                <i class="far fa-circle" style="font-size:1.5rem; color:#ccc;"></i>
-                            </div>
-                        </div>
                     </div>
                     
                     <div style="display:flex; gap:1rem;">
@@ -692,46 +655,6 @@
                             <i class="fas fa-arrow-right" style="margin-left:0.5rem;"></i> العودة
                         </button>
                         <button onclick="validateCardAndProceed()" style="flex:2; background:#ff6b35; color:#fff; border:none; padding:1.2rem; font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 15px rgba(255,107,53,0.3);">
-                            متابعة <i class="fas fa-arrow-left" style="margin-right:0.5rem;"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Syriatel Cash Payment - QR Only -->
-                <div id="syriatelDetails" class="payment-section" style="display:none;">
-                    <button onclick="backToPaymentOptions()" style="background:transparent; border:none; color:#2a7080; font-family:'El Messiri',sans-serif; font-size:1rem; font-weight:600; cursor:pointer; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.5rem; transition:all 0.3s;">
-                        <i class="fas fa-arrow-right"></i> العودة لطرق الدفع
-                    </button>
-                    
-                    <!-- Syriatel Header -->
-                    <div style="background:linear-gradient(135deg, #E31E24 0%, #C41E3A 100%); padding:1.5rem; border-radius:16px 16px 0 0; text-align:center; margin-bottom:0;">
-                        <i class="fas fa-mobile-alt" style="font-size:3rem; color:#fff; margin-bottom:0.5rem;"></i>
-                        <h2 style="font-family:'El Messiri',sans-serif; font-size:1.8rem; font-weight:700; color:#fff; margin:0;">Syriatel Cash</h2>
-                    </div>
-                    
-                    <!-- QR Code Container - Clean and Simple -->
-                    <div style="background:#fff; padding:3rem 2rem; border-radius:0 0 16px 16px; box-shadow:0 4px 20px rgba(0,0,0,0.1); margin-bottom:1.5rem; text-align:center;">
-                        
-                        <!-- QR Code Display -->
-                        <div class="qr-container" style="margin-bottom:2rem;">
-                            <div id="qrCodeContainer" style="display:inline-block; padding:2rem; background:#fff; border-radius:16px; box-shadow:0 8px 30px rgba(0,0,0,0.12); border:3px solid #f0f0f0;">
-                                <!-- QR Code will be generated here -->
-                            </div>
-                        </div>
-                        
-                        <!-- Save QR Button -->
-                        <button onclick="saveQRCode()" style="width:100%; max-width:400px; background:linear-gradient(135deg, #E31E24 0%, #C41E3A 100%); color:#fff; border:none; padding:1.2rem; font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 15px rgba(227,30,36,0.3);">
-                            <i class="fas fa-download" style="margin-left:0.5rem;"></i>
-                            حفظ الصورة
-                        </button>
-                    </div>
-                    
-                    <!-- Navigation Buttons -->
-                    <div style="display:flex; gap:1rem;">
-                        <button onclick="backToPaymentOptions()" style="flex:1; background:#e0e0e0; color:#666; border:none; padding:1.2rem; font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s;">
-                            <i class="fas fa-arrow-right" style="margin-left:0.5rem;"></i> العودة
-                        </button>
-                        <button onclick="goToStep(4)" style="flex:2; background:#ff6b35; color:#fff; border:none; padding:1.2rem; font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 15px rgba(255,107,53,0.3);">
                             متابعة <i class="fas fa-arrow-left" style="margin-right:0.5rem;"></i>
                         </button>
                     </div>

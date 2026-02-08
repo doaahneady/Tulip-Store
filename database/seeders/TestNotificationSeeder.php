@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Notification;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class TestNotificationSeeder extends Seeder
 {
@@ -15,6 +15,7 @@ class TestNotificationSeeder extends Seeder
 
         if ($users->isEmpty()) {
             echo "No users found. Please create users first.\n";
+
             return;
         }
 
@@ -88,14 +89,14 @@ class TestNotificationSeeder extends Seeder
         foreach ($users as $user) {
             // Create 3-5 notifications per user
             $count = rand(3, 5);
-            
+
             for ($i = 0; $i < $count; $i++) {
                 $notification = $notifications[array_rand($notifications)];
                 $createdAt = Carbon::now()->subDays(rand(0, 30))->subHours(rand(0, 23));
-                
+
                 // 60% chance of being read
                 $isRead = rand(1, 100) <= 60;
-                
+
                 Notification::create([
                     'user_id' => $user->id,
                     'type' => $notification['type'],
@@ -113,6 +114,6 @@ class TestNotificationSeeder extends Seeder
         }
 
         echo "Successfully created test notifications for all users!\n";
-        echo "Total notifications: " . Notification::count() . "\n";
+        echo 'Total notifications: '.Notification::count()."\n";
     }
 }

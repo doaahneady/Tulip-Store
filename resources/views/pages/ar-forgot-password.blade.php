@@ -163,12 +163,6 @@
             .auth-card{border-radius:40px;}
         }
         @media (max-width:700px){
-            .home-logo {
-                width: 65px;
-                height: 65px;
-                top: 15px;
-                left: 15px;
-            }
             .auth-shell{padding:1rem;}
             .auth-card-wrap{
                 flex-direction:column;
@@ -206,46 +200,12 @@
             .auth-illustration{width:180px;}
             .auth-illustration img{width:180px;}
             input,button{font-size:0.85rem;padding:0.6rem 0.9rem;}
-            .home-logo {
-                width: 55px;
-                height: 55px;
-                top: 10px;
-                left: 10px;
-            }
         }
-        .home-logo {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-            z-index: 1000;
-            background: white;
-        }
-        .home-logo:hover {
-            transform: scale(1.1);
-            box-shadow: 0 8px 25px rgba(255,111,53,0.5);
-        }
-        .home-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            image-rendering: auto;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            transform: translateZ(0);
-        }
+
     </style>
 </head>
 <body>
-    <a href="/" class="home-logo" title="العودة للصفحة الرئيسية">
-        <img src="/images/photo_2025-11-17_11-18-40.jpg" alt="Home">
-    </a>
+
     <div class="auth-shell">
         <div class="auth-card-wrap">
             <div class="auth-illustration">

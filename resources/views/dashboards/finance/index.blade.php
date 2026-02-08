@@ -1,416 +1,325 @@
-@extends('dashboards.layouts.app', ['title' => 'Finance Dashboard', 'subtitle' => 'Financial Operations & Transaction Management'])
-
+@extends('dashboards.layouts.app')
 @section('content')
-<!-- Finance Overview Cards -->
+@php $title = 'لوحة المالية'; $subtitle = 'نظرة عامة على الإيرادات والتكاليف والتفصيل'; @endphp
+
+<div class="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200 mb-6">
+    <div class="px-4 py-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-coins text-indigo-600"></i>
+            <span class="text-sm text-gray-700">تحكم سريع</span>
+        </div>
+        <form method="GET" action="{{ route('dashboard.finance.index') }}" class="flex flex-wrap items-center gap-2">
+            <input type="date" name="from" value="{{ request('from') }}" class="form-input w-40">
+            <input type="date" name="to" value="{{ request('to') }}" class="form-input w-40">
+            <select name="period" class="form-select w-36">
+                <option value="">الفترة</option>
+                <option value="7" @selected(request('period')=='7')>آخر 7 أيام</option>
+                <option value="30" @selected(request('period')=='30')>آخر 30 يوم</option>
+                <option value="90" @selected(request('period')=='90')>آخر 90 يوم</option>
+            </select>
+            <button type="submit" class="btn btn-ghost btn-sm">
+                <i class="fas fa-filter"></i>
+                تصفية
+            </button>
+            <a class="btn btn-secondary btn-sm" href="{{ route('dashboard.finance.transactions.export', array_merge(request()->query(), ['format' => 'csv'])) }}">
+                <i class="fas fa-download"></i>
+                تصدير المعاملات
+            </a>
+        </form>
+    </div>
+</div>
+
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center gap-2">
+        <a href="{{ route('dashboard.finance.expenses') }}#new-expense" class="inline-flex items-center gap-2 bg-rose-600 text-white px-4 py-2 rounded-xl hover:bg-rose-700 transition">
+            <i class="fas fa-plus"></i>
+            <span>إضافة مصروف</span>
+        </a>
+        <a href="{{ route('dashboard.finance.transactions') }}#new-transaction" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition">
+            <i class="fas fa-plus"></i>
+            <span>إنشاء معاملة</span>
+        </a>
+        <a href="{{ route('dashboard.administrative-approvals.index') }}" class="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition">
+            <i class="fas fa-clipboard-check"></i>
+            <span>الموافقات الإدارية</span>
+        </a>
+        <a href="{{ route('dashboard.my-attendance.index') }}" class="inline-flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-xl hover:bg-teal-700 transition">
+            <i class="fas fa-user-clock"></i>
+            <span>حضوري</span>
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+    <a href="{{ route('dashboard.finance.transactions') }}" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center"><i class="fas fa-receipt"></i></div>
+        <div>
+            <div class="text-sm font-semibold text-gray-900">المعاملات</div>
+            <div class="text-xs text-gray-500">قائمة وبحث وتصدير</div>
+        </div>
+    </a>
+    <a href="{{ route('dashboard.finance.approvals') }}" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i class="fas fa-user-check"></i></div>
+        <div>
+            <div class="text-sm font-semibold text-gray-900">الموافقات</div>
+            <div class="text-xs text-gray-500">استردادات / عمولات / رواتب</div>
+        </div>
+    </a>
+    <a href="{{ route('dashboard.finance.payouts') }}" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center"><i class="fas fa-hand-holding-dollar"></i></div>
+        <div>
+            <div class="text-sm font-semibold text-gray-900">التحويلات</div>
+            <div class="text-xs text-gray-500">طلبات المتاجر</div>
+        </div>
+    </a>
+    <a href="{{ route('dashboard.finance.revenue') }}" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center"><i class="fas fa-chart-line"></i></div>
+        <div>
+            <div class="text-sm font-semibold text-gray-900">الإيرادات</div>
+            <div class="text-xs text-gray-500">تحليلات</div>
+        </div>
+    </a>
+    <a href="{{ route('dashboard.finance.expenses') }}" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center"><i class="fas fa-wallet"></i></div>
+        <div>
+            <div class="text-sm font-semibold text-gray-900">المصروفات</div>
+            <div class="text-xs text-gray-500">قائمة وتقارير</div>
+        </div>
+    </a>
+    <a href="{{ route('dashboard.finance.reports') }}" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gray-100 text-gray-700 flex items-center justify-center"><i class="fas fa-file-invoice-dollar"></i></div>
+        <div>
+            <div class="text-sm font-semibold text-gray-900">التقارير</div>
+            <div class="text-xs text-gray-500">P&L / Cash Flow</div>
+        </div>
+    </a>
+</div>
+
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <!-- Total Revenue -->
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Total Revenue</p>
-                    <h3 class="text-2xl font-semibold text-gray-900">${{ number_format($metrics['total_revenue'] ?? 2847500) }}</h3>
-                    <div class="flex items-center gap-1 mt-1">
-                        <span class="text-success-600 text-sm font-medium flex items-center gap-1">
-                            <i class="fas fa-arrow-up text-xs"></i>
-                            +{{ $metrics['revenue_growth'] ?? 18 }}%
-                        </span>
-                        <span class="text-gray-500 text-sm">vs last month</span>
-                    </div>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-success-50 text-success-600 flex items-center justify-center">
-                    <i class="fas fa-dollar-sign text-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pending Payouts -->
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Pending Payouts</p>
-                    <h3 class="text-2xl font-semibold text-gray-900">${{ number_format($metrics['pending_payouts'] ?? 145750) }}</h3>
-                    <div class="flex items-center gap-1 mt-1">
-                        <span class="text-warning-600 text-sm font-medium">
-                            <i class="fas fa-clock text-xs"></i>
-                            {{ $metrics['payout_requests'] ?? 23 }} requests
-                        </span>
-                    </div>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-warning-50 text-warning-600 flex items-center justify-center">
-                    <i class="fas fa-hand-holding-usd text-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Monthly Profit -->
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Monthly Profit</p>
-                    <h3 class="text-2xl font-semibold text-gray-900">${{ number_format($metrics['monthly_profit'] ?? 425800) }}</h3>
-                    <div class="flex items-center gap-1 mt-1">
-                        <span class="text-success-600 text-sm font-medium flex items-center gap-1">
-                            <i class="fas fa-arrow-up text-xs"></i>
-                            +{{ $metrics['profit_margin'] ?? 15.2 }}%
-                        </span>
-                        <span class="text-gray-500 text-sm">profit margin</span>
-                    </div>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
-                    <i class="fas fa-chart-line text-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Transaction Volume -->
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Transactions</p>
-                    <h3 class="text-2xl font-semibold text-gray-900">{{ number_format($metrics['transactions'] ?? 15847) }}</h3>
-                    <div class="flex items-center gap-1 mt-1">
-                        <span class="text-primary-600 text-sm font-medium">
-                            <i class="fas fa-exchange-alt text-xs"></i>
-                            {{ $metrics['avg_transaction'] ?? 179 }} avg value
-                        </span>
-                    </div>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                    <i class="fas fa-receipt text-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
+    <x-dashboard.stat-card title="إيرادات اليوم" :value="'$'.number_format($metrics['todays_revenue'] ?? 0, 2)" icon="fas fa-sun" color="orange" />
+    <x-dashboard.stat-card title="إيرادات الشهر" :value="'$'.number_format($metrics['monthly_revenue'] ?? 0, 2)" icon="fas fa-calendar-alt" color="blue" />
+    <x-dashboard.stat-card title="المدفوعات المعلقة" :value="'$'.number_format($metrics['outstanding_payments'] ?? 0, 2)" icon="fas fa-exclamation-circle" color="red" />
+    <x-dashboard.stat-card title="الاستردادات المعلقة" :value="'$'.number_format($metrics['pending_refunds'] ?? 0, 2)" icon="fas fa-undo" color="purple" />
 </div>
 
-<!-- Main Dashboard Grid -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-    <!-- Revenue Analytics Chart -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <div class="lg:col-span-2">
-        <div class="card">
-            <div class="card-header">
-                <div class="flex items-center justify-between">
-                    <h3 class="card-title">Revenue & Profit Analytics</h3>
-                    <div class="flex items-center gap-2">
-                        <select class="form-select text-sm" id="revenue-metric">
-                            <option value="revenue">Revenue</option>
-                            <option value="profit">Profit</option>
-                            <option value="commission">Commission</option>
-                            <option value="expenses">Expenses</option>
-                        </select>
-                        <select class="form-select text-sm" id="revenue-period">
-                            <option value="30d" selected>Last 30 days</option>
-                            <option value="90d">Last 90 days</option>
-                            <option value="1y">Last year</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <canvas id="revenueAnalyticsChart" height="300"></canvas>
-            </div>
-        </div>
+        @component('components.dashboard.chart-card', ['title' => 'الإيرادات مقابل المصروفات', 'icon' => 'fas fa-chart-line', 'chartId' => 'revExpChart'])
+        @endcomponent
     </div>
-
-    <!-- Pending Approvals -->
     <div>
-        <div class="card">
-            <div class="card-header">
-                <div class="flex items-center justify-between">
-                    <h3 class="card-title">Pending Approvals</h3>
-                    <span class="badge badge-warning">{{ $metrics['pending_approvals'] ?? 8 }}</span>
-                </div>
-            </div>
-            <div class="card-body p-0">
-                @php
-                    $approvals = [
-                        ['type' => 'Payout Request', 'amount' => 15000, 'store' => 'TechStore Plus', 'time' => '2 hours ago', 'priority' => 'high'],
-                        ['type' => 'Expense Claim', 'amount' => 850, 'store' => 'HR Department', 'time' => '4 hours ago', 'priority' => 'normal'],
-                        ['type' => 'Payout Request', 'amount' => 8500, 'store' => 'Fashion Hub', 'time' => '6 hours ago', 'priority' => 'normal'],
-                        ['type' => 'Refund Request', 'amount' => 250, 'store' => 'Customer #1234', 'time' => '8 hours ago', 'priority' => 'low'],
-                        ['type' => 'Payout Request', 'amount' => 22000, 'store' => 'Electronics World', 'time' => '1 day ago', 'priority' => 'high'],
-                    ];
-                @endphp
-                @foreach($approvals as $approval)
-                <div class="flex items-center justify-between p-4 border-b border-gray-100 last:border-b-0">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg 
-                            @if($approval['priority'] === 'high') bg-error-100 text-error-600
-                            @elseif($approval['priority'] === 'normal') bg-warning-100 text-warning-600
-                            @else bg-gray-100 text-gray-600
-                            @endif
-                            flex items-center justify-center">
-                            @if($approval['type'] === 'Payout Request')
-                                <i class="fas fa-hand-holding-usd text-sm"></i>
-                            @elseif($approval['type'] === 'Expense Claim')
-                                <i class="fas fa-receipt text-sm"></i>
-                            @else
-                                <i class="fas fa-undo text-sm"></i>
-                            @endif
-                        </div>
-                        <div>
-                            <div class="font-medium text-gray-900 text-sm">{{ $approval['type'] }}</div>
-                            <div class="text-gray-600 text-xs">{{ $approval['store'] }}</div>
-                            <div class="text-gray-500 text-xs">{{ $approval['time'] }}</div>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div class="font-semibold text-gray-900">${{ number_format($approval['amount']) }}</div>
-                        <div class="flex gap-1 mt-1">
-                            <button class="btn btn-sm" style="background-color: var(--success-600); color: white; padding: 0.25rem 0.5rem;" onclick="approveTransaction('{{ $approval['type'] }}', {{ $approval['amount'] }})">
-                                <i class="fas fa-check text-xs"></i>
-                            </button>
-                            <button class="btn btn-sm" style="background-color: var(--error-600); color: white; padding: 0.25rem 0.5rem;" onclick="rejectTransaction('{{ $approval['type'] }}', {{ $approval['amount'] }})">
-                                <i class="fas fa-times text-xs"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
+        @component('components.dashboard.chart-card', ['title' => 'تفصيل طرق الدفع', 'icon' => 'fas fa-chart-pie', 'chartId' => 'paymentMethodChart'])
+        @endcomponent
     </div>
-</div>
+    <div>
+        @component('components.dashboard.chart-card', ['title' => 'توقعات التدفق النقدي (30 يوم)', 'icon' => 'fas fa-chart-area', 'chartId' => 'cashFlowChart'])
+        @endcomponent
+    </div>
 
-<!-- Transaction Overview & Tax Summary -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-    <!-- Recent Transactions -->
-    <div class="card">
-        <div class="card-header">
-            <div class="flex items-center justify-between">
-                <h3 class="card-title">Recent Transactions</h3>
-                <a href="{{ route('dashboard.finance.transactions') }}" class="btn btn-ghost btn-sm">
-                    View All
-                    <i class="fas fa-arrow-right text-xs ml-1"></i>
-                </a>
-            </div>
+    <div class="bg-white rounded-2xl shadow-sm">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900">الأكثر ربحاً (المتاجر)</h3>
+            <span class="text-xs text-gray-500">آخر 30 يوم</span>
         </div>
-        <div class="card-body p-0">
-            <div class="table-container">
-                <table class="table">
-                    <thead>
+        <div class="p-6">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th>Transaction</th>
-                            <th>Type</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                            <th>Date</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">المتجر</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الإيرادات</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @php
-                            $transactions = [
-                                ['id' => 'TXN-5847', 'type' => 'Order Payment', 'amount' => 1250, 'status' => 'completed', 'date' => '2 hours ago'],
-                                ['id' => 'TXN-5846', 'type' => 'Payout', 'amount' => -8500, 'status' => 'processing', 'date' => '4 hours ago'],
-                                ['id' => 'TXN-5845', 'type' => 'Commission', 'amount' => 125, 'status' => 'completed', 'date' => '6 hours ago'],
-                                ['id' => 'TXN-5844', 'type' => 'Refund', 'amount' => -350, 'status' => 'completed', 'date' => '8 hours ago'],
-                                ['id' => 'TXN-5843', 'type' => 'Order Payment', 'amount' => 2100, 'status' => 'completed', 'date' => '1 day ago'],
-                            ];
-                        @endphp
-                        @foreach($transactions as $transaction)
-                        <tr>
-                            <td>
-                                <span class="font-medium text-primary-600">{{ $transaction['id'] }}</span>
-                            </td>
-                            <td>
-                                <span class="badge badge-gray">{{ $transaction['type'] }}</span>
-                            </td>
-                            <td>
-                                <span class="font-medium {{ $transaction['amount'] > 0 ? 'text-success-600' : 'text-error-600' }}">
-                                    {{ $transaction['amount'] > 0 ? '+' : '' }}${{ number_format(abs($transaction['amount'])) }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge 
-                                    @if($transaction['status'] === 'completed') badge-success
-                                    @elseif($transaction['status'] === 'processing') badge-warning
-                                    @else badge-gray
-                                    @endif">
-                                    {{ ucfirst($transaction['status']) }}
-                                </span>
-                            </td>
-                            <td class="text-gray-500 text-sm">{{ $transaction['date'] }}</td>
-                        </tr>
-                        @endforeach
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse(($metrics['revenue_by_store'] ?? []) as $store)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-800">{{ is_array(data_get($store,'name')) ? json_encode(data_get($store,'name')) : data_get($store,'name') }}</td>
+                                <td class="px-4 py-3 text-sm font-semibold text-gray-900">${{ number_format($store->total_revenue ?? 0, 2) }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="2" class="px-4 py-6 text-center text-gray-500">لا توجد بيانات</td></tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Tax & Compliance Summary -->
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Tax & Compliance</h3>
+    <div class="bg-white rounded-2xl shadow-sm">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900">الإنفاق حسب المستخدمين</h3>
+            <span class="text-xs text-gray-500">آخر 30 يوم</span>
         </div>
-        <div class="card-body">
-            <!-- Tax Overview -->
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="p-3 bg-gray-50 rounded-lg">
-                    <div class="text-sm text-gray-600">VAT Collected</div>
-                    <div class="text-xl font-semibold text-gray-900">${{ number_format($metrics['vat_collected'] ?? 42750) }}</div>
-                </div>
-                <div class="p-3 bg-gray-50 rounded-lg">
-                    <div class="text-sm text-gray-600">Tax Liability</div>
-                    <div class="text-xl font-semibold text-gray-900">${{ number_format($metrics['tax_liability'] ?? 38250) }}</div>
-                </div>
+        <div class="p-6">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">المستخدم</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الإجمالي</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse(($metrics['revenue_by_user'] ?? []) as $user)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-800">{{ is_array(data_get($user,'name')) ? json_encode(data_get($user,'name')) : data_get($user,'name') }}</td>
+                                <td class="px-4 py-3 text-sm font-semibold text-gray-900">${{ number_format($user->total_spent ?? 0, 2) }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="2" class="px-4 py-6 text-center text-gray-500">لا توجد بيانات</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
+        </div>
+    </div>
 
-            <!-- Tax Breakdown -->
-            <div class="mb-6">
-                <h4 class="font-medium text-gray-900 mb-3">Monthly Tax Breakdown</h4>
-                <div class="space-y-3">
-                    @php
-                        $taxBreakdown = [
-                            ['type' => 'Sales Tax (15%)', 'amount' => 28500, 'percentage' => 65],
-                            ['type' => 'Service Tax (5%)', 'amount' => 9500, 'percentage' => 22],
-                            ['type' => 'Platform Fee Tax', 'amount' => 4750, 'percentage' => 13],
-                        ];
-                    @endphp
-                    @foreach($taxBreakdown as $tax)
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="text-sm font-medium text-gray-900">{{ $tax['type'] }}</span>
-                                <span class="text-sm text-gray-600">${{ number_format($tax['amount']) }}</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="bg-primary-600 h-2 rounded-full" style="width: {{ $tax['percentage'] }}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
+    <div class="bg-white rounded-2xl shadow-sm">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900">قيمة الطلبات حسب السائقين</h3>
+            <span class="text-xs text-gray-500">آخر 30 يوم</span>
+        </div>
+        <div class="p-6">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">السائق</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">القيمة</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse(($metrics['revenue_by_driver'] ?? []) as $driver)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-800">{{ is_array(data_get($driver,'driver_name')) ? json_encode(data_get($driver,'driver_name')) : (data_get($driver,'driver_name') ?? (is_array(data_get($driver,'name')) ? json_encode(data_get($driver,'name')) : (data_get($driver,'name') ?? ('Driver #'.$driver->id)))) }}</td>
+                                <td class="px-4 py-3 text-sm font-semibold text-gray-900">${{ number_format($driver->total_delivered_value ?? 0, 2) }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="2" class="px-4 py-6 text-center text-gray-500">لا توجد بيانات</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
+        </div>
+    </div>
 
-            <!-- Compliance Status -->
-            <div class="space-y-2">
-                <div class="flex items-center justify-between p-2 bg-success-50 rounded">
-                    <span class="text-sm text-success-800">Monthly VAT Filing</span>
-                    <i class="fas fa-check-circle text-success-600"></i>
-                </div>
-                <div class="flex items-center justify-between p-2 bg-success-50 rounded">
-                    <span class="text-sm text-success-800">Quarterly Report</span>
-                    <i class="fas fa-check-circle text-success-600"></i>
-                </div>
-                <div class="flex items-center justify-between p-2 bg-warning-50 rounded">
-                    <span class="text-sm text-warning-800">Annual Audit</span>
-                    <span class="text-xs text-warning-600">Due in 45 days</span>
-                </div>
+    <div class="bg-white rounded-2xl shadow-sm">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900">تكلفة الرواتب حسب الموظف</h3>
+            <span class="text-xs text-gray-500">الشهر الحالي</span>
+        </div>
+        <div class="p-6">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الموظف</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الصافي</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse(($metrics['money_by_employee'] ?? []) as $employee)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-800">{{ ($employee->first_name ?? '') . ' ' . ($employee->last_name ?? '') }}</td>
+                                <td class="px-4 py-3 text-sm font-semibold text-gray-900">${{ number_format($employee->total_pay ?? 0, 2) }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="2" class="px-4 py-6 text-center text-gray-500">لا توجد بيانات</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Financial Reports & Commission Tracking -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <!-- P&L Summary -->
-    <div class="card">
-        <div class="card-header">
-            <div class="flex items-center justify-between">
-                <h3 class="card-title">P&L Summary</h3>
-                <a href="{{ route('dashboard.finance.reports') }}" class="btn btn-ghost btn-sm">
-                    Full Report
-                    <i class="fas fa-arrow-right text-xs ml-1"></i>
-                </a>
-            </div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900">طلبات الاسترداد / الموافقات</h3>
+            <a href="{{ route('dashboard.finance.approvals') }}" class="text-sm text-indigo-600 hover:text-indigo-800">عرض الكل</a>
         </div>
-        <div class="card-body">
-            <!-- P&L Chart -->
-            <div class="mb-6">
-                <canvas id="profitLossChart" height="200"></canvas>
-            </div>
-
-            <!-- P&L Details -->
-            <div class="space-y-3">
-                @php
-                    $plItems = [
-                        ['item' => 'Total Revenue', 'amount' => 2847500, 'type' => 'revenue'],
-                        ['item' => 'Platform Commissions', 'amount' => 427125, 'type' => 'revenue'],
-                        ['item' => 'Payment Processing', 'amount' => -85500, 'type' => 'expense'],
-                        ['item' => 'Staff Salaries', 'amount' => -285000, 'type' => 'expense'],
-                        ['item' => 'Infrastructure Costs', 'amount' => -45000, 'type' => 'expense'],
-                        ['item' => 'Marketing Expenses', 'amount' => -125000, 'type' => 'expense'],
-                    ];
-                @endphp
-                @foreach($plItems as $item)
-                <div class="flex items-center justify-between p-2 border-b border-gray-100 last:border-b-0">
-                    <span class="text-sm text-gray-700">{{ $item['item'] }}</span>
-                    <span class="font-medium {{ $item['type'] === 'revenue' ? 'text-success-600' : 'text-error-600' }}">
-                        {{ $item['amount'] > 0 ? '+' : '' }}${{ number_format($item['amount']) }}
-                    </span>
-                </div>
-                @endforeach
-                <div class="flex items-center justify-between p-3 bg-primary-50 rounded-lg mt-3">
-                    <span class="font-semibold text-primary-800">Net Profit</span>
-                    <span class="font-bold text-primary-800">${{ number_format(array_sum(array_column($plItems, 'amount'))) }}</span>
-                </div>
+        <div class="p-6">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">النوع</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">المبلغ</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الطلب</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">تاريخ</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">إجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse(($metrics['pending_approvals_list'] ?? []) as $t)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-800">{{ $t->type }}</td>
+                                <td class="px-4 py-3 text-sm font-semibold text-gray-900">${{ number_format($t->amount ?? 0, 2) }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-700">{{ optional($t->order)->order_number ?? '-' }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">{{ $t->created_at?->diffForHumans() }}</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <form method="POST" action="{{ route('dashboard.finance.approvals.transactions.approve', $t->id) }}">
+                                            @csrf
+                                            <button class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs hover:bg-emerald-700">موافقة</button>
+                                        </form>
+                                        <form method="POST" action="{{ route('dashboard.finance.approvals.transactions.reject', $t->id) }}">
+                                            @csrf
+                                            <button class="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs hover:bg-red-700">رفض</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="px-4 py-6 text-center text-gray-500">لا توجد طلبات</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <!-- Commission Tracking -->
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Commission Tracking</h3>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900">طلبات تحويل المتاجر</h3>
+            <a href="{{ route('dashboard.finance.payouts') }}" class="text-sm text-indigo-600 hover:text-indigo-800">عرض الكل</a>
         </div>
-        <div class="card-body">
-            <!-- Commission Overview -->
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="p-3 bg-gray-50 rounded-lg text-center">
-                    <div class="text-2xl font-bold text-primary-600">{{ $metrics['commission_rate'] ?? 15 }}%</div>
-                    <div class="text-sm text-gray-600">Avg Commission Rate</div>
-                </div>
-                <div class="p-3 bg-gray-50 rounded-lg text-center">
-                    <div class="text-2xl font-bold text-success-600">${{ number_format($metrics['monthly_commission'] ?? 427125) }}</div>
-                    <div class="text-sm text-gray-600">This Month</div>
-                </div>
-            </div>
-
-            <!-- Top Earning Stores -->
-            <div class="mb-4">
-                <h4 class="font-medium text-gray-900 mb-3">Top Commission Generators</h4>
-                <div class="space-y-3">
-                    @php
-                        $topStores = [
-                            ['store' => 'TechStore Plus', 'commission' => 45000, 'rate' => 15],
-                            ['store' => 'Fashion Hub', 'commission' => 38500, 'rate' => 12],
-                            ['store' => 'Electronics World', 'commission' => 32000, 'rate' => 18],
-                            ['store' => 'Home & Garden', 'commission' => 28750, 'rate' => 14],
-                        ];
-                    @endphp
-                    @foreach($topStores as $store)
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div>
-                            <div class="font-medium text-gray-900 text-sm">{{ $store['store'] }}</div>
-                            <div class="text-gray-600 text-xs">{{ $store['rate'] }}% commission rate</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="font-semibold text-success-600">${{ number_format($store['commission']) }}</div>
-                            <div class="text-xs text-gray-500">this month</div>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="flex gap-2">
-                <button class="btn btn-sm btn-primary" onclick="generateCommissionReport()">
-                    <i class="fas fa-file-alt"></i>
-                    Generate Report
-                </button>
-                <button class="btn btn-sm btn-secondary" onclick="adjustCommissionRates()">
-                    <i class="fas fa-percentage"></i>
-                    Adjust Rates
-                </button>
+        <div class="p-6">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">المتجر</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">المبلغ</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">تاريخ</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">إجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse(($metrics['pending_payouts_list'] ?? []) as $p)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-800">{{ optional($p->store)->name ?? ('Store #'.$p->store_id) }}</td>
+                                <td class="px-4 py-3 text-sm font-semibold text-gray-900">${{ number_format($p->amount ?? 0, 2) }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">{{ $p->created_at?->diffForHumans() }}</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <form method="POST" action="{{ route('dashboard.finance.approvals.payouts.approve', $p->id) }}">
+                                            @csrf
+                                            <button class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs hover:bg-emerald-700">موافقة</button>
+                                        </form>
+                                        <form method="POST" action="{{ route('dashboard.finance.approvals.payouts.reject', $p->id) }}">
+                                            @csrf
+                                            <button class="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs hover:bg-red-700">رفض</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="4" class="px-4 py-6 text-center text-gray-500">لا توجد طلبات</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -418,110 +327,68 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Revenue Analytics Chart
-    initializeRevenueChart();
-    
-    // Initialize P&L Chart
-    initializeProfitLossChart();
-});
-
-function initializeRevenueChart() {
-    const ctx = document.getElementById('revenueAnalyticsChart').getContext('2d');
-    let revenueChart = new Chart(ctx, {
+const revExpCtx = document.getElementById('revExpChart')?.getContext('2d');
+if (revExpCtx) {
+    const revLabels = @json(collect($metrics['revenue_series'] ?? [])->pluck('date'));
+    const revData = @json(collect($metrics['revenue_series'] ?? [])->pluck('revenue'));
+    const expData = @json(collect($metrics['expense_series'] ?? [])->pluck('expenses'));
+    new Chart(revExpCtx, {
         type: 'line',
         data: {
-            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-            datasets: [{
-                label: 'Revenue ($)',
-                data: [650000, 720000, 680000, 797500],
-                borderColor: 'rgb(34, 197, 94)',
-                backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                fill: true,
-                tension: 0.4
-            }]
+            labels: revLabels,
+            datasets: [
+                {
+                    label: 'الإيرادات',
+                    data: revData,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                },
+                {
+                    label: 'المصروفات',
+                    data: expData,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    display: false
-                }
+                legend: { position: 'bottom' },
+                tooltip: { mode: 'index', intersect: false }
             },
+            interaction: { mode: 'index', intersect: false },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Amount ($)'
-                    },
-                    ticks: {
-                        callback: function(value) {
-                            return '$' + value.toLocaleString();
-                        }
-                    }
-                }
+                y: { beginAtZero: true }
             }
         }
     });
-
-    // Revenue Metric Selector
-    document.getElementById('revenue-metric').addEventListener('change', function() {
-        const metric = this.value;
-        updateRevenueChart(metric, revenueChart);
-    });
 }
 
-function updateRevenueChart(metric, chart) {
-    const datasets = {
-        revenue: {
-            label: 'Revenue ($)',
-            data: [650000, 720000, 680000, 797500],
-            borderColor: 'rgb(34, 197, 94)',
-            backgroundColor: 'rgba(34, 197, 94, 0.1)'
-        },
-        profit: {
-            label: 'Profit ($)',
-            data: [97500, 108000, 102000, 119625],
-            borderColor: 'rgb(59, 130, 246)',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)'
-        },
-        commission: {
-            label: 'Commission ($)',
-            data: [97500, 108000, 102000, 119625],
-            borderColor: 'rgb(168, 85, 247)',
-            backgroundColor: 'rgba(168, 85, 247, 0.1)'
-        },
-        expenses: {
-            label: 'Expenses ($)',
-            data: [552500, 612000, 578000, 677875],
-            borderColor: 'rgb(239, 68, 68)',
-            backgroundColor: 'rgba(239, 68, 68, 0.1)'
-        }
-    };
-
-    chart.data.datasets[0] = {
-        ...datasets[metric],
-        fill: true,
-        tension: 0.4
-    };
-    chart.update();
-}
-
-function initializeProfitLossChart() {
-    const ctx = document.getElementById('profitLossChart').getContext('2d');
-    new Chart(ctx, {
+const pmCtx = document.getElementById('paymentMethodChart')?.getContext('2d');
+if (pmCtx) {
+    const pmDataObj = @json($metrics['payment_method_breakdown'] ?? []);
+    const pmLabels = Object.keys(pmDataObj);
+    const pmData = Object.values(pmDataObj);
+    new Chart(pmCtx, {
         type: 'doughnut',
         data: {
-            labels: ['Revenue', 'Expenses'],
+            labels: pmLabels.map(l => {
+                if (l === 'card') return 'بطاقة';
+                if (l === 'cash') return 'نقد';
+                if (l === 'mobile_wallet') return 'محفظة رقمية';
+                return l;
+            }),
             datasets: [{
-                data: [3274625, 540500],
-                backgroundColor: [
-                    'rgba(34, 197, 94, 0.8)',
-                    'rgba(239, 68, 68, 0.8)'
-                ],
+                data: pmData,
+                backgroundColor: ['#6366f1', '#f59e0b', '#10b981'],
                 borderWidth: 0
             }]
         },
@@ -529,36 +396,104 @@ function initializeProfitLossChart() {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    position: 'bottom',
-                }
+                legend: { position: 'bottom' }
             }
         }
     });
 }
 
-function approveTransaction(type, amount) {
-    if (confirm(`Approve ${type} for $${amount.toLocaleString()}?`)) {
-        console.log(`Approving ${type} for $${amount}`);
-        // API call to approve transaction
-    }
-}
-
-function rejectTransaction(type, amount) {
-    if (confirm(`Reject ${type} for $${amount.toLocaleString()}?`)) {
-        console.log(`Rejecting ${type} for $${amount}`);
-        // API call to reject transaction
-    }
-}
-
-function generateCommissionReport() {
-    console.log('Generating commission report...');
-    // API call to generate and download commission report
-}
-
-function adjustCommissionRates() {
-    console.log('Opening commission rate adjustment...');
-    // Open commission rate management interface
+const cfCtx = document.getElementById('cashFlowChart')?.getContext('2d');
+if (cfCtx) {
+    const cfLabels = @json(collect($metrics['cash_flow_projection'] ?? [])->pluck('date'));
+    const cfData = @json(collect($metrics['cash_flow_projection' ] ?? [])->pluck('net'));
+    new Chart(cfCtx, {
+        type: 'bar',
+        data: {
+            labels: cfLabels,
+            datasets: [{
+                label: 'صافي التدفق المتوقع',
+                data: cfData,
+                backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
 }
 </script>
+<script>
+async function loadTraderPayouts() {
+    try {
+        const res = await fetch('/api/finance/trader-payouts');
+        const data = await res.json();
+        const container = document.getElementById('trader-payouts-list');
+        const rows = (data.payouts?.data ?? []).map(p => {
+            return `
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm text-gray-800">#${p.id}</td>
+                <td class="px-4 py-3 text-sm text-gray-800">${p.trader_id}</td>
+                <td class="px-4 py-3 text-sm text-gray-900 font-semibold">$${Number(p.amount ?? 0).toFixed(2)}</td>
+                <td class="px-4 py-3 text-sm text-gray-800">${p.status}</td>
+                <td class="px-4 py-3 text-sm text-gray-800">${p.reference_number ?? '-'}</td>
+                <td class="px-4 py-3 text-sm">
+                    <button onclick="approvePayout(${p.id})" class="bg-green-600 text-white px-3 py-1 rounded">موافقة</button>
+                    <button onclick="completePayout(${p.id})" class="bg-indigo-600 text-white px-3 py-1 rounded">إتمام</button>
+                </td>
+            </tr>`;
+        }).join('');
+        container.innerHTML = rows || `<tr><td colspan="6" class="px-4 py-6 text-center text-gray-500">لا توجد مدفوعات</td></tr>`;
+    } catch (e) {}
+}
+async function approvePayout(id) {
+    try {
+        const res = await fetch(`/api/finance/trader-payouts/${id}/approve`, { method: 'POST' });
+        await res.json();
+        await loadTraderPayouts();
+    } catch (e) {}
+}
+async function completePayout(id) {
+    const ref = prompt('مرجع العملية البنكية؟') || '';
+    if (!ref) return;
+    try {
+        const res = await fetch(`/api/finance/trader-payouts/${id}/complete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ transaction_reference: ref }) });
+        await res.json();
+        await loadTraderPayouts();
+    } catch (e) {}
+}
+document.addEventListener('DOMContentLoaded', () => loadTraderPayouts());
+</script>
+@endpush
+@push('content_after')
+<div class="bg-white rounded-2xl shadow-sm mt-8">
+    <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-gray-900">مدفوعات التجار</h3>
+        <span class="text-xs text-gray-500">واجهة قابلة للنقر</span>
+    </div>
+    <div class="p-6">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">#</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">التاجر</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">المبلغ</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الحالة</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">المرجع</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="trader-payouts-list" class="divide-y divide-gray-100"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
 @endpush

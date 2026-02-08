@@ -10,7 +10,7 @@ class Country extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'iso2', 'dial_code', 'flag'
+        'name', 'iso2', 'dial_code', 'flag',
     ];
 
     public $timestamps = false;

@@ -3,18 +3,17 @@
 namespace App\Http\Controllers\Legacy\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Role;
-use App\Models\Order;
-use Illuminate\Http\Request;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class UserManagementController extends Controller
 {
     public function index(Request $request)
     {
         // Check if user is admin
-        if (!auth()->user()->is_admin) {
+        if (! auth()->user()->is_admin) {
             abort(403, 'Unauthorized');
         }
 
@@ -29,11 +28,11 @@ class UserManagementController extends Controller
 
         // Search filter
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%')
-                  ->orWhere('phone', 'like', '%' . $request->search . '%')
-                  ->orWhere('mobile', 'like', '%' . $request->search . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%'.$request->search.'%')
+                    ->orWhere('email', 'like', '%'.$request->search.'%')
+                    ->orWhere('phone', 'like', '%'.$request->search.'%')
+                    ->orWhere('mobile', 'like', '%'.$request->search.'%');
             });
         }
 
@@ -52,6 +51,7 @@ class UserManagementController extends Controller
         $roles = Role::all();
 
         // Calculate stats
+        $sumCol = \Schema::hasColumn('orders', 'total_amount') ? 'total_amount' : (\Schema::hasColumn('orders', 'total') ? 'total' : 'subtotal');
         $stats = [
             'total' => User::count(),
             'workers' => User::whereNotNull('role_id')->count(),
@@ -65,20 +65,20 @@ class UserManagementController extends Controller
     public function show(User $user)
     {
         // Check if user is admin
-        if (!auth()->user()->is_admin) {
+        if (! auth()->user()->is_admin) {
             abort(403, 'Unauthorized');
         }
 
         $user->load([
-            'orders' => function($query) {
+            'orders' => function ($query) {
                 $query->latest()->take(10);
             },
-            'role'
+            'role',
         ]);
 
         $stats = [
             'total_orders' => $user->orders()->count(),
-            'total_spent' => $user->orders()->where('status', 'delivered')->sum('total'),
+            'total_spent' => $user->orders()->where('status', 'delivered')->sum($sumCol),
             'pending_orders' => $user->orders()->where('status', 'pending')->count(),
             'completed_orders' => $user->orders()->where('status', 'delivered')->count(),
         ];
@@ -89,7 +89,7 @@ class UserManagementController extends Controller
     public function toggleAdmin(User $user)
     {
         // Check if user is admin
-        if (!auth()->user()->is_admin) {
+        if (! auth()->user()->is_admin) {
             return back()->with('error', 'غير مصرح');
         }
 
@@ -97,7 +97,7 @@ class UserManagementController extends Controller
             return back()->with('error', 'لا يمكنك تعديل حسابك الخاص');
         }
 
-        $user->update(['is_admin' => !$user->is_admin]);
+        $user->update(['is_admin' => ! $user->is_admin]);
 
         return back()->with('success', 'تم تحديث صلاحيات المستخدم بنجاح');
     }
@@ -105,7 +105,7 @@ class UserManagementController extends Controller
     public function updateRole(Request $request, User $user)
     {
         // Check if user is admin
-        if (!auth()->user()->is_admin) {
+        if (! auth()->user()->is_admin) {
             return back()->with('error', 'غير مصرح');
         }
 
@@ -114,13 +114,13 @@ class UserManagementController extends Controller
         }
 
         $request->validate([
-            'role_id' => 'nullable|exists:roles,id'
+            'role_id' => 'nullable|exists:roles,id',
         ]);
 
         // Update role and admin status
         $user->update([
             'role_id' => $request->role_id,
-            'is_admin' => $request->role_id ? true : false
+            'is_admin' => $request->role_id ? true : false,
         ]);
 
         $roleName = $request->role_id ? Role::find($request->role_id)->display_name : 'عميل';
@@ -131,7 +131,7 @@ class UserManagementController extends Controller
     public function destroy(User $user)
     {
         // Check if user is admin
-        if (!auth()->user()->is_admin) {
+        if (! auth()->user()->is_admin) {
             return back()->with('error', 'غير مصرح');
         }
 

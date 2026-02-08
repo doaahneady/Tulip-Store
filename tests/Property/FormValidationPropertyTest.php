@@ -3,20 +3,18 @@
 namespace Tests\Property;
 
 use App\Http\Requests\Dashboard\BulkUserActionRequest;
-use App\Http\Requests\Dashboard\BulkOrderActionRequest;
-use App\Http\Requests\Dashboard\BulkStoreActionRequest;
-use App\Http\Requests\Dashboard\StoreEmployeeRequest;
-use App\Http\Requests\Dashboard\RecordAttendanceRequest;
 use App\Http\Requests\Dashboard\CalculatePayrollRequest;
+use App\Http\Requests\Dashboard\RecordAttendanceRequest;
+use App\Http\Requests\Dashboard\StoreEmployeeRequest;
 use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
 
 /**
  * Property-Based Tests for Form Validation Error Display
- * 
+ *
  * These tests verify that form validation correctly identifies invalid inputs
  * and returns appropriate error messages for each invalid field.
- * 
+ *
  * **Feature: dashboard-system-rebuild, Property 22: Form Validation Error Display**
  * **Validates: Requirements 15.2**
  */
@@ -41,7 +39,7 @@ class FormValidationPropertyTest extends TestCase
             // Non-integer user_ids
             ['action' => 'activate', 'user_ids' => ['a', 'b', 'c']],
         ];
-        
+
         return $invalidCases[array_rand($invalidCases)];
     }
 
@@ -127,7 +125,7 @@ class FormValidationPropertyTest extends TestCase
                 'gender' => 'invalid-gender',
             ],
         ];
-        
+
         return $invalidCases[array_rand($invalidCases)];
     }
 
@@ -154,7 +152,7 @@ class FormValidationPropertyTest extends TestCase
             // Notes too long
             ['employee_id' => 1, 'date' => '2024-01-01', 'status' => 'present', 'notes' => str_repeat('a', 501)],
         ];
-        
+
         return $invalidCases[array_rand($invalidCases)];
     }
 
@@ -185,7 +183,7 @@ class FormValidationPropertyTest extends TestCase
             // Non-numeric allowances
             ['employee_id' => 1, 'month' => '2024-01', 'allowances' => 'not-a-number'],
         ];
-        
+
         return $invalidCases[array_rand($invalidCases)];
     }
 
@@ -195,6 +193,7 @@ class FormValidationPropertyTest extends TestCase
     protected function getExpectedInvalidFields(array $data, array $rules): array
     {
         $validator = Validator::make($data, $rules);
+
         return array_keys($validator->errors()->toArray());
     }
 
@@ -209,31 +208,30 @@ class FormValidationPropertyTest extends TestCase
             if (is_string($rule)) {
                 // Remove exists and unique rules from string rules
                 $parts = explode('|', $rule);
-                $parts = array_filter($parts, fn($p) => 
-                    !str_starts_with($p, 'exists:') && 
-                    !str_starts_with($p, 'unique:')
+                $parts = array_filter($parts, fn ($p) => ! str_starts_with($p, 'exists:') &&
+                    ! str_starts_with($p, 'unique:')
                 );
                 $cleanRules[$field] = implode('|', $parts);
             } elseif (is_array($rule)) {
                 // Remove exists and unique rules from array rules
-                $cleanRules[$field] = array_filter($rule, fn($r) => 
-                    !is_string($r) || 
-                    (!str_starts_with($r, 'exists:') && !str_starts_with($r, 'unique:'))
+                $cleanRules[$field] = array_filter($rule, fn ($r) => ! is_string($r) ||
+                    (! str_starts_with($r, 'exists:') && ! str_starts_with($r, 'unique:'))
                 );
             } else {
                 $cleanRules[$field] = $rule;
             }
         }
+
         return $cleanRules;
     }
 
     /**
      * **Feature: dashboard-system-rebuild, Property 22: Form Validation Error Display**
      * **Validates: Requirements 15.2**
-     * 
+     *
      * *For any* form submission with invalid input, the response SHALL contain
      * error messages for each invalid field.
-     * 
+     *
      * @test
      */
     public function property_form_validation_returns_errors_for_invalid_fields(): void
@@ -242,40 +240,40 @@ class FormValidationPropertyTest extends TestCase
         for ($i = 0; $i < 100; $i++) {
             // Randomly select a form request type
             $formType = rand(0, 3);
-            
+
             switch ($formType) {
                 case 0:
                     $invalidData = $this->generateInvalidBulkUserData();
-                    $rules = $this->removeDbRules((new BulkUserActionRequest())->rules());
+                    $rules = $this->removeDbRules((new BulkUserActionRequest)->rules());
                     $formName = 'BulkUserAction';
                     break;
                 case 1:
                     $invalidData = $this->generateInvalidEmployeeData();
-                    $rules = $this->removeDbRules((new StoreEmployeeRequest())->rules());
+                    $rules = $this->removeDbRules((new StoreEmployeeRequest)->rules());
                     $formName = 'StoreEmployee';
                     break;
                 case 2:
                     $invalidData = $this->generateInvalidAttendanceData();
-                    $rules = $this->removeDbRules((new RecordAttendanceRequest())->rules());
+                    $rules = $this->removeDbRules((new RecordAttendanceRequest)->rules());
                     $formName = 'RecordAttendance';
                     break;
                 case 3:
                     $invalidData = $this->generateInvalidPayrollData();
-                    $rules = $this->removeDbRules((new CalculatePayrollRequest())->rules());
+                    $rules = $this->removeDbRules((new CalculatePayrollRequest)->rules());
                     $formName = 'CalculatePayroll';
                     break;
             }
-            
+
             // Create validator with the invalid data
             $validator = Validator::make($invalidData, $rules);
-            
+
             // Assert: Validation should fail
             $this->assertTrue(
                 $validator->fails(),
-                "Iteration $i ($formName): Validation should fail for invalid data: " . 
+                "Iteration $i ($formName): Validation should fail for invalid data: ".
                 json_encode($invalidData)
             );
-            
+
             // Assert: There should be at least one error message
             $errors = $validator->errors();
             $this->assertGreaterThan(
@@ -283,7 +281,7 @@ class FormValidationPropertyTest extends TestCase
                 $errors->count(),
                 "Iteration $i ($formName): Should have at least one error message"
             );
-            
+
             // Assert: Each error should have a non-empty message
             foreach ($errors->all() as $message) {
                 $this->assertNotEmpty(
@@ -300,7 +298,7 @@ class FormValidationPropertyTest extends TestCase
 
     /**
      * Property test: Valid data should pass validation
-     * 
+     *
      * @test
      */
     public function property_valid_data_passes_validation(): void
@@ -312,16 +310,16 @@ class FormValidationPropertyTest extends TestCase
                 'action' => ['activate', 'deactivate', 'verify', 'delete'][rand(0, 3)],
                 'user_ids' => [rand(1, 1000), rand(1, 1000)],
             ];
-            
-            $rules = (new BulkUserActionRequest())->rules();
+
+            $rules = (new BulkUserActionRequest)->rules();
             // Remove the exists rule for this test since we don't have a database
             $rules['user_ids.*'] = 'integer';
-            
+
             $validator = Validator::make($validBulkUserData, $rules);
-            
+
             $this->assertFalse(
                 $validator->fails(),
-                "Iteration $i: Valid BulkUserAction data should pass validation. Errors: " . 
+                "Iteration $i: Valid BulkUserAction data should pass validation. Errors: ".
                 json_encode($validator->errors()->toArray())
             );
         }
@@ -329,7 +327,7 @@ class FormValidationPropertyTest extends TestCase
 
     /**
      * Property test: Custom error messages are returned
-     * 
+     *
      * @test
      */
     public function property_custom_error_messages_are_returned(): void
@@ -338,18 +336,18 @@ class FormValidationPropertyTest extends TestCase
         for ($i = 0; $i < 100; $i++) {
             // Test BulkUserActionRequest with missing action
             $invalidData = ['user_ids' => [1, 2, 3]];
-            $request = new BulkUserActionRequest();
+            $request = new BulkUserActionRequest;
             $rules = $this->removeDbRules($request->rules());
             $messages = $request->messages();
-            
+
             $validator = Validator::make($invalidData, $rules, $messages);
-            
+
             $this->assertTrue($validator->fails());
-            
+
             // Check that the custom message is used
             $actionErrors = $validator->errors()->get('action');
             $this->assertNotEmpty($actionErrors);
-            
+
             // The error message should be the custom one
             $this->assertStringContainsString(
                 'select an action',
@@ -361,7 +359,7 @@ class FormValidationPropertyTest extends TestCase
 
     /**
      * Property test: Each invalid field has exactly one primary error
-     * 
+     *
      * @test
      */
     public function property_each_invalid_field_has_error_message(): void
@@ -375,14 +373,14 @@ class FormValidationPropertyTest extends TestCase
                 'email' => 'invalid-email', // Invalid format
                 'salary' => -100, // Negative value
             ];
-            
-            $rules = $this->removeDbRules((new StoreEmployeeRequest())->rules());
+
+            $rules = $this->removeDbRules((new StoreEmployeeRequest)->rules());
             $validator = Validator::make($invalidData, $rules);
-            
+
             $this->assertTrue($validator->fails());
-            
+
             $errors = $validator->errors();
-            
+
             // Each invalid field should have at least one error
             $invalidFields = ['employee_code', 'first_name', 'email', 'salary'];
             foreach ($invalidFields as $field) {

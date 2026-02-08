@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Form Request for marking payroll as paid
- * 
+ *
  * @see Requirements 10.4, 15.2
  */
 class MarkPayrollPaidRequest extends FormRequest

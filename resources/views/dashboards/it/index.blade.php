@@ -1,543 +1,477 @@
-@extends('dashboards.layouts.app', ['title' => 'IT/DevOps Dashboard', 'subtitle' => 'System Health & Infrastructure Monitoring'])
-
+@extends('dashboards.layouts.app')
 @section('content')
-<!-- System Health Overview -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <!-- Overall System Health -->
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">System Health</p>
-                    <h3 class="text-2xl font-semibold text-gray-900">{{ $metrics['system_health'] ?? 99.8 }}%</h3>
-                    <div class="flex items-center gap-1 mt-1">
-                        <span class="text-success-600 text-sm font-medium">
-                            <i class="fas fa-check-circle text-xs"></i>
-                            All systems operational
-                        </span>
-                    </div>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-success-50 text-success-600 flex items-center justify-center">
-                    <i class="fas fa-heartbeat text-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
+@php $title = 'لوحة تقنية المعلومات'; $subtitle = 'مراقبة النظام والأداء والأمان'; @endphp
 
-    <!-- Server Uptime -->
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Server Uptime</p>
-                    <h3 class="text-2xl font-semibold text-gray-900">{{ $metrics['uptime_days'] ?? 47 }}d</h3>
-                    <div class="flex items-center gap-1 mt-1">
-                        <span class="text-success-600 text-sm font-medium">
-                            99.9% availability
-                        </span>
-                    </div>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
-                    <i class="fas fa-server text-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Active Alerts -->
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Active Alerts</p>
-                    <h3 class="text-2xl font-semibold text-gray-900">{{ $metrics['active_alerts'] ?? 2 }}</h3>
-                    <div class="flex items-center gap-1 mt-1">
-                        <span class="text-warning-600 text-sm font-medium">
-                            <i class="fas fa-exclamation-triangle text-xs"></i>
-                            1 critical, 1 warning
-                        </span>
-                    </div>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-warning-50 text-warning-600 flex items-center justify-center">
-                    <i class="fas fa-bell text-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Response Time -->
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Avg Response Time</p>
-                    <h3 class="text-2xl font-semibold text-gray-900">{{ $metrics['response_time'] ?? 145 }}ms</h3>
-                    <div class="flex items-center gap-1 mt-1">
-                        <span class="text-success-600 text-sm font-medium flex items-center gap-1">
-                            <i class="fas fa-arrow-down text-xs"></i>
-                            -12ms from yesterday
-                        </span>
-                    </div>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                    <i class="fas fa-tachometer-alt text-lg"></i>
-                </div>
-            </div>
-        </div>
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center gap-2">
+        <a href="{{ route('dashboard.it.system-health') }}" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition">
+            <i class="fas fa-heartbeat"></i>
+            <span>System Health</span>
+        </a>
+        <a href="{{ route('dashboard.it.logs') }}" class="inline-flex items-center gap-2 bg-slate-700 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition">
+            <i class="fas fa-file-alt"></i>
+            <span>Logs</span>
+        </a>
+        <a href="{{ route('dashboard.it.api-errors') }}" class="inline-flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-xl hover:bg-amber-700 transition">
+            <i class="fas fa-bug"></i>
+            <span>API Errors</span>
+        </a>
+        <a href="{{ route('dashboard.it.database') }}" class="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition">
+            <i class="fas fa-database"></i>
+            <span>Database</span>
+        </a>
+        <a href="{{ route('dashboard.it.backups') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span>Backups</span>
+        </a>
+        <a href="{{ route('dashboard.administrative-approvals.index') }}" class="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition">
+            <i class="fas fa-clipboard-check"></i>
+            <span>الموافقات الإدارية</span>
+        </a>
+        <a href="{{ route('dashboard.my-attendance.index') }}" class="inline-flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-xl hover:bg-teal-700 transition">
+            <i class="fas fa-user-clock"></i>
+            <span>حضوري</span>
+        </a>
     </div>
 </div>
 
-<!-- Main Dashboard Grid -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-    <!-- System Performance Chart -->
-    <div class="lg:col-span-2">
-        <div class="card">
-            <div class="card-header">
-                <div class="flex items-center justify-between">
-                    <h3 class="card-title">System Performance Metrics</h3>
-                    <div class="flex items-center gap-2">
-                        <select class="form-select text-sm" id="performance-metric">
-                            <option value="cpu">CPU Usage</option>
-                            <option value="memory">Memory Usage</option>
-                            <option value="disk">Disk I/O</option>
-                            <option value="network">Network Traffic</option>
-                        </select>
-                        <select class="form-select text-sm" id="performance-period">
-                            <option value="1h">Last Hour</option>
-                            <option value="24h" selected>Last 24 Hours</option>
-                            <option value="7d">Last 7 Days</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <canvas id="performanceChart" height="300"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- System Alerts -->
-    <div>
-        <div class="card">
-            <div class="card-header">
-                <div class="flex items-center justify-between">
-                    <h3 class="card-title">System Alerts</h3>
-                    <button class="btn btn-ghost btn-sm" onclick="refreshAlerts()">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="card-body p-0">
-                @php
-                    $alerts = [
-                        ['level' => 'critical', 'service' => 'Email Service', 'message' => 'High response time detected', 'time' => '5 minutes ago'],
-                        ['level' => 'warning', 'service' => 'Database', 'message' => 'Connection pool 80% full', 'time' => '12 minutes ago'],
-                        ['level' => 'info', 'service' => 'Cache', 'message' => 'Memory usage normal', 'time' => '1 hour ago'],
-                        ['level' => 'warning', 'service' => 'File Storage', 'message' => 'Disk usage at 75%', 'time' => '2 hours ago'],
-                    ];
-                @endphp
-                @foreach($alerts as $alert)
-                <div class="flex items-center gap-3 p-4 border-b border-gray-100 last:border-b-0">
-                    <div class="w-3 h-3 rounded-full 
-                        @if($alert['level'] === 'critical') bg-error-500
-                        @elseif($alert['level'] === 'warning') bg-warning-500
-                        @else bg-success-500
-                        @endif"></div>
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between">
-                            <span class="font-medium text-gray-900 text-sm">{{ $alert['service'] }}</span>
-                            <span class="text-xs text-gray-500">{{ $alert['time'] }}</span>
-                        </div>
-                        <p class="text-gray-600 text-xs mt-1">{{ $alert['message'] }}</p>
-                        <span class="badge 
-                            @if($alert['level'] === 'critical') badge-error
-                            @elseif($alert['level'] === 'warning') badge-warning
-                            @else badge-success
-                            @endif text-xs mt-1">
-                            {{ ucfirst($alert['level']) }}
-                        </span>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
+<!-- System Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
+    <x-dashboard.stat-card title="المستخدمين" :value="number_format($systemMetrics['total_users'])" icon="fas fa-users" color="blue" />
+    <x-dashboard.stat-card title="الموظفين" :value="number_format($systemMetrics['total_employees'])" icon="fas fa-user-tie" color="purple" />
+    <x-dashboard.stat-card title="المنتجات" :value="number_format($systemMetrics['total_products'])" icon="fas fa-box" color="green" />
+    <x-dashboard.stat-card title="الطلبات" :value="number_format($systemMetrics['total_orders'])" icon="fas fa-shopping-cart" color="orange" />
+    <x-dashboard.stat-card title="السائقين" :value="number_format($systemMetrics['total_drivers'])" icon="fas fa-truck" color="indigo" />
+    <x-dashboard.stat-card title="حجم قاعدة البيانات" :value="$systemMetrics['database_size']" icon="fas fa-database" color="red" />
 </div>
 
-<!-- Services Status & Database Health -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-    <!-- Services Status -->
-    <div class="card">
-        <div class="card-header">
-            <div class="flex items-center justify-between">
-                <h3 class="card-title">Service Status</h3>
-                <div class="flex items-center gap-2">
-                    <span class="text-xs text-gray-500">Last updated: {{ now()->format('H:i:s') }}</span>
-                    <button class="btn btn-ghost btn-sm" onclick="refreshServices()">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                </div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+    <x-dashboard.stat-card title="مدة التشغيل" :value="$metrics['system_uptime'] ?? 'N/A'" icon="fas fa-clock" color="gray" />
+    <x-dashboard.stat-card title="استخدام CPU" :value="isset($metrics['cpu_usage']) ? (number_format($metrics['cpu_usage'],1).'%' ) : 'N/A'" icon="fas fa-microchip" color="orange" />
+    <x-dashboard.stat-card title="استخدام الذاكرة" :value="isset($metrics['memory_usage']) ? (number_format($metrics['memory_usage'],1).'%' ) : 'N/A'" icon="fas fa-memory" color="purple" />
+    <x-dashboard.stat-card title="استخدام القرص" :value="isset($metrics['disk_usage']) ? (number_format($metrics['disk_usage'],1).'%' ) : 'N/A'" icon="fas fa-hdd" color="teal" />
+    <x-dashboard.stat-card title="شبكة" :value="$metrics['network_throughput'] ?? 'N/A'" icon="fas fa-network-wired" color="blue" />
+    </div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <!-- User Activity Today -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-chart-line text-blue-500 ml-2"></i>نشاط اليوم</h3>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between p-3 bg-blue-50 rounded-xl">
+                <span class="text-gray-600">تسجيلات جديدة</span>
+                <span class="font-bold text-blue-600">{{ $userActivity['new_registrations'] }}</span>
             </div>
-        </div>
-        <div class="card-body">
-            @php
-                $services = [
-                    ['name' => 'Web Server (Nginx)', 'status' => 'online', 'response_time' => '45ms', 'uptime' => '99.9%', 'cpu' => '12%', 'memory' => '2.1GB'],
-                    ['name' => 'Application Server', 'status' => 'online', 'response_time' => '89ms', 'uptime' => '99.8%', 'cpu' => '35%', 'memory' => '4.2GB'],
-                    ['name' => 'Database (PostgreSQL)', 'status' => 'online', 'response_time' => '12ms', 'uptime' => '99.9%', 'cpu' => '18%', 'memory' => '8.1GB'],
-                    ['name' => 'Redis Cache', 'status' => 'online', 'response_time' => '3ms', 'uptime' => '99.9%', 'cpu' => '5%', 'memory' => '512MB'],
-                    ['name' => 'Payment Gateway', 'status' => 'online', 'response_time' => '120ms', 'uptime' => '99.7%', 'cpu' => 'N/A', 'memory' => 'N/A'],
-                    ['name' => 'Email Service', 'status' => 'degraded', 'response_time' => '2.1s', 'uptime' => '98.5%', 'cpu' => 'N/A', 'memory' => 'N/A'],
-                ];
-            @endphp
-            <div class="space-y-3">
-                @foreach($services as $service)
-                <div class="p-3 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-3">
-                            <div class="w-3 h-3 rounded-full 
-                                @if($service['status'] === 'online') bg-success-500
-                                @elseif($service['status'] === 'degraded') bg-warning-500
-                                @else bg-error-500
-                                @endif"></div>
-                            <span class="font-medium text-gray-900">{{ $service['name'] }}</span>
-                        </div>
-                        <span class="badge 
-                            @if($service['status'] === 'online') badge-success
-                            @elseif($service['status'] === 'degraded') badge-warning
-                            @else badge-error
-                            @endif">
-                            {{ ucfirst($service['status']) }}
-                        </span>
-                    </div>
-                    <div class="grid grid-cols-4 gap-4 text-sm">
-                        <div>
-                            <span class="text-gray-500">Response:</span>
-                            <div class="font-medium">{{ $service['response_time'] }}</div>
-                        </div>
-                        <div>
-                            <span class="text-gray-500">Uptime:</span>
-                            <div class="font-medium">{{ $service['uptime'] }}</div>
-                        </div>
-                        <div>
-                            <span class="text-gray-500">CPU:</span>
-                            <div class="font-medium">{{ $service['cpu'] }}</div>
-                        </div>
-                        <div>
-                            <span class="text-gray-500">Memory:</span>
-                            <div class="font-medium">{{ $service['memory'] }}</div>
-                        </div>
-                    </div>
-                </div>
-                @endforeach
+            <div class="flex items-center justify-between p-3 bg-green-50 rounded-xl">
+                <span class="text-gray-600">تسجيلات هذا الأسبوع</span>
+                <span class="font-bold text-green-600">{{ $userActivity['new_this_week'] }}</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-purple-50 rounded-xl">
+                <span class="text-gray-600">موظفين نشطين اليوم</span>
+                <span class="font-bold text-purple-600">{{ $userActivity['active_employees'] }}</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-orange-50 rounded-xl">
+                <span class="text-gray-600">طلبات اليوم</span>
+                <span class="font-bold text-orange-600">{{ $userActivity['orders_today'] }}</span>
             </div>
         </div>
     </div>
 
-    <!-- Database Health -->
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Database Health</h3>
-        </div>
-        <div class="card-body">
-            <!-- Database Metrics -->
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="p-3 bg-gray-50 rounded-lg">
-                    <div class="text-sm text-gray-600">Active Connections</div>
-                    <div class="text-xl font-semibold text-gray-900">{{ $metrics['db_connections'] ?? 45 }}/100</div>
-                </div>
-                <div class="p-3 bg-gray-50 rounded-lg">
-                    <div class="text-sm text-gray-600">Query Performance</div>
-                    <div class="text-xl font-semibold text-gray-900">{{ $metrics['avg_query_time'] ?? 12 }}ms</div>
-                </div>
-                <div class="p-3 bg-gray-50 rounded-lg">
-                    <div class="text-sm text-gray-600">Cache Hit Ratio</div>
-                    <div class="text-xl font-semibold text-gray-900">{{ $metrics['cache_hit_ratio'] ?? 98.5 }}%</div>
-                </div>
-                <div class="p-3 bg-gray-50 rounded-lg">
-                    <div class="text-sm text-gray-600">Database Size</div>
-                    <div class="text-xl font-semibold text-gray-900">{{ $metrics['db_size'] ?? '2.4' }}GB</div>
-                </div>
-            </div>
-
-            <!-- Recent Backups -->
-            <div class="mb-4">
-                <h4 class="font-medium text-gray-900 mb-3">Recent Backups</h4>
-                <div class="space-y-2">
-                    @php
-                        $backups = [
-                            ['type' => 'Full Backup', 'size' => '2.4GB', 'time' => '2 hours ago', 'status' => 'success'],
-                            ['type' => 'Incremental', 'size' => '45MB', 'time' => '6 hours ago', 'status' => 'success'],
-                            ['type' => 'Full Backup', 'size' => '2.3GB', 'time' => '1 day ago', 'status' => 'success'],
-                        ];
-                    @endphp
-                    @foreach($backups as $backup)
-                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-database text-primary-600 text-sm"></i>
-                            <span class="text-sm font-medium">{{ $backup['type'] }}</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-sm text-gray-600">
-                            <span>{{ $backup['size'] }}</span>
-                            <span>{{ $backup['time'] }}</span>
-                            <i class="fas fa-check-circle text-success-600"></i>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="flex gap-2">
-                <button class="btn btn-sm btn-primary" onclick="createBackup()">
-                    <i class="fas fa-save"></i>
-                    Create Backup
-                </button>
-                <button class="btn btn-sm btn-secondary" onclick="optimizeDatabase()">
-                    <i class="fas fa-cog"></i>
-                    Optimize
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Recent Deployments & Error Logs -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <!-- Recent Deployments -->
-    <div class="card">
-        <div class="card-header">
-            <div class="flex items-center justify-between">
-                <h3 class="card-title">Recent Deployments</h3>
-                <a href="{{ route('dashboard.it.deployments') }}" class="btn btn-ghost btn-sm">
-                    View All
-                    <i class="fas fa-arrow-right text-xs ml-1"></i>
-                </a>
-            </div>
-        </div>
-        <div class="card-body p-0">
-            @php
-                $deployments = [
-                    ['version' => 'v2.4.1', 'environment' => 'Production', 'status' => 'completed', 'deployed_by' => 'Mike IT', 'time' => '2 hours ago'],
-                    ['version' => 'v2.4.0', 'environment' => 'Staging', 'status' => 'completed', 'deployed_by' => 'Sarah Dev', 'time' => '1 day ago'],
-                    ['version' => 'v2.3.9', 'environment' => 'Production', 'status' => 'rolled_back', 'deployed_by' => 'Tom Lead', 'time' => '3 days ago'],
-                    ['version' => 'v2.3.8', 'environment' => 'Production', 'status' => 'completed', 'deployed_by' => 'Mike IT', 'time' => '1 week ago'],
-                ];
-            @endphp
-            @foreach($deployments as $deployment)
-            <div class="flex items-center justify-between p-4 border-b border-gray-100 last:border-b-0">
+    <!-- System Services -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-server text-green-500 ml-2"></i>حالة الخدمات</h3>
+        <div class="space-y-3">
+            @foreach($systemServices as $service)
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg 
-                        @if($deployment['status'] === 'completed') bg-success-100 text-success-600
-                        @elseif($deployment['status'] === 'rolled_back') bg-error-100 text-error-600
-                        @else bg-warning-100 text-warning-600
-                        @endif
-                        flex items-center justify-center">
-                        @if($deployment['status'] === 'completed')
-                            <i class="fas fa-check text-sm"></i>
-                        @elseif($deployment['status'] === 'rolled_back')
-                            <i class="fas fa-undo text-sm"></i>
-                        @else
-                            <i class="fas fa-clock text-sm"></i>
-                        @endif
-                    </div>
-                    <div>
-                        <div class="font-medium text-gray-900">{{ $deployment['version'] }}</div>
-                        <div class="text-sm text-gray-600">{{ $deployment['environment'] }} • {{ $deployment['deployed_by'] }}</div>
-                    </div>
+                    <div class="w-3 h-3 rounded-full {{ $service->status == 'running' ? 'bg-green-500' : ($service->status == 'stopped' ? 'bg-red-500' : 'bg-yellow-500') }}"></div>
+                    <span class="text-gray-700">{{ $service->display_name ?? $service->name }}</span>
                 </div>
-                <div class="text-right">
-                    <span class="badge 
-                        @if($deployment['status'] === 'completed') badge-success
-                        @elseif($deployment['status'] === 'rolled_back') badge-error
-                        @else badge-warning
-                        @endif">
-                        {{ ucfirst(str_replace('_', ' ', $deployment['status'])) }}
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-500">{{ $service->uptime ?? 'N/A' }}</span>
+                    <span class="px-2 py-1 text-xs rounded-lg {{ $service->status == 'running' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                        {{ $service->status == 'running' ? 'يعمل' : 'متوقف' }}
                     </span>
-                    <div class="text-xs text-gray-500 mt-1">{{ $deployment['time'] }}</div>
                 </div>
             </div>
             @endforeach
         </div>
     </div>
 
-    <!-- Error Logs -->
-    <div class="card">
-        <div class="card-header">
-            <div class="flex items-center justify-between">
-                <h3 class="card-title">Recent Error Logs</h3>
-                <a href="{{ route('dashboard.it.logs') }}" class="btn btn-ghost btn-sm">
-                    View All
-                    <i class="fas fa-arrow-right text-xs ml-1"></i>
-                </a>
-            </div>
-        </div>
-        <div class="card-body p-0">
-            @php
-                $errorLogs = [
-                    ['level' => 'error', 'message' => 'Payment gateway timeout', 'file' => 'PaymentService.php:142', 'time' => '5 minutes ago'],
-                    ['level' => 'warning', 'message' => 'High memory usage detected', 'file' => 'MemoryMonitor.php:89', 'time' => '15 minutes ago'],
-                    ['level' => 'error', 'message' => 'Database connection failed', 'file' => 'DatabaseManager.php:67', 'time' => '1 hour ago'],
-                    ['level' => 'critical', 'message' => 'Email service unavailable', 'file' => 'EmailService.php:234', 'time' => '2 hours ago'],
-                    ['level' => 'warning', 'message' => 'Slow query detected', 'file' => 'QueryLogger.php:45', 'time' => '3 hours ago'],
-                ];
-            @endphp
-            @foreach($errorLogs as $log)
-            <div class="p-4 border-b border-gray-100 last:border-b-0">
-                <div class="flex items-start gap-3">
-                    <div class="w-2 h-2 rounded-full mt-2 
-                        @if($log['level'] === 'critical') bg-error-500
-                        @elseif($log['level'] === 'error') bg-error-400
-                        @elseif($log['level'] === 'warning') bg-warning-500
-                        @else bg-gray-400
-                        @endif"></div>
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between">
-                            <span class="badge 
-                                @if($log['level'] === 'critical') badge-error
-                                @elseif($log['level'] === 'error') badge-error
-                                @elseif($log['level'] === 'warning') badge-warning
-                                @else badge-gray
-                                @endif text-xs">
-                                {{ ucfirst($log['level']) }}
-                            </span>
-                            <span class="text-xs text-gray-500">{{ $log['time'] }}</span>
-                        </div>
-                        <p class="font-medium text-gray-900 text-sm mt-1">{{ $log['message'] }}</p>
-                        <p class="text-xs text-gray-600 mt-1">{{ $log['file'] }}</p>
-                    </div>
+    <!-- Backup Status -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-cloud-upload-alt text-indigo-500 ml-2"></i>النسخ الاحتياطية</h3>
+        <div class="space-y-4">
+            <div class="grid grid-cols-3 gap-3 text-center">
+                <div class="p-3 bg-blue-50 rounded-xl">
+                    <p class="text-2xl font-bold text-blue-600">{{ $backupStats['total'] }}</p>
+                    <p class="text-xs text-gray-500">الإجمالي</p>
+                </div>
+                <div class="p-3 bg-green-50 rounded-xl">
+                    <p class="text-2xl font-bold text-green-600">{{ $backupStats['completed'] }}</p>
+                    <p class="text-xs text-gray-500">مكتمل</p>
+                </div>
+                <div class="p-3 bg-red-50 rounded-xl">
+                    <p class="text-2xl font-bold text-red-600">{{ $backupStats['failed'] }}</p>
+                    <p class="text-xs text-gray-500">فشل</p>
                 </div>
             </div>
-            @endforeach
+            @if($backupStats['last_backup'])
+            <div class="p-3 bg-gray-50 rounded-xl">
+                <p class="text-xs text-gray-500">آخر نسخة احتياطية</p>
+                <p class="font-semibold text-gray-800">{{ $backupStats['last_backup']->backup_name }}</p>
+                <p class="text-xs text-gray-500">{{ $backupStats['last_backup']->completed_at?->diffForHumans() ?? 'N/A' }}</p>
+            </div>
+            @endif
         </div>
     </div>
 </div>
-@endsection
 
-@push('scripts')
+<!-- Charts Row -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Daily Traffic Chart -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-chart-area text-blue-500 ml-2"></i>حركة المرور (آخر 7 أيام)</h3>
+        <canvas id="trafficChart" height="200"></canvas>
+    </div>
+
+    <!-- Orders by Status -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-chart-pie text-purple-500 ml-2"></i>حالة الطلبات</h3>
+        <canvas id="ordersChart" height="200"></canvas>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-tachometer-alt text-orange-500 ml-2"></i>أداء واجهة API</h3>
+        <div class="grid grid-cols-3 gap-3">
+            <div class="p-3 bg-purple-50 rounded-xl text-center">
+                <p class="text-xl font-bold text-purple-600">{{ number_format($apiStats['avg_response_time'] ?? 0, 0) }}ms</p>
+                <p class="text-xs text-gray-500">متوسط الاستجابة</p>
+            </div>
+            <div class="p-3 bg-green-50 rounded-xl text-center">
+                @php $success = isset($metrics['error_rate_24h']) ? max(0, 100 - $metrics['error_rate_24h']) : null; @endphp
+                <p class="text-xl font-bold text-green-600">{{ $success !== null ? (number_format($success, 1).'%') : 'N/A' }}</p>
+                <p class="text-xs text-gray-500">نسبة النجاح</p>
+            </div>
+            <div class="p-3 bg-red-50 rounded-xl text-center">
+                <p class="text-xl font-bold text-red-600">{{ $metrics['slow_queries_today'] ?? 0 }}</p>
+                <p class="text-xs text-gray-500">استعلامات بطيئة اليوم</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-bug text-red-500 ml-2"></i>مراقبة الأخطاء</h3>
+        <div class="space-y-2 max-h-48 overflow-y-auto">
+            @php $recentErrors = ($systemLogs ?? collect())->where('level','error')->take(10); @endphp
+            @forelse($recentErrors as $log)
+            <div class="flex items-start gap-3 p-3 bg-red-50 rounded-lg">
+                <div class="w-2 h-2 mt-2 rounded-full bg-red-500"></div>
+                <div class="flex-1">
+                    <p class="text-sm text-gray-800">{{ Str::limit($log->message, 80) }}</p>
+                    <p class="text-xs text-gray-500">{{ $log->created_at->diffForHumans() }} - {{ $log->channel ?? 'system' }}</p>
+                </div>
+            </div>
+            @empty
+            <p class="text-center text-gray-500 py-4">لا توجد أخطاء حديثة</p>
+            @endforelse
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-code-branch text-indigo-500 ml-2"></i>النشر والإصدارات</h3>
+        <div class="grid grid-cols-3 gap-3">
+            <div class="p-3 bg-blue-50 rounded-xl text-center">
+                <p class="text-xl font-bold text-blue-600">{{ $metrics['deployments_this_month'] ?? 0 }}</p>
+                <p class="text-xs text-gray-500">نشـر هذا الشهر</p>
+            </div>
+            <div class="p-3 bg-green-50 rounded-xl text-center">
+                <p class="text-xl font-bold text-green-600">{{ isset($metrics['deployment_success_rate']) ? (number_format($metrics['deployment_success_rate'],1).'%') : 'N/A' }}</p>
+                <p class="text-xs text-gray-500">معدل النجاح</p>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-xl text-center">
+                <p class="text-sm font-semibold text-gray-700">{{ optional($metrics['last_deployment'])->diffForHumans() ?? 'N/A' }}</p>
+                <p class="text-xs text-gray-500">آخر نشر</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Security Stats -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-shield-alt text-red-500 ml-2"></i>إحصائيات الأمان</h3>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="p-4 bg-blue-50 rounded-xl text-center">
+                <p class="text-2xl font-bold text-blue-600">{{ number_format($securityStats['total_events']) }}</p>
+                <p class="text-xs text-gray-500">إجمالي الأحداث</p>
+            </div>
+            <div class="p-4 bg-green-50 rounded-xl text-center">
+                <p class="text-2xl font-bold text-green-600">{{ $securityStats['today_events'] }}</p>
+                <p class="text-xs text-gray-500">أحداث اليوم</p>
+            </div>
+            <div class="p-4 bg-yellow-50 rounded-xl text-center">
+                <p class="text-2xl font-bold text-yellow-600">{{ $securityStats['failed_logins'] }}</p>
+                <p class="text-xs text-gray-500">محاولات فاشلة</p>
+            </div>
+            <div class="p-4 bg-red-50 rounded-xl text-center">
+                <p class="text-2xl font-bold text-red-600">{{ $securityStats['high_risk'] }}</p>
+                <p class="text-xs text-gray-500">مخاطر عالية</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Stats -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-file-alt text-orange-500 ml-2"></i>إحصائيات السجلات</h3>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="p-4 bg-blue-50 rounded-xl text-center">
+                <p class="text-2xl font-bold text-blue-600">{{ number_format($logStats['total']) }}</p>
+                <p class="text-xs text-gray-500">إجمالي السجلات</p>
+            </div>
+            <div class="p-4 bg-green-50 rounded-xl text-center">
+                <p class="text-2xl font-bold text-green-600">{{ $logStats['today'] }}</p>
+                <p class="text-xs text-gray-500">سجلات اليوم</p>
+            </div>
+            <div class="p-4 bg-yellow-50 rounded-xl text-center">
+                <p class="text-2xl font-bold text-yellow-600">{{ $logStats['warnings'] }}</p>
+                <p class="text-xs text-gray-500">تحذيرات</p>
+            </div>
+            <div class="p-4 bg-red-50 rounded-xl text-center">
+                <p class="text-2xl font-bold text-red-600">{{ $logStats['errors'] }}</p>
+                <p class="text-xs text-gray-500">أخطاء</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Recent Security Logs -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-lock text-indigo-500 ml-2"></i>سجلات الأمان الأخيرة</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-right text-xs text-gray-500 border-b">
+                        <th class="pb-3">الحدث</th>
+                        <th class="pb-3">الحالة</th>
+                        <th class="pb-3">IP</th>
+                        <th class="pb-3">الوقت</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    @forelse($securityLogs as $log)
+                    <tr class="border-b border-gray-50">
+                        <td class="py-3">{{ $log->event_type }}</td>
+                        <td class="py-3">
+                            <span class="px-2 py-1 text-xs rounded-lg {{ $log->status == 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                {{ $log->status == 'success' ? 'نجاح' : 'فشل' }}
+                            </span>
+                        </td>
+                        <td class="py-3 text-gray-500">{{ $log->ip_address ?? 'N/A' }}</td>
+                        <td class="py-3 text-gray-500">{{ $log->created_at->diffForHumans() }}</td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="4" class="py-4 text-center text-gray-500">لا توجد سجلات</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- System Logs -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-terminal text-gray-500 ml-2"></i>سجلات النظام</h3>
+        <div class="space-y-2 max-h-80 overflow-y-auto">
+            @forelse($systemLogs as $log)
+            <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                <div class="w-2 h-2 mt-2 rounded-full {{ $log->level == 'error' ? 'bg-red-500' : ($log->level == 'warning' ? 'bg-yellow-500' : 'bg-green-500') }}"></div>
+                <div class="flex-1">
+                    <p class="text-sm text-gray-800">{{ Str::limit($log->message, 60) }}</p>
+                    <p class="text-xs text-gray-500">{{ $log->created_at->diffForHumans() }} - {{ $log->action ?? 'system' }}</p>
+                </div>
+            </div>
+            @empty
+            <p class="text-center text-gray-500 py-4">لا توجد سجلات</p>
+            @endforelse
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- API Errors -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-exclamation-triangle text-yellow-500 ml-2"></i>أخطاء API</h3>
+        <div class="grid grid-cols-3 gap-3 mb-4">
+            <div class="p-3 bg-blue-50 rounded-xl text-center">
+                <p class="text-xl font-bold text-blue-600">{{ $apiStats['total_errors'] }}</p>
+                <p class="text-xs text-gray-500">الإجمالي</p>
+            </div>
+            <div class="p-3 bg-orange-50 rounded-xl text-center">
+                <p class="text-xl font-bold text-orange-600">{{ $apiStats['today_errors'] }}</p>
+                <p class="text-xs text-gray-500">اليوم</p>
+            </div>
+            <div class="p-3 bg-purple-50 rounded-xl text-center">
+                <p class="text-xl font-bold text-purple-600">{{ number_format($apiStats['avg_response_time'], 0) }}ms</p>
+                <p class="text-xs text-gray-500">متوسط الاستجابة</p>
+            </div>
+        </div>
+        <div class="space-y-2 max-h-48 overflow-y-auto">
+            @forelse($apiErrors as $error)
+            <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-sm">
+                <span class="text-gray-700">{{ Str::limit($error->endpoint, 30) }}</span>
+                <span class="px-2 py-1 text-xs rounded bg-red-100 text-red-700">{{ $error->status_code }}</span>
+            </div>
+            @empty
+            <p class="text-center text-gray-500 py-4">لا توجد أخطاء</p>
+            @endforelse
+        </div>
+    </div>
+
+    <!-- Slow Queries -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-clock text-red-500 ml-2"></i>الاستعلامات البطيئة</h3>
+        <div class="grid grid-cols-3 gap-3 mb-4">
+            <div class="p-3 bg-blue-50 rounded-xl text-center">
+                <p class="text-xl font-bold text-blue-600">{{ $queryStats['total'] }}</p>
+                <p class="text-xs text-gray-500">الإجمالي</p>
+            </div>
+            <div class="p-3 bg-yellow-50 rounded-xl text-center">
+                <p class="text-xl font-bold text-yellow-600">{{ $queryStats['unoptimized'] }}</p>
+                <p class="text-xs text-gray-500">غير محسّن</p>
+            </div>
+            <div class="p-3 bg-red-50 rounded-xl text-center">
+                <p class="text-xl font-bold text-red-600">{{ $queryStats['critical'] }}</p>
+                <p class="text-xs text-gray-500">حرج</p>
+            </div>
+        </div>
+        <div class="space-y-2 max-h-48 overflow-y-auto">
+            @forelse($slowQueries as $query)
+            <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-sm">
+                <span class="text-gray-700">{{ Str::limit($query->table_name ?? $query->query, 25) }}</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-500">{{ number_format($query->execution_time, 0) }}ms</span>
+                    <span class="px-2 py-1 text-xs rounded {{ $query->is_optimized ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
+                        {{ $query->is_optimized ? 'محسّن' : 'معلق' }}
+                    </span>
+                </div>
+            </div>
+            @empty
+            <p class="text-center text-gray-500 py-4">لا توجد استعلامات بطيئة</p>
+            @endforelse
+        </div>
+    </div>
+</div>
+
+<!-- Recent Logins -->
+<div class="bg-white rounded-2xl p-6 shadow-sm mb-8">
+    <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-sign-in-alt text-green-500 ml-2"></i>آخر تسجيلات الدخول</h3>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead>
+                <tr class="text-right text-xs text-gray-500 border-b">
+                    <th class="pb-3">الموظف</th>
+                    <th class="pb-3">البريد الإلكتروني</th>
+                    <th class="pb-3">القسم</th>
+                    <th class="pb-3">آخر دخول</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm">
+                @forelse($recentLogins as $employee)
+                <tr class="border-b border-gray-50 hover:bg-gray-50">
+                    <td class="py-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                {{ substr($employee->full_name ?? 'U', 0, 1) }}
+                            </div>
+                            <span>{{ $employee->full_name ?? 'N/A' }}</span>
+                        </div>
+                    </td>
+                    <td class="py-3 text-gray-500">{{ $employee->email }}</td>
+                    <td class="py-3">
+                        <span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-lg">{{ $employee->department ?? 'N/A' }}</span>
+                    </td>
+                    <td class="py-3 text-gray-500">{{ $employee->last_login_at?->diffForHumans() ?? 'N/A' }}</td>
+                </tr>
+                @empty
+                <tr><td colspan="4" class="py-4 text-center text-gray-500">لا توجد تسجيلات دخول</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Charts Scripts -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Performance Chart
-    const ctx = document.getElementById('performanceChart').getContext('2d');
-    let performanceChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: Array.from({length: 24}, (_, i) => `${i}:00`),
-            datasets: [{
-                label: 'CPU Usage (%)',
-                data: [12, 15, 18, 22, 25, 28, 32, 35, 38, 42, 45, 48, 52, 55, 58, 62, 65, 68, 72, 75, 78, 72, 68, 65],
-                borderColor: 'rgb(59, 130, 246)',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    title: {
-                        display: true,
-                        text: 'Usage (%)'
-                    }
-                }
-            }
-        }
-    });
-
-    // Performance Metric Selector
-    document.getElementById('performance-metric').addEventListener('change', function() {
-        const metric = this.value;
-        updatePerformanceChart(metric);
-    });
-
-    // Real-time updates
-    setInterval(function() {
-        updateSystemMetrics();
-    }, 30000); // Update every 30 seconds
+// Traffic Chart
+const trafficCtx = document.getElementById('trafficChart').getContext('2d');
+new Chart(trafficCtx, {
+    type: 'line',
+    data: {
+        labels: {!! json_encode(array_column($dailyTraffic, 'date')) !!},
+        datasets: [{
+            label: 'المستخدمين الجدد',
+            data: {!! json_encode(array_column($dailyTraffic, 'users')) !!},
+            borderColor: '#6366F1',
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            fill: true,
+            tension: 0.4
+        }, {
+            label: 'الطلبات',
+            data: {!! json_encode(array_column($dailyTraffic, 'orders')) !!},
+            borderColor: '#10B981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            fill: true,
+            tension: 0.4
+        }, {
+            label: 'تسجيلات الدخول',
+            data: {!! json_encode(array_column($dailyTraffic, 'logins')) !!},
+            borderColor: '#F59E0B',
+            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } },
+        scales: { y: { beginAtZero: true } }
+    }
 });
 
-function updatePerformanceChart(metric) {
-    const datasets = {
-        cpu: {
-            label: 'CPU Usage (%)',
-            data: [12, 15, 18, 22, 25, 28, 32, 35, 38, 42, 45, 48, 52, 55, 58, 62, 65, 68, 72, 75, 78, 72, 68, 65],
-            borderColor: 'rgb(59, 130, 246)',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)'
-        },
-        memory: {
-            label: 'Memory Usage (%)',
-            data: [45, 48, 52, 55, 58, 62, 65, 68, 72, 75, 78, 82, 85, 88, 92, 95, 98, 95, 92, 88, 85, 82, 78, 75],
-            borderColor: 'rgb(34, 197, 94)',
-            backgroundColor: 'rgba(34, 197, 94, 0.1)'
-        },
-        disk: {
-            label: 'Disk I/O (MB/s)',
-            data: [2.1, 2.5, 3.2, 4.1, 5.5, 6.8, 8.2, 9.5, 11.2, 12.8, 14.5, 16.2, 18.5, 20.1, 22.8, 25.5, 28.2, 25.8, 22.5, 18.2, 14.8, 11.5, 8.2, 5.5],
-            borderColor: 'rgb(168, 85, 247)',
-            backgroundColor: 'rgba(168, 85, 247, 0.1)'
-        },
-        network: {
-            label: 'Network Traffic (Mbps)',
-            data: [15.2, 18.5, 22.1, 25.8, 29.5, 32.1, 35.8, 39.2, 42.5, 45.8, 49.2, 52.5, 55.8, 59.2, 62.5, 65.8, 69.2, 65.5, 61.8, 58.2, 54.5, 50.8, 47.2, 43.5],
-            borderColor: 'rgb(234, 179, 8)',
-            backgroundColor: 'rgba(234, 179, 8, 0.1)'
-        }
-    };
-
-    // Update chart with new dataset
-    const chart = Chart.getChart('performanceChart');
-    chart.data.datasets[0] = {
-        ...datasets[metric],
-        fill: true,
-        tension: 0.4
-    };
-    chart.update();
-}
-
-function refreshServices() {
-    // Simulate service refresh
-    console.log('Refreshing services...');
-    // In real implementation, make API call to refresh service status
-}
-
-function refreshAlerts() {
-    // Simulate alerts refresh
-    console.log('Refreshing alerts...');
-    // In real implementation, make API call to refresh alerts
-}
-
-function createBackup() {
-    if (confirm('Create a new database backup? This may take several minutes.')) {
-        console.log('Creating backup...');
-        // In real implementation, make API call to create backup
+// Orders Status Chart
+const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+const statusLabels = {
+    'pending': 'قيد الانتظار',
+    'processing': 'قيد المعالجة',
+    'shipped': 'تم الشحن',
+    'delivered': 'تم التسليم',
+    'cancelled': 'ملغي'
+};
+const statusColors = {
+    'pending': '#F59E0B',
+    'processing': '#3B82F6',
+    'shipped': '#8B5CF6',
+    'delivered': '#10B981',
+    'cancelled': '#EF4444'
+};
+const orderData = @json($ordersByStatus);
+new Chart(ordersCtx, {
+    type: 'doughnut',
+    data: {
+        labels: orderData.map(item => statusLabels[item.status] || item.status),
+        datasets: [{
+            data: orderData.map(item => item.count),
+            backgroundColor: orderData.map(item => statusColors[item.status] || '#6B7280'),
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } }
     }
-}
-
-function optimizeDatabase() {
-    if (confirm('Optimize database? This may temporarily affect performance.')) {
-        console.log('Optimizing database...');
-        // In real implementation, make API call to optimize database
-    }
-}
-
-function updateSystemMetrics() {
-    // Fetch latest system metrics
-    fetch('/api/it/metrics')
-        .then(response => response.json())
-        .then(data => {
-            // Update dashboard with new data
-            console.log('Updated system metrics:', data);
-        })
-        .catch(error => console.error('Error updating metrics:', error));
-}
+});
 </script>
-@endpush
+@endsection

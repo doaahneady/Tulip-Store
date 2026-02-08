@@ -12,12 +12,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->string('sku')->unique()->nullable()->after('slug');
-            $table->decimal('cost_price', 10, 2)->nullable()->after('discount_price');
-            $table->string('meta_title')->nullable()->after('details');
-            $table->text('meta_description')->nullable()->after('meta_title');
-            $table->decimal('weight', 8, 2)->nullable()->after('meta_description'); // in kg
-            $table->string('dimensions')->nullable()->after('weight'); // LxWxH in cm
+            if (! Schema::hasColumn('products', 'sku')) {
+                $table->string('sku')->unique()->nullable()->after('slug');
+            }
+            if (! Schema::hasColumn('products', 'cost_price')) {
+                $table->decimal('cost_price', 10, 2)->nullable()->after('discount_price');
+            }
+            if (! Schema::hasColumn('products', 'meta_title')) {
+                $table->string('meta_title')->nullable()->after('details');
+            }
+            if (! Schema::hasColumn('products', 'meta_description')) {
+                $table->text('meta_description')->nullable()->after('meta_title');
+            }
+            if (! Schema::hasColumn('products', 'weight')) {
+                $table->decimal('weight', 8, 2)->nullable()->after('meta_description');
+            }
+            if (! Schema::hasColumn('products', 'dimensions')) {
+                $table->string('dimensions')->nullable()->after('weight');
+            }
         });
     }
 
@@ -27,7 +39,24 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->dropColumn(['sku', 'cost_price', 'meta_title', 'meta_description', 'weight', 'dimensions']);
+            if (Schema::hasColumn('products', 'sku')) {
+                $table->dropColumn('sku');
+            }
+            if (Schema::hasColumn('products', 'cost_price')) {
+                $table->dropColumn('cost_price');
+            }
+            if (Schema::hasColumn('products', 'meta_title')) {
+                $table->dropColumn('meta_title');
+            }
+            if (Schema::hasColumn('products', 'meta_description')) {
+                $table->dropColumn('meta_description');
+            }
+            if (Schema::hasColumn('products', 'weight')) {
+                $table->dropColumn('weight');
+            }
+            if (Schema::hasColumn('products', 'dimensions')) {
+                $table->dropColumn('dimensions');
+            }
         });
     }
 };

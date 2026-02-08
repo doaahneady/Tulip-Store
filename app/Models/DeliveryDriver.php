@@ -9,6 +9,8 @@ class DeliveryDriver extends Model
 {
     use HasFactory;
 
+    protected $table = 'drivers';
+
     protected $fillable = [
         'user_id',
         'driver_name',
@@ -22,13 +24,13 @@ class DeliveryDriver extends Model
         'last_location_update',
         'total_deliveries',
         'rating',
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [
         'last_location_update' => 'datetime',
         'rating' => 'decimal:2',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
     ];
 
     public function user()
@@ -63,7 +65,7 @@ class DeliveryDriver extends Model
         $this->update([
             'current_latitude' => $latitude,
             'current_longitude' => $longitude,
-            'last_location_update' => now()
+            'last_location_update' => now(),
         ]);
 
         $this->locationHistory()->create([
@@ -72,13 +74,13 @@ class DeliveryDriver extends Model
             'speed' => $speed,
             'accuracy' => $accuracy,
             'battery_level' => $battery,
-            'recorded_at' => now()
+            'recorded_at' => now(),
         ]);
     }
 
     public function getStatusColorAttribute()
     {
-        return match($this->status) {
+        return match ($this->status) {
             'available' => '#047857',
             'busy' => '#d97706',
             'on_break' => '#6b7280',
@@ -89,7 +91,7 @@ class DeliveryDriver extends Model
 
     public function getStatusLabelAttribute()
     {
-        return match($this->status) {
+        return match ($this->status) {
             'available' => 'متاح',
             'busy' => 'مشغول',
             'on_break' => 'استراحة',

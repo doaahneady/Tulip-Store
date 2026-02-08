@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -22,6 +22,12 @@ class DatabaseSeeder extends Seeder
             ActivityLogSeeder::class,
             RefundSeeder::class,
         ]);
+
+        if (app()->environment('local')) {
+            $this->call([
+                DemoTraderSeeder::class,
+            ]);
+        }
 
         // Seed example users that match the register/login form
         User::updateOrCreate(

@@ -1,120 +1,65 @@
-@extends('dashboards.layouts.app', ['title' => 'System Health', 'subtitle' => 'Monitor system services and performance'])
-
+@extends('dashboards.layouts.app')
 @section('content')
-<div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-    <!-- Service Status Cards -->
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Services Online</p>
-                    <h3 class="text-2xl font-semibold text-success-600">{{ $metrics['services_online'] ?? 12 }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-success-50 text-success-600 flex items-center justify-center">
-                    <i class="fas fa-check-circle text-lg"></i>
-                </div>
-            </div>
+@php $title = 'صحة النظام'; $subtitle = 'حالة الخدمات ومؤشرات الأداء'; @endphp
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="text-gray-500 text-xs">الحالة العامة</div>
+        <div class="text-2xl font-bold mt-1 {{ ($healthSummary['status'] ?? 'healthy') === 'healthy' ? 'text-emerald-700' : 'text-red-700' }}">
+            {{ ($healthSummary['status'] ?? 'healthy') === 'healthy' ? 'سليم' : 'تحذير' }}
         </div>
     </div>
-
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Services Offline</p>
-                    <h3 class="text-2xl font-semibold text-error-600">{{ $metrics['services_offline'] ?? 0 }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-error-50 text-error-600 flex items-center justify-center">
-                    <i class="fas fa-times-circle text-lg"></i>
-                </div>
-            </div>
-        </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="text-gray-500 text-xs">وقت الاستجابة</div>
+        <div class="text-2xl font-bold mt-1 text-gray-900">{{ number_format((float) ($healthSummary['avg_response_time_ms'] ?? 0), 0) }} ms</div>
     </div>
-
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Degraded Services</p>
-                    <h3 class="text-2xl font-semibold text-warning-600">{{ $metrics['services_degraded'] ?? 1 }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-warning-50 text-warning-600 flex items-center justify-center">
-                    <i class="fas fa-exclamation-triangle text-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Avg Response Time</p>
-                    <h3 class="text-2xl font-semibold text-gray-900">{{ $metrics['avg_response_time'] ?? 45 }}ms</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
-                    <i class="fas fa-tachometer-alt text-lg"></i>
-                </div>
-            </div>
-        </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="text-gray-500 text-xs">الأخطاء (آخر 24 ساعة)</div>
+        <div class="text-2xl font-bold mt-1 text-gray-900">{{ number_format((int) ($healthSummary['errors_last_24h'] ?? 0)) }}</div>
     </div>
 </div>
 
-<!-- System Services Status -->
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title">System Services Status</h3>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200">
+    <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-gray-900">الخدمات</h3>
+        <a href="{{ route('dashboard.it.index') }}" class="text-sm text-indigo-600">عودة</a>
     </div>
-    <div class="card-body">
-        <div class="table-container">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Service</th>
-                        <th>Status</th>
-                        <th>Response Time</th>
-                        <th>Uptime</th>
-                        <th>Last Check</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @php
-                        $services = [
-                            ['name' => 'Web Server', 'status' => 'online', 'response_time' => '45ms', 'uptime' => '99.9%', 'last_check' => '1 min ago'],
-                            ['name' => 'Database', 'status' => 'online', 'response_time' => '12ms', 'uptime' => '99.8%', 'last_check' => '1 min ago'],
-                            ['name' => 'Redis Cache', 'status' => 'online', 'response_time' => '3ms', 'uptime' => '99.9%', 'last_check' => '1 min ago'],
-                            ['name' => 'Payment Gateway', 'status' => 'online', 'response_time' => '120ms', 'uptime' => '99.7%', 'last_check' => '2 min ago'],
-                            ['name' => 'Email Service', 'status' => 'degraded', 'response_time' => '2.1s', 'uptime' => '98.5%', 'last_check' => '1 min ago'],
-                            ['name' => 'File Storage', 'status' => 'online', 'response_time' => '89ms', 'uptime' => '99.6%', 'last_check' => '1 min ago'],
-                        ];
-                    @endphp
-                    @foreach($services as $service)
-                    <tr>
-                        <td class="font-medium">{{ $service['name'] }}</td>
-                        <td>
-                            <span class="badge 
-                                @if($service['status'] === 'online') badge-success
-                                @elseif($service['status'] === 'degraded') badge-warning
-                                @else badge-error
-                                @endif">
-                                {{ ucfirst($service['status']) }}
+    <div class="p-4 overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الخدمة</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الحالة</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                @forelse(($services ?? []) as $svc)
+                    @php $up = (bool) ($svc['is_up'] ?? false); @endphp
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-semibold text-gray-900">{{ $svc['name'] ?? '-' }}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded text-xs {{ $up ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700' }}">
+                                {{ $up ? 'تعمل' : 'متوقفة' }}
                             </span>
                         </td>
-                        <td>{{ $service['response_time'] }}</td>
-                        <td>{{ $service['uptime'] }}</td>
-                        <td class="text-gray-500">{{ $service['last_check'] }}</td>
-                        <td>
-                            <button class="btn btn-sm btn-ghost">
-                                <i class="fas fa-sync text-xs"></i>
-                                Test
-                            </button>
+                        <td class="px-4 py-3">
+                            <form method="POST" action="{{ route('dashboard.it.services.update-status', ['service' => $svc['key'] ?? 'unknown']) }}" class="inline-flex items-center gap-2">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="status" value="{{ $up ? 'down' : 'up' }}">
+                                <button type="submit" class="btn btn-secondary btn-sm">{{ $up ? 'إيقاف' : 'تشغيل' }}</button>
+                            </form>
                         </td>
                     </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                @empty
+                    <tr>
+                        <td colspan="3" class="px-4 py-8 text-center text-gray-500">لا توجد بيانات</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
 @endsection
+

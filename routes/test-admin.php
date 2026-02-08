@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Dashboard\SuperAdminController;
+use Illuminate\Support\Facades\Route;
 
 // Test route without middleware to verify controller works
 Route::get('/test-super-admin', function () {
@@ -30,16 +30,17 @@ Route::get('/test-super-admin', function () {
         'recent_activities' => collect([]),
         'top_performing_stores' => collect([]),
     ];
-    
+
     return view('dashboards.super-admin.index', compact('metrics'));
 });
 
 // Test controller instantiation
 Route::get('/test-controller', function () {
     try {
-        $controller = new SuperAdminController();
-        return "✅ SuperAdminController instantiated successfully!";
+        $controller = new SuperAdminController;
+
+        return '✅ SuperAdminController instantiated successfully!';
     } catch (Exception $e) {
-        return "❌ Error: " . $e->getMessage();
+        return '❌ Error: '.$e->getMessage();
     }
 });

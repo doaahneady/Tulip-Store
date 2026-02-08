@@ -200,7 +200,7 @@
             </div>
             <div class="user">
                 <i class="fas fa-user-circle"></i>
-                <span>{{ auth()->user()->name }}</span>
+                <span>{{ is_array(data_get(auth()->user(),'name')) ? json_encode(data_get(auth()->user(),'name')) : data_get(auth()->user(),'name') }}</span>
             </div>
         </div>
     </div>

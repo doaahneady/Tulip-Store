@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Providers\RouteServiceProvider;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +20,14 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+                // Handle different guard redirects
+                if ($guard === 'employee') {
+                    return redirect()->route('employee.dashboard');
+                }
+                if ($guard === 'trader') {
+                    return redirect()->route('dashboard.vendor.index');
+                }
+
                 return redirect('/');
             }
         }
@@ -28,4 +35,3 @@ class RedirectIfAuthenticated
         return $next($request);
     }
 }
-

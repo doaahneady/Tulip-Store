@@ -15,11 +15,14 @@ class Review extends Model
         'rating',
         'comment',
         'is_verified_purchase',
+        'is_approved',
+        'rejection_reason',
     ];
 
     protected $casts = [
         'rating' => 'integer',
         'is_verified_purchase' => 'boolean',
+        'is_approved' => 'boolean',
     ];
 
     public function product()

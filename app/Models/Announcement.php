@@ -36,10 +36,10 @@ class Announcement extends Model
     public function scopeActive($query)
     {
         return $query->where('published_at', '<=', now())
-                    ->where(function ($q) {
-                        $q->whereNull('expires_at')
-                          ->orWhere('expires_at', '>', now());
-                    });
+            ->where(function ($q) {
+                $q->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            });
     }
 
     public function scopePinned($query)

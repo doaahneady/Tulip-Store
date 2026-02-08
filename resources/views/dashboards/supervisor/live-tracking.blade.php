@@ -1,176 +1,80 @@
-@extends('dashboards.layouts.app', ['title' => 'Live Driver Tracking', 'subtitle' => 'Real-time driver location monitoring'])
-
+@extends('dashboards.layouts.app')
 @section('content')
-<div class="flex items-center justify-between mb-6">
-    <div>
-        <h2 class="text-2xl font-semibold text-gray-900">Live Driver Tracking</h2>
-        <p class="text-gray-600">Monitor driver locations and delivery status in real-time</p>
-    </div>
-    <div class="flex items-center gap-3">
-        <button class="btn btn-ghost">
-            <i class="fas fa-sync text-sm mr-2"></i>
-            Refresh
-        </button>
-        <button class="btn btn-primary">
-            <i class="fas fa-route text-sm mr-2"></i>
-            Optimize Routes
-        </button>
-    </div>
-</div>
+@php $title = 'تتبع السائقين المباشر'; $subtitle = 'مواقع السائقين والمهام النشطة'; @endphp
 
-<!-- Driver Status Overview -->
-<div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Available</p>
-                    <h3 class="text-2xl font-semibold text-success-600">{{ $metrics['available_drivers'] ?? 14 }}</h3>
-                </div>
-                <div class="w-3 h-3 rounded-full bg-success-500"></div>
-            </div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-800">الخريطة المباشرة</h3>
+            <button id="refresh-btn" class="text-sm text-indigo-600">تحديث</button>
         </div>
+        <div id="map" class="w-full h-96 rounded-xl border border-gray-200"></div>
     </div>
-
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">On Delivery</p>
-                    <h3 class="text-2xl font-semibold text-warning-600">{{ $metrics['drivers_on_delivery'] ?? 18 }}</h3>
-                </div>
-                <div class="w-3 h-3 rounded-full bg-warning-500"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Busy</p>
-                    <h3 class="text-2xl font-semibold text-primary-600">{{ $metrics['busy_drivers'] ?? 8 }}</h3>
-                </div>
-                <div class="w-3 h-3 rounded-full bg-primary-500"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Offline</p>
-                    <h3 class="text-2xl font-semibold text-gray-600">{{ $metrics['offline_drivers'] ?? 5 }}</h3>
-                </div>
-                <div class="w-3 h-3 rounded-full bg-gray-500"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Total</p>
-                    <h3 class="text-2xl font-semibold text-gray-900">{{ $metrics['total_drivers'] ?? 45 }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
-                    <i class="fas fa-users text-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Map and Driver List -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Live Map -->
-    <div class="lg:col-span-2">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Live Driver Map</h3>
-            </div>
-            <div class="card-body p-0">
-                <div id="driver-map" class="w-full h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <div class="text-center">
-                        <i class="fas fa-map-marked-alt text-4xl text-gray-400 mb-4"></i>
-                        <p class="text-gray-600">Interactive map will be loaded here</p>
-                        <p class="text-gray-500 text-sm">Showing real-time driver locations</p>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">السائقون</h3>
+        <div id="driver-list" class="space-y-3">
+            @foreach($drivers as $driver)
+                <div class="flex items-center justify-between p-3 border rounded-xl">
+                    <div>
+                        <div class="font-semibold text-gray-900">{{ $driver['name'] }}</div>
+                        <div class="text-xs text-gray-500">{{ $driver['availability'] }}</div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Active Drivers List -->
-    <div>
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Active Drivers</h3>
-            </div>
-            <div class="card-body p-0">
-                @php
-                    $activeDrivers = [
-                        ['name' => 'Ahmed Hassan', 'status' => 'on_delivery', 'location' => 'Downtown Area', 'eta' => '15 min', 'orders' => 3],
-                        ['name' => 'Maria Rodriguez', 'status' => 'available', 'location' => 'North District', 'eta' => '-', 'orders' => 0],
-                        ['name' => 'John Smith', 'status' => 'on_delivery', 'location' => 'East Side', 'eta' => '8 min', 'orders' => 2],
-                        ['name' => 'Lisa Chen', 'status' => 'busy', 'location' => 'South Area', 'eta' => '25 min', 'orders' => 4],
-                        ['name' => 'David Wilson', 'status' => 'available', 'location' => 'West End', 'eta' => '-', 'orders' => 0],
-                    ];
-                @endphp
-                @foreach($activeDrivers as $driver)
-                <div class="flex items-center gap-3 p-4 border-b border-gray-100 last:border-b-0">
-                    <div class="w-3 h-3 rounded-full 
-                        @if($driver['status'] === 'available') bg-success-500
-                        @elseif($driver['status'] === 'on_delivery') bg-warning-500
-                        @elseif($driver['status'] === 'busy') bg-primary-500
-                        @else bg-gray-500
-                        @endif"></div>
-                    <div class="flex-1">
-                        <div class="font-medium text-gray-900 text-sm">{{ $driver['name'] }}</div>
-                        <div class="text-gray-500 text-xs">{{ $driver['location'] }}</div>
-                        @if($driver['orders'] > 0)
-                        <div class="text-primary-600 text-xs">{{ $driver['orders'] }} orders • ETA: {{ $driver['eta'] }}</div>
+                    <div class="text-xs text-gray-500">
+                        @if($driver['current_assignment'])
+                            #{{ optional($driver['current_assignment'])->order_id }}
+                        @else
+                            —
                         @endif
                     </div>
-                    <div class="flex items-center gap-1">
-                        <button class="btn btn-sm btn-ghost">
-                            <i class="fas fa-phone text-xs"></i>
-                        </button>
-                        <button class="btn btn-sm btn-ghost">
-                            <i class="fas fa-map-marker-alt text-xs"></i>
-                        </button>
-                    </div>
                 </div>
-                @endforeach
-            </div>
+            @endforeach
         </div>
     </div>
-</div>
+    </div>
 @endsection
 
 @push('scripts')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize map (placeholder for actual map integration)
-    console.log('Live tracking map initialized');
-    
-    // Auto-refresh driver locations every 30 seconds
-    setInterval(function() {
-        updateDriverLocations();
-    }, 30000);
-});
+    if (typeof window.L === 'undefined') {
+        const el = document.getElementById('map');
+        if (el) {
+            el.innerHTML = '<div class="h-full w-full flex items-center justify-center text-sm text-gray-500">فشل تحميل الخريطة (Leaflet). تحقق من الاتصال بالإنترنت.</div>';
+        }
+    } else {
+        const map = L.map('map').setView([33.5138, 36.2765], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '' }).addTo(map);
+        let markers = {};
+        setTimeout(() => map.invalidateSize(), 200);
 
-function updateDriverLocations() {
-    // Fetch latest driver locations from API
-    fetch('/dashboard/api/supervisor/driver-locations')
-        .then(response => response.json())
-        .then(data => {
-            // Update map markers and driver list
-            console.log('Updated driver locations:', data);
-        })
-        .catch(error => console.error('Error updating locations:', error));
-}
+        function loadLocations() {
+            fetch('{{ route('dashboard.supervisor.api.driver-locations') }}')
+                .then(r => r.json())
+                .then(data => {
+                    Object.values(markers).forEach(m => map.removeLayer(m));
+                    markers = {};
+                    data.forEach(d => {
+                        if (d.lat !== null && d.lat !== '' && d.lng !== null && d.lng !== '') {
+                            const icon = L.divIcon({
+                                className: 'driver-marker',
+                                html: '<div class="w-6 h-6 rounded-full bg-indigo-600 border-2 border-white shadow"></div>',
+                                iconSize: [24, 24],
+                                iconAnchor: [12, 12]
+                            });
+                            const marker = L.marker([d.lat, d.lng], { icon }).addTo(map);
+                            marker.bindPopup('<div class="text-sm font-semibold">'+d.name+'</div><div class="text-xs text-gray-500">'+(d.availability || '')+'</div>');
+                            markers[d.id] = marker;
+                        }
+                    });
+                    const group = new L.featureGroup(Object.values(markers));
+                    if (Object.values(markers).length) map.fitBounds(group.getBounds().pad(0.2));
+                    setTimeout(() => map.invalidateSize(), 0);
+                });
+        }
+        document.getElementById('refresh-btn').addEventListener('click', loadLocations);
+        loadLocations();
+        setInterval(loadLocations, 30000);
+    }
 </script>
 @endpush

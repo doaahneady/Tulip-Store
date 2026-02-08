@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Support\Str;
+use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
 {
@@ -165,11 +164,11 @@ class ProductSeeder extends Seeder
 
         foreach ($products as $productData) {
             $category = Category::where('slug', $productData['category_slug'])->first();
-            
+
             if ($category) {
                 unset($productData['category_slug']);
                 $productData['category_id'] = $category->id;
-                
+
                 Product::firstOrCreate(
                     ['slug' => $productData['slug']],
                     $productData

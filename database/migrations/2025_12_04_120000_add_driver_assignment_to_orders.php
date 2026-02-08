@@ -9,18 +9,34 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
+            $afterColumn = Schema::hasColumn('orders', 'customer_id') ? 'customer_id' : (Schema::hasColumn('orders', 'user_id') ? 'user_id' : 'id');
+
             // Driver assignment
-            $table->foreignId('assigned_driver_id')->nullable()->after('user_id')->constrained('users')->onDelete('set null');
-            $table->timestamp('assigned_at')->nullable()->after('assigned_driver_id');
-            
+            if (! Schema::hasColumn('orders', 'assigned_driver_id')) {
+                $table->foreignId('assigned_driver_id')->nullable()->after($afterColumn)->constrained('users')->onDelete('set null');
+            }
+            if (! Schema::hasColumn('orders', 'assigned_at')) {
+                $table->timestamp('assigned_at')->nullable()->after('assigned_driver_id');
+            }
+
             // Customer confirmation
-            $table->string('confirmation_token')->nullable()->unique()->after('payment_status');
-            $table->timestamp('confirmed_at')->nullable()->after('confirmation_token');
-            $table->text('customer_signature')->nullable()->after('confirmed_at');
-            
+            if (! Schema::hasColumn('orders', 'confirmation_token')) {
+                $table->string('confirmation_token')->nullable()->unique()->after('payment_status');
+            }
+            if (! Schema::hasColumn('orders', 'confirmed_at')) {
+                $table->timestamp('confirmed_at')->nullable()->after('confirmation_token');
+            }
+            if (! Schema::hasColumn('orders', 'customer_signature')) {
+                $table->text('customer_signature')->nullable()->after('confirmed_at');
+            }
+
             // Additional tracking
-            $table->foreignId('assigned_by')->nullable()->after('assigned_at')->constrained('users')->onDelete('set null');
-            $table->text('delivery_notes')->nullable()->after('address_note');
+            if (! Schema::hasColumn('orders', 'assigned_by')) {
+                $table->foreignId('assigned_by')->nullable()->after('assigned_at')->constrained('users')->onDelete('set null');
+            }
+            if (! Schema::hasColumn('orders', 'delivery_notes')) {
+                $table->text('delivery_notes')->nullable()->after('address_note');
+            }
         });
     }
 
@@ -36,7 +52,7 @@ return new class extends Migration
                 'confirmation_token',
                 'confirmed_at',
                 'customer_signature',
-                'delivery_notes'
+                'delivery_notes',
             ]);
         });
     }

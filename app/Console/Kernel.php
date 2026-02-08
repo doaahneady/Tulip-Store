@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('compliance:enforce-retention')->dailyAt('02:00');
+        $schedule->command('trader:payouts:generate')->monthlyOn(1, '03:00');
     }
 
     /**
@@ -25,4 +26,3 @@ class Kernel extends ConsoleKernel
         require base_path('routes/console.php');
     }
 }
-

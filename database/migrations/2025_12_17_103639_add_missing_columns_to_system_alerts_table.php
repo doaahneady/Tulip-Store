@@ -14,21 +14,21 @@ return new class extends Migration
         if (Schema::hasTable('system_alerts')) {
             Schema::table('system_alerts', function (Blueprint $table) {
                 // Add status column if it doesn't exist
-                if (!Schema::hasColumn('system_alerts', 'status')) {
+                if (! Schema::hasColumn('system_alerts', 'status')) {
                     $table->enum('status', ['active', 'resolved', 'dismissed'])->default('active')->after('message');
                 }
-                
+
                 // Add severity column if it doesn't exist (alias for priority)
-                if (!Schema::hasColumn('system_alerts', 'severity')) {
+                if (! Schema::hasColumn('system_alerts', 'severity')) {
                     $table->enum('severity', ['low', 'medium', 'high', 'critical'])->default('medium')->after('status');
                 }
             });
-            
+
             // Copy data from priority to severity if both exist
             if (Schema::hasColumn('system_alerts', 'priority') && Schema::hasColumn('system_alerts', 'severity')) {
                 DB::statement('UPDATE system_alerts SET severity = priority WHERE severity = "medium"');
             }
-            
+
             // Set default status based on is_resolved
             if (Schema::hasColumn('system_alerts', 'is_resolved') && Schema::hasColumn('system_alerts', 'status')) {
                 DB::statement('UPDATE system_alerts SET status = CASE WHEN is_resolved = 1 THEN "resolved" ELSE "active" END WHERE status = "active"');

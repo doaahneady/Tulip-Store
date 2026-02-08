@@ -1,10 +1,11 @@
 <?php
+
 /**
  * Test GPS Update Script
- * 
+ *
  * This script simulates a driver phone sending GPS location updates
  * Run this to test the live tracking system
- * 
+ *
  * Usage: php test_gps_update.php
  */
 
@@ -25,13 +26,13 @@ $iteration = 0;
 
 while (true) {
     $iteration++;
-    
+
     // Simulate movement (random walk around Sweida)
     $lat = $centerLat + (rand(-100, 100) / 10000); // ±0.01 degrees (~1km)
     $lng = $centerLng + (rand(-100, 100) / 10000);
     $speed = rand(0, 80); // 0-80 km/h
     $accuracy = rand(5, 20); // 5-20 meters
-    
+
     // Prepare data
     $data = [
         'driver_id' => $driverId,
@@ -40,20 +41,20 @@ while (true) {
         'speed' => $speed,
         'accuracy' => $accuracy,
     ];
-    
+
     // Send to API
-    $ch = curl_init($baseUrl . '/api/driver/location/update');
+    $ch = curl_init($baseUrl.'/api/driver/location/update');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
     ]);
-    
+
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    
+
     // Display result
     $timestamp = date('H:i:s');
     if ($httpCode == 200) {
@@ -62,7 +63,7 @@ while (true) {
         echo "❌ [{$timestamp}] Failed to update location (HTTP {$httpCode})\n";
         echo "Response: {$response}\n";
     }
-    
+
     // Wait 3 seconds before next update
     sleep(3);
 }

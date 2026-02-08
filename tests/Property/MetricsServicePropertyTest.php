@@ -2,14 +2,14 @@
 
 namespace Tests\Property;
 
-use App\Services\Dashboard\MetricsService;
 use App\Repositories\Contracts\OrderRepositoryInterface;
-use Tests\TestCase;
+use App\Services\Dashboard\MetricsService;
 use Mockery;
+use Tests\TestCase;
 
 /**
  * Property-Based Tests for MetricsService
- * 
+ *
  * These tests verify the correctness properties of the MetricsService
  * by running multiple iterations with randomly generated test data.
  */
@@ -20,7 +20,7 @@ class MetricsServicePropertyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create a mock OrderRepository since we're testing formatting methods
         $mockOrderRepository = Mockery::mock(OrderRepositoryInterface::class);
         $this->metricsService = new MetricsService($mockOrderRepository);
@@ -58,7 +58,6 @@ class MetricsServicePropertyTest extends TestCase
         'IQD' => 'ع.د',
     ];
 
-
     /**
      * Generate a random monetary amount
      */
@@ -66,6 +65,7 @@ class MetricsServicePropertyTest extends TestCase
     {
         // Generate amounts from -999999.99 to 999999.99
         $sign = rand(0, 1) === 0 ? 1 : -1;
+
         return $sign * round(rand(0, 99999999) / 100, 2);
     }
 
@@ -76,6 +76,7 @@ class MetricsServicePropertyTest extends TestCase
     {
         // Generate percentages from -1000% to 1000%
         $sign = rand(0, 1) === 0 ? 1 : -1;
+
         return $sign * round(rand(0, 100000) / 100, 2);
     }
 
@@ -85,7 +86,7 @@ class MetricsServicePropertyTest extends TestCase
     protected function hasThousandSeparators(string $formatted, float $amount, string $locale): bool
     {
         $absAmount = abs($amount);
-        
+
         // Only amounts >= 1000 should have thousand separators
         if ($absAmount < 1000) {
             return true; // No separators needed
@@ -103,7 +104,7 @@ class MetricsServicePropertyTest extends TestCase
         ];
 
         $separator = $separators[$locale] ?? ',';
-        
+
         // The formatted string should contain the thousand separator
         return str_contains($formatted, $separator);
     }
@@ -111,10 +112,10 @@ class MetricsServicePropertyTest extends TestCase
     /**
      * **Feature: dashboard-system-rebuild, Property 5: Currency Formatting Consistency**
      * **Validates: Requirements 3.4**
-     * 
-     * *For any* monetary value, the formatted output SHALL contain the currency 
+     *
+     * *For any* monetary value, the formatted output SHALL contain the currency
      * symbol and use thousand separators according to locale rules.
-     * 
+     *
      * @test
      */
     public function property_currency_formatting_contains_symbol_and_separators(): void
@@ -124,9 +125,9 @@ class MetricsServicePropertyTest extends TestCase
             $amount = $this->generateRandomAmount();
             $currency = $this->currencies[array_rand($this->currencies)];
             $locale = $this->locales[array_rand($this->locales)];
-            
+
             $formatted = $this->metricsService->formatCurrency($amount, $currency, $locale);
-            
+
             // Property 1: The formatted string must contain the currency symbol
             $symbol = $this->currencySymbols[$currency] ?? $currency;
             $this->assertStringContainsString(
@@ -134,13 +135,13 @@ class MetricsServicePropertyTest extends TestCase
                 $formatted,
                 "Iteration $i: Formatted currency '$formatted' should contain symbol '$symbol' for $currency"
             );
-            
+
             // Property 2: For amounts >= 1000, the formatted string must contain thousand separators
             $this->assertTrue(
                 $this->hasThousandSeparators($formatted, $amount, $locale),
                 "Iteration $i: Formatted currency '$formatted' should have thousand separators for amount $amount in locale $locale"
             );
-            
+
             // Property 3: Negative amounts should have a minus sign
             if ($amount < 0) {
                 $this->assertStringContainsString(
@@ -154,7 +155,7 @@ class MetricsServicePropertyTest extends TestCase
 
     /**
      * Additional test: Verify currency formatting with specific edge cases
-     * 
+     *
      * @test
      */
     public function property_currency_formatting_handles_edge_cases(): void
@@ -163,26 +164,25 @@ class MetricsServicePropertyTest extends TestCase
         $formatted = $this->metricsService->formatCurrency(0.0, 'USD', 'en_US');
         $this->assertStringContainsString('$', $formatted);
         $this->assertStringContainsString('0', $formatted);
-        
+
         // Test very large numbers
         $formatted = $this->metricsService->formatCurrency(1234567.89, 'USD', 'en_US');
         $this->assertStringContainsString('$', $formatted);
         $this->assertStringContainsString(',', $formatted); // Thousand separator
-        
+
         // Test JPY (no decimals)
         $formatted = $this->metricsService->formatCurrency(1234.56, 'JPY', 'en_US');
         $this->assertStringContainsString('¥', $formatted);
         $this->assertStringNotContainsString('.', $formatted); // No decimal point for JPY
     }
 
-
     /**
      * **Feature: dashboard-system-rebuild, Property 6: Percentage Change Color Coding**
      * **Validates: Requirements 3.5**
-     * 
-     * *For any* percentage value, positive values SHALL be displayed with green 
+     *
+     * *For any* percentage value, positive values SHALL be displayed with green
      * color class and negative values SHALL be displayed with red color class.
-     * 
+     *
      * @test
      */
     public function property_percentage_color_coding_matches_sign(): void
@@ -190,14 +190,14 @@ class MetricsServicePropertyTest extends TestCase
         // Run 100 iterations with random data
         for ($i = 0; $i < 100; $i++) {
             $percentage = $this->generateRandomPercentage();
-            
+
             $result = $this->metricsService->formatPercentage($percentage);
-            
+
             // Verify result structure
             $this->assertArrayHasKey('value', $result, "Iteration $i: Result should have 'value' key");
             $this->assertArrayHasKey('color', $result, "Iteration $i: Result should have 'color' key");
             $this->assertArrayHasKey('icon', $result, "Iteration $i: Result should have 'icon' key");
-            
+
             // Property: Color coding must match the sign of the percentage
             if ($percentage > 0) {
                 $this->assertEquals(
@@ -244,7 +244,7 @@ class MetricsServicePropertyTest extends TestCase
                     "Iteration $i: Zero percentage should have minus icon, got '{$result['icon']}'"
                 );
             }
-            
+
             // Property: Value should contain percentage sign
             $this->assertStringContainsString(
                 '%',
@@ -256,7 +256,7 @@ class MetricsServicePropertyTest extends TestCase
 
     /**
      * Additional test: Verify percentage formatting with specific values
-     * 
+     *
      * @test
      */
     public function property_percentage_formatting_specific_values(): void
@@ -266,13 +266,13 @@ class MetricsServicePropertyTest extends TestCase
         $this->assertEquals('green', $result['color']);
         $this->assertEquals('arrow-up', $result['icon']);
         $this->assertEquals('+25.5%', $result['value']);
-        
+
         // Test negative percentage
         $result = $this->metricsService->formatPercentage(-15.3);
         $this->assertEquals('red', $result['color']);
         $this->assertEquals('arrow-down', $result['icon']);
         $this->assertEquals('-15.3%', $result['value']);
-        
+
         // Test zero
         $result = $this->metricsService->formatPercentage(0.0);
         $this->assertEquals('gray', $result['color']);

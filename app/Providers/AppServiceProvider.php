@@ -2,22 +2,20 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\ServiceProvider;
-
+use App\Repositories\Contracts\AuditLogRepositoryInterface;
+use App\Repositories\Contracts\FinancialTransactionRepositoryInterface;
 // Repository Contracts
 use App\Repositories\Contracts\OrderRepositoryInterface;
-use App\Repositories\Contracts\UserRepositoryInterface;
-use App\Repositories\Contracts\AuditLogRepositoryInterface;
 use App\Repositories\Contracts\StoreRepositoryInterface;
-use App\Repositories\Contracts\FinancialTransactionRepositoryInterface;
-
+use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Repositories\Eloquent\AuditLogRepository;
+use App\Repositories\Eloquent\FinancialTransactionRepository;
 // Repository Implementations
 use App\Repositories\Eloquent\OrderRepository;
-use App\Repositories\Eloquent\UserRepository;
-use App\Repositories\Eloquent\AuditLogRepository;
 use App\Repositories\Eloquent\StoreRepository;
-use App\Repositories\Eloquent\FinancialTransactionRepository;
+use App\Repositories\Eloquent\UserRepository;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {

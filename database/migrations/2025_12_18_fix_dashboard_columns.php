@@ -14,7 +14,7 @@ return new class extends Migration
         // Add missing columns for IT dashboard
         if (Schema::hasTable('system_services')) {
             Schema::table('system_services', function (Blueprint $table) {
-                if (!Schema::hasColumn('system_services', 'response_time')) {
+                if (! Schema::hasColumn('system_services', 'response_time')) {
                     $table->integer('response_time')->default(0)->after('status'); // in milliseconds
                 }
             });
@@ -36,17 +36,17 @@ return new class extends Migration
         // Add missing columns for Finance dashboard
         if (Schema::hasTable('orders')) {
             Schema::table('orders', function (Blueprint $table) {
-                if (!Schema::hasColumn('orders', 'tax_amount')) {
+                if (! Schema::hasColumn('orders', 'tax_amount')) {
                     $table->decimal('tax_amount', 10, 2)->default(0)->after('total');
                 }
-                if (!Schema::hasColumn('orders', 'commission_amount')) {
+                if (! Schema::hasColumn('orders', 'commission_amount')) {
                     $table->decimal('commission_amount', 10, 2)->default(0)->after('tax_amount');
                 }
             });
         }
 
         // Create employees table if it doesn't exist (for HR dashboard)
-        if (!Schema::hasTable('employees')) {
+        if (! Schema::hasTable('employees')) {
             Schema::create('employees', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->constrained()->onDelete('cascade');
@@ -63,7 +63,7 @@ return new class extends Migration
         }
 
         // Create system_alerts table if it doesn't exist
-        if (!Schema::hasTable('system_alerts')) {
+        if (! Schema::hasTable('system_alerts')) {
             Schema::create('system_alerts', function (Blueprint $table) {
                 $table->id();
                 $table->string('title');
@@ -79,7 +79,7 @@ return new class extends Migration
         }
 
         // Create payouts table if it doesn't exist
-        if (!Schema::hasTable('payouts')) {
+        if (! Schema::hasTable('payouts')) {
             Schema::create('payouts', function (Blueprint $table) {
                 $table->id();
                 $table->string('payout_id')->unique();

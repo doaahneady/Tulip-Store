@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Form Request for rejecting payouts
- * 
+ *
  * @see Requirements 13.3, 15.2
  */
 class RejectPayoutRequest extends FormRequest

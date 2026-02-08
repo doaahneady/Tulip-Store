@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class ActivityLogSeeder extends Seeder
 {
@@ -12,9 +12,16 @@ class ActivityLogSeeder extends Seeder
      */
     public function run(): void
     {
+        if (! Schema::hasTable('activity_logs')) {
+            if (isset($this->command)) {
+                $this->command->warn('activity_logs table not found. Skipping ActivityLogSeeder.');
+            }
+
+            return;
+        }
         $users = \DB::table('users')->where('is_admin', true)->get();
         $adminId = $users->first()->id ?? 1;
-        
+
         $activities = [
             [
                 'user_id' => $adminId,
@@ -77,7 +84,7 @@ class ActivityLogSeeder extends Seeder
                 'updated_at' => now()->subHours(12),
             ],
         ];
-        
+
         \DB::table('activity_logs')->insert($activities);
     }
 }

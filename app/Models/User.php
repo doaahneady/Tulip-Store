@@ -38,9 +38,14 @@ class User extends Authenticatable
         'is_hr',
         'is_cs',
         'is_finance',
+        'country',
         'is_accountant',
         'is_driver_supervisor',
         'role_id',
+        'locked_at',
+        'locked_until',
+        'lock_reason',
+        'login_failures',
     ];
 
     /**
@@ -65,6 +70,9 @@ class User extends Authenticatable
             'password' => 'hashed',
             'verified' => 'boolean',
             'is_trader' => 'boolean',
+            'locked_at' => 'datetime',
+            'locked_until' => 'datetime',
+            'login_failures' => 'integer',
         ];
     }
 
@@ -82,8 +90,8 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'user_roles')
-                    ->withPivot(['assigned_at', 'assigned_by', 'expires_at', 'is_active'])
-                    ->wherePivot('is_active', true);
+            ->withPivot(['assigned_at', 'assigned_by', 'expires_at', 'is_active'])
+            ->wherePivot('is_active', true);
     }
 
     /**
@@ -115,7 +123,9 @@ class User extends Authenticatable
      */
     public function ownedStore()
     {
-        return $this->hasOne(Store::class, 'owner_id');
+        $fk = \Illuminate\Support\Facades\Schema::hasColumn('stores', 'owner_id') ? 'owner_id' : 'user_id';
+
+        return $this->hasOne(Store::class, $fk);
     }
 
     /**
@@ -160,11 +170,11 @@ class User extends Authenticatable
         if (is_string($role)) {
             return $this->roles->contains('name', $role);
         }
-        
+
         if (is_array($role)) {
             return $this->roles->whereIn('name', $role)->isNotEmpty();
         }
-        
+
         return false;
     }
 
@@ -176,7 +186,7 @@ class User extends Authenticatable
         if (is_string($roles)) {
             $roles = explode(',', $roles);
         }
-        
+
         return $this->roles->whereIn('name', $roles)->isNotEmpty();
     }
 
@@ -188,8 +198,8 @@ class User extends Authenticatable
         if (is_string($role)) {
             $role = Role::where('name', $role)->first();
         }
-        
-        if ($role && !$this->hasRole($role->name)) {
+
+        if ($role && ! $this->hasRole($role->name)) {
             $this->roles()->attach($role->id, [
                 'assigned_at' => now(),
                 'assigned_by' => $assignedBy,
@@ -206,7 +216,7 @@ class User extends Authenticatable
         if (is_string($role)) {
             $role = Role::where('name', $role)->first();
         }
-        
+
         if ($role) {
             $this->roles()->detach($role->id);
         }

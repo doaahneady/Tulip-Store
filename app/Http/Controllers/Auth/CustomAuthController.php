@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 use App\Mail\VerificationCodeMail;
-use Illuminate\Support\Str;
+use App\Models\ActivityFeed;
+use App\Models\Notification;
+use App\Models\SecurityAuditLog;
+use App\Models\SystemLog;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 
 class CustomAuthController extends Controller
 {
@@ -26,7 +30,7 @@ class CustomAuthController extends Controller
             ]);
 
             // Generate username from email
-            $username = explode('@', $validated['email'])[0] . '_' . rand(1000, 9999);
+            $username = explode('@', $validated['email'])[0].'_'.rand(1000, 9999);
 
             $user = User::create([
                 'name' => $validated['name'],
@@ -39,9 +43,51 @@ class CustomAuthController extends Controller
                 'verified' => false,
             ]);
 
+            // Admin activity feed: new registration
+            if (Schema::hasTable('activity_feeds')) {
+                ActivityFeed::create([
+                    'dashboard_type' => 'admin',
+                    'activity_type' => 'user',
+                    'action' => 'created',
+                    'title' => 'New User Registration',
+                    'description' => $user->name.' signed up',
+                    'actor_type' => User::class,
+                    'actor_id' => $user->id,
+                    'target_type' => User::class,
+                    'target_id' => $user->id,
+                    'severity' => 'info',
+                    'metadata' => ['email' => $user->email],
+                ]);
+            }
+            // IT: system log + security audit (account_created)
+            if (Schema::hasTable('system_logs')) {
+                SystemLog::create([
+                    'level' => 'info',
+                    'action' => 'user_registered',
+                    'message' => 'User registered via email/password',
+                    'user' => $user->email,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'metadata' => ['method' => 'email_password'],
+                ]);
+            }
+            if (Schema::hasTable('security_audit_logs')) {
+                SecurityAuditLog::create([
+                    'event_type' => 'account_created',
+                    'user_type' => User::class,
+                    'user_id' => $user->id,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'status' => 'success',
+                    'description' => 'Account created via email/password',
+                    'metadata' => ['email' => $user->email],
+                    'risk_level' => 'low',
+                ]);
+            }
+
             // Generate 6-digit verification code
             $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-            
+
             // Store code and user info in session
             $request->session()->put('verification_code', $code);
             $request->session()->put('verification_email', $user->email);
@@ -52,24 +98,24 @@ class CustomAuthController extends Controller
             try {
                 Mail::to($user->email)->send(new VerificationCodeMail($code, $user->name));
             } catch (\Exception $e) {
-                \Log::error('Failed to send verification email: ' . $e->getMessage());
+                \Log::error('Failed to send verification email: '.$e->getMessage());
             }
 
             return response()->json([
                 'success' => true,
                 'message' => 'تم إرسال رمز التحقق إلى بريدك الإلكتروني',
-                'redirect' => '/ar-verify-registration'
+                'redirect' => '/ar-verify-registration',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'خطأ في البيانات المدخلة',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'حدث خطأ: ' . $e->getMessage()
+                'message' => 'حدث خطأ: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -77,24 +123,24 @@ class CustomAuthController extends Controller
     public function verifyRegistration(Request $request)
     {
         $request->validate([
-            'code' => 'required|string|size:6'
+            'code' => 'required|string|size:6',
         ]);
 
         $storedCode = $request->session()->get('verification_code');
         $expiresAt = $request->session()->get('code_expires_at');
         $userId = $request->session()->get('verification_user_id');
 
-        if (!$storedCode || now()->greaterThan($expiresAt)) {
+        if (! $storedCode || now()->greaterThan($expiresAt)) {
             return response()->json([
                 'success' => false,
-                'message' => 'انتهت صلاحية الرمز'
+                'message' => 'انتهت صلاحية الرمز',
             ], 400);
         }
 
         if ($request->code !== $storedCode) {
             return response()->json([
                 'success' => false,
-                'message' => 'الرمز غير صحيح'
+                'message' => 'الرمز غير صحيح',
             ], 400);
         }
 
@@ -103,9 +149,47 @@ class CustomAuthController extends Controller
         if ($user) {
             $user->verified = true;
             $user->save();
-            
+
             // Log the user in
             Auth::login($user);
+
+            // Create welcome notification
+            if (Schema::hasTable('notifications')) {
+                Notification::create([
+                    'user_id' => $user->id,
+                    'type' => 'system',
+                    'title' => 'Welcome to Tulip Store',
+                    'message' => 'Your email has been verified. Welcome aboard!',
+                    'icon' => 'fa-smile',
+                    'color' => 'green',
+                    'link' => '/profile',
+                ]);
+            }
+            // IT: successful login audit + system log
+            if (Schema::hasTable('system_logs')) {
+                SystemLog::create([
+                    'level' => 'info',
+                    'action' => 'login_success',
+                    'message' => 'User logged in after verification',
+                    'user' => $user->email,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'metadata' => ['method' => 'email_password'],
+                ]);
+            }
+            if (Schema::hasTable('security_audit_logs')) {
+                SecurityAuditLog::create([
+                    'event_type' => 'login_attempt',
+                    'user_type' => User::class,
+                    'user_id' => $user->id,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'status' => 'success',
+                    'description' => 'User logged in after verification',
+                    'metadata' => ['email' => $user->email],
+                    'risk_level' => 'low',
+                ]);
+            }
         }
 
         // Clear session
@@ -114,7 +198,7 @@ class CustomAuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'تم التحقق بنجاح',
-            'user_name' => $user->name
+            'user_name' => $user->name,
         ]);
     }
 
@@ -125,8 +209,23 @@ class CustomAuthController extends Controller
             'password' => 'required|string',
         ]);
 
+        if (\Illuminate\Support\Facades\Schema::hasTable('ip_blacklists')) {
+            $blocked = \App\Models\IPBlacklist::where('ip_address', $request->ip())
+                ->where('is_active', true)
+                ->where(function ($q) {
+                    $q->whereNull('expires_at')->orWhere('expires_at', '>=', now());
+                })
+                ->exists();
+            if ($blocked) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'تم رفض الوصول',
+                ], 403);
+            }
+        }
+
         $credentials = [
-            'password' => $request->password
+            'password' => $request->password,
         ];
 
         // Check if email or phone
@@ -136,33 +235,81 @@ class CustomAuthController extends Controller
             $credentials['phone'] = $request->email;
         }
 
+        $user = \App\Models\User::where('email', $request->email)->orWhere('phone', $request->email)->first();
+        if ($user && $user->locked_until && $user->locked_until->isFuture()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'الحساب مقفل مؤقتًا',
+            ], 423);
+        }
+
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            
+            if ($user && ($user->locked_at || $user->locked_until || $user->login_failures > 0)) {
+                $user->update([
+                    'locked_at' => null,
+                    'locked_until' => null,
+                    'lock_reason' => null,
+                    'login_failures' => 0,
+                ]);
+            }
+
+            if (\Illuminate\Support\Facades\Schema::hasTable('system_logs')) {
+                \App\Models\SystemLog::create([
+                    'level' => 'info',
+                    'action' => 'login_success',
+                    'message' => 'User logged in successfully',
+                    'user' => $user?->email ?? (string) $request->email,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'metadata' => ['method' => filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone'],
+                ]);
+            }
+            if (\Illuminate\Support\Facades\Schema::hasTable('security_audit_logs')) {
+                \App\Models\SecurityAuditLog::create([
+                    'event_type' => 'login_attempt',
+                    'user_type' => $user ? \App\Models\User::class : null,
+                    'user_id' => $user?->id,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'status' => 'success',
+                    'description' => 'User logged in successfully',
+                    'metadata' => ['identifier' => (string) $request->email],
+                    'risk_level' => 'low',
+                ]);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'تم تسجيل الدخول بنجاح',
-                'redirect' => '/'
+                'redirect' => '/',
             ]);
         }
 
+        \App\Services\CrossDepartmentFlowService::recordFailedLoginAttempt(
+            (string) $request->email,
+            $user?->id,
+            $request->ip(),
+            $request->userAgent()
+        );
+
         return response()->json([
             'success' => false,
-            'message' => 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
+            'message' => 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
         ], 401);
     }
 
     public function forgotPassword(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:users,email'
+            'email' => 'required|email|exists:users,email',
         ]);
 
         $user = User::where('email', $request->email)->first();
-        
+
         // Generate 6-digit code
         $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-        
+
         // Store code in session
         $request->session()->put('verification_code', $code);
         $request->session()->put('verification_email', $request->email);
@@ -173,30 +320,30 @@ class CustomAuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم إرسال رمز التحقق إلى بريدك الإلكتروني'
+            'message' => 'تم إرسال رمز التحقق إلى بريدك الإلكتروني',
         ]);
     }
 
     public function verifyCode(Request $request)
     {
         $request->validate([
-            'code' => 'required|string|size:6'
+            'code' => 'required|string|size:6',
         ]);
 
         $storedCode = $request->session()->get('verification_code');
         $expiresAt = $request->session()->get('code_expires_at');
 
-        if (!$storedCode || now()->greaterThan($expiresAt)) {
+        if (! $storedCode || now()->greaterThan($expiresAt)) {
             return response()->json([
                 'success' => false,
-                'message' => 'انتهت صلاحية الرمز'
+                'message' => 'انتهت صلاحية الرمز',
             ], 400);
         }
 
         if ($request->code !== $storedCode) {
             return response()->json([
                 'success' => false,
-                'message' => 'الرمز غير صحيح'
+                'message' => 'الرمز غير صحيح',
             ], 400);
         }
 
@@ -204,7 +351,7 @@ class CustomAuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم التحقق بنجاح'
+            'message' => 'تم التحقق بنجاح',
         ]);
     }
 
@@ -214,10 +361,10 @@ class CustomAuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        if (!$request->session()->get('code_verified')) {
+        if (! $request->session()->get('code_verified')) {
             return response()->json([
                 'success' => false,
-                'message' => 'يجب التحقق من الرمز أولاً'
+                'message' => 'يجب التحقق من الرمز أولاً',
             ], 400);
         }
 
@@ -232,7 +379,7 @@ class CustomAuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تغيير كلمة المرور بنجاح'
+            'message' => 'تم تغيير كلمة المرور بنجاح',
         ]);
     }
 

@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Form Request for approving payouts
- * 
+ *
  * @see Requirements 13.3, 15.2
  */
 class ApprovePayoutRequest extends FormRequest

@@ -36,20 +36,24 @@ class DeploymentLog extends Model
         if ($this->started_at && $this->completed_at) {
             return $this->completed_at->diffInSeconds($this->started_at);
         }
+
         return null;
     }
 
     public function getDurationHumanAttribute()
     {
         $duration = $this->duration;
-        if (!$duration) return 'N/A';
-        
+        if (! $duration) {
+            return 'N/A';
+        }
+
         $minutes = floor($duration / 60);
         $seconds = $duration % 60;
-        
+
         if ($minutes > 0) {
             return "{$minutes}m {$seconds}s";
         }
+
         return "{$seconds}s";
     }
 

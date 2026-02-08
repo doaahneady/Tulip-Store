@@ -8,9 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_driver_supervisor')->default(false)->after('is_accountant');
-        });
+        if (! Schema::hasColumn('users', 'is_driver_supervisor')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->boolean('is_driver_supervisor')->default(false);
+            });
+        }
     }
 
     public function down(): void

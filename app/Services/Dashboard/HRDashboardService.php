@@ -4,6 +4,7 @@ namespace App\Services\Dashboard;
 
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\FinancialTransaction;
 use App\Models\LeaveRequest;
 use App\Models\Payroll;
 use App\Models\User;
@@ -11,12 +12,13 @@ use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * HR Dashboard Service
- * 
+ *
  * Provides employee KPIs, attendance tracking, leave management, and payroll calculation.
- * 
+ *
  * @see Requirements 10.1, 10.2, 10.3, 10.4
  */
 class HRDashboardService
@@ -28,32 +30,33 @@ class HRDashboardService
 
     /**
      * Get HR KPI metrics
-     * 
+     *
      * @return array Array containing total_employees, present_today, on_leave, pending_requests
+     *
      * @see Requirements 10.1
      */
     public function getKPIMetrics(): array
     {
         $today = Carbon::today();
-        
+
         // Total employees
         $totalEmployees = Employee::where('status', '!=', 'terminated')->count();
         $activeEmployees = Employee::where('status', 'active')->count();
-        
+
         // Present today
         $presentToday = Attendance::whereDate('date', $today)
             ->whereIn('status', ['present', 'late'])
             ->count();
-        
+
         // On leave today
         $onLeaveToday = LeaveRequest::where('status', 'approved')
             ->where('start_date', '<=', $today)
             ->where('end_date', '>=', $today)
             ->count();
-        
+
         // Pending leave requests
         $pendingRequests = LeaveRequest::where('status', 'pending')->count();
-        
+
         // Absent today (employees who should be present but aren't)
         $absentToday = Attendance::whereDate('date', $today)
             ->where('status', 'absent')
@@ -66,8 +69,8 @@ class HRDashboardService
             ],
             'present_today' => [
                 'value' => $presentToday,
-                'percentage' => $activeEmployees > 0 
-                    ? round(($presentToday / $activeEmployees) * 100, 1) 
+                'percentage' => $activeEmployees > 0
+                    ? round(($presentToday / $activeEmployees) * 100, 1)
                     : 0,
             ],
             'on_leave' => [
@@ -82,27 +85,26 @@ class HRDashboardService
         ];
     }
 
-
     /**
      * Get employees with pagination and filters
-     * 
-     * @param array $filters Filters including status, department, search, per_page
-     * @return LengthAwarePaginator
+     *
+     * @param  array  $filters  Filters including status, department, search, per_page
+     *
      * @see Requirements 10.1
      */
     public function getEmployees(array $filters = []): LengthAwarePaginator
     {
         $query = Employee::query();
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['department'])) {
+        if (! empty($filters['department'])) {
             $query->where('department', $filters['department']);
         }
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
@@ -123,28 +125,28 @@ class HRDashboardService
 
     /**
      * Get attendance records with filters
-     * 
-     * @param array $filters Filters including employee_id, date_from, date_to, status, per_page
-     * @return LengthAwarePaginator
+     *
+     * @param  array  $filters  Filters including employee_id, date_from, date_to, status, per_page
+     *
      * @see Requirements 10.2
      */
     public function getAttendance(array $filters = []): LengthAwarePaginator
     {
         $query = Attendance::with('employee');
 
-        if (!empty($filters['employee_id'])) {
+        if (! empty($filters['employee_id'])) {
             $query->where('employee_id', $filters['employee_id']);
         }
 
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->where('date', '>=', $filters['date_from']);
         }
 
-        if (!empty($filters['date_to'])) {
+        if (! empty($filters['date_to'])) {
             $query->where('date', '<=', $filters['date_to']);
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
@@ -159,14 +161,13 @@ class HRDashboardService
 
     /**
      * Get today's attendance summary
-     * 
-     * @return array
+     *
      * @see Requirements 10.2
      */
     public function getTodayAttendance(): array
     {
         $today = Carbon::today();
-        
+
         $attendance = Attendance::with('employee')
             ->whereDate('date', $today)
             ->get();
@@ -184,10 +185,6 @@ class HRDashboardService
 
     /**
      * Record attendance for an employee
-     * 
-     * @param int $employeeId
-     * @param array $data
-     * @return Attendance
      */
     public function recordAttendance(int $employeeId, array $data): Attendance
     {
@@ -209,35 +206,34 @@ class HRDashboardService
         return $attendance;
     }
 
-
     /**
      * Get leave requests with filters
-     * 
-     * @param array $filters Filters including employee_id, status, leave_type, per_page
-     * @return LengthAwarePaginator
+     *
+     * @param  array  $filters  Filters including employee_id, status, leave_type, per_page
+     *
      * @see Requirements 10.3
      */
     public function getLeaveRequests(array $filters = []): LengthAwarePaginator
     {
         $query = LeaveRequest::with(['employee', 'approver']);
 
-        if (!empty($filters['employee_id'])) {
+        if (! empty($filters['employee_id'])) {
             $query->where('employee_id', $filters['employee_id']);
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['leave_type'])) {
+        if (! empty($filters['leave_type'])) {
             $query->where('leave_type', $filters['leave_type']);
         }
 
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->where('start_date', '>=', $filters['date_from']);
         }
 
-        if (!empty($filters['date_to'])) {
+        if (! empty($filters['date_to'])) {
             $query->where('end_date', '<=', $filters['date_to']);
         }
 
@@ -252,8 +248,7 @@ class HRDashboardService
 
     /**
      * Get pending leave requests
-     * 
-     * @return Collection
+     *
      * @see Requirements 10.3
      */
     public function getPendingLeaveRequests(): Collection
@@ -266,17 +261,13 @@ class HRDashboardService
 
     /**
      * Get employee's leave balance
-     * 
-     * @param int $employeeId
-     * @param string $leaveType
-     * @param int $year
-     * @return array
+     *
      * @see Requirements 10.3
      */
-    public function getLeaveBalance(int $employeeId, string $leaveType = 'annual', int $year = null): array
+    public function getLeaveBalance(int $employeeId, string $leaveType = 'annual', ?int $year = null): array
     {
         $year = $year ?? Carbon::now()->year;
-        
+
         // Default annual leave allowance (can be configured per employee/company)
         $defaultAllowances = [
             'annual' => 21,
@@ -317,17 +308,14 @@ class HRDashboardService
 
     /**
      * Approve a leave request and adjust leave balance
-     * 
-     * @param int $leaveRequestId
-     * @param User $approver
-     * @return LeaveRequest|null
+     *
      * @see Requirements 10.3
      */
     public function approveLeaveRequest(int $leaveRequestId, User $approver): ?LeaveRequest
     {
         $leaveRequest = LeaveRequest::find($leaveRequestId);
 
-        if (!$leaveRequest || $leaveRequest->status !== 'pending') {
+        if (! $leaveRequest || $leaveRequest->status !== 'pending') {
             return null;
         }
 
@@ -358,7 +346,7 @@ class HRDashboardService
                     ],
                     [
                         'status' => 'on_leave',
-                        'notes' => ucfirst($leaveRequest->leave_type) . ' leave',
+                        'notes' => ucfirst($leaveRequest->leave_type).' leave',
                     ]
                 );
             }
@@ -389,17 +377,12 @@ class HRDashboardService
 
     /**
      * Reject a leave request
-     * 
-     * @param int $leaveRequestId
-     * @param User $rejector
-     * @param string|null $reason
-     * @return LeaveRequest|null
      */
     public function rejectLeaveRequest(int $leaveRequestId, User $rejector, ?string $reason = null): ?LeaveRequest
     {
         $leaveRequest = LeaveRequest::find($leaveRequestId);
 
-        if (!$leaveRequest || $leaveRequest->status !== 'pending') {
+        if (! $leaveRequest || $leaveRequest->status !== 'pending') {
             return null;
         }
 
@@ -426,27 +409,26 @@ class HRDashboardService
         return $leaveRequest->fresh();
     }
 
-
     /**
      * Get payroll records with filters
-     * 
-     * @param array $filters Filters including employee_id, month, status, per_page
-     * @return LengthAwarePaginator
+     *
+     * @param  array  $filters  Filters including employee_id, month, status, per_page
+     *
      * @see Requirements 10.4
      */
     public function getPayroll(array $filters = []): LengthAwarePaginator
     {
         $query = Payroll::with('employee');
 
-        if (!empty($filters['employee_id'])) {
+        if (! empty($filters['employee_id'])) {
             $query->where('employee_id', $filters['employee_id']);
         }
 
-        if (!empty($filters['month'])) {
+        if (! empty($filters['month'])) {
             $query->where('month', $filters['month']);
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
@@ -461,19 +443,18 @@ class HRDashboardService
 
     /**
      * Calculate payroll for an employee
-     * 
+     *
      * Net salary = base_salary + bonuses - deductions - (absent_days * daily_rate)
-     * 
-     * @param int $employeeId
-     * @param string $month Format: 'YYYY-MM'
-     * @param array $adjustments Optional adjustments (bonuses, deductions, allowances)
-     * @return Payroll
+     *
+     * @param  string  $month  Format: 'YYYY-MM'
+     * @param  array  $adjustments  Optional adjustments (bonuses, deductions, allowances)
+     *
      * @see Requirements 10.4
      */
     public function calculatePayroll(int $employeeId, string $month, array $adjustments = []): Payroll
     {
         $employee = Employee::findOrFail($employeeId);
-        
+
         // Parse month to get date range
         $monthStart = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
         $monthEnd = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
@@ -494,7 +475,7 @@ class HRDashboardService
         $totalOvertimeMinutes = Attendance::where('employee_id', $employeeId)
             ->whereBetween('date', [$monthStart, $monthEnd])
             ->sum('overtime_hours');
-        
+
         // Overtime rate: 1.5x hourly rate
         $hourlyRate = $dailyRate / 8;
         $overtimePay = ($totalOvertimeMinutes / 60) * $hourlyRate * 1.5;
@@ -538,9 +519,9 @@ class HRDashboardService
 
     /**
      * Generate payroll for all active employees
-     * 
-     * @param string $month Format: 'YYYY-MM'
-     * @return array
+     *
+     * @param  string  $month  Format: 'YYYY-MM'
+     *
      * @see Requirements 10.4
      */
     public function generateMonthlyPayroll(string $month): array
@@ -580,47 +561,65 @@ class HRDashboardService
     }
 
     /**
-     * Process payroll (mark as processed)
-     * 
-     * @param int $payrollId
-     * @return Payroll|null
+     * Process payroll (mark as processed and send to finance)
      */
     public function processPayroll(int $payrollId): ?Payroll
     {
-        $payroll = Payroll::find($payrollId);
+        $payroll = Payroll::with('employee')->find($payrollId);
 
-        if (!$payroll || $payroll->status !== 'draft') {
+        if (! $payroll || $payroll->status !== 'draft') {
             return null;
         }
 
-        $payroll->update([
-            'status' => 'processed',
-        ]);
+        DB::beginTransaction();
 
-        $this->auditService->log(
-            'update',
-            'payroll',
-            $payrollId,
-            [
-                'new_values' => ['status' => 'processed'],
-            ]
-        );
+        try {
+            $payroll->update([
+                'status' => 'processed',
+            ]);
 
-        return $payroll->fresh();
+            // Create Financial Transaction for Finance Approval
+            FinancialTransaction::create([
+                'transaction_id' => 'PAY-'.strtoupper(uniqid()),
+                'type' => 'salary_payment',
+                'status' => 'pending', // Waiting for Finance approval
+                'amount' => $payroll->net_salary,
+                'currency' => 'SYP',
+                'description' => "Salary Payment: {$payroll->employee->first_name} {$payroll->employee->last_name} ({$payroll->month})",
+                'metadata' => [
+                    'payroll_id' => $payroll->id,
+                    'employee_id' => $payroll->employee_id,
+                    'month' => $payroll->month,
+                ],
+            ]);
+
+            $this->auditService->log(
+                'update',
+                'payroll',
+                $payrollId,
+                [
+                    'new_values' => ['status' => 'processed'],
+                    'action' => 'sent_to_finance',
+                ]
+            );
+
+            DB::commit();
+
+            return $payroll->fresh();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
     /**
      * Mark payroll as paid
-     * 
-     * @param int $payrollId
-     * @param Carbon|null $paymentDate
-     * @return Payroll|null
      */
     public function markPayrollPaid(int $payrollId, ?Carbon $paymentDate = null): ?Payroll
     {
         $payroll = Payroll::find($payrollId);
 
-        if (!$payroll || $payroll->status === 'paid') {
+        if (! $payroll || $payroll->status === 'paid') {
             return null;
         }
 
@@ -644,12 +643,10 @@ class HRDashboardService
         return $payroll->fresh();
     }
 
-
     /**
      * Get attendance chart data
-     * 
-     * @param string $period Period: 'week', 'month'
-     * @return array
+     *
+     * @param  string  $period  Period: 'week', 'month'
      */
     public function getAttendanceChartData(string $period = 'week'): array
     {
@@ -682,8 +679,6 @@ class HRDashboardService
 
     /**
      * Get department statistics
-     * 
-     * @return Collection
      */
     public function getDepartmentStats(): Collection
     {
@@ -697,9 +692,6 @@ class HRDashboardService
 
     /**
      * Get recent leave requests
-     * 
-     * @param int $limit
-     * @return Collection
      */
     public function getRecentLeaveRequests(int $limit = 10): Collection
     {
@@ -711,9 +703,8 @@ class HRDashboardService
 
     /**
      * Get payroll summary for a month
-     * 
-     * @param string $month Format: 'YYYY-MM'
-     * @return array
+     *
+     * @param  string  $month  Format: 'YYYY-MM'
      */
     public function getPayrollSummary(string $month): array
     {
@@ -738,9 +729,6 @@ class HRDashboardService
 
     /**
      * Get employee by ID
-     * 
-     * @param int $employeeId
-     * @return Employee|null
      */
     public function getEmployee(int $employeeId): ?Employee
     {
@@ -750,12 +738,34 @@ class HRDashboardService
 
     /**
      * Create a new employee
-     * 
-     * @param array $data
-     * @return Employee
      */
     public function createEmployee(array $data): Employee
     {
+        // Hash password if provided
+        if (isset($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        }
+
+        // Generate employee code if not provided
+        if (empty($data['employee_code'])) {
+            $data['employee_code'] = 'EMP-'.strtoupper(uniqid());
+        }
+
+        // Ensure employee_id is set (using employee_code)
+        if (empty($data['employee_id'])) {
+            $data['employee_id'] = $data['employee_code'];
+        }
+
+        // Set default employment type
+        $data['employment_type'] = $data['employment_type'] ?? 'full_time';
+
+        // Set default role flags if not provided (default to regular employee)
+        $data['is_admin'] = $data['is_admin'] ?? false;
+        $data['is_hr'] = $data['is_hr'] ?? false;
+        $data['is_finance'] = $data['is_finance'] ?? false;
+        $data['is_driver_supervisor'] = $data['is_driver_supervisor'] ?? false;
+        $data['is_it'] = $data['is_it'] ?? false;
+
         $employee = Employee::create($data);
 
         $this->auditService->log(
@@ -763,7 +773,7 @@ class HRDashboardService
             'employee',
             $employee->id,
             [
-                'new_values' => $data,
+                'new_values' => array_diff_key($data, ['password' => '']), // Don't log password
             ]
         );
 
@@ -772,16 +782,12 @@ class HRDashboardService
 
     /**
      * Update an employee
-     * 
-     * @param int $employeeId
-     * @param array $data
-     * @return Employee|null
      */
     public function updateEmployee(int $employeeId, array $data): ?Employee
     {
         $employee = Employee::find($employeeId);
 
-        if (!$employee) {
+        if (! $employee) {
             return null;
         }
 
@@ -803,8 +809,6 @@ class HRDashboardService
 
     /**
      * Get all departments
-     * 
-     * @return Collection
      */
     public function getDepartments(): Collection
     {

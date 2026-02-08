@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Form Request for bulk store actions
- * 
+ *
  * @see Requirements 7.5, 15.2
  */
 class BulkStoreActionRequest extends FormRequest

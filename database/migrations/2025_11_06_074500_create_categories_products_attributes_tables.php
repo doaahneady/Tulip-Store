@@ -1,11 +1,14 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
-    public function up(): void {
-        if (!Schema::hasTable('categories')) {
+return new class extends Migration
+{
+    public function up(): void
+    {
+        if (! Schema::hasTable('categories')) {
             Schema::create('categories', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -15,7 +18,7 @@ return new class extends Migration {
             });
         }
 
-        if (!Schema::hasTable('products')) {
+        if (! Schema::hasTable('products')) {
             Schema::create('products', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -31,7 +34,7 @@ return new class extends Migration {
             });
         }
 
-        if (!Schema::hasTable('product_attributes')) {
+        if (! Schema::hasTable('product_attributes')) {
             Schema::create('product_attributes', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedBigInteger('product_id');
@@ -43,7 +46,8 @@ return new class extends Migration {
         }
     }
 
-    public function down(): void {
+    public function down(): void
+    {
         Schema::dropIfExists('product_attributes');
         Schema::dropIfExists('products');
         Schema::dropIfExists('categories');

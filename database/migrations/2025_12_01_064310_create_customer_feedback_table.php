@@ -23,7 +23,7 @@ return new class extends Migration
             $table->timestamp('reviewed_at')->nullable();
             $table->text('response')->nullable();
             $table->timestamps();
-            
+
             $table->index('user_id');
             $table->index('type');
             $table->index('status');

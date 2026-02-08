@@ -24,7 +24,7 @@ return new class extends Migration
             $table->text('optimization_notes')->nullable();
             $table->timestamp('last_seen_at')->nullable();
             $table->timestamps();
-            
+
             $table->index('severity');
             $table->index('is_optimized');
             $table->index('execution_time');

@@ -15,7 +15,7 @@ return new class extends Migration
         // =====================================================
         // CORE RBAC SYSTEM
         // =====================================================
-        
+
         // Roles table - Define system roles
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
@@ -25,7 +25,7 @@ return new class extends Migration
             $table->json('permissions')->nullable(); // JSON array of permissions
             $table->boolean('is_system_role')->default(false); // Cannot be deleted
             $table->timestamps();
-            
+
             $table->index(['name', 'is_system_role']);
         });
 
@@ -37,7 +37,7 @@ return new class extends Migration
             $table->string('category'); // users, orders, finance, etc.
             $table->text('description')->nullable();
             $table->timestamps();
-            
+
             $table->index(['category', 'name']);
         });
 
@@ -47,7 +47,7 @@ return new class extends Migration
             $table->foreignId('role_id')->constrained()->onDelete('cascade');
             $table->foreignId('permission_id')->constrained()->onDelete('cascade');
             $table->timestamps();
-            
+
             $table->unique(['role_id', 'permission_id']);
         });
 
@@ -60,7 +60,7 @@ return new class extends Migration
             $table->foreignId('assigned_by')->nullable()->constrained('users');
             $table->timestamp('expires_at')->nullable();
             $table->boolean('is_active')->default(true);
-            
+
             $table->unique(['user_id', 'role_id']);
             $table->index(['user_id', 'is_active']);
         });
@@ -68,7 +68,7 @@ return new class extends Migration
         // =====================================================
         // AUDIT & ACTIVITY LOGGING
         // =====================================================
-        
+
         Schema::create('audit_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
@@ -81,7 +81,7 @@ return new class extends Migration
             $table->text('user_agent')->nullable();
             $table->string('session_id')->nullable();
             $table->timestamp('created_at')->useCurrent();
-            
+
             $table->index(['user_id', 'created_at']);
             $table->index(['model_type', 'model_id']);
             $table->index(['action', 'created_at']);
@@ -90,7 +90,7 @@ return new class extends Migration
         // =====================================================
         // ORGANIZATIONS & STORES
         // =====================================================
-        
+
         Schema::create('organizations', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -100,7 +100,7 @@ return new class extends Migration
             $table->json('settings')->nullable(); // Organization-specific settings
             $table->enum('status', ['active', 'suspended', 'inactive'])->default('active');
             $table->timestamps();
-            
+
             $table->index(['status', 'created_at']);
         });
 
@@ -118,7 +118,7 @@ return new class extends Migration
             $table->enum('status', ['active', 'pending', 'suspended', 'closed'])->default('pending');
             $table->decimal('commission_rate', 5, 4)->default(0.0500); // 5% default
             $table->timestamps();
-            
+
             $table->index(['owner_id', 'status']);
             $table->index(['organization_id', 'status']);
         });
@@ -126,7 +126,7 @@ return new class extends Migration
         // =====================================================
         // PRODUCT MANAGEMENT
         // =====================================================
-        
+
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -138,7 +138,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->json('metadata')->nullable(); // SEO, filters, etc.
             $table->timestamps();
-            
+
             $table->foreign('parent_id')->references('id')->on('categories')->onDelete('set null');
             $table->index(['parent_id', 'is_active', 'sort_order']);
         });
@@ -167,7 +167,7 @@ return new class extends Migration
             $table->decimal('weight', 8, 2)->nullable(); // For shipping calculations
             $table->json('dimensions')->nullable(); // L x W x H
             $table->timestamps();
-            
+
             $table->index(['store_id', 'status']);
             $table->index(['category_id', 'is_active']);
             $table->index(['sku', 'is_active']);
@@ -177,24 +177,24 @@ return new class extends Migration
         // =====================================================
         // ORDER MANAGEMENT SYSTEM
         // =====================================================
-        
+
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->string('order_number')->unique();
             $table->foreignId('customer_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('store_id')->nullable()->constrained()->onDelete('set null');
-            
+
             // Order Status Flow
             $table->enum('status', [
-                'pending', 'confirmed', 'processing', 'shipped', 
-                'delivered', 'cancelled', 'refunded', 'returned'
+                'pending', 'confirmed', 'processing', 'shipped',
+                'delivered', 'cancelled', 'refunded', 'returned',
             ])->default('pending');
-            
+
             // Payment Information
             $table->enum('payment_status', ['pending', 'paid', 'failed', 'refunded', 'partial'])->default('pending');
             $table->string('payment_method')->nullable(); // card, cash, wallet, etc.
             $table->string('payment_reference')->nullable();
-            
+
             // Financial Breakdown
             $table->decimal('subtotal', 10, 2);
             $table->decimal('tax_amount', 10, 2)->default(0);
@@ -202,21 +202,21 @@ return new class extends Migration
             $table->decimal('discount_amount', 10, 2)->default(0);
             $table->decimal('total_amount', 10, 2);
             $table->decimal('commission_amount', 10, 2)->default(0); // Platform commission
-            
+
             // Shipping Information
             $table->json('shipping_address');
             $table->json('billing_address')->nullable();
             $table->timestamp('estimated_delivery')->nullable();
             $table->timestamp('shipped_at')->nullable();
             $table->timestamp('delivered_at')->nullable();
-            
+
             // Tracking & Notes
             $table->string('tracking_number')->nullable();
             $table->text('customer_notes')->nullable();
             $table->text('admin_notes')->nullable();
-            
+
             $table->timestamps();
-            
+
             $table->index(['customer_id', 'status']);
             $table->index(['store_id', 'status']);
             $table->index(['status', 'created_at']);
@@ -234,14 +234,14 @@ return new class extends Migration
             $table->decimal('total_price', 10, 2); // unit_price * quantity
             $table->json('product_snapshot')->nullable(); // Full product data at time of order
             $table->timestamps();
-            
+
             $table->index(['order_id', 'product_id']);
         });
 
         // =====================================================
         // DELIVERY & LOGISTICS SYSTEM
         // =====================================================
-        
+
         Schema::create('drivers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
@@ -256,7 +256,7 @@ return new class extends Migration
             $table->integer('total_deliveries')->default(0);
             $table->json('working_hours')->nullable(); // Schedule preferences
             $table->timestamps();
-            
+
             $table->index(['status', 'availability']);
             $table->index(['rating', 'total_deliveries']);
         });
@@ -271,10 +271,10 @@ return new class extends Migration
             $table->decimal('speed', 8, 2)->nullable(); // Speed in km/h
             $table->decimal('heading', 8, 2)->nullable(); // Direction in degrees
             $table->timestamp('recorded_at')->useCurrent();
-            
+
             // PostGIS geometry column (if PostGIS is available)
             // $table->geometry('location', 'POINT', 4326)->nullable();
-            
+
             $table->index(['driver_id', 'recorded_at']);
             $table->index(['latitude', 'longitude']);
         });
@@ -284,23 +284,23 @@ return new class extends Migration
             $table->foreignId('order_id')->constrained()->onDelete('cascade');
             $table->foreignId('driver_id')->constrained()->onDelete('cascade');
             $table->foreignId('assigned_by')->constrained('users')->onDelete('cascade');
-            
+
             $table->enum('status', [
-                'assigned', 'accepted', 'rejected', 'picked_up', 
-                'in_transit', 'delivered', 'failed', 'cancelled'
+                'assigned', 'accepted', 'rejected', 'picked_up',
+                'in_transit', 'delivered', 'failed', 'cancelled',
             ])->default('assigned');
-            
+
             $table->timestamp('assigned_at')->useCurrent();
             $table->timestamp('accepted_at')->nullable();
             $table->timestamp('picked_up_at')->nullable();
             $table->timestamp('delivered_at')->nullable();
-            
+
             $table->text('driver_notes')->nullable();
             $table->json('delivery_proof')->nullable(); // Photos, signatures, etc.
             $table->decimal('delivery_fee', 8, 2)->nullable();
-            
+
             $table->timestamps();
-            
+
             $table->index(['driver_id', 'status']);
             $table->index(['order_id', 'status']);
         });
@@ -308,39 +308,48 @@ return new class extends Migration
         // =====================================================
         // FINANCIAL SYSTEM
         // =====================================================
-        
+
         Schema::create('financial_transactions', function (Blueprint $table) {
             $table->id();
             $table->string('transaction_id')->unique(); // External reference
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('order_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('store_id')->nullable()->constrained()->onDelete('set null');
-            
+
             $table->enum('type', [
-                'order_payment', 'commission', 'payout', 'refund', 
-                'fee', 'adjustment', 'payroll', 'expense'
+                'order_payment', 'commission', 'payout', 'refund',
+                'fee', 'adjustment', 'payroll', 'salary_payment', 'expense',
             ]);
-            
-            $table->enum('status', ['pending', 'processing', 'completed', 'failed', 'cancelled'])->default('pending');
-            
+
+            $table->enum('status', [
+                'pending',
+                'pending_approval',
+                'approved',
+                'rejected',
+                'processing',
+                'completed',
+                'failed',
+                'cancelled',
+            ])->default('pending');
+
             $table->decimal('amount', 12, 2);
             $table->string('currency', 3)->default('USD');
             $table->text('description');
             $table->json('metadata')->nullable(); // Additional transaction data
-            
+
             // Immutability fields
             $table->string('hash')->nullable(); // For transaction integrity
             $table->boolean('is_locked')->default(false); // Prevent modifications
             $table->timestamp('locked_at')->nullable();
-            
+
             // Approval workflow
             $table->enum('approval_status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->foreignId('approved_by')->nullable()->constrained('users');
             $table->timestamp('approved_at')->nullable();
             $table->text('approval_notes')->nullable();
-            
+
             $table->timestamps();
-            
+
             $table->index(['type', 'status']);
             $table->index(['user_id', 'created_at']);
             $table->index(['store_id', 'type']);
@@ -360,7 +369,7 @@ return new class extends Migration
             $table->timestamp('processed_at')->nullable();
             $table->string('reference_number')->nullable(); // Bank reference
             $table->timestamps();
-            
+
             $table->index(['store_id', 'status']);
             $table->index(['status', 'created_at']);
         });
@@ -368,7 +377,7 @@ return new class extends Migration
         // =====================================================
         // HR MANAGEMENT SYSTEM
         // =====================================================
-        
+
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
@@ -384,7 +393,7 @@ return new class extends Migration
             $table->json('emergency_contact')->nullable();
             $table->json('documents')->nullable(); // Contract, ID copies, etc.
             $table->timestamps();
-            
+
             $table->index(['department', 'status']);
             $table->index(['status', 'hire_date']);
         });
@@ -403,7 +412,7 @@ return new class extends Migration
             $table->enum('status', ['scheduled', 'in_progress', 'completed', 'missed', 'cancelled'])->default('scheduled');
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             $table->index(['employee_id', 'shift_date']);
             $table->index(['shift_date', 'status']);
         });
@@ -424,7 +433,7 @@ return new class extends Migration
             $table->foreignId('approved_by')->nullable()->constrained('users');
             $table->timestamp('approved_at')->nullable();
             $table->timestamps();
-            
+
             $table->unique(['employee_id', 'pay_period']);
             $table->index(['pay_period', 'status']);
         });
@@ -432,7 +441,7 @@ return new class extends Migration
         // =====================================================
         // IT/DEVOPS MONITORING SYSTEM
         // =====================================================
-        
+
         Schema::create('system_services', function (Blueprint $table) {
             $table->id();
             $table->string('name'); // web_server, database, redis, etc.
@@ -446,7 +455,7 @@ return new class extends Migration
             $table->json('health_data')->nullable(); // CPU, memory, disk usage
             $table->json('configuration')->nullable();
             $table->timestamps();
-            
+
             $table->index(['status', 'last_check']);
             $table->index(['type', 'status']);
         });
@@ -463,7 +472,7 @@ return new class extends Migration
             $table->string('session_id')->nullable();
             $table->string('ip_address', 45)->nullable();
             $table->timestamp('created_at')->useCurrent();
-            
+
             $table->index(['level', 'created_at']);
             $table->index(['channel', 'created_at']);
             $table->index(['user_id', 'created_at']);
@@ -480,7 +489,7 @@ return new class extends Migration
             $table->json('changes')->nullable(); // List of changes/features
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             $table->index(['environment', 'status']);
             $table->index(['version', 'environment']);
         });
@@ -488,64 +497,70 @@ return new class extends Migration
         // =====================================================
         // CUSTOMER SUPPORT SYSTEM
         // =====================================================
-        
-        Schema::create('support_tickets', function (Blueprint $table) {
-            $table->id();
-            $table->string('ticket_number')->unique();
-            $table->foreignId('customer_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null');
-            $table->string('subject');
-            $table->text('description');
-            $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
-            $table->enum('status', ['open', 'in_progress', 'waiting_customer', 'resolved', 'closed'])->default('open');
-            $table->string('category')->nullable(); // billing, technical, general, etc.
-            $table->foreignId('related_order_id')->nullable()->constrained('orders')->onDelete('set null');
-            $table->timestamp('first_response_at')->nullable();
-            $table->timestamp('resolved_at')->nullable();
-            $table->timestamps();
-            
-            $table->index(['status', 'priority']);
-            $table->index(['assigned_to', 'status']);
-            $table->index(['customer_id', 'status']);
-        });
 
-        Schema::create('ticket_replies', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('ticket_id')->constrained('support_tickets')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->text('message');
-            $table->json('attachments')->nullable();
-            $table->boolean('is_internal')->default(false); // Internal notes vs customer-visible
-            $table->timestamps();
-            
-            $table->index(['ticket_id', 'created_at']);
-        });
+        if (! Schema::hasTable('support_tickets')) {
+            Schema::create('support_tickets', function (Blueprint $table) {
+                $table->id();
+                $table->string('ticket_number')->unique();
+                $table->foreignId('customer_id')->constrained('users')->onDelete('cascade');
+                $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null');
+                $table->string('subject');
+                $table->text('description');
+                $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
+                $table->enum('status', ['open', 'in_progress', 'waiting_customer', 'resolved', 'closed'])->default('open');
+                $table->string('category')->nullable();
+                $table->foreignId('related_order_id')->nullable()->constrained('orders')->onDelete('set null');
+                $table->timestamp('first_response_at')->nullable();
+                $table->timestamp('resolved_at')->nullable();
+                $table->timestamps();
+
+                $table->index(['status', 'priority']);
+                $table->index(['assigned_to', 'status']);
+                $table->index(['customer_id', 'status']);
+            });
+        }
+
+        if (! Schema::hasTable('ticket_replies')) {
+            Schema::create('ticket_replies', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('ticket_id')->constrained('support_tickets')->onDelete('cascade');
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
+                $table->text('message');
+                $table->json('attachments')->nullable();
+                $table->boolean('is_internal')->default(false);
+                $table->timestamps();
+
+                $table->index(['ticket_id', 'created_at']);
+            });
+        }
 
         // =====================================================
         // NOTIFICATION SYSTEM
         // =====================================================
-        
-        Schema::create('notifications', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('type'); // order_update, system_alert, etc.
-            $table->string('title');
-            $table->text('message');
-            $table->json('data')->nullable(); // Additional notification data
-            $table->enum('channel', ['database', 'email', 'sms', 'push'])->default('database');
-            $table->boolean('is_read')->default(false);
-            $table->timestamp('read_at')->nullable();
-            $table->timestamp('sent_at')->nullable();
-            $table->timestamps();
-            
-            $table->index(['user_id', 'is_read']);
-            $table->index(['type', 'created_at']);
-        });
+
+        if (! Schema::hasTable('notifications')) {
+            Schema::create('notifications', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
+                $table->string('type'); // order_update, system_alert, etc.
+                $table->string('title');
+                $table->text('message');
+                $table->json('data')->nullable(); // Additional notification data
+                $table->enum('channel', ['database', 'email', 'sms', 'push'])->default('database');
+                $table->boolean('is_read')->default(false);
+                $table->timestamp('read_at')->nullable();
+                $table->timestamp('sent_at')->nullable();
+                $table->timestamps();
+
+                $table->index(['user_id', 'is_read']);
+                $table->index(['type', 'created_at']);
+            });
+        }
 
         // =====================================================
         // SETTINGS & CONFIGURATION
         // =====================================================
-        
+
         Schema::create('system_settings', function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique();
@@ -554,7 +569,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->boolean('is_public')->default(false); // Can be accessed by frontend
             $table->timestamps();
-            
+
             $table->index(['key', 'is_public']);
         });
     }

@@ -4,25 +4,30 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class Driver extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'phone',
-        'email',
+        'user_id',
+        'vehicle_id',
         'license_number',
+        'license_expiry',
         'vehicle_type',
         'vehicle_plate',
+        'vehicle_info',
         'status',
-        'current_latitude',
-        'current_longitude',
+        'availability',
+        'working_hours',
+        'last_location',
         'last_location_update',
         'total_deliveries',
         'rating',
-        'is_active',
+        'current_speed',
+        'current_heading',
     ];
 
     protected $casts = [
@@ -30,6 +35,36 @@ class Driver extends Model
         'rating' => 'decimal:2',
         'is_active' => 'boolean',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class);
+    }
+
+    public function employee()
+    {
+        return $this->hasOne(Employee::class);
+    }
+
+    public function currentLocation()
+    {
+        return $this->hasOne(DriverLocation::class)->latestOfMany();
+    }
+
+    public function latestLocation()
+    {
+        return $this->hasOne(DriverLocation::class)->latestOfMany();
+    }
+
+    public function deliveryAssignments()
+    {
+        return $this->hasMany(DeliveryAssignment::class);
+    }
 
     public function locations()
     {
@@ -47,13 +82,28 @@ class Driver extends Model
             ->whereIn('status', ['assigned', 'picked_up', 'in_transit']);
     }
 
-    public function updateLocation($latitude, $longitude, $speed = null, $accuracy = null)
+    public function updateLocation($latitude, $longitude, $speed = null, $accuracy = null, $heading = null)
     {
-        $this->update([
-            'current_latitude' => $latitude,
-            'current_longitude' => $longitude,
-            'last_location_update' => now(),
-        ]);
+        $updates = [];
+
+        if (Schema::hasColumn('drivers', 'last_location') && Schema::getConnection()->getDriverName() === 'mysql') {
+            $lng = (float) $longitude;
+            $lat = (float) $latitude;
+            $updates['last_location'] = DB::raw("ST_GeomFromText('POINT({$lng} {$lat})')");
+        }
+        if (Schema::hasColumn('drivers', 'last_location_update')) {
+            $updates['last_location_update'] = now();
+        }
+        if (Schema::hasColumn('drivers', 'current_speed')) {
+            $updates['current_speed'] = $speed;
+        }
+        if (Schema::hasColumn('drivers', 'current_heading')) {
+            $updates['current_heading'] = $heading;
+        }
+
+        if (! empty($updates)) {
+            $this->forceFill($updates)->save();
+        }
 
         $this->locations()->create([
             'latitude' => $latitude,
@@ -66,7 +116,7 @@ class Driver extends Model
 
     public function getStatusColorAttribute()
     {
-        return match($this->status) {
+        return match ($this->availability) {
             'available' => 'green',
             'busy' => 'blue',
             'on_break' => 'yellow',

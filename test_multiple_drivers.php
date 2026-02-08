@@ -1,9 +1,10 @@
 <?php
+
 /**
  * Test Multiple Drivers GPS Update Script
- * 
+ *
  * This script simulates multiple drivers sending GPS updates simultaneously
- * 
+ *
  * Usage: php test_multiple_drivers.php
  */
 
@@ -31,20 +32,20 @@ $iteration = 0;
 while (true) {
     $iteration++;
     echo "\n--- Update Round #{$iteration} ---\n";
-    
+
     foreach ($driverIds as $driverId) {
         $location = $driverLocations[$driverId];
-        
+
         // Simulate movement
         $lat = $location['lat'] + (rand(-50, 50) / 10000);
         $lng = $location['lng'] + (rand(-50, 50) / 10000);
         $speed = rand(0, 80);
         $accuracy = rand(5, 20);
-        
+
         // Update stored location for next iteration
         $driverLocations[$driverId]['lat'] = $lat;
         $driverLocations[$driverId]['lng'] = $lng;
-        
+
         // Prepare data
         $data = [
             'driver_id' => $driverId,
@@ -53,18 +54,18 @@ while (true) {
             'speed' => $speed,
             'accuracy' => $accuracy,
         ];
-        
+
         // Send to API
-        $ch = curl_init($baseUrl . '/api/driver/location/update');
+        $ch = curl_init($baseUrl.'/api/driver/location/update');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        
+
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        
+
         // Display result
         $timestamp = date('H:i:s');
         $name = $location['name'];
@@ -74,7 +75,7 @@ while (true) {
             echo "❌ [{$timestamp}] Driver #{$driverId} ({$name}): FAILED\n";
         }
     }
-    
+
     // Wait 5 seconds before next round
     sleep(5);
 }

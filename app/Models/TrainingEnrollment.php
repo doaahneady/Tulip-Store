@@ -10,7 +10,7 @@ class TrainingEnrollment extends Model
     use HasFactory;
 
     protected $fillable = [
-        'training_program_id', 'employee_id', 'status', 'score', 'feedback'
+        'training_program_id', 'employee_id', 'status', 'score', 'feedback',
     ];
 
     protected $casts = [

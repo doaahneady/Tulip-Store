@@ -12,31 +12,31 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('products', function (Blueprint $table) {
-            if (!Schema::hasColumn('products', 'color')) {
+            if (! Schema::hasColumn('products', 'color')) {
                 $table->string('color')->nullable()->after('description');
             }
-            if (!Schema::hasColumn('products', 'size')) {
+            if (! Schema::hasColumn('products', 'size')) {
                 $table->string('size')->nullable()->after('description');
             }
-            if (!Schema::hasColumn('products', 'material')) {
+            if (! Schema::hasColumn('products', 'material')) {
                 $table->string('material')->nullable()->after('description');
             }
-            if (!Schema::hasColumn('products', 'brand')) {
+            if (! Schema::hasColumn('products', 'brand')) {
                 $table->string('brand')->nullable()->after('description');
             }
-            if (!Schema::hasColumn('products', 'age_range')) {
+            if (! Schema::hasColumn('products', 'age_range')) {
                 $table->integer('age_range')->nullable()->after('description');
             }
-            if (!Schema::hasColumn('products', 'author')) {
+            if (! Schema::hasColumn('products', 'author')) {
                 $table->string('author')->nullable()->after('description');
             }
-            if (!Schema::hasColumn('products', 'genre')) {
+            if (! Schema::hasColumn('products', 'genre')) {
                 $table->string('genre')->nullable()->after('description');
             }
-            if (!Schema::hasColumn('products', 'pages')) {
+            if (! Schema::hasColumn('products', 'pages')) {
                 $table->integer('pages')->nullable()->after('description');
             }
-            if (!Schema::hasColumn('products', 'condition')) {
+            if (! Schema::hasColumn('products', 'condition')) {
                 $table->string('condition')->default('new')->after('description');
             }
         });
@@ -58,7 +58,7 @@ return new class extends Migration
                 'genre',
                 'pages',
                 'condition',
-                'stock'
+                'stock',
             ]);
         });
     }

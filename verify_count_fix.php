@@ -30,5 +30,3 @@ echo "4. Maintainable and readable code\n\n";
 
 echo "=== All Count() Errors Should Be Resolved! ===\n";
 echo "The tickets page should now load without any count() on array errors.\n";
-
-?>

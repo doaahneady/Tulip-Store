@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Legacy\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -15,9 +15,9 @@ class ProductManagementController extends Controller
         $query = Product::with('category');
 
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('description', 'like', '%' . $request->search . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%'.$request->search.'%')
+                    ->orWhere('description', 'like', '%'.$request->search.'%');
             });
         }
 
@@ -76,7 +76,7 @@ class ProductManagementController extends Controller
         $request->validate([
             'action' => 'required|in:delete,activate,deactivate,feature,unfeature',
             'ids' => 'required|array',
-            'ids.*' => 'exists:products,id'
+            'ids.*' => 'exists:products,id',
         ]);
 
         $products = Product::whereIn('id', $request->ids);
@@ -112,7 +112,7 @@ class ProductManagementController extends Controller
         $query = Product::with('category');
 
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%'.$request->search.'%');
         }
 
         if ($request->filled('category')) {
@@ -121,15 +121,15 @@ class ProductManagementController extends Controller
 
         $products = $query->get();
 
-        $filename = 'products_' . date('Y-m-d_His') . '.csv';
-        
+        $filename = 'products_'.date('Y-m-d_His').'.csv';
+
         header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        
+        header('Content-Disposition: attachment; filename="'.$filename.'"');
+
         $output = fopen('php://output', 'w');
-        
+
         fputcsv($output, ['ID', 'Name', 'Category', 'Price', 'Discount Price', 'Stock', 'Status', 'Featured']);
-        
+
         foreach ($products as $product) {
             fputcsv($output, [
                 $product->id,
@@ -139,10 +139,10 @@ class ProductManagementController extends Controller
                 $product->discount_price ?? '',
                 $product->stock,
                 $product->is_active ? 'Active' : 'Inactive',
-                $product->is_featured ? 'Yes' : 'No'
+                $product->is_featured ? 'Yes' : 'No',
             ]);
         }
-        
+
         fclose($output);
         exit;
     }
@@ -151,20 +151,21 @@ class ProductManagementController extends Controller
     {
         $validated = $request->validate([
             'field' => 'required|in:price,discount_price,stock',
-            'value' => 'required|numeric|min:0'
+            'value' => 'required|numeric|min:0',
         ]);
 
         $product->update([$validated['field'] => $validated['value']]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Updated successfully'
+            'message' => 'Updated successfully',
         ]);
     }
 
     public function create()
     {
         $categories = Category::where('is_active', true)->get();
+
         return view('admin.products.create', compact('categories'));
     }
 
@@ -184,7 +185,7 @@ class ProductManagementController extends Controller
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
-        
+
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('products', 'public');
         }
@@ -198,6 +199,7 @@ class ProductManagementController extends Controller
     public function edit(Product $product)
     {
         $categories = Category::where('is_active', true)->get();
+
         return view('admin.products.edit', compact('product', 'categories'));
     }
 
@@ -217,7 +219,7 @@ class ProductManagementController extends Controller
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
-        
+
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('products', 'public');
         }
@@ -238,15 +240,15 @@ class ProductManagementController extends Controller
 
     public function toggleFeatured(Product $product)
     {
-        $product->update(['is_featured' => !$product->is_featured]);
-        
+        $product->update(['is_featured' => ! $product->is_featured]);
+
         return back()->with('success', 'Product featured status updated');
     }
 
     public function toggleActive(Product $product)
     {
-        $product->update(['is_active' => !$product->is_active]);
-        
+        $product->update(['is_active' => ! $product->is_active]);
+
         return back()->with('success', 'Product status updated');
     }
 }

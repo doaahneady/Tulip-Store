@@ -20,14 +20,18 @@ class CartController extends Controller
     {
         $user = Auth::user();
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
-        
+
         $cart->load(['items.product']);
 
+        $count = (int) $cart->items->sum(fn ($item) => (int) $item->quantity);
+
         return response()->json([
+            'success' => true,
             'id' => $cart->id,
             'items' => $cart->items,
-            'total' => $cart->items->sum(fn($item) => $item->price * $item->quantity),
-            'count' => $cart->items->count(),
+            'total' => (float) $cart->items->sum(fn ($item) => (float) ($item->total_price ?? ($item->price * $item->quantity))),
+            'count' => $count,
+            'cart_count' => $count,
         ]);
     }
 
@@ -42,26 +46,37 @@ class CartController extends Controller
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
         $product = Product::findOrFail($request->product_id);
 
-        // Check stock
-        if ($product->stock < $request->quantity) {
-            return response()->json([
-                'message' => 'Insufficient stock',
-                'available' => $product->stock
-            ], 422);
+        $cartItem = CartItem::firstOrNew([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+        ]);
+
+        $existingQuantity = $cartItem->exists ? (int) $cartItem->quantity : 0;
+        $newQuantity = $existingQuantity + (int) $request->quantity;
+
+        if ($product->track_inventory) {
+            $available = (int) ($product->stock_quantity ?? 0);
+            if ($newQuantity > $available) {
+                return response()->json([
+                    'message' => 'Insufficient stock',
+                    'available' => $available,
+                ], 422);
+            }
         }
 
-        // Add or update item
-        $cartItem = CartItem::updateOrCreate(
-            ['cart_id' => $cart->id, 'product_id' => $request->product_id],
-            [
-                'quantity' => \DB::raw("quantity + {$request->quantity}"),
-                'price' => $product->discount_price ?? $product->price,
-            ]
-        );
+        $cartItem->quantity = $newQuantity;
+        $cartItem->unit_price = $product->discount_price ?? $product->price;
+        $cartItem->save();
+
+        $cart->load('items');
+        $count = (int) $cart->items->sum(fn ($item) => (int) $item->quantity);
 
         return response()->json([
+            'success' => true,
             'message' => 'Product added to cart',
             'item' => $cartItem,
+            'cart_count' => $count,
+            'count' => $count,
         ], 201);
     }
 
@@ -74,34 +89,62 @@ class CartController extends Controller
         $cartItem = CartItem::findOrFail($itemId);
         $product = $cartItem->product;
 
-        // Check stock
-        if ($product->stock < $request->quantity) {
-            return response()->json([
-                'message' => 'Insufficient stock',
-                'available' => $product->stock
-            ], 422);
+        if ($product && $product->track_inventory) {
+            $available = (int) ($product->stock_quantity ?? 0);
+            if ((int) $request->quantity > $available) {
+                return response()->json([
+                    'message' => 'Insufficient stock',
+                    'available' => $available,
+                ], 422);
+            }
         }
 
         $cartItem->update(['quantity' => $request->quantity]);
 
-        return response()->json($cartItem);
+        $cart = $cartItem->cart()->with('items')->first();
+        $count = $cart ? (int) $cart->items->sum(fn ($item) => (int) $item->quantity) : 0;
+
+        return response()->json([
+            'success' => true,
+            'item' => $cartItem->fresh(),
+            'cart_count' => $count,
+            'count' => $count,
+        ]);
     }
 
     public function removeItem($itemId)
     {
-        CartItem::destroy($itemId);
-        return response()->json(['message' => 'Item removed from cart']);
+        $user = Auth::user();
+        $cart = Cart::where('user_id', $user->id)->first();
+        if ($cart) {
+            CartItem::where('cart_id', $cart->id)->where('id', $itemId)->delete();
+            $cart->load('items');
+        }
+
+        $count = $cart ? (int) $cart->items->sum(fn ($item) => (int) $item->quantity) : 0;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Item removed from cart',
+            'cart_count' => $count,
+            'count' => $count,
+        ]);
     }
 
     public function clear()
     {
         $user = Auth::user();
         $cart = Cart::where('user_id', $user->id)->first();
-        
+
         if ($cart) {
             CartItem::where('cart_id', $cart->id)->delete();
         }
 
-        return response()->json(['message' => 'Cart cleared']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Cart cleared',
+            'cart_count' => 0,
+            'count' => 0,
+        ]);
     }
 }

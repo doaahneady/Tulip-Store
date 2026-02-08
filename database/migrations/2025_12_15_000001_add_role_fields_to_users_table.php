@@ -12,16 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            if (!Schema::hasColumn('users', 'is_hr')) {
+            if (! Schema::hasColumn('users', 'is_hr')) {
                 $table->boolean('is_hr')->default(false)->after('is_admin');
             }
-            if (!Schema::hasColumn('users', 'is_cs')) {
+            if (! Schema::hasColumn('users', 'is_cs')) {
                 $table->boolean('is_cs')->default(false)->after('is_hr');
             }
-            if (!Schema::hasColumn('users', 'is_finance')) {
+            if (! Schema::hasColumn('users', 'is_finance')) {
                 $table->boolean('is_finance')->default(false)->after('is_cs');
             }
-            if (!Schema::hasColumn('users', 'is_accountant')) {
+            if (! Schema::hasColumn('users', 'is_accountant')) {
                 $table->boolean('is_accountant')->default(false)->after('is_finance');
             }
         });

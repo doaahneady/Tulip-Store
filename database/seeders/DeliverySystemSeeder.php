@@ -2,12 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\DeliveryDriver;
-use App\Models\User;
-use App\Models\Order;
 use App\Models\DeliveryAssignment;
-use Carbon\Carbon;
+use App\Models\DeliveryDriver;
+use App\Models\Order;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class DeliverySystemSeeder extends Seeder
 {
@@ -25,7 +24,7 @@ class DeliverySystemSeeder extends Seeder
                 'current_latitude' => 33.5138,
                 'current_longitude' => 36.2765,
                 'rating' => 4.8,
-                'total_deliveries' => 245
+                'total_deliveries' => 245,
             ],
             [
                 'driver_name' => 'محمد علي',
@@ -37,7 +36,7 @@ class DeliverySystemSeeder extends Seeder
                 'current_latitude' => 33.5200,
                 'current_longitude' => 36.2800,
                 'rating' => 4.9,
-                'total_deliveries' => 312
+                'total_deliveries' => 312,
             ],
             [
                 'driver_name' => 'خالد حسن',
@@ -49,7 +48,7 @@ class DeliverySystemSeeder extends Seeder
                 'current_latitude' => 33.5100,
                 'current_longitude' => 36.2700,
                 'rating' => 4.7,
-                'total_deliveries' => 189
+                'total_deliveries' => 189,
             ],
             [
                 'driver_name' => 'عمر يوسف',
@@ -61,7 +60,7 @@ class DeliverySystemSeeder extends Seeder
                 'current_latitude' => 33.5250,
                 'current_longitude' => 36.2850,
                 'rating' => 4.6,
-                'total_deliveries' => 156
+                'total_deliveries' => 156,
             ],
             [
                 'driver_name' => 'سعيد أحمد',
@@ -73,7 +72,7 @@ class DeliverySystemSeeder extends Seeder
                 'current_latitude' => 33.5180,
                 'current_longitude' => 36.2720,
                 'rating' => 4.9,
-                'total_deliveries' => 278
+                'total_deliveries' => 278,
             ],
             [
                 'driver_name' => 'فهد عبدالله',
@@ -85,7 +84,7 @@ class DeliverySystemSeeder extends Seeder
                 'current_latitude' => 33.5120,
                 'current_longitude' => 36.2780,
                 'rating' => 4.5,
-                'total_deliveries' => 134
+                'total_deliveries' => 134,
             ],
             [
                 'driver_name' => 'ياسر محمود',
@@ -97,7 +96,7 @@ class DeliverySystemSeeder extends Seeder
                 'current_latitude' => 33.5160,
                 'current_longitude' => 36.2740,
                 'rating' => 4.4,
-                'total_deliveries' => 98
+                'total_deliveries' => 98,
             ],
             [
                 'driver_name' => 'طارق سالم',
@@ -109,18 +108,18 @@ class DeliverySystemSeeder extends Seeder
                 'current_latitude' => 33.5220,
                 'current_longitude' => 36.2820,
                 'rating' => 4.8,
-                'total_deliveries' => 223
-            ]
+                'total_deliveries' => 223,
+            ],
         ];
 
         foreach ($drivers as $driverData) {
             // Create user for driver
             $user = User::create([
                 'name' => $driverData['driver_name'],
-                'email' => strtolower(str_replace(' ', '', $driverData['driver_name'])) . '@delivery.com',
+                'email' => strtolower(str_replace(' ', '', $driverData['driver_name'])).'@delivery.com',
                 'password' => bcrypt('password'),
                 'phone' => $driverData['phone'],
-                'is_admin' => false
+                'is_admin' => false,
             ]);
 
             $driverData['user_id'] = $user->id;
@@ -135,8 +134,8 @@ class DeliverySystemSeeder extends Seeder
                     'longitude' => $driverData['current_longitude'] + (rand(-100, 100) / 10000),
                     'speed' => rand(0, 60),
                     'accuracy' => rand(5, 20),
-                    'battery_level' => rand(50, 100) . '%',
-                    'recorded_at' => now()->subMinutes(rand(1, 480))
+                    'battery_level' => rand(50, 100).'%',
+                    'recorded_at' => now()->subMinutes(rand(1, 480)),
                 ]);
             }
         }
@@ -155,7 +154,7 @@ class DeliverySystemSeeder extends Seeder
                     'picked_up_at' => rand(0, 1) ? now()->subMinutes(rand(5, 30)) : null,
                     'delivery_latitude' => $orders[$index]->latitude,
                     'delivery_longitude' => $orders[$index]->longitude,
-                    'estimated_time_minutes' => rand(15, 45)
+                    'estimated_time_minutes' => rand(15, 45),
                 ]);
             }
         }
@@ -167,7 +166,7 @@ class DeliverySystemSeeder extends Seeder
         foreach ($completedOrders as $index => $order) {
             $driver = $allDrivers->random();
             $assignedAt = now()->subHours(rand(1, 8));
-            
+
             DeliveryAssignment::create([
                 'order_id' => $order->id,
                 'driver_id' => $driver->id,
@@ -178,12 +177,12 @@ class DeliverySystemSeeder extends Seeder
                 'delivery_latitude' => $order->latitude,
                 'delivery_longitude' => $order->longitude,
                 'distance_km' => rand(2, 15),
-                'estimated_time_minutes' => rand(15, 45)
+                'estimated_time_minutes' => rand(15, 45),
             ]);
         }
 
         $this->command->info('✅ Delivery system seeded successfully!');
-        $this->command->info('📍 Created ' . DeliveryDriver::count() . ' drivers');
-        $this->command->info('🚚 Created ' . DeliveryAssignment::count() . ' delivery assignments');
+        $this->command->info('📍 Created '.DeliveryDriver::count().' drivers');
+        $this->command->info('🚚 Created '.DeliveryAssignment::count().' delivery assignments');
     }
 }

@@ -52,6 +52,6 @@ class ApiError extends Model
 
     public function getResponseTimeHumanAttribute()
     {
-        return number_format($this->response_time, 2) . 'ms';
+        return number_format($this->response_time, 2).'ms';
     }
 }

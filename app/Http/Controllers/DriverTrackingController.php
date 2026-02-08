@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Driver;
-use Illuminate\Http\Request;
 
 class DriverTrackingController extends Controller
 {
@@ -12,7 +11,7 @@ class DriverTrackingController extends Controller
      */
     public function index()
     {
-        $drivers = Driver::where('is_active', true)
+        $drivers = Driver::where('status', 'active')
             ->orderBy('name')
             ->get();
 

@@ -12,14 +12,15 @@ class NotificationSeeder extends Seeder
     {
         // Clear existing notifications
         Notification::truncate();
-        
+
         $user = User::first();
-        
-        if (!$user) {
+
+        if (! $user) {
             echo "⚠️ No users found. Please create a user first.\n";
+
             return;
         }
-        
+
         $notifications = [
             [
                 'type' => 'order_created',
@@ -28,7 +29,7 @@ class NotificationSeeder extends Seeder
                 'icon' => 'fas fa-shopping-cart',
                 'color' => 'blue',
                 'link' => '/my-orders',
-                'is_read' => false
+                'is_read' => false,
             ],
             [
                 'type' => 'order_confirmed',
@@ -37,7 +38,7 @@ class NotificationSeeder extends Seeder
                 'icon' => 'fas fa-check-circle',
                 'color' => 'green',
                 'link' => '/my-orders',
-                'is_read' => false
+                'is_read' => false,
             ],
             [
                 'type' => 'order_shipped',
@@ -46,7 +47,7 @@ class NotificationSeeder extends Seeder
                 'icon' => 'fas fa-shipping-fast',
                 'color' => 'orange',
                 'link' => '/my-orders',
-                'is_read' => false
+                'is_read' => false,
             ],
             [
                 'type' => 'order_delivered',
@@ -55,7 +56,7 @@ class NotificationSeeder extends Seeder
                 'icon' => 'fas fa-check-double',
                 'color' => 'green',
                 'link' => '/my-orders',
-                'is_read' => true
+                'is_read' => true,
             ],
             [
                 'type' => 'welcome',
@@ -64,7 +65,7 @@ class NotificationSeeder extends Seeder
                 'icon' => 'fas fa-heart',
                 'color' => 'red',
                 'link' => '/',
-                'is_read' => true
+                'is_read' => true,
             ],
             [
                 'type' => 'promotion',
@@ -73,7 +74,7 @@ class NotificationSeeder extends Seeder
                 'icon' => 'fas fa-gift',
                 'color' => 'orange',
                 'link' => '/',
-                'is_read' => false
+                'is_read' => false,
             ],
             [
                 'type' => 'new_product',
@@ -82,7 +83,7 @@ class NotificationSeeder extends Seeder
                 'icon' => 'fas fa-star',
                 'color' => 'blue',
                 'link' => '/',
-                'is_read' => false
+                'is_read' => false,
             ],
             [
                 'type' => 'order_cancelled',
@@ -91,10 +92,10 @@ class NotificationSeeder extends Seeder
                 'icon' => 'fas fa-times-circle',
                 'color' => 'red',
                 'link' => '/my-orders',
-                'is_read' => false
-            ]
+                'is_read' => false,
+            ],
         ];
-        
+
         foreach ($notifications as $index => $notificationData) {
             Notification::create([
                 'user_id' => $user->id,
@@ -106,12 +107,12 @@ class NotificationSeeder extends Seeder
                 'link' => $notificationData['link'],
                 'is_read' => $notificationData['is_read'],
                 'created_at' => now()->subHours($index * 3),
-                'updated_at' => now()->subHours($index * 3)
+                'updated_at' => now()->subHours($index * 3),
             ]);
-            
+
             echo "✅ Created notification: {$notificationData['title']}\n";
         }
-        
+
         echo "\n🎉 Successfully created 8 test notifications!\n";
     }
 }

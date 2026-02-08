@@ -22,10 +22,10 @@
       <div>
         <h3 class="text-white font-bold mb-4">Support</h3>
         <ul class="space-y-2 text-sm">
-          <li><a href="#" class="hover:text-primary transition">Contact Us</a></li>
-          <li><a href="#" class="hover:text-primary transition">FAQ</a></li>
-          <li><a href="#" class="hover:text-primary transition">Returns</a></li>
-          <li><a href="#" class="hover:text-primary transition">Shipping</a></li>
+          <li><a href="/contact" class="hover:text-primary transition">Contact Us</a></li>
+          <li><a href="/faq" class="hover:text-primary transition">FAQ</a></li>
+          <li><a href="/returns" class="hover:text-primary transition">Returns</a></li>
+          <li><a href="/shipping" class="hover:text-primary transition">Shipping</a></li>
         </ul>
       </div>
 
@@ -33,9 +33,9 @@
       <div>
         <h3 class="text-white font-bold mb-4">Legal</h3>
         <ul class="space-y-2 text-sm">
-          <li><a href="#" class="hover:text-primary transition">Privacy Policy</a></li>
-          <li><a href="#" class="hover:text-primary transition">Terms of Service</a></li>
-          <li><a href="#" class="hover:text-primary transition">Cookie Policy</a></li>
+          <li><a href="/privacy" class="hover:text-primary transition">Privacy Policy</a></li>
+          <li><a href="/terms" class="hover:text-primary transition">Terms of Service</a></li>
+          <li><a href="/cookies" class="hover:text-primary transition">Cookie Policy</a></li>
         </ul>
       </div>
     </div>

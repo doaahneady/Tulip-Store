@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\EmailVerification;
 use App\Mail\VerificationCodeMail;
+use App\Models\EmailVerification;
 use App\Models\PasswordReset;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -51,7 +51,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -72,7 +72,7 @@ class AuthController extends Controller
         // Generate verification code and token
         $verificationCode = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
         $token = Str::random(64);
-        
+
         // Store verification code with token (expires in 15 minutes)
         EmailVerification::create([
             'email' => $user->email,
@@ -89,7 +89,7 @@ class AuthController extends Controller
             );
         } catch (\Exception $e) {
             // Log error but don't fail registration
-            \Log::error('Failed to send verification email: ' . $e->getMessage());
+            \Log::error('Failed to send verification email: '.$e->getMessage());
         }
 
         return response()->json([
@@ -100,7 +100,7 @@ class AuthController extends Controller
                 'username' => $user->username,
                 'email' => $user->email,
                 'verified' => $user->verified,
-            ]
+            ],
         ], 201);
     }
 
@@ -118,7 +118,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -128,10 +128,10 @@ class AuthController extends Controller
             ->where('expires_at', '>', Carbon::now())
             ->first();
 
-        if (!$verification) {
+        if (! $verification) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid or expired verification code'
+                'message' => 'Invalid or expired verification code',
             ], 400);
         }
 
@@ -155,7 +155,7 @@ class AuthController extends Controller
                 'username' => $user->username,
                 'email' => $user->email,
                 'verified' => $user->verified,
-            ]
+            ],
         ], 200);
     }
 
@@ -172,22 +172,22 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $user = User::where('email', $request->email)->first();
-        
+
         if ($user->verified) {
             return response()->json([
                 'success' => false,
-                'message' => 'Email already verified'
+                'message' => 'Email already verified',
             ], 400);
         }
 
         // Generate new verification code
         $verificationCode = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
-        
+
         // Invalidate old codes
         EmailVerification::where('email', $request->email)
             ->where('used', false)
@@ -209,16 +209,17 @@ class AuthController extends Controller
                 new VerificationCodeMail($user->user_full_name ?? $user->username, $verificationCode)
             );
         } catch (\Exception $e) {
-            \Log::error('Failed to send verification email: ' . $e->getMessage());
+            \Log::error('Failed to send verification email: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to send verification email'
+                'message' => 'Failed to send verification email',
             ], 500);
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'Verification code sent successfully'
+            'message' => 'Verification code sent successfully',
         ], 200);
     }
 
@@ -236,25 +237,63 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
+        }
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('ip_blacklists')) {
+            $blocked = \App\Models\IPBlacklist::where('ip_address', $request->ip())
+                ->where('is_active', true)
+                ->where(function ($q) {
+                    $q->whereNull('expires_at')->orWhere('expires_at', '>=', now());
+                })
+                ->exists();
+            if ($blocked) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Access denied',
+                ], 403);
+            }
         }
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if ($user && $user->locked_until && $user->locked_until->isFuture()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid credentials'
+                'message' => 'Account temporarily locked',
+            ], 423);
+        }
+
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            \App\Services\CrossDepartmentFlowService::recordFailedLoginAttempt(
+                (string) $request->email,
+                $user?->id,
+                $request->ip(),
+                $request->userAgent()
+            );
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid credentials',
             ], 401);
         }
 
-        if (!$user->verified) {
+        if (! $user->verified) {
             return response()->json([
                 'success' => false,
                 'message' => 'Please verify your email before logging in',
-                'requires_verification' => true
+                'requires_verification' => true,
             ], 403);
+        }
+
+        if ($user->locked_at || $user->locked_until || $user->login_failures > 0) {
+            $user->update([
+                'locked_at' => null,
+                'locked_until' => null,
+                'lock_reason' => null,
+                'login_failures' => 0,
+            ]);
         }
 
         // Create token
@@ -273,7 +312,7 @@ class AuthController extends Controller
                 'language' => $user->language,
                 'verified' => $user->verified,
             ],
-            'token' => $token
+            'token' => $token,
         ], 200);
     }
 
@@ -286,7 +325,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Logged out successfully'
+            'message' => 'Logged out successfully',
         ], 200);
     }
 
@@ -297,7 +336,7 @@ class AuthController extends Controller
     {
         return response()->json([
             'success' => true,
-            'user' => $request->user()
+            'user' => $request->user(),
         ], 200);
     }
 
@@ -314,7 +353,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -342,16 +381,17 @@ class AuthController extends Controller
                 $message->to($user->email)->subject('Password Reset Code - Tulip Store');
             });
         } catch (\Exception $e) {
-            \Log::error('Failed to send password reset email: ' . $e->getMessage());
+            \Log::error('Failed to send password reset email: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to send password reset email'
+                'message' => 'Failed to send password reset email',
             ], 500);
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'Password reset code sent successfully'
+            'message' => 'Password reset code sent successfully',
         ], 200);
     }
 
@@ -370,7 +410,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -380,18 +420,18 @@ class AuthController extends Controller
             ->where('expires_at', '>', Carbon::now())
             ->first();
 
-        if (!$reset) {
+        if (! $reset) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid or expired verification code'
+                'message' => 'Invalid or expired verification code',
             ], 400);
         }
 
         $user = User::where('email', $request->email)->first();
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'success' => false,
-                'message' => 'User not found'
+                'message' => 'User not found',
             ], 404);
         }
 
@@ -402,8 +442,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Password has been reset successfully'
+            'message' => 'Password has been reset successfully',
         ], 200);
     }
 }
-

@@ -67,41 +67,34 @@ const activityTracker = new DatabaseActivityTracker();
 // MODERN SLIDER
 // ============================================
 
-const sliderData = [
-    {
-        image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&h=450&fit=crop',
-        title: 'أرسل ابتسامتك أينما كنت',
-        subtitle: 'تسوق معنا أفضل المنتجات والعروض'
-    },
-    {
-        image: 'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=800&h=450&fit=crop',
-        title: 'هدايا فاخرة تعكس ذوقك',
-        subtitle: 'لحظات استثنائية تستحق هدايا مميزة'
-    },
-    {
-        image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=800&h=450&fit=crop',
-        title: 'عروض حصرية لفترة محدودة',
-        subtitle: 'وفّر على مجموعة مختارة من الهدايا'
-    },
-    {
-        image: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=800&h=450&fit=crop',
-        title: 'مجوهرات فاخرة',
-        subtitle: 'قطع فريدة تضيف لمسة من الأناقة'
-    },
-    {
-        image: 'https://images.unsplash.com/photo-1549298916-c6c5f85fa167?w=800&h=450&fit=crop',
-        title: 'وصل حديثاً',
-        subtitle: 'اكتشف أحدث المنتجات في متجرنا'
-    }
-];
+let sliderData = [];
 
 let currentModernSlide = 0;
+
+async function loadSliderData() {
+    try {
+        const response = await fetch('/api/homepage/slides', { headers: { 'Accept': 'application/json' } });
+        if (!response.ok) {
+            return [];
+        }
+
+        const data = await response.json();
+        if (data && data.success && Array.isArray(data.slides)) {
+            return data.slides;
+        }
+    } catch (error) {
+        console.error('Error loading slider data:', error);
+    }
+
+    return [];
+}
 
 function initializeModernSlider() {
     const container = document.getElementById('modernSlider');
     const dotsContainer = document.getElementById('modernSliderDots');
     
     if (!container || !dotsContainer) return;
+    if (!Array.isArray(sliderData) || sliderData.length === 0) return;
     
     // Create slides
     sliderData.forEach((slide, index) => {
@@ -737,8 +730,8 @@ async function addToCart(productId, buttonElement) {
 // INITIALIZE ON PAGE LOAD
 // ============================================
 
-window.addEventListener('DOMContentLoaded', () => {
-    // Initialize slider
+window.addEventListener('DOMContentLoaded', async () => {
+    sliderData = await loadSliderData();
     initializeModernSlider();
     
     // Load all sections

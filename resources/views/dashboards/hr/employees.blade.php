@@ -1,162 +1,71 @@
-@extends('dashboards.layouts.app', ['title' => 'Employee Management', 'subtitle' => 'Manage employees and their information'])
-
+@extends('dashboards.layouts.app')
 @section('content')
-<div class="flex items-center justify-between mb-6">
-    <div>
-        <h2 class="text-2xl font-semibold text-gray-900">Employee Management</h2>
-        <p class="text-gray-600">Manage all employees and their information</p>
-    </div>
-    <button class="btn btn-primary">
-        <i class="fas fa-plus text-sm mr-2"></i>
-        Add Employee
-    </button>
+@php $title = 'الموظفون'; $subtitle = 'عرض الموظفين وإدارة بياناتهم'; @endphp
+<div class="bg-white rounded-2xl p-6 shadow-sm mb-6">
+    <form method="GET" action="{{ route('dashboard.hr.employees') }}" class="flex flex-wrap items-center gap-3">
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="بحث" class="form-input w-56">
+        <select name="department" class="form-select w-44">
+            <option value="">القسم</option>
+            @foreach(($departments ?? []) as $d)
+                <option value="{{ $d }}" @selected(request('department')==$d)>{{ $d }}</option>
+            @endforeach
+        </select>
+        <select name="status" class="form-select w-40">
+            <option value="">الحالة</option>
+            <option value="active" @selected(request('status')=='active')>نشط</option>
+            <option value="inactive" @selected(request('status')=='inactive')>غير نشط</option>
+            <option value="on_leave" @selected(request('status')=='on_leave')>على إجازة</option>
+            <option value="terminated" @selected(request('status')=='terminated')>منتهي العقد</option>
+        </select>
+        <select name="employment_type" class="form-select w-44">
+            <option value="">نوع التوظيف</option>
+            <option value="full_time" @selected(request('employment_type')=='full_time')>دوام كامل</option>
+            <option value="part_time" @selected(request('employment_type')=='part_time')>دوام جزئي</option>
+            <option value="contract" @selected(request('employment_type')=='contract')>عقد</option>
+            <option value="intern" @selected(request('employment_type')=='intern')>متدرب</option>
+        </select>
+        <button type="submit" class="btn btn-secondary btn-sm">تصفية</button>
+        <a href="{{ route('dashboard.hr.employees.create') }}" class="btn btn-primary btn-sm">إضافة موظف</a>
+    </form>
 </div>
-
-<!-- Employee Stats -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Total Employees</p>
-                    <h3 class="text-2xl font-semibold text-gray-900">{{ $metrics['total_employees'] ?? 156 }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
-                    <i class="fas fa-users text-lg"></i>
-                </div>
-            </div>
-        </div>
+<div class="bg-white rounded-2xl shadow-sm">
+    <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-gray-900">قائمة الموظفين</h3>
     </div>
-
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Active Employees</p>
-                    <h3 class="text-2xl font-semibold text-success-600">{{ $metrics['active_employees'] ?? 142 }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-success-50 text-success-600 flex items-center justify-center">
-                    <i class="fas fa-user-check text-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">New Hires (Month)</p>
-                    <h3 class="text-2xl font-semibold text-primary-600">{{ $metrics['new_hires_month'] ?? 8 }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
-                    <i class="fas fa-user-plus text-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">On Leave</p>
-                    <h3 class="text-2xl font-semibold text-warning-600">{{ $metrics['employees_on_leave'] ?? 6 }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-warning-50 text-warning-600 flex items-center justify-center">
-                    <i class="fas fa-calendar-times text-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Employee List -->
-<div class="card">
-    <div class="card-header">
-        <div class="flex items-center justify-between">
-            <h3 class="card-title">All Employees</h3>
-            <div class="flex items-center gap-3">
-                <div class="relative">
-                    <input type="text" placeholder="Search employees..." class="form-input pl-10">
-                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                </div>
-                <select class="form-select">
-                    <option>All Departments</option>
-                    <option>IT</option>
-                    <option>HR</option>
-                    <option>Finance</option>
-                    <option>Operations</option>
-                </select>
-            </div>
-        </div>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-container">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Employee</th>
-                        <th>Department</th>
-                        <th>Position</th>
-                        <th>Status</th>
-                        <th>Hire Date</th>
-                        <th>Salary</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @php
-                        $employees = [
-                            ['name' => 'John Smith', 'email' => 'john@tulip.com', 'department' => 'IT', 'position' => 'Senior Developer', 'status' => 'active', 'hire_date' => '2023-01-15', 'salary' => '$85,000'],
-                            ['name' => 'Sarah Johnson', 'email' => 'sarah@tulip.com', 'department' => 'HR', 'position' => 'HR Manager', 'status' => 'active', 'hire_date' => '2022-08-20', 'salary' => '$75,000'],
-                            ['name' => 'Mike Chen', 'email' => 'mike@tulip.com', 'department' => 'Finance', 'position' => 'Accountant', 'status' => 'active', 'hire_date' => '2023-03-10', 'salary' => '$65,000'],
-                            ['name' => 'Lisa Rodriguez', 'email' => 'lisa@tulip.com', 'department' => 'Operations', 'position' => 'Operations Manager', 'status' => 'on_leave', 'hire_date' => '2022-11-05', 'salary' => '$80,000'],
-                            ['name' => 'David Kim', 'email' => 'david@tulip.com', 'department' => 'IT', 'position' => 'DevOps Engineer', 'status' => 'active', 'hire_date' => '2023-06-01', 'salary' => '$90,000'],
-                        ];
-                    @endphp
-                    @foreach($employees as $employee)
-                    <tr>
-                        <td>
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 text-sm font-medium">
-                                    {{ strtoupper(substr($employee['name'], 0, 1)) }}
-                                </div>
-                                <div>
-                                    <div class="font-medium text-gray-900">{{ $employee['name'] }}</div>
-                                    <div class="text-gray-500 text-sm">{{ $employee['email'] }}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="badge badge-gray">{{ $employee['department'] }}</span>
-                        </td>
-                        <td class="font-medium">{{ $employee['position'] }}</td>
-                        <td>
-                            <span class="badge {{ $employee['status'] === 'active' ? 'badge-success' : 'badge-warning' }}">
-                                {{ ucfirst(str_replace('_', ' ', $employee['status'])) }}
-                            </span>
-                        </td>
-                        <td class="text-gray-600">{{ date('M j, Y', strtotime($employee['hire_date'])) }}</td>
-                        <td class="font-medium">{{ $employee['salary'] }}</td>
-                        <td>
+    <div class="p-4 overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الموظف</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">القسم</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">المنصب</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الحالة</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">إجراءات</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                @forelse($employees as $emp)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-sm text-gray-800">{{ optional($emp->user)->name ?? ('#'.$emp->id) }}</td>
+                        <td class="px-4 py-3 text-sm">{{ $emp->department }}</td>
+                        <td class="px-4 py-3 text-sm">{{ $emp->position }}</td>
+                        <td class="px-4 py-3 text-sm">{{ $emp->status }}</td>
+                        <td class="px-4 py-3 text-sm">
                             <div class="flex items-center gap-2">
-                                <button class="btn btn-sm btn-ghost">
-                                    <i class="fas fa-eye text-xs"></i>
-                                </button>
-                                <button class="btn btn-sm btn-ghost">
-                                    <i class="fas fa-edit text-xs"></i>
-                                </button>
-                                <button class="btn btn-sm btn-ghost text-error-600">
-                                    <i class="fas fa-trash text-xs"></i>
-                                </button>
+                                <a href="{{ route('dashboard.hr.employees.edit', $emp) }}" class="btn btn-secondary btn-xs">تعديل</a>
+                                <form method="POST" action="{{ route('dashboard.hr.employees.delete', $emp) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-ghost btn-xs">حذف</button>
+                                </form>
                             </div>
                         </td>
                     </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                @empty
+                    <tr><td colspan="5" class="px-4 py-6 text-center text-gray-500">لا توجد بيانات</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+        <div class="mt-4">{{ $employees->links() }}</div>
     </div>
-</div>
 @endsection

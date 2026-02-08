@@ -4,16 +4,16 @@ namespace Tests\Property;
 
 use App\Models\User;
 use App\Services\Dashboard\DataTableService;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 /**
  * Property-Based Tests for Search Filter Correctness
- * 
+ *
  * **Feature: dashboard-system-rebuild, Property 9: Search Filter Correctness**
  * **Validates: Requirements 4.3**
- * 
+ *
  * These tests verify that search filtering returns only results that contain
  * the search term in at least one searchable column.
  */
@@ -29,9 +29,9 @@ class SearchFilterPropertyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create users table if it doesn't exist
-        if (!Schema::hasTable('users')) {
+        if (! Schema::hasTable('users')) {
             Schema::create('users', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -52,10 +52,9 @@ class SearchFilterPropertyTest extends TestCase
                 $table->timestamps();
             });
         }
-        
-        $this->dataTableService = new DataTableService();
-    }
 
+        $this->dataTableService = new DataTableService;
+    }
 
     protected function tearDown(): void
     {
@@ -63,7 +62,7 @@ class SearchFilterPropertyTest extends TestCase
         if (Schema::hasTable('users')) {
             \DB::table('users')->truncate();
         }
-        
+
         parent::tearDown();
     }
 
@@ -77,24 +76,24 @@ class SearchFilterPropertyTest extends TestCase
         $firstNames = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Henry', 'Ivy', 'Jack'];
         $lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis'];
         $domains = ['example.com', 'test.org', 'demo.net', 'sample.io'];
-        
+
         for ($i = 0; $i < $count; $i++) {
             $firstName = $firstNames[array_rand($firstNames)];
             $lastName = $lastNames[array_rand($lastNames)];
             $domain = $domains[array_rand($domains)];
-            
+
             $users[] = [
-                'name' => $firstName . ' ' . $lastName,
-                'email' => strtolower($firstName) . '.' . strtolower($lastName) . $i . '@' . $domain,
+                'name' => $firstName.' '.$lastName,
+                'email' => strtolower($firstName).'.'.strtolower($lastName).$i.'@'.$domain,
                 'password' => 'hashed_password',
-                'phone' => '555' . str_pad($i, 7, '0', STR_PAD_LEFT),
+                'phone' => '555'.str_pad($i, 7, '0', STR_PAD_LEFT),
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ];
         }
-        
+
         // Batch insert for efficiency
-        if (!empty($users)) {
+        if (! empty($users)) {
             foreach (array_chunk($users, 100) as $chunk) {
                 \DB::table('users')->insert($chunk);
             }
@@ -112,7 +111,7 @@ class SearchFilterPropertyTest extends TestCase
             'example', 'test', 'demo', 'sample',
             '555', '@',
         ];
-        
+
         return $terms[array_rand($terms)];
     }
 
@@ -122,24 +121,24 @@ class SearchFilterPropertyTest extends TestCase
     protected function userMatchesSearch(User $user, string $searchTerm): bool
     {
         $searchTerm = strtolower($searchTerm);
-        
+
         foreach ($this->searchableColumns as $column) {
             $value = $user->$column ?? null;
             if ($value !== null && str_contains(strtolower((string) $value), $searchTerm)) {
                 return true;
             }
         }
-        
+
         return false;
     }
 
     /**
      * **Feature: dashboard-system-rebuild, Property 9: Search Filter Correctness**
      * **Validates: Requirements 4.3**
-     * 
-     * *For any* search term and *for any* dataset, all returned results 
+     *
+     * *For any* search term and *for any* dataset, all returned results
      * SHALL contain the search term in at least one searchable column.
-     * 
+     *
      * @test
      */
     public function property_search_filter_returns_only_matching_results(): void
@@ -148,17 +147,17 @@ class SearchFilterPropertyTest extends TestCase
         for ($iteration = 0; $iteration < 100; $iteration++) {
             // Clean up from previous iteration
             \DB::table('users')->truncate();
-            
+
             // Generate random dataset size (10-50 records)
             $datasetSize = rand(10, 50);
             $this->generateRandomUsers($datasetSize);
-            
+
             // Pick a random search term
             $searchTerm = $this->getRandomSearchTerm();
-            
+
             // Reset page
             request()->merge(['page' => 1]);
-            
+
             // Get filtered results using DataTableService
             $query = User::query();
             $result = $this->dataTableService->apply($query, [
@@ -166,14 +165,14 @@ class SearchFilterPropertyTest extends TestCase
                 'searchable_columns' => $this->searchableColumns,
                 'per_page' => 100,
             ]);
-            
+
             // Property: Every returned result must contain the search term in at least one searchable column
             foreach ($result->items() as $user) {
                 $matches = $this->userMatchesSearch($user, $searchTerm);
-                
+
                 $this->assertTrue(
                     $matches,
-                    "Iteration $iteration: User ID {$user->id} does not contain search term '$searchTerm' " .
+                    "Iteration $iteration: User ID {$user->id} does not contain search term '$searchTerm' ".
                     "in any searchable column. Name: {$user->name}, Email: {$user->email}, Phone: {$user->phone}"
                 );
             }
@@ -182,28 +181,28 @@ class SearchFilterPropertyTest extends TestCase
 
     /**
      * Test that empty search returns all results
-     * 
+     *
      * @test
      */
     public function property_empty_search_returns_all_results(): void
     {
         // Clean up
         \DB::table('users')->truncate();
-        
+
         // Create a fixed dataset
         $datasetSize = 25;
         $this->generateRandomUsers($datasetSize);
-        
+
         // Test with empty search term
         request()->merge(['page' => 1]);
-        
+
         $query = User::query();
         $result = $this->dataTableService->apply($query, [
             'search' => '',
             'searchable_columns' => $this->searchableColumns,
             'per_page' => 100,
         ]);
-        
+
         // Property: Empty search should return all records
         $this->assertEquals(
             $datasetSize,
@@ -214,14 +213,14 @@ class SearchFilterPropertyTest extends TestCase
 
     /**
      * Test that search is case-insensitive
-     * 
+     *
      * @test
      */
     public function property_search_is_case_insensitive(): void
     {
         // Clean up
         \DB::table('users')->truncate();
-        
+
         // Create a user with known data
         \DB::table('users')->insert([
             'name' => 'Alice Smith',
@@ -231,19 +230,19 @@ class SearchFilterPropertyTest extends TestCase
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-        
+
         $searchVariants = ['alice', 'ALICE', 'Alice', 'aLiCe'];
-        
+
         foreach ($searchVariants as $searchTerm) {
             request()->merge(['page' => 1]);
-            
+
             $query = User::query();
             $result = $this->dataTableService->apply($query, [
                 'search' => $searchTerm,
                 'searchable_columns' => $this->searchableColumns,
                 'per_page' => 100,
             ]);
-            
+
             // Property: Search should be case-insensitive
             $this->assertEquals(
                 1,
@@ -255,29 +254,29 @@ class SearchFilterPropertyTest extends TestCase
 
     /**
      * Test that non-matching search returns empty results
-     * 
+     *
      * @test
      */
     public function property_non_matching_search_returns_empty(): void
     {
         // Clean up
         \DB::table('users')->truncate();
-        
+
         // Create users with known data
         $this->generateRandomUsers(20);
-        
+
         // Search for something that definitely won't match
         $nonMatchingTerm = 'xyz123nonexistent456';
-        
+
         request()->merge(['page' => 1]);
-        
+
         $query = User::query();
         $result = $this->dataTableService->apply($query, [
             'search' => $nonMatchingTerm,
             'searchable_columns' => $this->searchableColumns,
             'per_page' => 100,
         ]);
-        
+
         // Property: Non-matching search should return empty results
         $this->assertEquals(
             0,

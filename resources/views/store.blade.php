@@ -9,8 +9,55 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Changa:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/store.css?v=2">
+    <link rel="stylesheet" href="/css/store.css?v=999&fix=store&t={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Force CSS reset and basic styling */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: "El Messiri", sans-serif !important; 
+            background: #fdf8f3 !important;
+            line-height: 1.6 !important;
+        }
+        
+        /* Ensure navbar displays properly */
+        .tulip-navbar {
+            background: #fff !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 1000 !important;
+        }
+        
+        /* Force main content styling */
+        .main-content {
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: 2rem !important;
+        }
+        
+        /* Product grid styling */
+        .products-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+            gap: 2rem !important;
+            margin-top: 2rem !important;
+        }
+        
+        /* Product card styling */
+        .product-card {
+            background: #fff !important;
+            border-radius: 15px !important;
+            overflow: hidden !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px) !important;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        }
+    </style>
     <style>
         .account-wrapper {
             position: relative;
@@ -318,9 +365,9 @@
             <div class="logout-modal-buttons">
                 <button class="logout-modal-btn cancel" onclick="closeLogoutModal()">إلغاء</button>
                 <button class="logout-modal-btn confirm" onclick="confirmLogout()">تسجيل خروج</button>
-            </div>
-        </div>
-    </div>
+                        </div>
+                    </div>
+                </div>
     <!-- NAVBAR -->
     @include('components.navbar')
 
@@ -474,6 +521,31 @@
 
     <script>
         const API_BASE = window.location.origin + '/api';
+        const isAuthenticated = {!! auth()->check() ? 'true' : 'false' !!};
+        window.__productsById = {};
+
+        async function syncFavoritesFromServer() {
+            if (!isAuthenticated) {
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/wishlist', { headers: { 'Accept': 'application/json' } });
+                if (!res.ok) {
+                    return;
+                }
+                const data = await res.json();
+                if (Array.isArray(data.items)) {
+                    localStorage.setItem('favorites', JSON.stringify(data.items));
+                    const countElement = document.getElementById('favoritesCount');
+                    if (countElement) {
+                        const c = data.count || data.items.length || 0;
+                        countElement.textContent = c > 99 ? '+99' : c;
+                    }
+                }
+            } catch (e) {
+            }
+        }
 
         // Load all products or search results on page load
         function loadProducts() {
@@ -503,16 +575,24 @@
                     loadingProducts.style.display = 'none';
                     
                     const products = data.data || [];
+                    window.__productsById = {};
+                    products.forEach(p => { window.__productsById[p.id] = p; });
                     
                     if (products.length > 0) {
                         productsGrid.innerHTML = products.map(product => {
                             const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
                             const isFavorite = favorites.some(p => p.id === product.id);
+                            const stock = parseInt(product.stock_quantity ?? 0);
+                            const isOutOfStock = !!product.track_inventory && stock <= 0;
+                            const stockLabel = product.track_inventory ? (isOutOfStock ? 'غير متوفر' : `متوفر: ${stock}`) : 'متوفر';
                             return `
                             <div class="product-card" data-product-id="${product.id}">
-                                <button class="product-favorite-btn ${isFavorite ? 'active' : ''}" onclick="event.stopPropagation(); toggleProductFavorite(event, ${product.id}, ${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                                <button class="product-favorite-btn ${isFavorite ? 'active' : ''}" onclick="event.stopPropagation(); toggleProductFavorite(event, ${product.id})">
                                     <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
                                 </button>
+                                <div style="position:absolute; top: 14px; left: 14px; z-index: 3; background: ${isOutOfStock ? '#fee2e2' : '#dcfce7'}; color: ${isOutOfStock ? '#b91c1c' : '#166534'}; padding: 6px 10px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;">
+                                    ${stockLabel}
+                                </div>
                                 <div class="product-image-wrapper" onclick='openFloatingView(${JSON.stringify(product)})'>
                                     <img src="${product.image || 'https://via.placeholder.com/250'}" alt="${product.name}" class="product-img">
                                 </div>
@@ -531,7 +611,7 @@
                                     </div>
                                 </div>
                                 <div class="product-card-actions">
-                                    <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart(event, ${product.id})" data-product-id="${product.id}" style="width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                    <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart(event, ${product.id})" data-product-id="${product.id}" ${isOutOfStock ? 'disabled' : ''} style="width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center; ${isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : ''}">
                                         <i class="fas fa-shopping-cart" style="font-size: 1.2rem;"></i>
                                     </button>
                                     <button class="product-card-btn product-card-btn-share" style=" font-family: 'El Messiri', sans-serif;" onclick="event.stopPropagation(); shareProduct(event, '${product.name}')">
@@ -583,6 +663,21 @@
             } else {
                 ratingEl.style.display = 'none';
             }
+
+            const stock = parseInt(product.stock_quantity ?? 0);
+            const isOutOfStock = !!product.track_inventory && stock <= 0;
+            const cartBtn = document.getElementById('floatingCartBtn');
+            if (isOutOfStock) {
+                cartBtn.disabled = true;
+                cartBtn.innerHTML = '<i class="fas fa-times-circle"></i> غير متوفر';
+                cartBtn.style.opacity = '0.6';
+                cartBtn.style.cursor = 'not-allowed';
+            } else {
+                cartBtn.disabled = false;
+                cartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> أضف للسلة';
+                cartBtn.style.opacity = '';
+                cartBtn.style.cursor = '';
+            }
             
             // Show modal
             document.getElementById('productModalBackdrop').classList.add('active');
@@ -622,6 +717,9 @@
             event.stopPropagation();
             
             const btn = event.target.closest('.product-card-btn-cart');
+            if (btn.disabled) {
+                return;
+            }
             
             // Show loading
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
@@ -770,43 +868,82 @@
         }
         
         // Toggle product favorite
-        function toggleProductFavorite(event, productId, product) {
+        async function toggleProductFavorite(event, productId) {
             event.stopPropagation();
             const btn = event.currentTarget;
             const icon = btn.querySelector('i');
             
             let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
             const isFavorite = favorites.some(p => p.id === productId);
+            const product = window.__productsById[productId];
             
             // Add animation
             btn.classList.add('animating');
             setTimeout(() => btn.classList.remove('animating'), 600);
-            
-            if (isFavorite) {
-                // Remove from favorites
-                favorites = favorites.filter(p => p.id !== productId);
-                btn.classList.remove('active');
-                icon.classList.remove('fas');
-                icon.classList.add('far');
+
+            if (isAuthenticated) {
+                try {
+                    const res = await fetch('/api/wishlist/toggle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                        },
+                        body: JSON.stringify({ product_id: productId })
+                    });
+                    const data = await res.json();
+                    if (data.action === 'added') {
+                        btn.classList.add('active');
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                        if (product) {
+                            favorites = favorites.filter(p => p.id !== productId);
+                            favorites.push({
+                                id: product.id,
+                                name: product.name,
+                                price: product.discount_price || product.price,
+                                image: product.image
+                            });
+                        }
+                    } else if (data.action === 'removed') {
+                        btn.classList.remove('active');
+                        icon.classList.remove('fas');
+                        icon.classList.add('far');
+                        favorites = favorites.filter(p => p.id !== productId);
+                    }
+
+                    localStorage.setItem('favorites', JSON.stringify(favorites));
+                    const countElement = document.getElementById('favoritesCount');
+                    if (countElement) {
+                        const c = data.count || favorites.length || 0;
+                        countElement.textContent = c > 99 ? '+99' : c;
+                    }
+                } catch (e) {
+                }
             } else {
-                // Add to favorites
-                favorites.push({
-                    id: product.id,
-                    name: product.name,
-                    price: product.discount_price || product.price,
-                    image: product.image
-                });
-                btn.classList.add('active');
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-            }
-            
-            localStorage.setItem('favorites', JSON.stringify(favorites));
-            
-            // Update navbar count
-            const countElement = document.getElementById('favoritesCount');
-            if (countElement) {
-                countElement.textContent = favorites.length > 99 ? '+99' : favorites.length;
+                if (isFavorite) {
+                    favorites = favorites.filter(p => p.id !== productId);
+                    btn.classList.remove('active');
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                } else if (product) {
+                    favorites.push({
+                        id: product.id,
+                        name: product.name,
+                        price: product.discount_price || product.price,
+                        image: product.image
+                    });
+                    btn.classList.add('active');
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                }
+
+                localStorage.setItem('favorites', JSON.stringify(favorites));
+                const countElement = document.getElementById('favoritesCount');
+                if (countElement) {
+                    countElement.textContent = favorites.length > 99 ? '+99' : favorites.length;
+                }
             }
         }
         
@@ -841,7 +978,10 @@
                 const data = await response.json();
                 
                 if (data.items) {
-                    const cartItems = data.items.map(item => item.product_id);
+                    const cartItems = data.items
+                        .map(item => item.product_id ?? item.product?.id)
+                        .map(v => parseInt(v))
+                        .filter(v => Number.isFinite(v));
                     localStorage.setItem('cart_items', JSON.stringify(cartItems));
                     
                     // Update all product check icons
@@ -863,7 +1003,7 @@
 
         // Load products and cart count when page loads
         window.addEventListener('DOMContentLoaded', () => {
-            loadProducts();
+            syncFavoritesFromServer().finally(() => loadProducts());
             loadCartCount();
             // Wait a bit for products to load, then update icons
             setTimeout(updateCartIcons, 500);

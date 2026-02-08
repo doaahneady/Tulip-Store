@@ -2,16 +2,15 @@
 
 namespace Tests\Property;
 
-use Tests\TestCase;
-use Illuminate\Support\Facades\View;
 use stdClass;
+use Tests\TestCase;
 
 /**
  * Property-Based Tests for Dashboard Layout
- * 
+ *
  * These tests verify the correctness properties of the dashboard layout
  * by running multiple iterations with randomly generated test data.
- * 
+ *
  * **Feature: dashboard-system-rebuild, Property 1: Role-Based Access Control Enforcement**
  * (partial - layout rendering)
  * **Validates: Requirements 1.1**
@@ -51,10 +50,10 @@ class LayoutPropertyTest extends TestCase
      */
     protected function createMockUserWithRoles(array $roles): object
     {
-        $user = new stdClass();
+        $user = new stdClass;
         $user->id = rand(1, 10000);
-        $user->name = 'Test User ' . rand(1, 100);
-        $user->email = 'test' . rand(1, 1000) . '@example.com';
+        $user->name = 'Test User '.rand(1, 100);
+        $user->email = 'test'.rand(1, 1000).'@example.com';
 
         foreach ($this->roleFlags as $role => $flag) {
             $user->$flag = in_array($role, $roles);
@@ -71,6 +70,7 @@ class LayoutPropertyTest extends TestCase
         $roles = array_keys($this->roleFlags);
         $count = rand(0, count($roles));
         shuffle($roles);
+
         return array_slice($roles, 0, $count);
     }
 
@@ -78,10 +78,10 @@ class LayoutPropertyTest extends TestCase
      * **Feature: dashboard-system-rebuild, Property 1: Role-Based Access Control Enforcement**
      * (partial - layout rendering)
      * **Validates: Requirements 1.1**
-     * 
+     *
      * *For any* user with specific roles, the sidebar SHALL display only
      * navigation sections corresponding to those roles (plus admin override).
-     * 
+     *
      * @test
      */
     public function property_sidebar_shows_only_authorized_sections(): void
@@ -90,41 +90,40 @@ class LayoutPropertyTest extends TestCase
         for ($i = 0; $i < 100; $i++) {
             $userRoles = $this->getRandomRoles();
             $user = $this->createMockUserWithRoles($userRoles);
-            
+
             // Determine which sections should be visible
             $expectedSections = [];
             $isAdmin = in_array('admin', $userRoles);
-            
+
             foreach ($userRoles as $role) {
                 if (isset($this->roleSections[$role])) {
                     $expectedSections[] = $this->roleSections[$role];
                 }
             }
-            
+
             // Admin sees all sections
             if ($isAdmin) {
                 $expectedSections = array_unique(array_values($this->roleSections));
             }
-            
+
             $expectedSections = array_unique($expectedSections);
-            
+
             // Simulate what the sidebar would show
             $visibleSections = $this->getVisibleSectionsForUser($user);
-            
+
             // Verify: visible sections should match expected sections
             sort($expectedSections);
             sort($visibleSections);
-            
+
             $this->assertEquals(
                 $expectedSections,
                 $visibleSections,
-                "Iteration $i: User with roles [" . implode(', ', $userRoles) . 
-                "] should see sections [" . implode(', ', $expectedSections) . 
-                "] but saw [" . implode(', ', $visibleSections) . "]"
+                "Iteration $i: User with roles [".implode(', ', $userRoles).
+                '] should see sections ['.implode(', ', $expectedSections).
+                '] but saw ['.implode(', ', $visibleSections).']'
             );
         }
     }
-
 
     /**
      * Simulate sidebar visibility logic based on user roles

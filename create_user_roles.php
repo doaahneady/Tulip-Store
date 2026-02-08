@@ -5,11 +5,11 @@ require 'vendor/autoload.php';
 $app = require 'bootstrap/app.php';
 $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
 
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 try {
-    if (!Schema::hasTable('user_roles')) {
+    if (! Schema::hasTable('user_roles')) {
         Schema::create('user_roles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
@@ -18,7 +18,7 @@ try {
             $table->foreignId('assigned_by')->nullable()->constrained('users');
             $table->timestamp('expires_at')->nullable();
             $table->boolean('is_active')->default(true);
-            
+
             $table->unique(['user_id', 'role_id']);
             $table->index(['user_id', 'is_active']);
         });
@@ -43,7 +43,7 @@ try {
             $table->enum('status', ['scheduled', 'in_progress', 'completed', 'missed', 'cancelled'])->default('scheduled');
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             $table->index(['employee_id', 'shift_date']);
             $table->index(['shift_date', 'status']);
         },
@@ -63,14 +63,14 @@ try {
             $table->foreignId('approved_by')->nullable()->constrained('users');
             $table->timestamp('approved_at')->nullable();
             $table->timestamps();
-            
+
             $table->unique(['employee_id', 'pay_period']);
             $table->index(['pay_period', 'status']);
-        }
+        },
     ];
 
     foreach ($tables as $tableName => $callback) {
-        if (!Schema::hasTable($tableName)) {
+        if (! Schema::hasTable($tableName)) {
             Schema::create($tableName, $callback);
             echo "✓ {$tableName} table created successfully\n";
         } else {
@@ -81,5 +81,5 @@ try {
     echo "\nAll required tables are now available!\n";
 
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage() . "\n";
+    echo 'Error: '.$e->getMessage()."\n";
 }

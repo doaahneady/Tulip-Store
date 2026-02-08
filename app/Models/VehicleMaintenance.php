@@ -9,6 +9,8 @@ class VehicleMaintenance extends Model
 {
     use HasFactory;
 
+    protected $table = 'vehicle_maintenance';
+
     protected $fillable = [
         'driver_id',
         'type',
@@ -38,12 +40,12 @@ class VehicleMaintenance extends Model
     public function scopeUpcoming($query, $days = 30)
     {
         return $query->where('next_due_date', '<=', now()->addDays($days))
-                    ->where('status', 'scheduled');
+            ->where('status', 'scheduled');
     }
 
     public function scopeOverdue($query)
     {
         return $query->where('next_due_date', '<', now())
-                    ->where('status', 'scheduled');
+            ->where('status', 'scheduled');
     }
 }

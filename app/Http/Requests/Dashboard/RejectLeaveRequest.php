@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Form Request for rejecting leave requests
- * 
+ *
  * @see Requirements 10.3, 15.2
  */
 class RejectLeaveRequest extends FormRequest

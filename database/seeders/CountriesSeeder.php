@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Country;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
-use App\Models\Country;
 
 class CountriesSeeder extends Seeder
 {
@@ -15,7 +15,7 @@ class CountriesSeeder extends Seeder
         if (File::exists($local)) {
             $list = json_decode(File::get($local), true) ?: [];
         }
-        if (!$list) {
+        if (! $list) {
             try {
                 $resp = file_get_contents('https://cdn.jsdelivr.net/npm/country-telephone-data@0.6.22/data/countries.json');
                 $list = json_decode($resp, true) ?: [];
@@ -23,12 +23,16 @@ class CountriesSeeder extends Seeder
                 $list = [];
             }
         }
-        if (!$list) return;
+        if (! $list) {
+            return;
+        }
         foreach ($list as $c) {
             $name = $c['name'] ?? null;
             $iso2 = $c['iso2'] ?? null;
-            $dial = isset($c['dial_code']) ? ltrim((string)$c['dial_code'], '+') : (isset($c['dialCode']) ? (string)$c['dialCode'] : null);
-            if (!$name || !$iso2 || !$dial) continue;
+            $dial = isset($c['dial_code']) ? ltrim((string) $c['dial_code'], '+') : (isset($c['dialCode']) ? (string) $c['dialCode'] : null);
+            if (! $name || ! $iso2 || ! $dial) {
+                continue;
+            }
             Country::updateOrCreate(
                 ['iso2' => strtolower($iso2)],
                 ['name' => $name, 'dial_code' => $dial]

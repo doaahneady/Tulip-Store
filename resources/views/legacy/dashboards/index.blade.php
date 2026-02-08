@@ -27,7 +27,6 @@
         ['route' => 'finance.dashboard', 'icon' => 'fas fa-coins', 'label' => 'الإدارة المالية', 'desc' => 'الإيرادات والمصروفات', 'color' => 'teal', 'check' => ($user->is_finance ?? false) || ($user->is_admin ?? false)],
         ['route' => 'accounting.dashboard', 'icon' => 'fas fa-calculator', 'label' => 'المحاسبة', 'desc' => 'القيود والتقارير المالية', 'color' => 'cyan', 'check' => ($user->is_accountant ?? false) || ($user->is_admin ?? false)],
         ['route' => 'delivery.supervisor.dashboard', 'icon' => 'fas fa-truck', 'label' => 'إدارة التوصيل', 'desc' => 'تتبع السائقين والطلبات', 'color' => 'orange', 'check' => ($user->is_driver_supervisor ?? false) || ($user->is_admin ?? false)],
-        ['route' => 'store-owner.dashboard', 'icon' => 'fas fa-store', 'label' => 'متجري', 'desc' => 'إدارة المنتجات والمبيعات', 'color' => 'purple', 'check' => $user->is_trader ?? false],
     ];
     @endphp
 
@@ -46,7 +45,7 @@
     @endforeach
 </div>
 
-@if(!($user->is_admin ?? false) && !($user->is_it ?? false) && !($user->is_hr ?? false) && !($user->is_cs ?? false) && !($user->is_finance ?? false) && !($user->is_accountant ?? false) && !($user->is_driver_supervisor ?? false) && !($user->is_trader ?? false))
+@if(!($user->is_admin ?? false) && !($user->is_it ?? false) && !($user->is_hr ?? false) && !($user->is_cs ?? false) && !($user->is_finance ?? false) && !($user->is_accountant ?? false) && !($user->is_driver_supervisor ?? false))
 <div class="text-center py-12">
     <div class="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
         <i class="fas fa-lock text-gray-400 text-4xl"></i>

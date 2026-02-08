@@ -7,40 +7,7 @@ if ($user->is_admin ?? false) {
     $dashboards[] = ['route' => 'admin.dashboard', 'icon' => 'fas fa-crown', 'label' => 'الإدارة', 'color' => 'indigo'];
 }
 
-// IT Dashboard
-if (($user->is_it ?? false) || ($user->is_it_super ?? false)) {
-    $dashboards[] = ['route' => 'it.dashboard', 'icon' => 'fas fa-server', 'label' => 'تقنية المعلومات', 'color' => 'emerald'];
-}
-
-// HR Dashboard
-if ($user->is_hr ?? false || $user->is_admin ?? false) {
-    $dashboards[] = ['route' => 'hr.dashboard', 'icon' => 'fas fa-user-tie', 'label' => 'الموارد البشرية', 'color' => 'pink'];
-}
-
-// Customer Service Dashboard
-if ($user->is_cs ?? false || $user->is_admin ?? false) {
-    $dashboards[] = ['route' => 'cs.dashboard', 'icon' => 'fas fa-headset', 'label' => 'خدمة العملاء', 'color' => 'amber'];
-}
-
-// Finance Dashboard
-if ($user->is_finance ?? false || $user->is_accountant ?? false || $user->is_admin ?? false) {
-    $dashboards[] = ['route' => 'finance.dashboard', 'icon' => 'fas fa-coins', 'label' => 'المالية', 'color' => 'teal'];
-}
-
-// Accounting Dashboard
-if ($user->is_accountant ?? false || $user->is_admin ?? false) {
-    $dashboards[] = ['route' => 'accounting.dashboard', 'icon' => 'fas fa-calculator', 'label' => 'المحاسبة', 'color' => 'cyan'];
-}
-
-// Delivery Supervisor Dashboard
-if ($user->is_driver_supervisor ?? false || $user->is_admin ?? false) {
-    $dashboards[] = ['route' => 'delivery.supervisor.dashboard', 'icon' => 'fas fa-truck', 'label' => 'التوصيل', 'color' => 'orange'];
-}
-
-// Store Owner Dashboard
-if ($user->is_trader ?? false) {
-    $dashboards[] = ['route' => 'store-owner.dashboard', 'icon' => 'fas fa-store', 'label' => 'متجري', 'color' => 'purple'];
-}
+// Note: Store Owner (Trader) dashboard is now accessed via separate trader login at /trader/login
 @endphp
 
 @if(count($dashboards) > 1)

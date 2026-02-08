@@ -2,14 +2,14 @@
 
 namespace App\Services\Dashboard;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * DataTableService provides server-side operations for data tables
  * including pagination, sorting, search filtering, and date range filtering.
- * 
+ *
  * Requirements: 4.1, 4.2, 4.3, 4.4
  */
 class DataTableService
@@ -27,19 +27,18 @@ class DataTableService
     /**
      * Apply all data table operations to a query builder
      *
-     * @param Builder $query The Eloquent query builder
-     * @param array $options Options for filtering, sorting, and pagination
-     * @return LengthAwarePaginator
+     * @param  Builder  $query  The Eloquent query builder
+     * @param  array  $options  Options for filtering, sorting, and pagination
      */
     public function apply(Builder $query, array $options = []): LengthAwarePaginator
     {
         // Apply search filter
-        if (!empty($options['search']) && !empty($options['searchable_columns'])) {
+        if (! empty($options['search']) && ! empty($options['searchable_columns'])) {
             $query = $this->applySearch($query, $options['search'], $options['searchable_columns']);
         }
 
         // Apply date range filter
-        if (!empty($options['date_from']) || !empty($options['date_to'])) {
+        if (! empty($options['date_from']) || ! empty($options['date_to'])) {
             $dateColumn = $options['date_column'] ?? 'created_at';
             $query = $this->applyDateRange(
                 $query,
@@ -50,7 +49,7 @@ class DataTableService
         }
 
         // Apply sorting
-        if (!empty($options['sort_by'])) {
+        if (! empty($options['sort_by'])) {
             $sortableColumns = $options['sortable_columns'] ?? [];
             $direction = $options['sort_direction'] ?? 'asc';
             $query = $this->applySort($query, $options['sort_by'], $direction, $sortableColumns);
@@ -62,16 +61,14 @@ class DataTableService
         return $query->paginate($pageSize);
     }
 
-
     /**
      * Apply search filtering to a query
-     * 
+     *
      * Requirements 4.3: Filter results across searchable columns
      *
-     * @param Builder $query The query builder
-     * @param string $searchTerm The search term
-     * @param array $searchableColumns Columns to search in
-     * @return Builder
+     * @param  Builder  $query  The query builder
+     * @param  string  $searchTerm  The search term
+     * @param  array  $searchableColumns  Columns to search in
      */
     public function applySearch(Builder $query, string $searchTerm, array $searchableColumns): Builder
     {
@@ -80,28 +77,27 @@ class DataTableService
         }
 
         $searchTerm = trim($searchTerm);
-        
+
         if (empty($searchTerm)) {
             return $query;
         }
 
         return $query->where(function (Builder $q) use ($searchTerm, $searchableColumns) {
             foreach ($searchableColumns as $column) {
-                $q->orWhere($column, 'like', '%' . $searchTerm . '%');
+                $q->orWhere($column, 'like', '%'.$searchTerm.'%');
             }
         });
     }
 
     /**
      * Apply date range filtering to a query
-     * 
+     *
      * Requirements 4.4: Return only records within the specified date range inclusive of boundaries
      *
-     * @param Builder $query The query builder
-     * @param string|Carbon|null $dateFrom Start date (inclusive)
-     * @param string|Carbon|null $dateTo End date (inclusive)
-     * @param string $dateColumn The column to filter on
-     * @return Builder
+     * @param  Builder  $query  The query builder
+     * @param  string|Carbon|null  $dateFrom  Start date (inclusive)
+     * @param  string|Carbon|null  $dateTo  End date (inclusive)
+     * @param  string  $dateColumn  The column to filter on
      */
     public function applyDateRange(
         Builder $query,
@@ -124,14 +120,13 @@ class DataTableService
 
     /**
      * Apply sorting to a query
-     * 
+     *
      * Requirements 4.2: Sort data by column in ascending or descending order
      *
-     * @param Builder $query The query builder
-     * @param string $sortBy Column to sort by
-     * @param string $direction Sort direction (asc or desc)
-     * @param array $allowedColumns Allowed columns for sorting (empty = all allowed)
-     * @return Builder
+     * @param  Builder  $query  The query builder
+     * @param  string  $sortBy  Column to sort by
+     * @param  string  $direction  Sort direction (asc or desc)
+     * @param  array  $allowedColumns  Allowed columns for sorting (empty = all allowed)
      */
     public function applySort(
         Builder $query,
@@ -141,12 +136,12 @@ class DataTableService
     ): Builder {
         // Validate sort direction
         $direction = strtolower($direction);
-        if (!in_array($direction, ['asc', 'desc'])) {
+        if (! in_array($direction, ['asc', 'desc'])) {
             $direction = 'asc';
         }
 
         // Validate column if allowed columns are specified
-        if (!empty($allowedColumns) && !in_array($sortBy, $allowedColumns)) {
+        if (! empty($allowedColumns) && ! in_array($sortBy, $allowedColumns)) {
             return $query;
         }
 
@@ -155,25 +150,25 @@ class DataTableService
 
     /**
      * Apply pagination to a query
-     * 
+     *
      * Requirements 4.1: Provide server-side pagination with configurable page sizes
      *
-     * @param Builder $query The query builder
-     * @param int $pageSize Items per page
-     * @return LengthAwarePaginator
+     * @param  Builder  $query  The query builder
+     * @param  int  $pageSize  Items per page
      */
     public function applyPagination(Builder $query, int $pageSize = 25): LengthAwarePaginator
     {
         $pageSize = $this->validatePageSize($pageSize);
+
         return $query->paginate($pageSize);
     }
 
     /**
      * Validate and normalize page size
-     * 
+     *
      * Requirements 4.1: Configurable page sizes of 10, 25, 50, and 100 items
      *
-     * @param int $pageSize Requested page size
+     * @param  int  $pageSize  Requested page size
      * @return int Valid page size
      */
     public function validatePageSize(int $pageSize): int
@@ -199,8 +194,6 @@ class DataTableService
 
     /**
      * Get valid page sizes
-     *
-     * @return array
      */
     public function getValidPageSizes(): array
     {
@@ -209,16 +202,15 @@ class DataTableService
 
     /**
      * Check if a search term matches any value in the searchable columns
-     * 
-     * @param object $item The item to check
-     * @param string $searchTerm The search term
-     * @param array $searchableColumns Columns to search in
-     * @return bool
+     *
+     * @param  object  $item  The item to check
+     * @param  string  $searchTerm  The search term
+     * @param  array  $searchableColumns  Columns to search in
      */
     public function itemMatchesSearch(object $item, string $searchTerm, array $searchableColumns): bool
     {
         $searchTerm = strtolower(trim($searchTerm));
-        
+
         if (empty($searchTerm)) {
             return true;
         }
@@ -235,12 +227,11 @@ class DataTableService
 
     /**
      * Check if an item's date falls within a date range
-     * 
-     * @param object $item The item to check
-     * @param string|Carbon|null $dateFrom Start date (inclusive)
-     * @param string|Carbon|null $dateTo End date (inclusive)
-     * @param string $dateColumn The column to check
-     * @return bool
+     *
+     * @param  object  $item  The item to check
+     * @param  string|Carbon|null  $dateFrom  Start date (inclusive)
+     * @param  string|Carbon|null  $dateTo  End date (inclusive)
+     * @param  string  $dateColumn  The column to check
      */
     public function itemInDateRange(
         object $item,
@@ -249,12 +240,12 @@ class DataTableService
         string $dateColumn = 'created_at'
     ): bool {
         $itemDate = $item->$dateColumn ?? null;
-        
+
         if ($itemDate === null) {
             return false;
         }
 
-        if (!$itemDate instanceof Carbon) {
+        if (! $itemDate instanceof Carbon) {
             $itemDate = Carbon::parse($itemDate);
         }
 

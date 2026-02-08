@@ -11,8 +11,7 @@ class DriverLocationController extends Controller
 {
     /**
      * Update driver location from mobile phone GPS
-     * 
-     * @param Request $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function updateLocation(Request $request)
@@ -30,17 +29,17 @@ class DriverLocationController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $driver = Driver::find($request->driver_id);
 
-        // Optional: Verify phone number matches
-        if ($request->has('phone') && $driver->phone !== $request->phone) {
+        $knownPhone = $driver->user?->phone ?? $driver->user?->mobile;
+        if ($request->has('phone') && $knownPhone && $knownPhone !== $request->phone) {
             return response()->json([
                 'success' => false,
-                'message' => 'Phone number does not match driver record'
+                'message' => 'Phone number does not match driver record',
             ], 403);
         }
 
@@ -57,18 +56,17 @@ class DriverLocationController extends Controller
             'message' => 'Location updated successfully',
             'data' => [
                 'driver_id' => $driver->id,
-                'driver_name' => $driver->name,
-                'latitude' => $driver->current_latitude,
-                'longitude' => $driver->current_longitude,
-                'last_update' => $driver->last_location_update->toDateTimeString(),
-            ]
+                'driver_name' => $driver->user?->name ?? $driver->user?->user_full_name ?? $driver->user?->email ?? ('Driver #'.$driver->id),
+                'latitude' => (float) $request->latitude,
+                'longitude' => (float) $request->longitude,
+                'last_update' => optional($driver->last_location_update)->toDateTimeString(),
+            ],
         ]);
     }
 
     /**
      * Update driver status from mobile app
-     * 
-     * @param Request $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function updateStatus(Request $request)
@@ -83,37 +81,40 @@ class DriverLocationController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $driver = Driver::find($request->driver_id);
 
-        // Optional: Verify phone number
-        if ($request->has('phone') && $driver->phone !== $request->phone) {
+        $knownPhone = $driver->user?->phone ?? $driver->user?->mobile;
+        if ($request->has('phone') && $knownPhone && $knownPhone !== $request->phone) {
             return response()->json([
                 'success' => false,
-                'message' => 'Phone number does not match driver record'
+                'message' => 'Phone number does not match driver record',
             ], 403);
         }
 
-        $driver->update(['status' => $request->status]);
+        if (\Illuminate\Support\Facades\Schema::hasColumn('drivers', 'availability')) {
+            $driver->update(['availability' => $request->status]);
+        } else {
+            $driver->update(['status' => $request->status]);
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Status updated successfully',
             'data' => [
                 'driver_id' => $driver->id,
-                'driver_name' => $driver->name,
-                'status' => $driver->status,
-            ]
+                'driver_name' => $driver->user?->name ?? $driver->user?->user_full_name ?? $driver->user?->email ?? ('Driver #'.$driver->id),
+                'status' => $driver->availability ?? $driver->status,
+            ],
         ]);
     }
 
     /**
      * Get driver information
-     * 
-     * @param Request $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function getDriverInfo(Request $request)
@@ -127,7 +128,7 @@ class DriverLocationController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -154,14 +155,13 @@ class DriverLocationController extends Controller
                         'assigned_at' => $assignment->assigned_at->toDateTimeString(),
                     ];
                 }),
-            ]
+            ],
         ]);
     }
 
     /**
      * Batch update location (for multiple updates at once)
-     * 
-     * @param Request $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function batchUpdateLocation(Request $request)
@@ -180,7 +180,7 @@ class DriverLocationController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -212,7 +212,7 @@ class DriverLocationController extends Controller
             'data' => [
                 'driver_id' => $driver->id,
                 'locations_added' => $locationsAdded,
-            ]
+            ],
         ]);
     }
 }

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Staff Route</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .info { background: #e7f3ff; padding: 15px; margin: 10px 0; border-left: 4px solid #2196F3; }
+        .success { background: #d4edda; padding: 15px; margin: 10px 0; border-left: 4px solid #28a745; }
+        .error { background: #f8d7da; padding: 15px; margin: 10px 0; border-left: 4px solid #dc3545; }
+        .test-btn { background: #007bff; color: white; padding: 10px 20px; border: none; margin: 5px; cursor: pointer; }
+        .test-btn:hover { background: #0056b3; }
+        #results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Staff Route Debug Tool</h1>
+    
+    <div class="info">
+        <strong>Current URL:</strong> <span id="current-url"></span><br>
+        <strong>User Agent:</strong> <span id="user-agent"></span><br>
+        <strong>Timestamp:</strong> <span id="timestamp"></span>
+    </div>
+    
+    <h2>Test Actions</h2>
+    <button class="test-btn" onclick="testStaffRoute()">Test /staff Route</button>
+    <button class="test-btn" onclick="testEmployeeLogin()">Test /employee/login</button>
+    <button class="test-btn" onclick="clearStorage()">Clear Browser Storage</button>
+    <button class="test-btn" onclick="window.location.href='/staff'">Direct Navigate to /staff</button>
+    
+    <div id="results"></div>
+    
+    <script>
+        // Display current info
+        document.getElementById('current-url').textContent = window.location.href;
+        document.getElementById('user-agent').textContent = navigator.userAgent;
+        document.getElementById('timestamp').textContent = new Date().toISOString();
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = '<strong>' + new Date().toLocaleTimeString() + ':</strong> ' + message;
+            results.appendChild(div);
+        }
+        
+        async function testStaffRoute() {
+            log('Testing /staff route...', 'info');
+            
+            try {
+                const response = await fetch('/staff', {
+                    method: 'GET',
+                    redirect: 'manual'
+                });
+                
+                log(`Status: ${response.status}`, response.status === 302 ? 'success' : 'error');
+                log(`Type: ${response.type}`, 'info');
+                log(`Redirected: ${response.redirected}`, 'info');
+                log(`URL: ${response.url}`, 'info');
+                
+                if (response.status === 302) {
+                    const location = response.headers.get('Location');
+                    log(`Redirect Location: ${location}`, location && location.includes('employee/login') ? 'success' : 'error');
+                }
+                
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testEmployeeLogin() {
+            log('Testing /employee/login route...', 'info');
+            
+            try {
+                const response = await fetch('/employee/login');
+                log(`Status: ${response.status}`, response.status === 200 ? 'success' : 'error');
+                log(`Content-Type: ${response.headers.get('content-type')}`, 'info');
+                
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        function clearStorage() {
+            localStorage.clear();
+            sessionStorage.clear();
+            log('Browser storage cleared', 'success');
+        }
+        
+        // Auto-test on page load
+        window.addEventListener('load', function() {
+            setTimeout(testStaffRoute, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -8,14 +8,14 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * Adds store_id column to products table to support multi-store functionality.
      * This enables store owners to manage their own products through the dashboard.
      */
     public function up(): void
     {
         Schema::table('products', function (Blueprint $table) {
-            if (!Schema::hasColumn('products', 'store_id')) {
+            if (! Schema::hasColumn('products', 'store_id')) {
                 $table->foreignId('store_id')->nullable()->after('category_id')->constrained()->onDelete('set null');
                 $table->index('store_id');
             }

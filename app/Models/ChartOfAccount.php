@@ -22,20 +22,24 @@ class ChartOfAccount extends Model
         'current_balance',
         'is_active',
         'description',
-        'normal_balance'
+        'normal_balance',
     ];
 
     protected $casts = [
         'opening_balance' => 'decimal:2',
         'current_balance' => 'decimal:2',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
     ];
 
     // Account Types
     const TYPE_ASSET = 'asset';
+
     const TYPE_LIABILITY = 'liability';
+
     const TYPE_EQUITY = 'equity';
+
     const TYPE_REVENUE = 'revenue';
+
     const TYPE_EXPENSE = 'expense';
 
     public function parent()
@@ -67,11 +71,12 @@ class ChartOfAccount extends Model
     {
         $debits = $this->getDebitTotal();
         $credits = $this->getCreditTotal();
-        
+
         // Assets and Expenses have normal debit balance
         if (in_array($this->account_type, [self::TYPE_ASSET, self::TYPE_EXPENSE])) {
             return $this->opening_balance + $debits - $credits;
         }
+
         // Liabilities, Equity, Revenue have normal credit balance
         return $this->opening_balance + $credits - $debits;
     }
@@ -83,7 +88,7 @@ class ChartOfAccount extends Model
             self::TYPE_LIABILITY => 'التزامات',
             self::TYPE_EQUITY => 'حقوق ملكية',
             self::TYPE_REVENUE => 'إيرادات',
-            self::TYPE_EXPENSE => 'مصروفات'
+            self::TYPE_EXPENSE => 'مصروفات',
         ];
     }
 }

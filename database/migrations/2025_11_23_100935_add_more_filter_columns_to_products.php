@@ -13,93 +13,93 @@ return new class extends Migration
     {
         Schema::table('products', function (Blueprint $table) {
             // Clothing & Fashion filters (skip existing: color, size, material)
-            if (!Schema::hasColumn('products', 'fit')) {
+            if (! Schema::hasColumn('products', 'fit')) {
                 $table->string('fit')->nullable(); // Slim, Regular, Loose
             }
-            if (!Schema::hasColumn('products', 'sleeve_length')) {
+            if (! Schema::hasColumn('products', 'sleeve_length')) {
                 $table->string('sleeve_length')->nullable(); // Short, Long, Sleeveless
             }
-            if (!Schema::hasColumn('products', 'pattern')) {
+            if (! Schema::hasColumn('products', 'pattern')) {
                 $table->string('pattern')->nullable(); // Solid, Striped, Floral
             }
-            
+
             // Shoes filters
-            if (!Schema::hasColumn('products', 'shoe_size')) {
+            if (! Schema::hasColumn('products', 'shoe_size')) {
                 $table->string('shoe_size')->nullable();
             }
-            if (!Schema::hasColumn('products', 'shoe_type')) {
+            if (! Schema::hasColumn('products', 'shoe_type')) {
                 $table->string('shoe_type')->nullable(); // Sneakers, Boots, Sandals
             }
-            
+
             // Electronics filters
-            if (!Schema::hasColumn('products', 'screen_size')) {
+            if (! Schema::hasColumn('products', 'screen_size')) {
                 $table->string('screen_size')->nullable();
             }
-            if (!Schema::hasColumn('products', 'storage')) {
+            if (! Schema::hasColumn('products', 'storage')) {
                 $table->string('storage')->nullable();
             }
-            if (!Schema::hasColumn('products', 'ram')) {
+            if (! Schema::hasColumn('products', 'ram')) {
                 $table->string('ram')->nullable();
             }
-            if (!Schema::hasColumn('products', 'processor')) {
+            if (! Schema::hasColumn('products', 'processor')) {
                 $table->string('processor')->nullable();
             }
-            if (!Schema::hasColumn('products', 'battery')) {
+            if (! Schema::hasColumn('products', 'battery')) {
                 $table->string('battery')->nullable();
             }
-            if (!Schema::hasColumn('products', 'connectivity')) {
+            if (! Schema::hasColumn('products', 'connectivity')) {
                 $table->string('connectivity')->nullable(); // WiFi, Bluetooth, 5G
             }
-            
+
             // Books filters (skip existing: author, genre, pages)
-            if (!Schema::hasColumn('products', 'publisher')) {
+            if (! Schema::hasColumn('products', 'publisher')) {
                 $table->string('publisher')->nullable();
             }
-            if (!Schema::hasColumn('products', 'language')) {
+            if (! Schema::hasColumn('products', 'language')) {
                 $table->string('language')->nullable();
             }
-            if (!Schema::hasColumn('products', 'format')) {
+            if (! Schema::hasColumn('products', 'format')) {
                 $table->string('format')->nullable(); // Hardcover, Paperback, eBook
             }
-            
+
             // Toys filters (skip existing: age_range)
-            if (!Schema::hasColumn('products', 'toy_type')) {
+            if (! Schema::hasColumn('products', 'toy_type')) {
                 $table->string('toy_type')->nullable(); // Educational, Action, Puzzle
             }
-            
+
             // Home & Kitchen filters
-            if (!Schema::hasColumn('products', 'room')) {
+            if (! Schema::hasColumn('products', 'room')) {
                 $table->string('room')->nullable(); // Kitchen, Bedroom, Living Room
             }
-            if (!Schema::hasColumn('products', 'capacity')) {
+            if (! Schema::hasColumn('products', 'capacity')) {
                 $table->string('capacity')->nullable();
             }
-            if (!Schema::hasColumn('products', 'power')) {
+            if (! Schema::hasColumn('products', 'power')) {
                 $table->string('power')->nullable();
             }
-            
+
             // Sports filters
-            if (!Schema::hasColumn('products', 'sport_type')) {
+            if (! Schema::hasColumn('products', 'sport_type')) {
                 $table->string('sport_type')->nullable(); // Football, Basketball, Yoga
             }
-            if (!Schema::hasColumn('products', 'skill_level')) {
+            if (! Schema::hasColumn('products', 'skill_level')) {
                 $table->string('skill_level')->nullable(); // Beginner, Intermediate, Pro
             }
-            
+
             // General filters
-            if (!Schema::hasColumn('products', 'weight')) {
+            if (! Schema::hasColumn('products', 'weight')) {
                 $table->string('weight')->nullable();
             }
-            if (!Schema::hasColumn('products', 'dimensions')) {
+            if (! Schema::hasColumn('products', 'dimensions')) {
                 $table->string('dimensions')->nullable();
             }
-            if (!Schema::hasColumn('products', 'warranty')) {
+            if (! Schema::hasColumn('products', 'warranty')) {
                 $table->string('warranty')->nullable();
             }
-            if (!Schema::hasColumn('products', 'free_shipping')) {
+            if (! Schema::hasColumn('products', 'free_shipping')) {
                 $table->boolean('free_shipping')->default(false);
             }
-            if (!Schema::hasColumn('products', 'on_sale')) {
+            if (! Schema::hasColumn('products', 'on_sale')) {
                 $table->boolean('on_sale')->default(false);
             }
         });
@@ -119,9 +119,9 @@ return new class extends Migration
                 'toy_type',
                 'room', 'capacity', 'power',
                 'sport_type', 'skill_level',
-                'weight', 'dimensions', 'warranty', 'free_shipping', 'on_sale'
+                'weight', 'dimensions', 'warranty', 'free_shipping', 'on_sale',
             ];
-            
+
             foreach ($columns as $column) {
                 if (Schema::hasColumn('products', $column)) {
                     $table->dropColumn($column);

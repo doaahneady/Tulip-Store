@@ -300,6 +300,10 @@ h6 {
   color: #ff6b35;
 }
 
+.icon-store {
+  color: #9c27b0;
+}
+
 .icon-cart,
 .icon-user {
   color: #2a7080;
@@ -336,6 +340,11 @@ h6 {
 
 .gift-label {
   background: #ff6b35;
+  color: white;
+}
+
+.store-label {
+  background: #9c27b0;
   color: white;
 }
 

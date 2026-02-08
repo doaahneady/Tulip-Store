@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_cs_agent')->default(false)->after('is_it');
-            $table->boolean('is_cs_supervisor')->default(false)->after('is_cs_agent');
+            if (! Schema::hasColumn('users', 'is_cs_agent')) {
+                $table->boolean('is_cs_agent')->default(false)->after('is_it');
+            }
+            if (! Schema::hasColumn('users', 'is_cs_supervisor')) {
+                $table->boolean('is_cs_supervisor')->default(false)->after('is_cs_agent');
+            }
         });
     }
 

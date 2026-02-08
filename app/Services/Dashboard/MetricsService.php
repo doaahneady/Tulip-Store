@@ -14,9 +14,9 @@ class MetricsService
     /**
      * Calculate total revenue within a date range
      *
-     * @param Carbon $start Start date
-     * @param Carbon $end End date
-     * @param int|null $storeId Optional store ID for filtering
+     * @param  Carbon  $start  Start date
+     * @param  Carbon  $end  End date
+     * @param  int|null  $storeId  Optional store ID for filtering
      * @return float Total revenue
      */
     public function calculateRevenue(Carbon $start, Carbon $end, ?int $storeId = null): float
@@ -27,9 +27,9 @@ class MetricsService
     /**
      * Calculate order count within a date range
      *
-     * @param Carbon $start Start date
-     * @param Carbon $end End date
-     * @param int|null $storeId Optional store ID for filtering
+     * @param  Carbon  $start  Start date
+     * @param  Carbon  $end  End date
+     * @param  int|null  $storeId  Optional store ID for filtering
      * @return int Order count
      */
     public function calculateOrderCount(Carbon $start, Carbon $end, ?int $storeId = null): int
@@ -40,8 +40,8 @@ class MetricsService
     /**
      * Calculate growth percentage between current and previous values
      *
-     * @param float $current Current period value
-     * @param float $previous Previous period value
+     * @param  float  $current  Current period value
+     * @param  float  $previous  Previous period value
      * @return float Growth percentage
      */
     public function calculateGrowthPercentage(float $current, float $previous): float
@@ -53,13 +53,12 @@ class MetricsService
         return (($current - $previous) / $previous) * 100;
     }
 
-
     /**
      * Format a monetary value with currency symbol and thousand separators
      *
-     * @param float $amount The amount to format
-     * @param string $currency Currency code (default: USD)
-     * @param string $locale Locale for formatting (default: en_US)
+     * @param  float  $amount  The amount to format
+     * @param  string  $currency  Currency code (default: USD)
+     * @param  string  $locale  Locale for formatting (default: en_US)
      * @return string Formatted currency string
      */
     public function formatCurrency(float $amount, string $currency = 'USD', string $locale = 'en_US'): string
@@ -108,31 +107,31 @@ class MetricsService
 
         // Position the symbol
         if ($settings['symbol_position'] === 'before') {
-            return $prefix . $symbol . $formattedNumber;
+            return $prefix.$symbol.$formattedNumber;
         } else {
-            return $prefix . $formattedNumber . ' ' . $symbol;
+            return $prefix.$formattedNumber.' '.$symbol;
         }
     }
 
     /**
      * Format a percentage value with color coding and icon
      *
-     * @param float $value The percentage value
+     * @param  float  $value  The percentage value
      * @return array Array with 'value', 'color', and 'icon' keys
      */
     public function formatPercentage(float $value): array
     {
-        $formattedValue = number_format(abs($value), 1) . '%';
+        $formattedValue = number_format(abs($value), 1).'%';
 
         if ($value > 0) {
             return [
-                'value' => '+' . $formattedValue,
+                'value' => '+'.$formattedValue,
                 'color' => 'green',
                 'icon' => 'arrow-up',
             ];
         } elseif ($value < 0) {
             return [
-                'value' => '-' . $formattedValue,
+                'value' => '-'.$formattedValue,
                 'color' => 'red',
                 'icon' => 'arrow-down',
             ];
@@ -148,11 +147,11 @@ class MetricsService
     /**
      * Get KPI metrics for a dashboard
      *
-     * @param Carbon $currentStart Start of current period
-     * @param Carbon $currentEnd End of current period
-     * @param Carbon $previousStart Start of previous period
-     * @param Carbon $previousEnd End of previous period
-     * @param int|null $storeId Optional store ID for filtering
+     * @param  Carbon  $currentStart  Start of current period
+     * @param  Carbon  $currentEnd  End of current period
+     * @param  Carbon  $previousStart  Start of previous period
+     * @param  Carbon  $previousEnd  End of previous period
+     * @param  int|null  $storeId  Optional store ID for filtering
      * @return array Array of KPI metrics
      */
     public function getKPIMetrics(

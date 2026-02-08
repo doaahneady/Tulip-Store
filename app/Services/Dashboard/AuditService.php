@@ -17,11 +17,10 @@ class AuditService
     /**
      * Create an audit log entry for a sensitive action
      *
-     * @param string $action The action type (create, update, delete, export, approve)
-     * @param string $resourceType The type of resource being acted upon
-     * @param int|null $resourceId The ID of the resource
-     * @param array $metadata Additional metadata (old_values, new_values, etc.)
-     * @return AuditLog
+     * @param  string  $action  The action type (create, update, delete, export, approve)
+     * @param  string  $resourceType  The type of resource being acted upon
+     * @param  int|null  $resourceId  The ID of the resource
+     * @param  array  $metadata  Additional metadata (old_values, new_values, etc.)
      */
     public function log(
         string $action,
@@ -29,8 +28,12 @@ class AuditService
         ?int $resourceId = null,
         array $metadata = []
     ): AuditLog {
+        $webUser = Auth::guard('web')->user();
+        $employeeUser = Auth::guard('employee')->user();
+        $actor = $webUser ?? $employeeUser;
+
         $data = [
-            'user_id' => Auth::id(),
+            'user_id' => $webUser?->id,
             'action' => $action,
             'model_type' => $resourceType,
             'model_id' => $resourceId,
@@ -40,17 +43,19 @@ class AuditService
             'user_agent' => Request::userAgent(),
         ];
 
+        if (\Illuminate\Support\Facades\Schema::hasColumn('audit_logs', 'user_type')) {
+            $data['user_type'] = $actor ? get_class($actor) : null;
+        }
+
         return $this->auditLogRepository->create($data);
     }
-
 
     /**
      * Get audit logs with filtering and pagination
      *
-     * @param array $filters Filters: user_id, action, resource_type, date_from, date_to
-     * @param int $page Current page number
-     * @param int $perPage Items per page
-     * @return LengthAwarePaginator
+     * @param  array  $filters  Filters: user_id, action, resource_type, date_from, date_to
+     * @param  int  $page  Current page number
+     * @param  int  $perPage  Items per page
      */
     public function getAuditLogs(
         array $filters = [],
@@ -64,7 +69,7 @@ class AuditService
      * Serialize an audit log entry to JSON string
      * Uses consistent field ordering for deterministic output
      *
-     * @param AuditLog $entry The audit log entry to serialize
+     * @param  AuditLog  $entry  The audit log entry to serialize
      * @return string JSON string representation
      */
     public function serializeEntry(AuditLog $entry): string
@@ -75,7 +80,7 @@ class AuditService
     /**
      * Deserialize a JSON string to audit log attributes
      *
-     * @param string $json The JSON string to deserialize
+     * @param  string  $json  The JSON string to deserialize
      * @return array Audit log attributes array
      */
     public function deserializeEntry(string $json): array
@@ -86,8 +91,7 @@ class AuditService
     /**
      * Create an AuditLog instance from JSON (without persisting)
      *
-     * @param string $json The JSON string to deserialize
-     * @return AuditLog
+     * @param  string  $json  The JSON string to deserialize
      */
     public function createFromJson(string $json): AuditLog
     {

@@ -253,14 +253,26 @@
     </div>
 
     <script>
-        // Load favorites from localStorage
+        const isAuthenticated = {!! auth()->check() ? 'true' : 'false' !!};
         function loadFavorites() {
-            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            if (isAuthenticated) {
+                fetch('/api/wishlist')
+                    .then(r => r.json())
+                    .then(d => renderFavorites(d.items || []))
+                    .catch(() => {
+                        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                        renderFavorites(favorites);
+                    });
+            } else {
+                const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                renderFavorites(favorites);
+            }
+        }
+        function renderFavorites(favorites) {
             const favoritesContent = document.getElementById('favoritesContent');
             const countBadge = document.getElementById('favoritesCountBadge');
             const totalFavorites = document.getElementById('totalFavorites');
             
-            // Update navbar count
             updateFavoritesCount();
             
             if (favorites.length === 0) {
@@ -314,11 +326,23 @@
         }
         
         function removeFromFavorites(productId) {
-            let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-            favorites = favorites.filter(p => p.id !== productId);
-            localStorage.setItem('favorites', JSON.stringify(favorites));
-            
-            // Animate removal
+            if (isAuthenticated) {
+                fetch('/api/wishlist/items/' + productId, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                    }
+                }).then(() => animateRemoval(productId))
+                .catch(() => animateRemoval(productId));
+            } else {
+                let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                favorites = favorites.filter(p => p.id !== productId);
+                localStorage.setItem('favorites', JSON.stringify(favorites));
+                animateRemoval(productId);
+            }
+        }
+        function animateRemoval(productId) {
             const card = document.querySelector(`[data-product-id="${productId}"]`);
             if (card) {
                 card.style.transform = 'scale(0)';
@@ -369,14 +393,30 @@
         }
         
         function updateFavoritesCount() {
-            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
             const countElement = document.getElementById('favoritesCount');
-            if (countElement) {
-                countElement.textContent = favorites.length > 99 ? '+99' : favorites.length;
+            if (isAuthenticated) {
+                fetch('/api/wishlist')
+                    .then(r => r.json())
+                    .then(d => {
+                        if (countElement) {
+                            const c = d.count || (d.items ? d.items.length : 0) || 0;
+                            countElement.textContent = c > 99 ? '+99' : c;
+                        }
+                    })
+                    .catch(() => {
+                        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                        if (countElement) {
+                            countElement.textContent = favorites.length > 99 ? '+99' : favorites.length;
+                        }
+                    });
+            } else {
+                const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                if (countElement) {
+                    countElement.textContent = favorites.length > 99 ? '+99' : favorites.length;
+                }
             }
         }
         
-        // Load favorites on page load
         window.addEventListener('DOMContentLoaded', loadFavorites);
     </script>
 </body>

@@ -1,160 +1,135 @@
-@extends('dashboards.layouts.app', ['title' => 'Transactions', 'subtitle' => 'Manage financial transactions'])
-
+@extends('dashboards.layouts.app')
 @section('content')
-<div class="flex items-center justify-between mb-6">
-    <div>
-        <h2 class="text-2xl font-semibold text-gray-900">Financial Transactions</h2>
-        <p class="text-gray-600">View and manage all financial transactions</p>
+@php $title = 'المعاملات المالية'; $subtitle = 'بحث وتصفية وتصدير جميع المعاملات'; @endphp
+
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6" id="new-transaction">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-gray-900">إنشاء معاملة</h3>
     </div>
-    <button class="btn btn-primary">
-        <i class="fas fa-download text-sm mr-2"></i>
-        Export Report
-    </button>
+    <form method="POST" action="{{ route('dashboard.finance.transactions.create') }}" class="grid grid-cols-1 md:grid-cols-8 gap-3">
+        @csrf
+        <select name="type" required class="w-full md:col-span-2 px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            @foreach(['expense','adjustment','fee','commission','refund','order_payment','payout','payroll'] as $t)
+                <option value="{{ $t }}" @selected(old('type') === $t)>{{ $t }}</option>
+            @endforeach
+        </select>
+        <input type="number" step="0.01" min="0.01" name="amount" value="{{ old('amount') }}" required placeholder="المبلغ" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+        <input name="currency" value="{{ old('currency','USD') }}" placeholder="العملة" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+        <input name="description" value="{{ old('description') }}" required placeholder="الوصف" class="w-full md:col-span-2 px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+        <select name="status" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            @foreach(['completed','pending','pending_approval','processing','failed','cancelled'] as $s)
+                <option value="{{ $s }}" @selected(old('status','completed') === $s)>{{ $s }}</option>
+            @endforeach
+        </select>
+        <button class="inline-flex items-center justify-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition">
+            <i class="fas fa-plus"></i>
+            <span>إنشاء</span>
+        </button>
+
+        <select name="store_id" class="w-full md:col-span-3 px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            <option value="">المتجر (اختياري)</option>
+            @foreach(($stores ?? []) as $s)
+                @php $storeName = data_get($s, 'name'); @endphp
+                <option value="{{ $s->id }}" @selected(old('store_id') == $s->id)>{{ is_array($storeName) ? json_encode($storeName, JSON_UNESCAPED_UNICODE) : $storeName }}</option>
+            @endforeach
+        </select>
+        <input name="user_id" value="{{ old('user_id') }}" placeholder="User ID (اختياري)" class="w-full md:col-span-2 px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+        <input name="order_id" value="{{ old('order_id') }}" placeholder="Order ID (اختياري)" class="w-full md:col-span-2 px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+        <input name="category" value="{{ old('category') }}" placeholder="Category (اختياري)" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+
+        <select name="employee_id" class="w-full md:col-span-3 px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            <option value="">الموظف (اختياري)</option>
+            @foreach(($employees ?? []) as $e)
+                <option value="{{ $e->id }}" @selected(old('employee_id') == $e->id)>{{ ($e->first_name ?? '') . ' ' . ($e->last_name ?? '') }}</option>
+            @endforeach
+        </select>
+        <div class="md:col-span-5"></div>
+    </form>
 </div>
 
-<!-- Transaction Stats -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Total Transactions</p>
-                    <h3 class="text-2xl font-semibold text-gray-900">{{ number_format($metrics['transactions'] ?? 1247) }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
-                    <i class="fas fa-exchange-alt text-lg"></i>
-                </div>
-            </div>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+    <form method="GET" action="{{ route('dashboard.finance.transactions') }}" class="grid grid-cols-1 md:grid-cols-6 gap-3">
+        <input name="search" value="{{ request('search') }}" placeholder="بحث: رقم المعاملة / الوصف" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+        <select name="type" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            <option value="">النوع</option>
+            @foreach(($transactionTypes ?? []) as $t)
+                <option value="{{ $t }}" @selected(request('type') == $t)>{{ $t }}</option>
+            @endforeach
+        </select>
+        <select name="status" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            <option value="">الحالة</option>
+            @foreach(($transactionStatuses ?? []) as $s)
+                <option value="{{ $s }}" @selected(request('status') == $s)>{{ $s }}</option>
+            @endforeach
+        </select>
+        <input type="date" name="date_from" value="{{ request('date_from') }}" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+        <input type="date" name="date_to" value="{{ request('date_to') }}" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+        <div class="flex gap-2">
+            <button class="flex-1 inline-flex items-center justify-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition">
+                <i class="fas fa-filter"></i>
+                <span>تصفية</span>
+            </button>
+            <a href="{{ route('dashboard.finance.transactions') }}" class="inline-flex items-center justify-center px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50">مسح</a>
         </div>
-    </div>
+    </form>
 
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Pending Approval</p>
-                    <h3 class="text-2xl font-semibold text-warning-600">{{ number_format($metrics['pending_transactions'] ?? 23) }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-warning-50 text-warning-600 flex items-center justify-center">
-                    <i class="fas fa-clock text-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Total Volume</p>
-                    <h3 class="text-2xl font-semibold text-success-600">${{ number_format($metrics['total_volume'] ?? 2847500) }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-success-50 text-success-600 flex items-center justify-center">
-                    <i class="fas fa-dollar-sign text-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Avg Transaction</p>
-                    <h3 class="text-2xl font-semibold text-gray-900">${{ number_format($metrics['avg_transaction'] ?? 2283) }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-gray-50 text-gray-600 flex items-center justify-center">
-                    <i class="fas fa-chart-line text-lg"></i>
-                </div>
-            </div>
-        </div>
+    <div class="mt-4 flex flex-wrap gap-2">
+        <a href="{{ route('dashboard.finance.transactions.export', array_merge(request()->query(), ['format' => 'csv'])) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-900 text-white hover:bg-black">
+            <i class="fas fa-file-csv"></i>
+            <span>CSV</span>
+        </a>
+        <a href="{{ route('dashboard.finance.transactions.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-600 text-white hover:bg-rose-700">
+            <i class="fas fa-file-pdf"></i>
+            <span>PDF</span>
+        </a>
     </div>
 </div>
 
-<!-- Transaction List -->
-<div class="card">
-    <div class="card-header">
-        <div class="flex items-center justify-between">
-            <h3 class="card-title">Recent Transactions</h3>
-            <div class="flex items-center gap-3">
-                <select class="form-select">
-                    <option>All Types</option>
-                    <option>Payment</option>
-                    <option>Refund</option>
-                    <option>Payout</option>
-                    <option>Commission</option>
-                </select>
-                <select class="form-select">
-                    <option>All Status</option>
-                    <option>Pending</option>
-                    <option>Completed</option>
-                    <option>Failed</option>
-                </select>
-            </div>
-        </div>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-gray-900">قائمة المعاملات</h3>
+        <span class="text-sm text-gray-500">{{ $transactions->total() }} عنصر</span>
     </div>
-    <div class="card-body p-0">
-        <div class="table-container">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Transaction ID</th>
-                        <th>Type</th>
-                        <th>Amount</th>
-                        <th>From/To</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th>Actions</th>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-gray-500">
+                    <th class="text-right py-2">المعرف</th>
+                    <th class="text-right py-2">النوع</th>
+                    <th class="text-right py-2">الحالة</th>
+                    <th class="text-right py-2">المبلغ</th>
+                    <th class="text-right py-2">العميل</th>
+                    <th class="text-right py-2">الطلب</th>
+                    <th class="text-right py-2">المتجر</th>
+                    <th class="text-right py-2">التاريخ</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($transactions as $tr)
+                    <tr class="border-t border-gray-100">
+                        <td class="py-3 text-gray-900 font-semibold">{{ $tr->transaction_id }}</td>
+                        <td class="py-3 text-gray-700">
+                            <span class="px-2 py-1 rounded text-xs {{ $tr->type_color ?? 'text-gray-600 bg-gray-100' }}">{{ $tr->type }}</span>
+                        </td>
+                        <td class="py-3 text-gray-700">
+                            <span class="px-2 py-1 rounded text-xs {{ $tr->status_color ?? 'text-gray-600 bg-gray-100' }}">{{ $tr->status }}</span>
+                        </td>
+                        <td class="py-3 text-gray-900 font-semibold">{{ number_format((float) ($tr->amount ?? 0), 2) }} {{ $tr->currency ?? 'USD' }}</td>
+                        <td class="py-3 text-gray-700">{{ optional($tr->user)->email ?? '-' }}</td>
+                        <td class="py-3 text-gray-700">{{ optional($tr->order)->order_number ?? '-' }}</td>
+                        <td class="py-3 text-gray-700">{{ optional($tr->store)->name ?? '-' }}</td>
+                        <td class="py-3 text-gray-500">{{ $tr->created_at?->format('Y-m-d H:i') }}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @php
-                        $transactions = [
-                            ['id' => 'TXN-2024-001', 'type' => 'payment', 'amount' => 1250.00, 'party' => 'Store #156', 'status' => 'completed', 'date' => '2024-12-18 10:30'],
-                            ['id' => 'TXN-2024-002', 'type' => 'payout', 'amount' => 5000.00, 'party' => 'Vendor #45', 'status' => 'pending', 'date' => '2024-12-18 09:15'],
-                            ['id' => 'TXN-2024-003', 'type' => 'refund', 'amount' => 350.00, 'party' => 'Customer #789', 'status' => 'completed', 'date' => '2024-12-18 08:45'],
-                            ['id' => 'TXN-2024-004', 'type' => 'commission', 'amount' => 125.00, 'party' => 'Platform Fee', 'status' => 'completed', 'date' => '2024-12-18 07:20'],
-                            ['id' => 'TXN-2024-005', 'type' => 'payment', 'amount' => 2800.00, 'party' => 'Store #89', 'status' => 'failed', 'date' => '2024-12-17 18:30'],
-                        ];
-                    @endphp
-                    @foreach($transactions as $transaction)
-                    <tr>
-                        <td class="font-mono text-sm">{{ $transaction['id'] }}</td>
-                        <td>
-                            <span class="badge badge-gray">{{ ucfirst($transaction['type']) }}</span>
-                        </td>
-                        <td class="font-semibold">${{ number_format($transaction['amount'], 2) }}</td>
-                        <td>{{ $transaction['party'] }}</td>
-                        <td>
-                            <span class="badge 
-                                @if($transaction['status'] === 'completed') badge-success
-                                @elseif($transaction['status'] === 'pending') badge-warning
-                                @else badge-error
-                                @endif">
-                                {{ ucfirst($transaction['status']) }}
-                            </span>
-                        </td>
-                        <td class="text-gray-600">{{ date('M j, Y H:i', strtotime($transaction['date'])) }}</td>
-                        <td>
-                            <div class="flex items-center gap-2">
-                                <button class="btn btn-sm btn-ghost">
-                                    <i class="fas fa-eye text-xs"></i>
-                                </button>
-                                @if($transaction['status'] === 'pending')
-                                <button class="btn btn-sm btn-success">
-                                    <i class="fas fa-check text-xs"></i>
-                                </button>
-                                <button class="btn btn-sm btn-error">
-                                    <i class="fas fa-times text-xs"></i>
-                                </button>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                @empty
+                    <tr><td colspan="8" class="py-10 text-center text-gray-500">لا توجد نتائج</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-6">
+        {{ $transactions->withQueryString()->links() }}
     </div>
 </div>
 @endsection

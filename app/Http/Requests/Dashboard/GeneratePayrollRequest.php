@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Form Request for generating monthly payroll
- * 
+ *
  * @see Requirements 10.4, 15.2
  */
 class GeneratePayrollRequest extends FormRequest

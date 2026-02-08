@@ -1,166 +1,186 @@
-@extends('dashboards.layouts.app', ['title' => 'Orders', 'subtitle' => 'Manage your store orders'])
-
+@extends('dashboards.layouts.app', ['title' => 'Orders'])
 @section('content')
-<div class="flex items-center justify-between mb-6">
-    <div>
-        <h2 class="text-2xl font-semibold text-gray-900">Order Management</h2>
-        <p class="text-gray-600">View and manage all orders for your store</p>
-    </div>
-    <button class="btn btn-primary">
-        <i class="fas fa-download text-sm mr-2"></i>
-        Export Orders
-    </button>
-</div>
+@php $isTraderSession = auth('trader')->check() && !auth('employee')->check(); @endphp
 
-<!-- Order Stats -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Total Orders</p>
-                    <h3 class="text-2xl font-semibold text-gray-900">{{ $metrics['total_orders'] ?? 156 }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
-                    <i class="fas fa-shopping-cart text-lg"></i>
-                </div>
-            </div>
+<div class="bg-white rounded-xl shadow border border-gray-100">
+    <div class="p-6 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100">
+        <div>
+            <h3 class="text-lg font-semibold text-gray-800">{{ $isTraderSession ? 'طلبات منتجاتي' : 'الطلبات' }}</h3>
+            <p class="text-sm text-gray-500">Orders history, status, and customer details</p>
         </div>
+        <a href="{{ route('dashboard.vendor.index') }}" class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Back</a>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Pending Orders</p>
-                    <h3 class="text-2xl font-semibold text-warning-600">{{ $metrics['pending_orders'] ?? 8 }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-warning-50 text-warning-600 flex items-center justify-center">
-                    <i class="fas fa-clock text-lg"></i>
-                </div>
+    <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                <div class="text-xs text-gray-500">Total</div>
+                <div class="text-2xl font-bold text-gray-800">{{ number_format($orderStats['total'] ?? 0) }}</div>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                <div class="text-xs text-gray-500">Pending</div>
+                <div class="text-2xl font-bold text-gray-800">{{ number_format($orderStats['pending'] ?? 0) }}</div>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                <div class="text-xs text-gray-500">Processing</div>
+                <div class="text-2xl font-bold text-gray-800">{{ number_format($orderStats['processing'] ?? 0) }}</div>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                <div class="text-xs text-gray-500">Delivered</div>
+                <div class="text-2xl font-bold text-gray-800">{{ number_format($orderStats['delivered'] ?? 0) }}</div>
             </div>
         </div>
-    </div>
 
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Completed Orders</p>
-                    <h3 class="text-2xl font-semibold text-success-600">{{ $metrics['completed_orders'] ?? 142 }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-success-50 text-success-600 flex items-center justify-center">
-                    <i class="fas fa-check-circle text-lg"></i>
-                </div>
+        <form method="GET" action="{{ route('dashboard.vendor.orders') }}" class="grid grid-cols-1 md:grid-cols-6 gap-3 mb-6">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search order/customer/phone" class="border rounded-lg px-3 py-2 w-full md:col-span-2">
+            <select name="status" class="border rounded-lg px-3 py-2 w-full">
+                <option value="">All Status</option>
+                @foreach($statusOptions as $st)
+                    <option value="{{ $st }}" @selected(request('status') === $st)>{{ $st }}</option>
+                @endforeach
+            </select>
+            <select name="payment_status" class="border rounded-lg px-3 py-2 w-full">
+                <option value="">All Payments</option>
+                @foreach($paymentOptions as $ps)
+                    <option value="{{ $ps }}" @selected(request('payment_status') === $ps)>{{ $ps }}</option>
+                @endforeach
+            </select>
+            <input type="date" name="date_from" value="{{ request('date_from') }}" class="border rounded-lg px-3 py-2 w-full">
+            <input type="date" name="date_to" value="{{ request('date_to') }}" class="border rounded-lg px-3 py-2 w-full">
+            <div class="md:col-span-6 flex items-center gap-2">
+                <button class="px-4 py-2 bg-gray-800 text-white rounded-lg">Filter</button>
+                <a href="{{ route('dashboard.vendor.orders') }}" class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Reset</a>
             </div>
-        </div>
-    </div>
+        </form>
 
-    <div class="card">
-        <div class="card-body">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium mb-2">Monthly Revenue</p>
-                    <h3 class="text-2xl font-semibold text-gray-900">${{ number_format($metrics['monthly_revenue'] ?? 8500) }}</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-gray-50 text-gray-600 flex items-center justify-center">
-                    <i class="fas fa-dollar-sign text-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Order List -->
-<div class="card">
-    <div class="card-header">
-        <div class="flex items-center justify-between">
-            <h3 class="card-title">Recent Orders</h3>
-            <div class="flex items-center gap-3">
-                <div class="relative">
-                    <input type="text" placeholder="Search orders..." class="form-input pl-10">
-                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                </div>
-                <select class="form-select">
-                    <option>All Status</option>
-                    <option>Pending</option>
-                    <option>Processing</option>
-                    <option>Shipped</option>
-                    <option>Delivered</option>
-                    <option>Cancelled</option>
-                </select>
-            </div>
-        </div>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-container">
-            <table class="table">
-                <thead>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Items</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Payment</th>
-                        <th>Date</th>
-                        <th>Actions</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @php
-                        $orders = [
-                            ['id' => 'ORD-2024-001', 'customer' => 'Ahmed Hassan', 'items' => 3, 'total' => 125.50, 'status' => 'pending', 'payment' => 'paid', 'date' => '2024-12-18 10:30'],
-                            ['id' => 'ORD-2024-002', 'customer' => 'Sarah Johnson', 'items' => 1, 'total' => 89.99, 'status' => 'processing', 'payment' => 'paid', 'date' => '2024-12-18 09:15'],
-                            ['id' => 'ORD-2024-003', 'customer' => 'Mike Chen', 'items' => 5, 'total' => 234.75, 'status' => 'shipped', 'payment' => 'paid', 'date' => '2024-12-18 08:45'],
-                            ['id' => 'ORD-2024-004', 'customer' => 'Lisa Rodriguez', 'items' => 2, 'total' => 156.00, 'status' => 'delivered', 'payment' => 'paid', 'date' => '2024-12-17 18:20'],
-                            ['id' => 'ORD-2024-005', 'customer' => 'David Kim', 'items' => 4, 'total' => 198.50, 'status' => 'pending', 'payment' => 'pending', 'date' => '2024-12-17 16:10'],
-                        ];
-                    @endphp
-                    @foreach($orders as $order)
-                    <tr>
-                        <td class="font-mono text-sm">{{ $order['id'] }}</td>
-                        <td class="font-medium">{{ $order['customer'] }}</td>
-                        <td class="text-gray-600">{{ $order['items'] }} items</td>
-                        <td class="font-semibold">${{ number_format($order['total'], 2) }}</td>
-                        <td>
-                            <span class="badge 
-                                @if($order['status'] === 'delivered') badge-success
-                                @elseif($order['status'] === 'shipped') badge-primary
-                                @elseif($order['status'] === 'processing') badge-warning
-                                @elseif($order['status'] === 'pending') badge-gray
-                                @else badge-error
-                                @endif">
-                                {{ ucfirst($order['status']) }}
-                            </span>
-                        </td>
-                        <td>
-                            <span class="badge {{ $order['payment'] === 'paid' ? 'badge-success' : 'badge-warning' }}">
-                                {{ ucfirst($order['payment']) }}
-                            </span>
-                        </td>
-                        <td class="text-gray-600">{{ date('M j, Y H:i', strtotime($order['date'])) }}</td>
-                        <td>
-                            <div class="flex items-center gap-2">
-                                <button class="btn btn-sm btn-ghost">
-                                    <i class="fas fa-eye text-xs"></i>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @forelse($orders as $order)
+                        @php
+                            $items = $order->items ?? collect();
+                            $customerName = $order->customer->name ?? $order->recipient_name ?? 'Customer';
+                            $customerEmail = $order->customer->email ?? null;
+                            $customerPhone = $order->phone ?? ($order->customer->phone ?? null);
+                            $total = $order->total_amount ?? $order->total ?? 0;
+                            $logs = ($orderLogs[$order->id] ?? collect())->take(6);
+                        @endphp
+                        <tr>
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-gray-900">{{ $order->order_number ?? ('#'.$order->id) }}</div>
+                                <div class="text-xs text-gray-500">
+                                    @foreach($items->take(2) as $item)
+                                        <span>{{ $item->product->name ?? ('#'.$item->product_id) }} x{{ $item->quantity ?? 0 }}</span>@if(! $loop->last), @endif
+                                    @endforeach
+                                    @if($items->count() > 2)
+                                        <span>, +{{ $items->count() - 2 }}</span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-gray-700">
+                                <div class="font-medium">{{ $customerName }}</div>
+                                <div class="text-xs text-gray-500">
+                                    @if($customerEmail) <span>{{ $customerEmail }}</span> @endif
+                                    @if($customerEmail && $customerPhone) <span class="mx-1">•</span> @endif
+                                    @if($customerPhone) <span>{{ $customerPhone }}</span> @endif
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700">{{ $order->status ?? '-' }}</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 text-xs rounded bg-blue-50 text-blue-700 border border-blue-100">{{ $order->payment_status ?? '-' }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-700">{{ number_format((float) $total, 2) }}</td>
+                            <td class="px-6 py-4 text-gray-700">{{ optional($order->created_at)->format('Y-m-d H:i') }}</td>
+                            <td class="px-6 py-4">
+                                <button type="button" class="px-3 py-1 text-sm bg-emerald-600 text-white rounded hover:bg-emerald-700" onclick="toggleOrderDetails({{ $order->id }})">
+                                    Details
                                 </button>
-                                @if($order['status'] === 'pending')
-                                <button class="btn btn-sm btn-primary">
-                                    <i class="fas fa-check text-xs"></i>
-                                    Process
-                                </button>
-                                @endif
-                                <button class="btn btn-sm btn-ghost">
-                                    <i class="fas fa-print text-xs"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
+                            </td>
+                        </tr>
+                        <tr id="order-details-{{ $order->id }}" class="hidden bg-gray-50">
+                            <td colspan="7" class="px-6 py-4">
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    <div class="bg-white rounded-lg border border-gray-100 p-4">
+                                        <div class="font-semibold text-gray-800 mb-2">Items</div>
+                                        <div class="space-y-2">
+                                            @foreach($items as $item)
+                                                <div class="flex items-center justify-between border border-gray-100 rounded-lg px-3 py-2">
+                                                    <div class="text-sm text-gray-800">{{ $item->product->name ?? ('Product #'.$item->product_id) }}</div>
+                                                    <div class="text-sm text-gray-600">x{{ $item->quantity ?? 0 }}</div>
+                                                </div>
+                                            @endforeach
+                                            @if($items->isEmpty())
+                                                <div class="text-sm text-gray-500">No items</div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="bg-white rounded-lg border border-gray-100 p-4">
+                                        <div class="font-semibold text-gray-800 mb-2">Status History</div>
+                                        <div class="space-y-2">
+                                            @forelse($logs as $log)
+                                                @php
+                                                    $oldStatus = $log->old_values['status'] ?? null;
+                                                    $newStatus = $log->new_values['status'] ?? null;
+                                                    $oldPay = $log->old_values['payment_status'] ?? null;
+                                                    $newPay = $log->new_values['payment_status'] ?? null;
+                                                @endphp
+                                                <div class="border border-gray-100 rounded-lg px-3 py-2">
+                                                    <div class="flex items-center justify-between">
+                                                        <div class="text-sm text-gray-800">{{ $log->action }}</div>
+                                                        <div class="text-xs text-gray-500">{{ optional($log->created_at)->format('Y-m-d H:i') }}</div>
+                                                    </div>
+                                                    <div class="text-xs text-gray-600 mt-1">
+                                                        @if($newStatus)
+                                                            <span>Status: {{ $oldStatus ?: '-' }} → {{ $newStatus }}</span>
+                                                        @endif
+                                                        @if($newPay)
+                                                            <span class="mx-1">•</span>
+                                                            <span>Payment: {{ $oldPay ?: '-' }} → {{ $newPay }}</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @empty
+                                                <div class="text-sm text-gray-500">No history logs</div>
+                                            @endforelse
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-6 py-10 text-center text-gray-500">No orders found</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
+
+        <div class="mt-4">
+            {{ $orders->links() }}
+        </div>
     </div>
 </div>
+
+<script>
+    function toggleOrderDetails(orderId) {
+        const row = document.getElementById(`order-details-${orderId}`);
+        if (!row) return;
+        row.classList.toggle('hidden');
+    }
+</script>
 @endsection
+

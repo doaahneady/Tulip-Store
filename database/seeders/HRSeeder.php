@@ -2,15 +2,15 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Employee;
 use App\Models\Attendance;
+use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\Payroll;
 use App\Models\PerformanceReview;
 use App\Models\TrainingProgram;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class HRSeeder extends Seeder
 {

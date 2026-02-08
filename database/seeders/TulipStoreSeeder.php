@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Store;
 use Illuminate\Database\Seeder;
 
 class TulipStoreSeeder extends Seeder
@@ -50,6 +51,7 @@ class TulipStoreSeeder extends Seeder
         }
 
         // Create products
+        $storeId = Store::where('slug', 'sample-store')->value('id');
         $products = [
             // Fresh Flowers
             [
@@ -61,7 +63,6 @@ class TulipStoreSeeder extends Seeder
                 'price' => 299.99,
                 'discount_price' => null,
                 'stock' => 50,
-                'image' => 'https://via.placeholder.com/300x300?text=Red+Roses',
                 'rating' => 5,
                 'reviews_count' => 45,
                 'is_featured' => true,
@@ -76,7 +77,6 @@ class TulipStoreSeeder extends Seeder
                 'price' => 199.99,
                 'discount_price' => 149.99,
                 'stock' => 60,
-                'image' => 'https://via.placeholder.com/300x300?text=Mixed+Flowers',
                 'rating' => 4,
                 'reviews_count' => 28,
                 'is_featured' => true,
@@ -89,7 +89,6 @@ class TulipStoreSeeder extends Seeder
                 'category_id' => 1,
                 'price' => 249.99,
                 'stock' => 40,
-                'image' => 'https://via.placeholder.com/300x300?text=White+Lilies',
                 'rating' => 5,
                 'reviews_count' => 22,
                 'is_featured' => false,
@@ -104,7 +103,6 @@ class TulipStoreSeeder extends Seeder
                 'category_id' => 2,
                 'price' => 149.99,
                 'stock' => 30,
-                'image' => 'https://via.placeholder.com/300x300?text=Gift+Box',
                 'rating' => 4,
                 'reviews_count' => 15,
                 'is_featured' => true,
@@ -118,7 +116,6 @@ class TulipStoreSeeder extends Seeder
                 'price' => 99.99,
                 'discount_price' => 79.99,
                 'stock' => 50,
-                'image' => 'https://via.placeholder.com/300x300?text=Candles',
                 'rating' => 5,
                 'reviews_count' => 34,
                 'is_featured' => false,
@@ -134,7 +131,6 @@ class TulipStoreSeeder extends Seeder
                 'category_id' => 3,
                 'price' => 179.99,
                 'stock' => 40,
-                'image' => 'https://via.placeholder.com/300x300?text=Chocolates',
                 'rating' => 5,
                 'reviews_count' => 56,
                 'is_featured' => true,
@@ -147,7 +143,6 @@ class TulipStoreSeeder extends Seeder
                 'category_id' => 3,
                 'price' => 89.99,
                 'stock' => 45,
-                'image' => 'https://via.placeholder.com/300x300?text=Fruit+Sweets',
                 'rating' => 4,
                 'reviews_count' => 18,
                 'is_featured' => false,
@@ -162,7 +157,6 @@ class TulipStoreSeeder extends Seeder
                 'category_id' => 4,
                 'price' => 69.99,
                 'stock' => 100,
-                'image' => 'https://via.placeholder.com/300x300?text=Balloons',
                 'rating' => 4,
                 'reviews_count' => 12,
                 'is_featured' => true,
@@ -176,7 +170,6 @@ class TulipStoreSeeder extends Seeder
                 'price' => 119.99,
                 'discount_price' => 99.99,
                 'stock' => 60,
-                'image' => 'https://via.placeholder.com/300x300?text=Silver+Balloons',
                 'rating' => 5,
                 'reviews_count' => 27,
                 'is_featured' => false,
@@ -185,9 +178,18 @@ class TulipStoreSeeder extends Seeder
         ];
 
         foreach ($products as $productData) {
+            $data = $productData;
+            if (isset($data['image'])) {
+                $data['images'] = [$data['image']];
+                unset($data['image']);
+            }
+            $data['sku'] = strtoupper(substr($data['slug'], 0, 3)).'-'.str_pad(random_int(1, 999), 3, '0', STR_PAD_LEFT);
+            if ($storeId) {
+                $data['store_id'] = $storeId;
+            }
             Product::updateOrCreate(
-                ['slug' => $productData['slug']],
-                $productData
+                ['slug' => $data['slug']],
+                $data
             );
         }
 

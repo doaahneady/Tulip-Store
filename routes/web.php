@@ -21,6 +21,274 @@ Route::get('/', function () {
     return view('home-new');
 })->name('home');
 
+// Quick access to employee login for testing
+Route::get('/staff', function () {
+    return redirect()->route('employee.login');
+});
+
+// Test employee authentication status
+Route::get('/test-auth', function () {
+    $userAuth = auth()->check() ? auth()->user() : null;
+    $employeeAuth = auth('employee')->check() ? auth('employee')->user() : null;
+
+    return response()->json([
+        'customer_auth' => [
+            'authenticated' => auth()->check(),
+            'user' => $userAuth ? [
+                'id' => $userAuth->id,
+                'name' => $userAuth->name,
+                'email' => $userAuth->email,
+            ] : null,
+        ],
+        'employee_auth' => [
+            'authenticated' => auth('employee')->check(),
+            'employee' => $employeeAuth ? [
+                'id' => $employeeAuth->id,
+                'name' => $employeeAuth->full_name,
+                'email' => $employeeAuth->email,
+                'roles' => [
+                    'is_admin' => $employeeAuth->is_admin,
+                    'is_it' => $employeeAuth->is_it,
+                    'is_hr' => $employeeAuth->is_hr,
+                    'is_finance' => $employeeAuth->is_finance,
+                    'is_driver_supervisor' => $employeeAuth->is_driver_supervisor,
+                    'is_trader' => $employeeAuth->is_trader,
+                ],
+            ] : null,
+        ],
+    ]);
+});
+
+// Debug Admin Employee Route
+Route::get('/debug-admin-employee', function () {
+    try {
+        $admin = \App\Models\Employee::where('email', 'admin@tulipstore.com')->first();
+
+        if (! $admin) {
+            return response()->json([
+                'exists' => false,
+                'message' => 'Admin employee does not exist. Visit /create-admin-employee to create it.',
+            ]);
+        }
+
+        $passwordCheck = \Illuminate\Support\Facades\Hash::check('password123', $admin->password);
+
+        return response()->json([
+            'exists' => true,
+            'employee' => [
+                'id' => $admin->id,
+                'email' => $admin->email,
+                'status' => $admin->status,
+                'password_set' => ! empty($admin->password),
+                'password_matches' => $passwordCheck,
+                'email_verified' => ! is_null($admin->email_verified_at),
+                'roles' => [
+                    'is_admin' => $admin->is_admin,
+                    'is_it' => $admin->is_it,
+                    'is_hr' => $admin->is_hr,
+                    'is_finance' => $admin->is_finance,
+                    'is_driver_supervisor' => $admin->is_driver_supervisor,
+                    'is_trader' => $admin->is_trader,
+                ],
+            ],
+            'login_test' => [
+                'email' => 'admin@tulipstore.com',
+                'password' => 'password123',
+                'password_check' => $passwordCheck ? '✅ CORRECT' : '❌ INCORRECT',
+            ],
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
+    }
+});
+
+// Create Admin Employee Route
+Route::get('/create-admin-employee', function () {
+    try {
+        $admin = \App\Models\Employee::updateOrCreate(
+            ['email' => 'admin@tulipstore.com'],
+            [
+                'employee_code' => 'SA001',
+                'first_name' => 'Ahmed',
+                'last_name' => 'Al-Manager',
+                'email' => 'admin@tulipstore.com',
+                'password' => bcrypt('password123'),
+                'phone' => '+963-11-1234567',
+                'department' => 'Administration',
+                'position' => 'Chief Executive Officer',
+                'employment_type' => 'full_time',
+                'hire_date' => now(),
+                'status' => 'active',
+                'salary' => 150000.00,
+                'city' => 'Damascus',
+                'country' => 'Syria',
+                'gender' => 'male',
+                'email_verified_at' => now(),
+                // All roles enabled
+                'is_admin' => true,
+                'is_it' => true,
+                'is_hr' => true,
+                'is_finance' => true,
+                'is_driver_supervisor' => true,
+                'is_trader' => true,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Admin employee created/updated successfully!',
+            'credentials' => [
+                'email' => 'admin@tulipstore.com',
+                'password' => 'password123',
+                'login_url' => url('/employee/login'),
+            ],
+            'employee' => [
+                'id' => $admin->id,
+                'email' => $admin->email,
+                'status' => $admin->status,
+                'roles' => [
+                    'is_admin' => $admin->is_admin,
+                    'is_it' => $admin->is_it,
+                    'is_hr' => $admin->is_hr,
+                    'is_finance' => $admin->is_finance,
+                    'is_driver_supervisor' => $admin->is_driver_supervisor,
+                    'is_trader' => $admin->is_trader,
+                ],
+            ],
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
+    }
+});
+
+// Test route to create employees with different role combinations
+Route::get('/create-test-employees', function () {
+    try {
+        // Single role employee (IT only)
+        $itEmployee = App\Models\Employee::updateOrCreate(
+            ['email' => 'it@tulipstore.com'],
+            [
+                'employee_code' => 'EMP002',
+                'first_name' => 'John',
+                'last_name' => 'Tech',
+                'password' => bcrypt('password123'),
+                'phone' => '1234567891',
+                'department' => 'Information Technology',
+                'position' => 'IT Specialist',
+                'employment_type' => 'full_time',
+                'hire_date' => now(),
+                'status' => 'active',
+                'is_it' => true,
+            ]
+        );
+
+        // Multi-role employee (HR + Finance)
+        $multiEmployee = App\Models\Employee::updateOrCreate(
+            ['email' => 'multi@tulipstore.com'],
+            [
+                'employee_code' => 'EMP003',
+                'first_name' => 'Sarah',
+                'last_name' => 'Multi',
+                'password' => bcrypt('password123'),
+                'phone' => '1234567892',
+                'department' => 'Management',
+                'position' => 'Department Manager',
+                'employment_type' => 'full_time',
+                'hire_date' => now(),
+                'status' => 'active',
+                'is_hr' => true,
+                'is_finance' => true,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Test employees created/updated successfully!',
+            'employees' => [
+                [
+                    'email' => 'admin@tulipstore.com',
+                    'password' => 'password123',
+                    'roles' => 'All roles (should see dashboard selection)',
+                    'expected_behavior' => 'Dashboard selection page',
+                ],
+                [
+                    'email' => 'it@tulipstore.com',
+                    'password' => 'password123',
+                    'roles' => 'IT only',
+                    'expected_behavior' => 'Direct to IT dashboard',
+                ],
+                [
+                    'email' => 'multi@tulipstore.com',
+                    'password' => 'password123',
+                    'roles' => 'HR + Finance',
+                    'expected_behavior' => 'Dashboard selection page',
+                ],
+            ],
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+        ]);
+    }
+});
+
+// Test page to verify employee authentication and dashboard functionality
+Route::get('/test-employee-system', function () {
+    return '
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Employee System Test</title>
+        <style>
+            body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+            .card { background: white; padding: 20px; border-radius: 8px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            .success { color: green; }
+            .info { color: blue; }
+            .btn { background: #007cba; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 5px; }
+        </style>
+    </head>
+    <body>
+        <h1>🧪 Employee Authentication System Test</h1>
+        
+        <div class="card">
+            <h2>Test Instructions</h2>
+            <ol>
+                <li><strong>Create Test Employees:</strong> <a href="/create-test-employees" class="btn">Create Test Employees</a></li>
+                <li><strong>Test Single Role Employee:</strong> Login with <code>it@tulipstore.com</code> / <code>password123</code> - Should go directly to IT dashboard</li>
+                <li><strong>Test Multi-Role Employee:</strong> Login with <code>multi@tulipstore.com</code> / <code>password123</code> - Should show dashboard selection</li>
+                <li><strong>Test Admin Employee:</strong> Login with <code>admin@tulipstore.com</code> / <code>password123</code> - Should show dashboard selection</li>
+                <li><strong>Test Dropdown:</strong> Once in any dashboard, click the profile dropdown in top-right corner</li>
+            </ol>
+        </div>
+        
+        <div class="card">
+            <h2>Quick Links</h2>
+            <a href="/staff" class="btn">Employee Login</a>
+            <a href="/test-auth" class="btn">Check Auth Status</a>
+            <a href="/" class="btn">Back to Home</a>
+        </div>
+        
+        <div class="card">
+            <h2>Expected Behaviors</h2>
+            <ul>
+                <li><strong>Single Role Employees:</strong> Direct redirect to their dashboard</li>
+                <li><strong>Multi-Role Employees:</strong> Dashboard selection page with role options</li>
+                <li><strong>Profile Dropdown:</strong> Should show user info, dashboard switcher (if multiple roles), and logout</li>
+                <li><strong>Dashboard Switcher:</strong> Should only show dashboards the employee has access to</li>
+            </ul>
+        </div>
+    </body>
+    </html>';
+});
+
 // Original home page with database
 Route::get('/home-db', function () {
     return view('home');
@@ -64,12 +332,21 @@ Route::view('/register', 'pages.ar-signup')->name('register');
 // Override Laravel forgot password
 Route::view('/forgot-password', 'pages.ar-forgot-password')->name('password.request');
 
+// Footer Pages
+Route::view('/contact', 'pages.contact')->name('contact');
+Route::view('/faq', 'pages.faq')->name('faq');
+Route::view('/returns', 'pages.returns')->name('returns');
+Route::view('/shipping', 'pages.shipping')->name('shipping');
+Route::view('/privacy', 'pages.privacy')->name('privacy');
+Route::view('/terms', 'pages.terms')->name('terms');
+Route::view('/cookies', 'pages.cookies')->name('cookies');
+
 // Auth API routes
 use App\Http\Controllers\Auth\CustomAuthController;
 use App\Http\Controllers\Auth\GoogleAuthController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
 
 Route::middleware(['web'])->group(function () {
     Route::post('/api/register', [CustomAuthController::class, 'register']);
@@ -79,22 +356,23 @@ Route::middleware(['web'])->group(function () {
     Route::post('/api/verify-code', [CustomAuthController::class, 'verifyCode']);
     Route::post('/api/reset-password', [CustomAuthController::class, 'resetPassword']);
     Route::post('/api/logout', [CustomAuthController::class, 'logout'])->middleware('auth');
-    
+
     // Google OAuth
     Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect']);
     Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback']);
-    
+
     // Product & Category API routes
     Route::get('/api/products/search', [ProductController::class, 'search']);
     Route::get('/api/products', [ProductController::class, 'index']);
     Route::get('/api/categories', [CategoryController::class, 'index']);
-    
+
     // Public homepage packages API (Legacy)
     Route::get('/api/homepage/packages', [\App\Http\Controllers\Legacy\Admin\HomepageManagementController::class, 'getPackages']);
-    
+    Route::get('/api/homepage/slides', [\App\Http\Controllers\Legacy\Admin\HomepageManagementController::class, 'getSlides']);
+
     // Package products page (Legacy)
     Route::get('/package/{packageId}', [\App\Http\Controllers\Legacy\Admin\HomepageManagementController::class, 'showPackagePage'])->name('package.show');
-    
+
     // Cart API routes
     Route::get('/api/cart', [CartController::class, 'index']);
     Route::post('/api/cart/add', [CartController::class, 'add']);
@@ -102,24 +380,52 @@ Route::middleware(['web'])->group(function () {
     Route::post('/api/cart/remove', [CartController::class, 'remove']);
     Route::post('/api/cart/clear', [CartController::class, 'clear']);
     Route::get('/api/cart/items', [CartController::class, 'getItems']);
-    
+
+    Route::middleware('auth')->group(function () {
+        Route::get('/api/wishlist', [\App\Http\Controllers\Api\WishlistController::class, 'index']);
+        Route::post('/api/wishlist/add', [\App\Http\Controllers\Api\WishlistController::class, 'add']);
+        Route::post('/api/wishlist/toggle', [\App\Http\Controllers\Api\WishlistController::class, 'toggle']);
+        Route::delete('/api/wishlist/items/{productId}', [\App\Http\Controllers\Api\WishlistController::class, 'remove']);
+
+        Route::get('/api/addresses', [\App\Http\Controllers\Api\UserProfileController::class, 'addresses']);
+        Route::post('/api/addresses', [\App\Http\Controllers\Api\UserProfileController::class, 'storeAddress']);
+        Route::put('/api/addresses/{id}', [\App\Http\Controllers\Api\UserProfileController::class, 'updateAddress']);
+        Route::delete('/api/addresses/{id}', [\App\Http\Controllers\Api\UserProfileController::class, 'deleteAddress']);
+        Route::post('/api/addresses/{id}/default', [\App\Http\Controllers\Api\UserProfileController::class, 'setDefaultAddress']);
+
+        Route::get('/profile/orders', [\App\Http\Controllers\Api\UserProfileController::class, 'orders']);
+        Route::get('/profile/notifications', [\App\Http\Controllers\Api\UserProfileController::class, 'notifications']);
+        Route::put('/profile/update', [\App\Http\Controllers\Api\UserProfileController::class, 'updateProfile']);
+        Route::put('/profile/password', [\App\Http\Controllers\Api\UserProfileController::class, 'changePassword']);
+    });
+
+    // Custom Gift API routes
+    Route::post('/api/custom-gift/add-to-cart', [\App\Http\Controllers\CustomGiftController::class, 'addToCart']);
+    Route::get('/api/custom-gift/options', [\App\Http\Controllers\CustomGiftController::class, 'getOptions']);
+    Route::post('/api/custom-gift/remove', [\App\Http\Controllers\CustomGiftController::class, 'removeFromCart']);
+
+    // Custom Bouquet API routes
+    Route::post('/api/custom-bouquet/add-to-cart', [\App\Http\Controllers\CustomGiftController::class, 'addBouquetToCart']);
+
     // Order API routes
     Route::post('/api/orders/create', [\App\Http\Controllers\OrderController::class, 'create']);
     Route::post('/api/orders/{id}/upload-receipt', [\App\Http\Controllers\OrderController::class, 'uploadReceipt']);
-    Route::get('/api/user/profile', function() {
+    Route::get('/api/user/profile', function () {
         if (Auth::check()) {
             $user = Auth::user();
+
             return response()->json([
                 'name' => $user->name ?? $user->user_full_name,
                 'phone' => $user->phone ?? $user->mobile,
-                'email' => $user->email
+                'email' => $user->email,
             ]);
         }
+
         return response()->json(['error' => 'Not authenticated'], 401);
     });
-    
+
     // Saved cards API (mock data for now)
-    Route::get('/api/user/saved-cards', function() {
+    Route::get('/api/user/saved-cards', function () {
         if (Auth::check()) {
             // Return mock saved cards - in production, fetch from database
             return response()->json([
@@ -127,16 +433,17 @@ Route::middleware(['web'])->group(function () {
                     'id' => '1',
                     'last4' => '4242',
                     'expiry' => '12/25',
-                    'brand' => 'Visa'
+                    'brand' => 'Visa',
                 ],
                 [
                     'id' => '2',
                     'last4' => '5555',
                     'expiry' => '08/26',
-                    'brand' => 'Mastercard'
-                ]
+                    'brand' => 'Mastercard',
+                ],
             ]);
         }
+
         return response()->json([], 401);
     });
 });
@@ -162,6 +469,49 @@ Route::get('/store', function () {
     return view('store');
 })->name('store');
 
+// Store 3D redirects to gifts
+Route::get('/store-3d', function () {
+    return redirect('/gifts');
+})->name('store-3d');
+
+// Classic store page (alternative view)
+Route::get('/store/classic', function () {
+    return view('store');
+})->name('store.classic');
+
+// Gift routes
+Route::get('/gifts', function () {
+    return view('gifts.index');
+})->name('gifts.index');
+
+Route::get('/gifts/test', function () {
+    return view('gifts.test');
+})->name('gifts.test');
+
+Route::get('/gifts/box-arrangement', function () {
+    return view('gifts.box-arrangement');
+})->name('gifts.box-arrangement');
+
+Route::get('/gifts/flower-bouquet', function () {
+    return view('gifts.flower-bouquet');
+})->name('gifts.flower-bouquet');
+
+// Tulip Mart (Supermarket)
+Route::get('/mart', function () {
+    return view('mart.index');
+})->name('mart.index');
+
+Route::get('/mart/products', function () {
+    return view('mart.products');
+})->name('mart.products');
+
+Route::get('/mart/daily-prices', function () {
+    return view('mart.daily-prices');
+})->name('mart.daily-prices');
+
+Route::get('/gifts/{gift}', [App\Http\Controllers\GiftController::class, 'show'])->name('gifts.show');
+Route::get('/gifts/category/{category}', [App\Http\Controllers\GiftController::class, 'category'])->name('gifts.category');
+
 // Checkout page route (requires authentication)
 Route::get('/checkout', function () {
     return view('checkout');
@@ -182,16 +532,16 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Homepage Management (Legacy)
     Route::get('/homepage', [\App\Http\Controllers\Legacy\Admin\HomepageManagementController::class, 'index'])->name('homepage');
     Route::view('/homepage/manage', 'admin.homepage')->name('homepage.manage');
-    
+
     // Order Management (Legacy)
     Route::resource('orders', \App\Http\Controllers\Legacy\Admin\OrderManagementController::class)->only(['index', 'show']);
     Route::post('/orders/{order}/update-status', [\App\Http\Controllers\Legacy\Admin\OrderManagementController::class, 'updateStatus'])->name('orders.update-status');
     Route::post('/orders/{order}/update-payment-status', [\App\Http\Controllers\Legacy\Admin\OrderManagementController::class, 'updatePaymentStatus'])->name('orders.update-payment-status');
     Route::post('/orders/{order}/add-note', [\App\Http\Controllers\Legacy\Admin\OrderManagementController::class, 'addNote'])->name('orders.add-note');
-    
+
     // Category Management (Legacy)
     Route::resource('categories', \App\Http\Controllers\Legacy\Admin\CategoryManagementController::class);
-    
+
     // Product Management (Legacy)
     Route::resource('products', \App\Http\Controllers\Legacy\Admin\ProductManagementController::class);
     Route::post('/products/{product}/toggle-featured', [\App\Http\Controllers\Legacy\Admin\ProductManagementController::class, 'toggleFeatured'])->name('products.toggle-featured');
@@ -199,7 +549,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/products/bulk-action', [\App\Http\Controllers\Legacy\Admin\ProductManagementController::class, 'bulkAction'])->name('products.bulk-action');
     Route::get('/products/export/csv', [\App\Http\Controllers\Legacy\Admin\ProductManagementController::class, 'export'])->name('products.export');
     Route::post('/products/{product}/quick-update', [\App\Http\Controllers\Legacy\Admin\ProductManagementController::class, 'quickUpdate'])->name('products.quick-update');
-    
+
     // User Management (Legacy)
     Route::resource('users', \App\Http\Controllers\Legacy\Admin\UserManagementController::class)->only(['index', 'show', 'destroy']);
     Route::post('/users/{user}/toggle-admin', [\App\Http\Controllers\Legacy\Admin\UserManagementController::class, 'toggleAdmin'])->name('users.toggle-admin');
@@ -259,7 +609,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 */
 // Route::middleware(['auth'])->prefix('cs')->name('cs.legacy.')->group(function () {
 //     Route::get('/dashboard', [\App\Http\Controllers\Legacy\CS\CustomerServiceController::class, 'index'])->name('dashboard');
-//     
+//
 //     // Tickets Management
 //     Route::get('/tickets', [\App\Http\Controllers\Legacy\CS\CustomerServiceController::class, 'tickets'])->name('tickets.index');
 //     Route::get('/tickets/create', [\App\Http\Controllers\Legacy\CS\CustomerServiceController::class, 'createTicket'])->name('tickets.create');
@@ -270,12 +620,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 //     Route::post('/tickets/{ticket}/assign', [\App\Http\Controllers\Legacy\CS\CustomerServiceController::class, 'assignTicket'])->name('tickets.assign');
 //     Route::post('/tickets/{ticket}/status', [\App\Http\Controllers\Legacy\CS\CustomerServiceController::class, 'updateTicketStatus'])->name('tickets.status');
 //     Route::post('/tickets/{ticket}/reply', [\App\Http\Controllers\Legacy\CS\CustomerServiceController::class, 'replyToTicket'])->name('tickets.reply');
-//     
+//
 //     // Customer Feedback
 //     Route::get('/feedback', [\App\Http\Controllers\Legacy\CS\CustomerServiceController::class, 'feedback'])->name('feedback.index');
 //     Route::get('/feedback/{feedback}', [\App\Http\Controllers\Legacy\CS\CustomerServiceController::class, 'showFeedback'])->name('feedback.show');
 //     Route::post('/feedback/{feedback}/respond', [\App\Http\Controllers\Legacy\CS\CustomerServiceController::class, 'respondToFeedback'])->name('feedback.respond');
-//     
+//
 //     // Reports
 //     Route::get('/reports', [\App\Http\Controllers\Legacy\CS\CustomerServiceController::class, 'reports'])->name('reports');
 // });
@@ -290,7 +640,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 // Route::middleware(['auth'])->prefix('accounting')->name('accounting.legacy.')->group(function () {
 //     // Dashboard
 //     Route::get('/dashboard', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'index'])->name('dashboard');
-//     
+//
 //     // Chart of Accounts
 //     Route::get('/chart-of-accounts', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'chartOfAccounts'])->name('chart-of-accounts');
 //     Route::get('/accounts/tree', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'accountsTree'])->name('accounts.tree');
@@ -298,7 +648,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 //     Route::get('/accounts', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'getAccounts'])->name('accounts');
 //     Route::post('/accounts', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'storeAccount'])->name('accounts.store');
 //     Route::put('/accounts/{id}', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'updateAccount'])->name('accounts.update');
-//     
+//
 //     // Journal Entries
 //     Route::get('/journal-entries', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'journalEntries'])->name('journal-entries');
 //     Route::get('/journal-entries/create', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'createJournalEntry'])->name('journal-entries.create');
@@ -306,14 +656,14 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 //     Route::post('/journal-entries', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'storeJournalEntry'])->name('journal-entries.store');
 //     Route::post('/journal-entries/{id}/post', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'postJournalEntry'])->name('journal-entries.post');
 //     Route::post('/journal-entries/{id}/reverse', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'reverseJournalEntry'])->name('journal-entries.reverse');
-//     
+//
 //     // Financial Reports
 //     Route::get('/trial-balance', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'trialBalance'])->name('trial-balance');
 //     Route::get('/balance-sheet', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'balanceSheet'])->name('balance-sheet');
 //     Route::get('/income-statement', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'incomeStatement'])->name('income-statement');
 //     Route::get('/cash-flow', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'cashFlow'])->name('cash-flow');
 //     Route::get('/general-ledger', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'generalLedger'])->name('general-ledger');
-//     
+//
 //     // Calculators
 //     Route::get('/calculators/depreciation', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'depreciationCalculator'])->name('calculators.depreciation');
 //     Route::get('/calculators/loan', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'loanCalculator'])->name('calculators.loan');
@@ -321,7 +671,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 //     Route::get('/calculators/profit-margin', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'profitMarginCalculator'])->name('calculators.profit-margin');
 //     Route::get('/calculators/break-even', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'breakEvenCalculator'])->name('calculators.break-even');
 //     Route::post('/calculator', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'calculator'])->name('calculator');
-//     
+//
 //     // Other Modules
 //     Route::get('/invoices', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'invoices'])->name('invoices');
 //     Route::get('/receivables', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'receivables'])->name('receivables');
@@ -330,11 +680,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 //     Route::get('/fixed-assets', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'fixedAssets'])->name('fixed-assets');
 //     Route::get('/payroll', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'payroll'])->name('payroll');
 //     Route::get('/settings', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'settings'])->name('settings');
-//     
+//
 //     // Tools
 //     Route::post('/quick-entry', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'quickEntry'])->name('quick-entry');
 //     Route::get('/export', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'exportReport'])->name('export');
-//     
+//
 //     // Additional Actions
 //     Route::post('/accounts/{id}/toggle', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'toggleAccount'])->name('accounts.toggle');
 //     Route::delete('/journal-entries/{id}', [\App\Http\Controllers\Legacy\Accounting\AccountingController::class, 'deleteJournalEntry'])->name('journal-entries.delete');
@@ -347,151 +697,78 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 // });
 
 // Test orders page
-Route::get('/test-orders', function() {
+Route::get('/test-orders', function () {
     $orders = \App\Models\Order::with('items.product')->paginate(10);
+
     return view('test-orders', compact('orders'));
 });
 
 // Test permissions page
-Route::get('/test-permissions', function() {
+Route::get('/test-permissions', function () {
     return view('test-permissions');
 })->middleware('auth');
 
 // Test database connectivity
-Route::get('/test-database', function() {
+Route::get('/test-database', function () {
     return view('test-database');
 });
 
-// Test login route - automatically logs in as admin for testing
-Route::get('/test-login', function() {
-    $user = \App\Models\User::where('email', 'admin@test.com')->first();
-    
-    if (!$user) {
-        // Create a test admin user
-        $user = \App\Models\User::create([
-            'name' => 'Test Admin',
-            'email' => 'admin@test.com',
-            'password' => bcrypt('password'),
-            'is_admin' => true,
-            'is_it' => true,
-            'is_hr' => true,
-            'is_finance' => true,
-            'is_driver_supervisor' => true,
-            'is_trader' => true,
-        ]);
-    }
-    
-    // Log in the user
-    Auth::login($user);
-    
-    return redirect('/dashboard/admin')->with('success', 'Logged in as test admin! You can now access all dashboards.');
+/*
+|--------------------------------------------------------------------------
+| Employee Authentication Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('employee')->name('employee.')->group(function () {
+    // Employee login routes (guest only)
+    Route::middleware('guest:employee')->group(function () {
+        Route::get('/login', [App\Http\Controllers\Auth\EmployeeAuthController::class, 'showLoginForm'])->name('login');
+        Route::post('/login', [App\Http\Controllers\Auth\EmployeeAuthController::class, 'login']);
+    });
+
+    // Employee authenticated routes
+    Route::middleware('auth:employee')->group(function () {
+        Route::post('/logout', [App\Http\Controllers\Auth\EmployeeAuthController::class, 'logout'])->name('logout');
+        Route::get('/dashboard', [App\Http\Controllers\Auth\EmployeeAuthController::class, 'dashboard'])->name('dashboard');
+
+        // Employee Profile Routes
+        Route::prefix('profile')->name('profile.')->group(function () {
+            Route::get('/', [App\Http\Controllers\EmployeeProfileController::class, 'show'])->name('show');
+            Route::get('/edit', [App\Http\Controllers\EmployeeProfileController::class, 'edit'])->name('edit');
+            Route::put('/update', [App\Http\Controllers\EmployeeProfileController::class, 'update'])->name('update');
+            Route::post('/update-password', [App\Http\Controllers\EmployeeProfileController::class, 'updatePassword'])->name('update-password');
+            Route::post('/toggle-2fa', [App\Http\Controllers\EmployeeProfileController::class, 'toggleTwoFactor'])->name('toggle-2fa');
+
+            // Employee Management (for HR and Managers)
+            Route::get('/employees', [App\Http\Controllers\EmployeeProfileController::class, 'index'])->name('employees');
+            Route::get('/employees/{employee}', [App\Http\Controllers\EmployeeProfileController::class, 'showEmployee'])->name('show-employee');
+            Route::put('/employees/{employee}', [App\Http\Controllers\EmployeeProfileController::class, 'updateEmployee'])->name('update-employee');
+            Route::get('/stats', [App\Http\Controllers\EmployeeProfileController::class, 'getStats'])->name('stats');
+        });
+    });
 });
 
-// Debug route to check authentication status
-Route::get('/test-auth', function() {
-    $user = Auth::user();
-    if ($user) {
-        return response()->json([
-            'authenticated' => true,
-            'user' => $user->toArray(),
-            'dashboard_links' => [
-                'admin' => route('dashboard.admin.index'),
-                'analytics' => route('dashboard.admin.analytics'),
-            ]
-        ]);
-    } else {
-        return response()->json([
-            'authenticated' => false,
-            'message' => 'Not logged in'
-        ]);
-    }
-});
+Route::prefix('api/support')->middleware('auth:employee')->group(function () {
+    Route::get('/traders/pending', [\App\Http\Controllers\Api\SupportApprovalsController::class, 'pendingTraders']);
+    Route::post('/traders/{trader}/approve', [\App\Http\Controllers\Api\SupportApprovalsController::class, 'approveTrader']);
+    Route::post('/traders/{trader}/reject', [\App\Http\Controllers\Api\SupportApprovalsController::class, 'rejectTrader']);
+    Route::post('/traders/{trader}/request-info', [\App\Http\Controllers\Api\SupportApprovalsController::class, 'requestInfoTrader']);
 
-// Very basic test route
-Route::get('/test-basic', function() {
-    return 'Hello World! Laravel is working!';
+    Route::get('/trader-products/pending', [\App\Http\Controllers\Api\SupportApprovalsController::class, 'pendingTraderProducts']);
+    Route::post('/trader-products/{product}/approve', [\App\Http\Controllers\Api\SupportApprovalsController::class, 'approveTraderProduct']);
+    Route::post('/trader-products/{product}/reject', [\App\Http\Controllers\Api\SupportApprovalsController::class, 'rejectTraderProduct']);
+    Route::post('/trader-products/{product}/request-changes', [\App\Http\Controllers\Api\SupportApprovalsController::class, 'requestChangesTraderProduct']);
 });
-
-// Test dashboard route without middleware
-Route::get('/test-dashboard-simple', function() {
-    return view('dashboards.super-admin.analytics', [
-        'metrics' => [
-            'total_revenue' => 1000000,
-            'total_orders' => 5000,
-            'total_users' => 1200,
-            'conversion_rate' => 3.5
-        ]
-    ]);
-});
-
-// Simple test dashboard page
-Route::get('/test-dashboard', function() {
-    return '
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Test Dashboard</title>
-        <style>
-            body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-            .card { background: white; padding: 20px; border-radius: 8px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-            .success { color: green; }
-            .error { color: red; }
-        </style>
-    </head>
-    <body>
-        <h1>🧪 Dashboard Test Page</h1>
-        
-        <div class="card">
-            <h2>Authentication Status</h2>
-            ' . (Auth::check() ? 
-                '<p class="success">✅ Logged in as: ' . Auth::user()->name . ' (' . Auth::user()->email . ')</p>' : 
-                '<p class="error">❌ Not logged in</p>'
-            ) . '
-        </div>
-        
-        <div class="card">
-            <h2>Available Dashboard Links</h2>
-            ' . (Auth::check() ? '
-                <ul>
-                    <li><a href="' . route('dashboard.admin.index') . '">Super Admin Dashboard</a></li>
-                    <li><a href="' . route('dashboard.admin.analytics') . '">Analytics Page</a></li>
-                    <li><a href="' . route('dashboard.it.index') . '">IT Dashboard</a></li>
-                    <li><a href="' . route('dashboard.hr.index') . '">HR Dashboard</a></li>
-                    <li><a href="' . route('dashboard.finance.index') . '">Finance Dashboard</a></li>
-                    <li><a href="' . route('dashboard.supervisor.index') . '">Supervisor Dashboard</a></li>
-                    <li><a href="' . route('dashboard.vendor.index') . '">Vendor Dashboard</a></li>
-                </ul>
-            ' : '
-                <p>Please <a href="/test-login">log in first</a></p>
-            ') . '
-        </div>
-        
-        <div class="card">
-            <h2>Quick Actions</h2>
-            <p><a href="/test-login" style="background: #007cba; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">🔑 Auto Login as Admin</a></p>
-            <p><a href="/" style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">🏠 Go to Home Page</a></p>
-        </div>
-        
-        <div class="card">
-            <h2>System Info</h2>
-            <p><strong>Laravel Version:</strong> ' . app()->version() . '</p>
-            <p><strong>PHP Version:</strong> ' . PHP_VERSION . '</p>
-            <p><strong>Current Time:</strong> ' . now() . '</p>
-        </div>
-    </body>
-    </html>';
-})->name('test.dashboard');
 
 // Create test orders for driver supervisor
-Route::get('/create-test-orders', function() {
+Route::get('/create-test-orders', function () {
     $user = \App\Models\User::first();
-    if (!$user) {
+    if (! $user) {
         return 'No users found. Please create a user first.';
     }
-    
+
     $orders = [
         [
-            'order_number' => 'ORD-TEST-' . rand(1000, 9999),
+            'order_number' => 'ORD-TEST-'.rand(1000, 9999),
             'user_id' => $user->id,
             'recipient_name' => 'أحمد محمود',
             'phone' => '0912345678',
@@ -509,7 +786,7 @@ Route::get('/create-test-orders', function() {
             'total' => 57.50,
         ],
         [
-            'order_number' => 'ORD-TEST-' . rand(1000, 9999),
+            'order_number' => 'ORD-TEST-'.rand(1000, 9999),
             'user_id' => $user->id,
             'recipient_name' => 'فاطمة علي',
             'phone' => '0923456789',
@@ -527,7 +804,7 @@ Route::get('/create-test-orders', function() {
             'total' => 115.00,
         ],
         [
-            'order_number' => 'ORD-TEST-' . rand(1000, 9999),
+            'order_number' => 'ORD-TEST-'.rand(1000, 9999),
             'user_id' => $user->id,
             'recipient_name' => 'محمد حسن',
             'phone' => '0934567890',
@@ -545,12 +822,12 @@ Route::get('/create-test-orders', function() {
             'total' => 85.00,
         ],
     ];
-    
+
     $created = [];
     foreach ($orders as $orderData) {
         $order = \App\Models\Order::create($orderData);
         $created[] = $order->order_number;
-        
+
         // Create order item
         \App\Models\OrderItem::create([
             'order_id' => $order->id,
@@ -561,23 +838,23 @@ Route::get('/create-test-orders', function() {
             'subtotal' => 50.00,
         ]);
     }
-    
+
     // Create test drivers using Driver model
     $driversData = [
         ['name' => 'أحمد السائق', 'phone' => '0911111111', 'email' => 'driver1@test.com', 'license_number' => 'LIC001'],
         ['name' => 'محمد السائق', 'phone' => '0922222222', 'email' => 'driver2@test.com', 'license_number' => 'LIC002'],
     ];
-    
+
     foreach ($driversData as $driverData) {
         $existing = \App\Models\Driver::where('email', $driverData['email'])->first();
-        if (!$existing) {
+        if (! $existing) {
             \App\Models\Driver::create([
                 'name' => $driverData['name'],
                 'phone' => $driverData['phone'],
                 'email' => $driverData['email'],
                 'license_number' => $driverData['license_number'],
                 'vehicle_type' => 'motorcycle',
-                'vehicle_plate' => 'SYR-' . rand(1000, 9999),
+                'vehicle_plate' => 'SYR-'.rand(1000, 9999),
                 'status' => 'available',
                 'is_active' => true,
                 'rating' => 5.00,
@@ -585,8 +862,8 @@ Route::get('/create-test-orders', function() {
             ]);
         }
     }
-    
-    return '✅ تم إنشاء ' . count($created) . ' طلبات تجريبية: ' . implode(', ', $created) . '<br><br><a href="/delivery/supervisor/dashboard" style="background:#ff6b35;color:white;padding:1rem 2rem;border-radius:8px;text-decoration:none;font-weight:bold;">انتقل إلى لوحة التحكم</a>';
+
+    return '✅ تم إنشاء '.count($created).' طلبات تجريبية: '.implode(', ', $created).'<br><br><a href="/delivery/supervisor/dashboard" style="background:#ff6b35;color:white;padding:1rem 2rem;border-radius:8px;text-decoration:none;font-weight:bold;">انتقل إلى لوحة التحكم</a>';
 });
 
 /*
@@ -598,38 +875,38 @@ Route::get('/create-test-orders', function() {
 */
 // Route::middleware(['auth'])->prefix('hr')->name('hr.legacy.')->group(function () {
 //     Route::get('/dashboard', [\App\Http\Controllers\Legacy\HR\HRController::class, 'index'])->name('dashboard');
-//     
+//
 //     // Employee Management
 //     Route::get('/employees', [\App\Http\Controllers\Legacy\HR\HRController::class, 'employees'])->name('employees');
 //     Route::get('/employees/create', [\App\Http\Controllers\Legacy\HR\HRController::class, 'createEmployee'])->name('employees.create');
 //     Route::post('/employees', [\App\Http\Controllers\Legacy\HR\HRController::class, 'storeEmployee'])->name('employees.store');
 //     Route::get('/employees/{employee}/edit', [\App\Http\Controllers\Legacy\HR\HRController::class, 'editEmployee'])->name('employees.edit');
 //     Route::put('/employees/{employee}', [\App\Http\Controllers\Legacy\HR\HRController::class, 'updateEmployee'])->name('employees.update');
-//     
+//
 //     // Attendance Management
 //     Route::get('/attendance', [\App\Http\Controllers\Legacy\HR\HRController::class, 'attendance'])->name('attendance');
 //     Route::post('/attendance/mark', [\App\Http\Controllers\Legacy\HR\HRController::class, 'markAttendance'])->name('attendance.mark');
-//     
+//
 //     // Leave Management
 //     Route::get('/leaves', [\App\Http\Controllers\Legacy\HR\HRController::class, 'leaveRequests'])->name('leaves');
 //     Route::post('/leaves/{leave}/approve', [\App\Http\Controllers\Legacy\HR\HRController::class, 'approveLeave'])->name('leaves.approve');
 //     Route::post('/leaves/{leave}/reject', [\App\Http\Controllers\Legacy\HR\HRController::class, 'rejectLeave'])->name('leaves.reject');
-//     
+//
 //     // Payroll Management
 //     Route::get('/payroll', [\App\Http\Controllers\Legacy\HR\HRController::class, 'payroll'])->name('payroll');
 //     Route::post('/payroll/generate', [\App\Http\Controllers\Legacy\HR\HRController::class, 'generatePayroll'])->name('payroll.generate');
 //     Route::post('/payroll/{payroll}/process', [\App\Http\Controllers\Legacy\HR\HRController::class, 'processPayroll'])->name('payroll.process');
-//     
+//
 //     // Performance Reviews
 //     Route::get('/performance', [\App\Http\Controllers\Legacy\HR\HRController::class, 'performanceReviews'])->name('performance');
 //     Route::get('/performance/create', [\App\Http\Controllers\Legacy\HR\HRController::class, 'createReview'])->name('performance.create');
 //     Route::post('/performance', [\App\Http\Controllers\Legacy\HR\HRController::class, 'storeReview'])->name('performance.store');
-//     
+//
 //     // Training Programs
 //     Route::get('/training', [\App\Http\Controllers\Legacy\HR\HRController::class, 'trainingPrograms'])->name('training');
 //     Route::get('/training/create', [\App\Http\Controllers\Legacy\HR\HRController::class, 'createTraining'])->name('training.create');
 //     Route::post('/training', [\App\Http\Controllers\Legacy\HR\HRController::class, 'storeTraining'])->name('training.store');
-//     
+//
 //     // Reports
 //     Route::get('/reports', [\App\Http\Controllers\Legacy\HR\HRController::class, 'reports'])->name('reports');
 //     Route::get('/reports/attendance', [\App\Http\Controllers\Legacy\HR\HRController::class, 'attendanceReport'])->name('reports.attendance');
@@ -649,7 +926,7 @@ Route::get('/create-test-orders', function() {
 //     Route::post('/assign-driver', [\App\Http\Controllers\Legacy\Delivery\DeliverySupervisorController::class, 'assignDriver'])->name('assign');
 //     Route::post('/assignments/{assignment}/status', [\App\Http\Controllers\Legacy\Delivery\DeliverySupervisorController::class, 'updateDeliveryStatus'])->name('assignment.status');
 //     Route::get('/drivers/{driver}/history', [\App\Http\Controllers\Legacy\Delivery\DeliverySupervisorController::class, 'getDriverHistory'])->name('driver.history');
-//     
+//
 //     // Driver Management
 //     Route::get('/manage-drivers', [\App\Http\Controllers\Legacy\Delivery\DeliverySupervisorController::class, 'manageDrivers'])->name('manage-drivers');
 //     Route::post('/drivers', [\App\Http\Controllers\Legacy\Delivery\DeliverySupervisorController::class, 'storeDriver'])->name('drivers.store');
@@ -660,6 +937,44 @@ Route::get('/create-test-orders', function() {
 
 // Driver Tracking Page (for drivers to track themselves)
 Route::get('/driver/tracking', [\App\Http\Controllers\DriverTrackingController::class, 'index'])->name('driver.tracking');
+
+Route::prefix('trader')->name('trader.')->group(function () {
+    Route::middleware('guest:trader')->group(function () {
+        Route::get('/login', [\App\Http\Controllers\Auth\TraderAuthController::class, 'showLoginForm'])->name('login.form');
+        Route::post('/login', [\App\Http\Controllers\Auth\TraderAuthController::class, 'login'])->name('login');
+        Route::get('/register', [\App\Http\Controllers\Auth\TraderAuthController::class, 'showRegisterForm'])->name('register.form');
+        Route::post('/register', [\App\Http\Controllers\Auth\TraderAuthController::class, 'register'])->name('register');
+    });
+    Route::middleware(['auth:trader', 'role:store_owner'])->group(function () {
+        Route::post('/logout', [\App\Http\Controllers\Auth\TraderAuthController::class, 'logout'])->name('logout');
+        Route::get('/dashboard', [\App\Http\Controllers\Trader\TraderDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/products', [\App\Http\Controllers\Trader\TraderProductController::class, 'index'])->name('products.index');
+        Route::get('/products/create', [\App\Http\Controllers\Trader\TraderProductController::class, 'create'])->name('products.create');
+        Route::post('/products', [\App\Http\Controllers\Trader\TraderProductController::class, 'store'])->name('products.store');
+        Route::get('/products/{product}/edit', [\App\Http\Controllers\Trader\TraderProductController::class, 'edit'])->name('products.edit');
+        Route::put('/products/{product}', [\App\Http\Controllers\Trader\TraderProductController::class, 'update'])->name('products.update');
+        Route::delete('/products/{product}', [\App\Http\Controllers\Trader\TraderProductController::class, 'destroy'])->name('products.destroy');
+        Route::get('/inventory', [\App\Http\Controllers\Trader\TraderProductController::class, 'inventory'])->name('inventory');
+        Route::put('/inventory/{product}', [\App\Http\Controllers\Trader\TraderProductController::class, 'updateInventory'])->name('inventory.update');
+        Route::get('/sales', [\App\Http\Controllers\Trader\TraderProductController::class, 'sales'])->name('sales');
+        Route::post('/logout', [\App\Http\Controllers\Auth\TraderAuthController::class, 'logout'])->name('logout');
+    });
+});
+
+Route::prefix('dashboard/vendor')->name('dashboard.vendor.')->middleware(['web', 'auth:employee,trader', 'store.owner'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\Dashboard\VendorController::class, 'index'])->name('index');
+    Route::get('/orders', [\App\Http\Controllers\Dashboard\VendorController::class, 'orders'])->name('orders');
+    Route::get('/sales-forecasts', [\App\Http\Controllers\Dashboard\VendorController::class, 'salesForecasts'])->name('sales-forecasts');
+    Route::get('/product-performance-metrics', [\App\Http\Controllers\Dashboard\VendorController::class, 'productPerformanceMetrics'])->name('product-performance-metrics');
+    Route::get('/products', [\App\Http\Controllers\Dashboard\VendorController::class, 'products'])->name('products');
+    Route::post('/products', [\App\Http\Controllers\Dashboard\VendorController::class, 'createProduct'])->name('products.create');
+    Route::put('/products/{product}', [\App\Http\Controllers\Dashboard\VendorController::class, 'updateProduct'])->name('products.update');
+    Route::delete('/products/{product}', [\App\Http\Controllers\Dashboard\VendorController::class, 'deleteProduct'])->name('products.delete');
+    Route::post('/stock/{product}', [\App\Http\Controllers\Dashboard\VendorController::class, 'updateStock'])->name('stock.update');
+    Route::get('/purchase-orders', [\App\Http\Controllers\Dashboard\VendorController::class, 'purchaseOrders'])->name('purchase-orders');
+    Route::post('/purchase-orders', [\App\Http\Controllers\Dashboard\VendorController::class, 'createPurchaseOrder'])->name('purchase-orders.create');
+    Route::post('/purchase-orders/{purchaseOrder}/receive', [\App\Http\Controllers\Dashboard\VendorController::class, 'receivePurchaseOrder'])->name('purchase-orders.receive');
+});
 
 // Mobile Driver API routes (for GPS tracking from phones)
 Route::prefix('api/driver')->name('api.driver.')->group(function () {
@@ -692,35 +1007,18 @@ Route::middleware(['auth'])->prefix('api/admin/homepage')->group(function () {
     Route::post('/sections/reorder', [\App\Http\Controllers\Legacy\Admin\HomepageManagementController::class, 'reorderSections']);
     Route::get('/lightning-deals', [\App\Http\Controllers\Legacy\Admin\HomepageManagementController::class, 'getLightningDeals']);
     Route::post('/lightning-deals', [\App\Http\Controllers\Legacy\Admin\HomepageManagementController::class, 'updateLightningDeals']);
-    
+
     // Featured products management
     Route::get('/featured/{type}', [\App\Http\Controllers\Legacy\Admin\HomepageManagementController::class, 'getFeaturedProducts']);
     Route::post('/featured/{type}', [\App\Http\Controllers\Legacy\Admin\HomepageManagementController::class, 'saveFeaturedProducts']);
     Route::get('/featured-counts', [\App\Http\Controllers\Legacy\Admin\HomepageManagementController::class, 'getFeaturedCounts']);
-    
+
     // Packages management
     Route::get('/packages', [\App\Http\Controllers\Legacy\Admin\HomepageManagementController::class, 'getPackages']);
     Route::post('/packages', [\App\Http\Controllers\Legacy\Admin\HomepageManagementController::class, 'savePackages']);
     Route::post('/packages/add', [\App\Http\Controllers\Legacy\Admin\HomepageManagementController::class, 'addPackage']);
     Route::put('/packages/{packageId}', [\App\Http\Controllers\Legacy\Admin\HomepageManagementController::class, 'updatePackage']);
     Route::delete('/packages/{packageId}', [\App\Http\Controllers\Legacy\Admin\HomepageManagementController::class, 'deletePackage']);
-});
-
-// Legacy Dashboards Index (DEPRECATED - use /dashboard for new system)
-Route::get('/dashboards', function () {
-    return view('legacy.dashboards.index');
-})->middleware('auth')->name('dashboards.index');
-
-// Finance Dashboard routes (New Dashboard System - Requirements 13.1, 13.2, 13.4)
-Route::middleware(['auth'])->prefix('dashboard/finance')->name('dashboard.finance.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\Dashboard\FinanceDashboardController::class, 'index'])->name('index');
-    Route::get('/transactions', [\App\Http\Controllers\Dashboard\FinanceDashboardController::class, 'transactions'])->name('transactions');
-    Route::get('/transactions/export', [\App\Http\Controllers\Dashboard\FinanceDashboardController::class, 'exportTransactions'])->name('transactions.export');
-    Route::get('/payouts', [\App\Http\Controllers\Dashboard\FinanceDashboardController::class, 'payouts'])->name('payouts');
-    Route::get('/payouts/export', [\App\Http\Controllers\Dashboard\FinanceDashboardController::class, 'exportPayouts'])->name('payouts.export');
-    Route::post('/payouts/{id}/approve', [\App\Http\Controllers\Dashboard\FinanceDashboardController::class, 'approvePayout'])->name('payouts.approve');
-    Route::post('/payouts/{id}/reject', [\App\Http\Controllers\Dashboard\FinanceDashboardController::class, 'rejectPayout'])->name('payouts.reject');
-    Route::get('/reports', [\App\Http\Controllers\Dashboard\FinanceDashboardController::class, 'reports'])->name('reports');
 });
 
 /*
@@ -760,106 +1058,21 @@ Route::middleware(['auth'])->prefix('dashboard/finance')->name('dashboard.financ
 //     Route::get('/reviews', [\App\Http\Controllers\Legacy\Store\StoreOwnerController::class, 'reviews'])->name('reviews');
 // });
 
-// IT Dashboard routes (New Dashboard System - Requirements 8.1, 8.2, 8.4, 8.5)
-Route::middleware(['auth'])->prefix('dashboard/it')->name('dashboard.it.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\Dashboard\ITDashboardController::class, 'index'])->name('index');
-    Route::get('/logs', [\App\Http\Controllers\Dashboard\ITDashboardController::class, 'logs'])->name('logs');
-    Route::get('/logs/export', [\App\Http\Controllers\Dashboard\ITDashboardController::class, 'exportLogs'])->name('logs.export');
-    Route::get('/security', [\App\Http\Controllers\Dashboard\ITDashboardController::class, 'security'])->name('security');
-    Route::get('/performance', [\App\Http\Controllers\Dashboard\ITDashboardController::class, 'performance'])->name('performance');
-    Route::get('/alerts', [\App\Http\Controllers\Dashboard\ITDashboardController::class, 'alerts'])->name('alerts');
-    Route::post('/alerts/{id}/resolve', [\App\Http\Controllers\Dashboard\ITDashboardController::class, 'resolveAlert'])->name('alerts.resolve');
-    Route::post('/cache/clear', [\App\Http\Controllers\Dashboard\ITDashboardController::class, 'clearCache'])->name('cache.clear');
-    Route::post('/services/{id}/status', [\App\Http\Controllers\Dashboard\ITDashboardController::class, 'updateServiceStatus'])->name('services.status');
-    Route::post('/health-check', [\App\Http\Controllers\Dashboard\ITDashboardController::class, 'runHealthCheck'])->name('health-check');
-});
-
-// Customer Support Dashboard routes (New Dashboard System - Requirements 9.1, 9.2, 9.5)
-Route::middleware(['auth'])->prefix('dashboard/cs')->name('dashboard.cs.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\Dashboard\CSDashboardController::class, 'index'])->name('index');
-    Route::get('/tickets', [\App\Http\Controllers\Dashboard\CSDashboardController::class, 'tickets'])->name('tickets');
-    Route::get('/tickets/export', [\App\Http\Controllers\Dashboard\CSDashboardController::class, 'exportTickets'])->name('tickets.export');
-    Route::get('/tickets/{id}', [\App\Http\Controllers\Dashboard\CSDashboardController::class, 'showTicket'])->name('tickets.show');
-    Route::post('/tickets/{id}/assign', [\App\Http\Controllers\Dashboard\CSDashboardController::class, 'assignTicket'])->name('tickets.assign');
-    Route::post('/tickets/{id}/status', [\App\Http\Controllers\Dashboard\CSDashboardController::class, 'updateTicketStatus'])->name('tickets.status');
-    Route::post('/tickets/{id}/reply', [\App\Http\Controllers\Dashboard\CSDashboardController::class, 'replyToTicket'])->name('tickets.reply');
-    Route::get('/feedback', [\App\Http\Controllers\Dashboard\CSDashboardController::class, 'feedback'])->name('feedback');
-    Route::get('/feedback/export', [\App\Http\Controllers\Dashboard\CSDashboardController::class, 'exportFeedback'])->name('feedback.export');
-    Route::post('/feedback/{id}/respond', [\App\Http\Controllers\Dashboard\CSDashboardController::class, 'respondToFeedback'])->name('feedback.respond');
-    Route::get('/agent-performance', [\App\Http\Controllers\Dashboard\CSDashboardController::class, 'agentPerformance'])->name('agent-performance');
-});
-
-// HR Dashboard routes (New Dashboard System - Requirements 10.1, 10.2, 10.5)
-Route::middleware(['auth'])->prefix('dashboard/hr')->name('dashboard.hr.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'index'])->name('index');
-    Route::get('/employees', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'employees'])->name('employees');
-    Route::get('/employees/export', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'exportEmployees'])->name('employees.export');
-    Route::get('/employees/{id}', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'showEmployee'])->name('employees.show');
-    Route::post('/employees', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'storeEmployee'])->name('employees.store');
-    Route::put('/employees/{id}', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'updateEmployee'])->name('employees.update');
-    Route::get('/attendance', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'attendance'])->name('attendance');
-    Route::get('/attendance/export', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'exportAttendance'])->name('attendance.export');
-    Route::post('/attendance', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'recordAttendance'])->name('attendance.record');
-    Route::get('/leaves', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'leaves'])->name('leaves');
-    Route::post('/leaves/{id}/approve', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'approveLeave'])->name('leaves.approve');
-    Route::post('/leaves/{id}/reject', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'rejectLeave'])->name('leaves.reject');
-    Route::get('/payroll', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'payroll'])->name('payroll');
-    Route::get('/payroll/export', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'exportPayroll'])->name('payroll.export');
-    Route::post('/payroll/calculate', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'calculatePayroll'])->name('payroll.calculate');
-    Route::post('/payroll/generate', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'generatePayroll'])->name('payroll.generate');
-    Route::post('/payroll/{id}/process', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'processPayroll'])->name('payroll.process');
-    Route::post('/payroll/{id}/pay', [\App\Http\Controllers\Dashboard\HRDashboardController::class, 'markPayrollPaid'])->name('payroll.pay');
-});
-
-// Admin Dashboard routes (New Dashboard System - Requirements 7.1, 7.2, 7.3, 7.4)
-Route::middleware(['auth'])->prefix('dashboard/admin')->name('dashboard.admin.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\Dashboard\AdminDashboardController::class, 'index'])->name('index');
-    Route::get('/users', [\App\Http\Controllers\Dashboard\AdminDashboardController::class, 'users'])->name('users');
-    Route::get('/users/export', [\App\Http\Controllers\Dashboard\AdminDashboardController::class, 'exportUsers'])->name('users.export');
-    Route::get('/orders', [\App\Http\Controllers\Dashboard\AdminDashboardController::class, 'orders'])->name('orders');
-    Route::get('/orders/export', [\App\Http\Controllers\Dashboard\AdminDashboardController::class, 'exportOrders'])->name('orders.export');
-    Route::get('/stores', [\App\Http\Controllers\Dashboard\AdminDashboardController::class, 'stores'])->name('stores');
-    Route::get('/stores/export', [\App\Http\Controllers\Dashboard\AdminDashboardController::class, 'exportStores'])->name('stores.export');
-    Route::get('/alerts', [\App\Http\Controllers\Dashboard\AdminDashboardController::class, 'alerts'])->name('alerts');
-    Route::get('/settings', [\App\Http\Controllers\Dashboard\AdminDashboardController::class, 'settings'])->name('settings');
-    Route::post('/settings', [\App\Http\Controllers\Dashboard\AdminDashboardController::class, 'updateSettings'])->name('settings.update');
-    Route::post('/bulk-action', [\App\Http\Controllers\Dashboard\AdminDashboardController::class, 'bulkAction'])->name('bulk-action');
-});
-
-// Store Owner Dashboard routes (New Dashboard System - Requirements 12.1, 12.2, 12.4)
-Route::middleware(['auth'])->prefix('dashboard/store')->name('dashboard.store.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\Dashboard\StoreOwnerDashboardController::class, 'index'])->name('index');
-    Route::get('/products', [\App\Http\Controllers\Dashboard\StoreOwnerDashboardController::class, 'products'])->name('products');
-    Route::get('/products/export', [\App\Http\Controllers\Dashboard\StoreOwnerDashboardController::class, 'exportProducts'])->name('products.export');
-    Route::get('/products/create', [\App\Http\Controllers\Dashboard\StoreOwnerDashboardController::class, 'createProduct'])->name('products.create');
-    Route::post('/products', [\App\Http\Controllers\Dashboard\StoreOwnerDashboardController::class, 'storeProduct'])->name('products.store');
-    Route::get('/products/{id}/edit', [\App\Http\Controllers\Dashboard\StoreOwnerDashboardController::class, 'editProduct'])->name('products.edit');
-    Route::put('/products/{id}', [\App\Http\Controllers\Dashboard\StoreOwnerDashboardController::class, 'updateProduct'])->name('products.update');
-    Route::delete('/products/{id}', [\App\Http\Controllers\Dashboard\StoreOwnerDashboardController::class, 'deleteProduct'])->name('products.delete');
-    Route::get('/orders', [\App\Http\Controllers\Dashboard\StoreOwnerDashboardController::class, 'orders'])->name('orders');
-    Route::get('/orders/export', [\App\Http\Controllers\Dashboard\StoreOwnerDashboardController::class, 'exportOrders'])->name('orders.export');
-    Route::get('/analytics', [\App\Http\Controllers\Dashboard\StoreOwnerDashboardController::class, 'analytics'])->name('analytics');
-    Route::get('/earnings', [\App\Http\Controllers\Dashboard\StoreOwnerDashboardController::class, 'earnings'])->name('earnings');
-});
-
-// Delivery Supervisor Dashboard routes (New Dashboard System - Requirements 11.1, 11.2, 11.5)
-Route::middleware(['auth'])->prefix('dashboard/delivery')->name('dashboard.delivery.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\Dashboard\DeliveryDashboardController::class, 'index'])->name('index');
-    Route::get('/drivers', [\App\Http\Controllers\Dashboard\DeliveryDashboardController::class, 'drivers'])->name('drivers');
-    Route::get('/drivers/export', [\App\Http\Controllers\Dashboard\DeliveryDashboardController::class, 'exportDrivers'])->name('drivers.export');
-    Route::get('/drivers/{id}', [\App\Http\Controllers\Dashboard\DeliveryDashboardController::class, 'showDriver'])->name('drivers.show');
-    Route::post('/drivers/{id}/status', [\App\Http\Controllers\Dashboard\DeliveryDashboardController::class, 'updateDriverStatus'])->name('drivers.status');
-    Route::get('/assignments', [\App\Http\Controllers\Dashboard\DeliveryDashboardController::class, 'assignments'])->name('assignments');
-    Route::get('/assignments/export', [\App\Http\Controllers\Dashboard\DeliveryDashboardController::class, 'exportAssignments'])->name('assignments.export');
-    Route::post('/assign', [\App\Http\Controllers\Dashboard\DeliveryDashboardController::class, 'assignDriver'])->name('assign');
-    Route::post('/assignments/{id}/status', [\App\Http\Controllers\Dashboard\DeliveryDashboardController::class, 'updateAssignmentStatus'])->name('assignments.status');
-    Route::get('/tracking', [\App\Http\Controllers\Dashboard\DeliveryDashboardController::class, 'tracking'])->name('tracking');
-    // API endpoints for AJAX polling
-    Route::get('/api/locations', [\App\Http\Controllers\Dashboard\DeliveryDashboardController::class, 'getDriverLocations'])->name('api.locations');
-    Route::get('/api/deliveries', [\App\Http\Controllers\Dashboard\DeliveryDashboardController::class, 'getInTransitDeliveries'])->name('api.deliveries');
-});
-
 require __DIR__.'/auth.php';
+
+Route::middleware(['web', 'auth:employee'])->group(function () {
+    Route::middleware('dashboard.role:admin')->group(function () {
+        Route::get('/admin/dashboard', fn () => redirect()->route('dashboard.admin.index'));
+        Route::get('/admin/gifts', fn () => redirect()->route('dashboard.admin.gifts'));
+        Route::get('/admin/mart', fn () => redirect()->route('dashboard.admin.mart'));
+    });
+
+    Route::middleware('dashboard.role:it')->get('/it/dashboard', fn () => redirect()->route('dashboard.it.index'));
+    Route::middleware('dashboard.role:hr')->get('/hr/dashboard', fn () => redirect()->route('dashboard.hr.index'));
+    Route::middleware('dashboard.role:cs')->get('/support/dashboard', fn () => redirect()->route('dashboard.cs.index'));
+    Route::middleware('dashboard.role:delivery_supervisor')->get('/driver-supervisor/dashboard', fn () => redirect()->route('dashboard.supervisor.index'));
+    Route::middleware('dashboard.role:finance')->get('/finance/dashboard', fn () => redirect()->route('dashboard.finance.index'));
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -869,28 +1082,4 @@ require __DIR__.'/auth.php';
 | Dashboard routes are now loaded by RouteServiceProvider with proper
 | middleware and prefixes. No need to require here.
 |
-*/
-
-/*
-|--------------------------------------------------------------------------
-| Test Dashboard Routes
-|--------------------------------------------------------------------------
-*/
-require __DIR__.'/test-dashboard.php';
-/*
-|--------------------------------------------------------------------------
-| Simple Test Routes
-|--------------------------------------------------------------------------
-*/
-require __DIR__.'/simple-test.php';
-/*
-|--------------------------------------------------------------------------
-| Test Admin Routes
-|--------------------------------------------------------------------------
-*/
-require __DIR__.'/test-admin.php';
-/*
-|--------------------------------------------------------------------------
-| Dashboard Fix Test Route (removed - file no longer needed)
-|--------------------------------------------------------------------------
 */

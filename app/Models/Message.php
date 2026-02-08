@@ -12,7 +12,7 @@ class Message extends Model
         'message',
         'is_read',
         'read_at',
-        'is_broadcast'
+        'is_broadcast',
     ];
 
     protected $casts = [
@@ -34,7 +34,7 @@ class Message extends Model
     {
         $this->update([
             'is_read' => true,
-            'read_at' => now()
+            'read_at' => now(),
         ]);
     }
 }

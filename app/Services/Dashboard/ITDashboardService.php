@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * IT Dashboard Service
- * 
+ *
  * Provides system metrics collection, log viewing with filters, and cache management.
- * 
+ *
  * @see Requirements 8.1, 8.2, 8.3
  */
 class ITDashboardService
@@ -29,22 +29,23 @@ class ITDashboardService
 
     /**
      * Get system metrics including CPU, memory, and disk usage
-     * 
+     *
      * @return array Array containing cpu_usage, memory_usage, disk_usage, uptime
+     *
      * @see Requirements 8.1
      */
     public function getSystemMetrics(): array
     {
         // Get metrics from system services or calculate from system
         $services = SystemService::all();
-        
+
         // Calculate average CPU and memory from services
         $avgCpu = $services->avg('cpu_usage') ?? 0;
         $avgMemory = $services->avg('memory_usage') ?? 0;
-        
+
         // Get disk usage (simulated - in production would use system calls)
         $diskUsage = $this->getDiskUsage();
-        
+
         // Get system uptime
         $uptime = $this->getSystemUptime();
 
@@ -68,27 +69,27 @@ class ITDashboardService
         ];
     }
 
-
     /**
      * Get IT dashboard KPI metrics
-     * 
+     *
      * @return array Array containing system health indicators
+     *
      * @see Requirements 8.1
      */
     public function getKPIMetrics(): array
     {
         $systemMetrics = $this->getSystemMetrics();
-        
+
         // Count active services
         $totalServices = SystemService::count();
         $activeServices = SystemService::where('status', 'running')->count();
-        
+
         // Count unresolved alerts
         $unresolvedAlerts = SystemAlert::where('is_resolved', false)->count();
         $criticalAlerts = SystemAlert::where('is_resolved', false)
             ->where('priority', 'critical')
             ->count();
-        
+
         // Count recent errors
         $errorsToday = SystemLog::whereIn('level', ['error', 'critical'])
             ->whereDate('created_at', Carbon::today())
@@ -100,7 +101,7 @@ class ITDashboardService
             (float) $errorsToday,
             (float) $errorsYesterday
         );
-        
+
         // Slow queries count
         $slowQueries = SlowQuery::where('is_optimized', false)->count();
 
@@ -133,9 +134,9 @@ class ITDashboardService
 
     /**
      * Get system logs with filters
-     * 
-     * @param array $filters Filters including level, search, date_from, date_to, per_page
-     * @return LengthAwarePaginator
+     *
+     * @param  array  $filters  Filters including level, search, date_from, date_to, per_page
+     *
      * @see Requirements 8.2
      */
     public function getLogs(array $filters = []): LengthAwarePaginator
@@ -143,7 +144,7 @@ class ITDashboardService
         $query = SystemLog::query();
 
         // Filter by level
-        if (!empty($filters['level'])) {
+        if (! empty($filters['level'])) {
             if (is_array($filters['level'])) {
                 $query->whereIn('level', $filters['level']);
             } else {
@@ -152,21 +153,21 @@ class ITDashboardService
         }
 
         // Search in message and action
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('message', 'like', "%{$search}%")
-                  ->orWhere('action', 'like', "%{$search}%")
-                  ->orWhere('user', 'like', "%{$search}%");
+                    ->orWhere('action', 'like', "%{$search}%")
+                    ->orWhere('user', 'like', "%{$search}%");
             });
         }
 
         // Date range filters
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->where('created_at', '>=', $filters['date_from']);
         }
 
-        if (!empty($filters['date_to'])) {
+        if (! empty($filters['date_to'])) {
             $query->where('created_at', '<=', $filters['date_to']);
         }
 
@@ -182,10 +183,10 @@ class ITDashboardService
 
     /**
      * Get logs by level
-     * 
-     * @param string $level Log level: info, warning, error, critical
-     * @param int $limit Number of logs to return
-     * @return Collection
+     *
+     * @param  string  $level  Log level: info, warning, error, critical
+     * @param  int  $limit  Number of logs to return
+     *
      * @see Requirements 8.2
      */
     public function getLogsByLevel(string $level, int $limit = 50): Collection
@@ -198,9 +199,8 @@ class ITDashboardService
 
     /**
      * Get recent logs
-     * 
-     * @param int $limit Number of logs to return
-     * @return Collection
+     *
+     * @param  int  $limit  Number of logs to return
      */
     public function getRecentLogs(int $limit = 20): Collection
     {
@@ -211,9 +211,9 @@ class ITDashboardService
 
     /**
      * Get log statistics
-     * 
-     * @param Carbon $startDate Start date
-     * @param Carbon $endDate End date
+     *
+     * @param  Carbon  $startDate  Start date
+     * @param  Carbon  $endDate  End date
      * @return array Statistics by log level
      */
     public function getLogStatistics(Carbon $startDate, Carbon $endDate): array
@@ -225,7 +225,7 @@ class ITDashboardService
             $count = SystemLog::where('level', $level)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->count();
-            
+
             $stats[$level] = [
                 'count' => $count,
                 'color' => $this->getLevelColor($level),
@@ -235,12 +235,12 @@ class ITDashboardService
         return $stats;
     }
 
-
     /**
      * Clear application caches
-     * 
-     * @param User $user The user performing the action
+     *
+     * @param  User  $user  The user performing the action
      * @return array Result with success status and cleared caches
+     *
      * @see Requirements 8.3
      */
     public function clearCache(User $user): array
@@ -253,7 +253,7 @@ class ITDashboardService
             Cache::flush();
             $clearedCaches[] = 'application';
         } catch (\Exception $e) {
-            $errors[] = 'application: ' . $e->getMessage();
+            $errors[] = 'application: '.$e->getMessage();
         }
 
         // Log the cache clear action
@@ -278,9 +278,9 @@ class ITDashboardService
 
     /**
      * Get security alerts (failed login attempts and suspicious activity)
-     * 
-     * @param array $filters Filters including priority, is_resolved, per_page
-     * @return LengthAwarePaginator
+     *
+     * @param  array  $filters  Filters including priority, is_resolved, per_page
+     *
      * @see Requirements 8.4
      */
     public function getSecurityAlerts(array $filters = []): LengthAwarePaginator
@@ -306,19 +306,18 @@ class ITDashboardService
 
     /**
      * Get all system alerts
-     * 
-     * @param array $filters Filters including type, priority, is_resolved, per_page
-     * @return LengthAwarePaginator
+     *
+     * @param  array  $filters  Filters including type, priority, is_resolved, per_page
      */
     public function getAlerts(array $filters = []): LengthAwarePaginator
     {
         $query = SystemAlert::with('resolver');
 
-        if (!empty($filters['type'])) {
+        if (! empty($filters['type'])) {
             $query->where('type', $filters['type']);
         }
 
-        if (!empty($filters['priority'])) {
+        if (! empty($filters['priority'])) {
             $query->where('priority', $filters['priority']);
         }
 
@@ -326,11 +325,11 @@ class ITDashboardService
             $query->where('is_resolved', $filters['is_resolved']);
         }
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('message', 'like', "%{$search}%");
+                    ->orWhere('message', 'like', "%{$search}%");
             });
         }
 
@@ -345,9 +344,9 @@ class ITDashboardService
 
     /**
      * Get failed login attempts
-     * 
-     * @param int $limit Number of attempts to return
-     * @return Collection
+     *
+     * @param  int  $limit  Number of attempts to return
+     *
      * @see Requirements 8.4
      */
     public function getFailedLoginAttempts(int $limit = 50): Collection
@@ -360,8 +359,9 @@ class ITDashboardService
 
     /**
      * Get database health information
-     * 
+     *
      * @return array Database health metrics
+     *
      * @see Requirements 8.5
      */
     public function getDatabaseHealth(): array
@@ -402,8 +402,6 @@ class ITDashboardService
 
     /**
      * Get system services status
-     * 
-     * @return Collection
      */
     public function getServices(): Collection
     {
@@ -412,9 +410,8 @@ class ITDashboardService
 
     /**
      * Get service by ID
-     * 
-     * @param int $serviceId Service ID
-     * @return SystemService|null
+     *
+     * @param  int  $serviceId  Service ID
      */
     public function getService(int $serviceId): ?SystemService
     {
@@ -423,17 +420,16 @@ class ITDashboardService
 
     /**
      * Update service status
-     * 
-     * @param int $serviceId Service ID
-     * @param string $status New status
-     * @param User $user User performing the action
-     * @return SystemService|null
+     *
+     * @param  int  $serviceId  Service ID
+     * @param  string  $status  New status
+     * @param  User  $user  User performing the action
      */
     public function updateServiceStatus(int $serviceId, string $status, User $user): ?SystemService
     {
         $service = SystemService::find($serviceId);
 
-        if (!$service) {
+        if (! $service) {
             return null;
         }
 
@@ -457,20 +453,18 @@ class ITDashboardService
         return $service->fresh();
     }
 
-
     /**
      * Resolve a system alert
-     * 
-     * @param int $alertId Alert ID
-     * @param User $user User resolving the alert
-     * @param string|null $notes Resolution notes
-     * @return SystemAlert|null
+     *
+     * @param  int  $alertId  Alert ID
+     * @param  User  $user  User resolving the alert
+     * @param  string|null  $notes  Resolution notes
      */
     public function resolveAlert(int $alertId, User $user, ?string $notes = null): ?SystemAlert
     {
         $alert = SystemAlert::find($alertId);
 
-        if (!$alert || $alert->is_resolved) {
+        if (! $alert || $alert->is_resolved) {
             return null;
         }
 
@@ -499,9 +493,9 @@ class ITDashboardService
 
     /**
      * Get performance metrics chart data
-     * 
-     * @param string $metric Metric type: cpu, memory, errors
-     * @param string $period Period: 'day', 'week', 'month'
+     *
+     * @param  string  $metric  Metric type: cpu, memory, errors
+     * @param  string  $period  Period: 'day', 'week', 'month'
      * @return array Chart data with labels and values
      */
     public function getPerformanceChartData(string $metric, string $period = 'day'): array
@@ -550,11 +544,10 @@ class ITDashboardService
 
     /**
      * Get metric value for a specific time range
-     * 
-     * @param string $metric Metric type
-     * @param Carbon $start Start time
-     * @param Carbon $end End time
-     * @return float
+     *
+     * @param  string  $metric  Metric type
+     * @param  Carbon  $start  Start time
+     * @param  Carbon  $end  End time
      */
     protected function getMetricValue(string $metric, Carbon $start, Carbon $end): float
     {
@@ -579,21 +572,18 @@ class ITDashboardService
 
     /**
      * Get disk usage percentage
-     * 
-     * @return float
      */
     protected function getDiskUsage(): float
     {
         // In production, this would use disk_total_space() and disk_free_space()
         // For now, return a simulated value or from system services
         $service = SystemService::where('name', 'disk')->first();
+
         return $service ? $service->memory_usage : 45.0;
     }
 
     /**
      * Get system uptime in seconds
-     * 
-     * @return int
      */
     protected function getSystemUptime(): int
     {
@@ -603,14 +593,14 @@ class ITDashboardService
         if ($service && $service->created_at) {
             return Carbon::now()->diffInSeconds($service->created_at);
         }
+
         return 86400 * 7; // Default 7 days
     }
 
     /**
      * Format uptime seconds to human readable string
-     * 
-     * @param int $seconds Uptime in seconds
-     * @return string
+     *
+     * @param  int  $seconds  Uptime in seconds
      */
     protected function formatUptime(int $seconds): string
     {
@@ -620,13 +610,13 @@ class ITDashboardService
 
         $parts = [];
         if ($days > 0) {
-            $parts[] = $days . 'd';
+            $parts[] = $days.'d';
         }
         if ($hours > 0) {
-            $parts[] = $hours . 'h';
+            $parts[] = $hours.'h';
         }
         if ($minutes > 0 || empty($parts)) {
-            $parts[] = $minutes . 'm';
+            $parts[] = $minutes.'m';
         }
 
         return implode(' ', $parts);
@@ -634,10 +624,10 @@ class ITDashboardService
 
     /**
      * Get metric status based on thresholds
-     * 
-     * @param float $value Current value
-     * @param float $warningThreshold Warning threshold
-     * @param float $criticalThreshold Critical threshold
+     *
+     * @param  float  $value  Current value
+     * @param  float  $warningThreshold  Warning threshold
+     * @param  float  $criticalThreshold  Critical threshold
      * @return string Status: healthy, warning, critical
      */
     protected function getMetricStatus(float $value, float $warningThreshold, float $criticalThreshold): string
@@ -648,13 +638,14 @@ class ITDashboardService
         if ($value >= $warningThreshold) {
             return 'warning';
         }
+
         return 'healthy';
     }
 
     /**
      * Get color for log level
-     * 
-     * @param string $level Log level
+     *
+     * @param  string  $level  Log level
      * @return string Color class
      */
     protected function getLevelColor(string $level): string
@@ -670,8 +661,6 @@ class ITDashboardService
 
     /**
      * Get table sizes (simplified implementation)
-     * 
-     * @return array
      */
     protected function getTableSizes(): array
     {

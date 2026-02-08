@@ -14,7 +14,7 @@ class Payroll extends Model
     protected $fillable = [
         'employee_id', 'month', 'basic_salary', 'allowances',
         'bonuses', 'overtime_pay', 'deductions', 'tax',
-        'insurance', 'net_salary', 'status', 'payment_date', 'notes'
+        'insurance', 'net_salary', 'status', 'payment_date', 'notes',
     ];
 
     protected $casts = [

@@ -13,11 +13,11 @@ use Tests\TestCase;
 
 /**
  * Property-Based Tests for Store Revenue Calculation
- * 
+ *
  * **Feature: dashboard-system-rebuild, Property 21: Store Revenue Calculation**
  * **Validates: Requirements 12.3**
- * 
- * *For any* store owner, their displayed revenue SHALL equal the sum of 
+ *
+ * *For any* store owner, their displayed revenue SHALL equal the sum of
  * completed order totals for their products minus platform commission.
  */
 class StoreRevenuePropertyTest extends TestCase
@@ -37,16 +37,17 @@ class StoreRevenuePropertyTest extends TestCase
         $store->shouldReceive('products')->andReturnSelf();
         $store->shouldReceive('count')->andReturn(5);
         $store->shouldReceive('where')->andReturnSelf();
+
         return $store;
     }
 
     /**
      * **Feature: dashboard-system-rebuild, Property 21: Store Revenue Calculation**
      * **Validates: Requirements 12.3**
-     * 
-     * *For any* store owner, their displayed earnings SHALL equal 
+     *
+     * *For any* store owner, their displayed earnings SHALL equal
      * revenue minus platform commission (revenue * (1 - commission_rate/100)).
-     * 
+     *
      * @test
      */
     public function property_store_earnings_equals_revenue_minus_commission(): void
@@ -56,14 +57,14 @@ class StoreRevenuePropertyTest extends TestCase
             $userId = rand(1, 10000);
             $commissionRate = rand(5, 30);
             $revenue = rand(1000, 100000) / 100;
-            
+
             $store = $this->createMockStore($storeId, $userId, $commissionRate);
             $expectedEarnings = $revenue * (1 - $commissionRate / 100);
-            
+
             $orderRepository = Mockery::mock(OrderRepositoryInterface::class);
             $storeRepository = Mockery::mock(StoreRepositoryInterface::class);
             $metricsService = Mockery::mock(MetricsService::class);
-            
+
             $storeRepository->shouldReceive('findById')->with($storeId)->andReturn($store);
             $storeRepository->shouldReceive('calculateRevenue')
                 ->withArgs(function ($id, $start, $end) use ($storeId) {
@@ -75,24 +76,24 @@ class StoreRevenuePropertyTest extends TestCase
                     return $id === $storeId;
                 })
                 ->andReturn($expectedEarnings);
-            
+
             $orderRepository->shouldReceive('getOrderCount')->andReturn(10);
-            
+
             $metricsService->shouldReceive('calculateGrowthPercentage')->andReturn(0.0);
             $metricsService->shouldReceive('formatCurrency')
-                ->andReturnUsing(fn($amount) => '$' . number_format($amount, 2));
+                ->andReturnUsing(fn ($amount) => '$'.number_format($amount, 2));
             $metricsService->shouldReceive('formatPercentage')
                 ->andReturn(['value' => '0%', 'color' => 'gray', 'icon' => 'minus']);
-            
+
             $service = new StoreOwnerDashboardService($orderRepository, $storeRepository, $metricsService);
             $kpis = $service->getKPIMetrics($storeId);
-            
+
             $this->assertEquals(
                 $expectedEarnings,
                 $kpis['earnings']['value'],
                 "Iteration $i: Earnings should equal revenue ($revenue) minus $commissionRate% commission"
             );
-            
+
             $calculatedEarnings = $kpis['revenue']['value'] * (1 - $commissionRate / 100);
             $this->assertEqualsWithDelta(
                 $calculatedEarnings,
@@ -105,7 +106,7 @@ class StoreRevenuePropertyTest extends TestCase
 
     /**
      * Test that revenue calculation is correctly scoped to the store
-     * 
+     *
      * @test
      */
     public function property_revenue_calculation_uses_correct_store_id(): void
@@ -114,33 +115,34 @@ class StoreRevenuePropertyTest extends TestCase
             $storeId = rand(1, 10000);
             $userId = rand(1, 10000);
             $commissionRate = rand(5, 30);
-            
+
             $store = $this->createMockStore($storeId, $userId, $commissionRate);
-            
+
             $capturedStoreId = null;
-            
+
             $orderRepository = Mockery::mock(OrderRepositoryInterface::class);
             $storeRepository = Mockery::mock(StoreRepositoryInterface::class);
             $metricsService = Mockery::mock(MetricsService::class);
-            
+
             $storeRepository->shouldReceive('findById')->andReturn($store);
             $storeRepository->shouldReceive('calculateRevenue')
                 ->withArgs(function ($id, $start, $end) use (&$capturedStoreId) {
                     $capturedStoreId = $id;
+
                     return true;
                 })
                 ->andReturn(1000.0);
             $storeRepository->shouldReceive('calculateEarnings')->andReturn(900.0);
             $orderRepository->shouldReceive('getOrderCount')->andReturn(10);
-            
+
             $metricsService->shouldReceive('calculateGrowthPercentage')->andReturn(0.0);
             $metricsService->shouldReceive('formatCurrency')->andReturn('$1000');
             $metricsService->shouldReceive('formatPercentage')
                 ->andReturn(['value' => '0%', 'color' => 'gray', 'icon' => 'minus']);
-            
+
             $service = new StoreOwnerDashboardService($orderRepository, $storeRepository, $metricsService);
             $service->calculateRevenue($storeId, Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth());
-            
+
             $this->assertEquals(
                 $storeId,
                 $capturedStoreId,
@@ -151,7 +153,7 @@ class StoreRevenuePropertyTest extends TestCase
 
     /**
      * Test that earnings are always less than or equal to revenue
-     * 
+     *
      * @test
      */
     public function property_earnings_never_exceed_revenue(): void
@@ -161,27 +163,27 @@ class StoreRevenuePropertyTest extends TestCase
             $userId = rand(1, 10000);
             $commissionRate = rand(0, 50);
             $revenue = rand(0, 100000) / 100;
-            
+
             $store = $this->createMockStore($storeId, $userId, $commissionRate);
             $expectedEarnings = $revenue * (1 - $commissionRate / 100);
-            
+
             $orderRepository = Mockery::mock(OrderRepositoryInterface::class);
             $storeRepository = Mockery::mock(StoreRepositoryInterface::class);
             $metricsService = Mockery::mock(MetricsService::class);
-            
+
             $storeRepository->shouldReceive('findById')->andReturn($store);
             $storeRepository->shouldReceive('calculateRevenue')->andReturn($revenue);
             $storeRepository->shouldReceive('calculateEarnings')->andReturn($expectedEarnings);
             $orderRepository->shouldReceive('getOrderCount')->andReturn(10);
-            
+
             $metricsService->shouldReceive('calculateGrowthPercentage')->andReturn(0.0);
-            $metricsService->shouldReceive('formatCurrency')->andReturn('$' . $revenue);
+            $metricsService->shouldReceive('formatCurrency')->andReturn('$'.$revenue);
             $metricsService->shouldReceive('formatPercentage')
                 ->andReturn(['value' => '0%', 'color' => 'gray', 'icon' => 'minus']);
-            
+
             $service = new StoreOwnerDashboardService($orderRepository, $storeRepository, $metricsService);
             $kpis = $service->getKPIMetrics($storeId);
-            
+
             $this->assertLessThanOrEqual(
                 $kpis['revenue']['value'],
                 $kpis['earnings']['value'],

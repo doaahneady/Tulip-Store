@@ -9,20 +9,64 @@ class Role extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'display_name', 'description'];
+    protected $fillable = [
+        'name',
+        'display_name',
+        'description',
+        'is_active',
+    ];
 
-    public function users()
-    {
-        return $this->hasMany(User::class);
-    }
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
 
     public function permissions()
     {
-        return $this->belongsToMany(Permission::class);
+        return $this->belongsToMany(Permission::class, 'permission_role');
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_roles');
     }
 
     public function hasPermission($permission)
     {
-        return $this->permissions()->where('name', $permission)->exists();
+        if (is_string($permission)) {
+            return $this->permissions()->where('name', $permission)->exists();
+        }
+
+        return $this->permissions()->where('id', $permission->id)->exists();
+    }
+
+    public function givePermissionTo($permission)
+    {
+        if (is_string($permission)) {
+            $permission = Permission::where('name', $permission)->first();
+        }
+
+        if ($permission) {
+            $this->permissions()->syncWithoutDetaching([$permission->id]);
+        }
+
+        return $this;
+    }
+
+    public function revokePermissionTo($permission)
+    {
+        if (is_string($permission)) {
+            $permission = Permission::where('name', $permission)->first();
+        }
+
+        if ($permission) {
+            $this->permissions()->detach($permission->id);
+        }
+
+        return $this;
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 }

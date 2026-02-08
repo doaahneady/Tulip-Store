@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Role;
 use App\Models\Permission;
+use App\Models\Role;
+use Illuminate\Database\Seeder;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -58,7 +58,7 @@ class RolePermissionSeeder extends Seeder
                 'manage_orders',
                 'manage_users',
                 'manage_categories',
-                'view_reports'
+                'view_reports',
             ])->pluck('id')
         );
 
@@ -68,7 +68,7 @@ class RolePermissionSeeder extends Seeder
                 'view_dashboard',
                 'manage_products',
                 'manage_orders',
-                'manage_categories'
+                'manage_categories',
             ])->pluck('id')
         );
 

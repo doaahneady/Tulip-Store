@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Role;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class UpdateAdminRoleSeeder extends Seeder
 {
@@ -12,7 +12,7 @@ class UpdateAdminRoleSeeder extends Seeder
     {
         $admin = User::where('email', 'admin@tulipstore.com')->first();
         $superAdminRole = Role::where('name', 'super_admin')->first();
-        
+
         if ($admin && $superAdminRole) {
             $admin->role_id = $superAdminRole->id;
             $admin->is_admin = true;

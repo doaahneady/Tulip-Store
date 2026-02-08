@@ -2,13 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\User;
+use App\Models\CustomerFeedback;
 use App\Models\SupportTicket;
 use App\Models\TicketReply;
-use App\Models\CustomerFeedback;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class CustomerServiceDataSeeder extends Seeder
 {

@@ -3,556 +3,317 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Services\Dashboard\AuditService;
-use App\Services\Dashboard\ExportService;
-use App\Services\Dashboard\HRDashboardService;
+use App\Models\Attendance;
+use App\Models\Employee;
+use App\Models\LeaveRequest;
+use App\Models\Payroll;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
-/**
- * HR Dashboard Controller
- * 
- * Handles all HR dashboard functionality including:
- * - Dashboard overview with employee KPIs
- * - Employee management
- * - Attendance tracking
- * - Leave management
- * - Payroll processing
- * 
- * @see Requirements 10.1, 10.2, 10.5
- */
 class HRDashboardController extends Controller
 {
-    public function __construct(
-        protected HRDashboardService $hrService,
-        protected AuditService $auditService,
-        protected ExportService $exportService
-    ) {
-        // Apply HR role middleware to all methods
-        $this->middleware('dashboard.role:hr,admin');
-    }
+    // ============================================
+    // MAIN DASHBOARD
+    // ============================================
 
-    /**
-     * Display the HR dashboard overview
-     * Shows KPI cards, attendance trends, and recent activity
-     * 
-     * @see Requirements 10.1
-     */
-    public function index(Request $request)
+    public function index()
     {
-        $period = $request->get('period', 'week');
-
-        $data = [
-            'kpis' => $this->hrService->getKPIMetrics(),
-            'todayAttendance' => $this->hrService->getTodayAttendance(),
-            'attendanceChart' => $this->hrService->getAttendanceChartData($period),
-            'departmentStats' => $this->hrService->getDepartmentStats(),
-            'pendingLeaveRequests' => $this->hrService->getPendingLeaveRequests(),
-            'recentLeaveRequests' => $this->hrService->getRecentLeaveRequests(5),
-            'payrollSummary' => $this->hrService->getPayrollSummary(Carbon::now()->format('Y-m')),
-            'period' => $period,
+        $metrics = [
+            'total_employees' => Employee::count(),
+            'active_employees' => Employee::where('status', 'active')->count(),
+            'new_hires_month' => Employee::whereMonth('created_at', now()->month)->count(),
+            'on_leave_today' => $this->safeQuery(fn () => LeaveRequest::where('status', 'approved')
+                ->whereDate('start_date', '<=', today())
+                ->whereDate('end_date', '>=', today())->count(), 0),
+            'present_today' => $this->safeQuery(fn () => Attendance::whereDate('date', today())
+                ->where('status', 'present')->count(), 0),
+            'absent_today' => $this->safeQuery(fn () => Attendance::whereDate('date', today())
+                ->where('status', 'absent')->count(), 0),
+            'late_today' => $this->safeQuery(fn () => Attendance::whereDate('date', today())
+                ->where('status', 'late')->count(), 0),
+            'pending_leaves' => $this->safeQuery(fn () => LeaveRequest::where('status', 'pending')->count(), 0),
+            'pending_payroll' => $this->safeQuery(fn () => Payroll::where('status', 'pending')->count(), 0),
         ];
 
-        return view('dashboard.hr.index', $data);
+        $recentEmployees = Employee::orderBy('created_at', 'desc')->take(5)->get();
+        $pendingLeaves = $this->safeQuery(fn () => LeaveRequest::with('employee')->where('status', 'pending')
+            ->orderBy('created_at', 'desc')->take(10)->get(), collect());
+        $todayAttendance = $this->safeQuery(fn () => Attendance::with('employee')->whereDate('date', today())
+            ->orderBy('check_in', 'desc')->take(10)->get(), collect());
+
+        $departments = Employee::select('department', DB::raw('COUNT(*) as count'))
+            ->whereNotNull('department')
+            ->where('department', '!=', '')
+            ->groupBy('department')
+            ->orderBy('department')
+            ->get()
+            ->map(fn ($row) => ['name' => $row->department, 'count' => (int) $row->count]);
+
+        $startOfWeek = now()->startOfWeek();
+        $endOfWeek = now()->endOfWeek();
+        $upcomingBirthdays = $this->safeQuery(function () use ($startOfWeek, $endOfWeek) {
+            $candidates = Employee::whereNotNull('date_of_birth')
+                ->where(function ($q) use ($startOfWeek, $endOfWeek) {
+                    $q->whereMonth('date_of_birth', $startOfWeek->month)
+                        ->orWhereMonth('date_of_birth', $endOfWeek->month);
+                })->get();
+
+            return $candidates->filter(function ($e) use ($startOfWeek, $endOfWeek) {
+                if (! $e->date_of_birth) {
+                    return false;
+                }
+                $d = Carbon::parse($e->date_of_birth)->setYear(now()->year);
+
+                return $d->between($startOfWeek, $endOfWeek);
+            })->take(10)->values();
+        }, collect());
+
+        $workAnniversaries = $this->safeQuery(function () use ($startOfWeek, $endOfWeek) {
+            $candidates = Employee::whereNotNull('hire_date')
+                ->where(function ($q) use ($startOfWeek, $endOfWeek) {
+                    $q->whereMonth('hire_date', $startOfWeek->month)
+                        ->orWhereMonth('hire_date', $endOfWeek->month);
+                })->get();
+
+            return $candidates->filter(function ($e) use ($startOfWeek, $endOfWeek) {
+                if (! $e->hire_date) {
+                    return false;
+                }
+                $d = Carbon::parse($e->hire_date)->setYear(now()->year);
+
+                return $d->between($startOfWeek, $endOfWeek);
+            })->take(10)->values();
+        }, collect());
+
+        $scheduledLeaves = $this->safeQuery(function () use ($startOfWeek, $endOfWeek) {
+            return LeaveRequest::with('employee')
+                ->whereIn('status', ['approved', 'pending'])
+                ->whereDate('start_date', '>=', $startOfWeek->toDateString())
+                ->whereDate('start_date', '<=', $endOfWeek->toDateString())
+                ->orderBy('start_date', 'asc')
+                ->take(10)
+                ->get();
+        }, collect());
+
+        return view('dashboards.hr.index', compact(
+            'metrics',
+            'recentEmployees',
+            'pendingLeaves',
+            'todayAttendance',
+            'departments',
+            'upcomingBirthdays',
+            'workAnniversaries',
+            'scheduledLeaves'
+        ));
     }
 
+    // ============================================
+    // EMPLOYEE MANAGEMENT (Flows 1-5)
+    // ============================================
 
-    /**
-     * Display employees page
-     * Shows paginated list of employees with filters
-     * 
-     * @see Requirements 10.1
-     */
-    public function employees(Request $request)
+    // Flow 1: Create Employee Profile
+    public function employees()
     {
-        $filters = [
-            'per_page' => $request->get('per_page', 25),
-            'status' => $request->get('status'),
-            'department' => $request->get('department'),
-            'search' => $request->get('search'),
-            'sort_by' => $request->get('sort_by', 'created_at'),
-            'sort_direction' => $request->get('sort_direction', 'desc'),
-        ];
+        $employees = Employee::orderBy('created_at', 'desc')->paginate(20);
 
-        $employees = $this->hrService->getEmployees($filters);
-        $departments = $this->hrService->getDepartments();
-
-        return view('dashboard.hr.employees', [
-            'employees' => $employees,
-            'departments' => $departments,
-            'filters' => $filters,
-        ]);
+        return view('dashboards.hr.employees.index', compact('employees'));
     }
 
-    /**
-     * Display single employee details
-     * 
-     * @param int $employeeId The employee ID
-     */
-    public function showEmployee(int $employeeId)
+    public function createEmployee()
     {
-        $employee = $this->hrService->getEmployee($employeeId);
-
-        if (!$employee) {
-            return redirect()->route('dashboard.hr.employees')
-                ->with('error', __('Employee not found.'));
-        }
-
-        $leaveBalances = [];
-        foreach (['annual', 'sick', 'emergency'] as $leaveType) {
-            $leaveBalances[$leaveType] = $this->hrService->getLeaveBalance($employeeId, $leaveType);
-        }
-
-        return view('dashboard.hr.employee-show', [
-            'employee' => $employee,
-            'leaveBalances' => $leaveBalances,
-        ]);
+        return view('dashboards.hr.employees.create');
     }
 
-    /**
-     * Store a new employee
-     */
     public function storeEmployee(Request $request)
     {
         $validated = $request->validate([
-            'employee_code' => 'required|string|unique:employees,employee_code',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:employees,email',
-            'phone' => 'required|string|max:20',
-            'department' => 'required|string|max:255',
-            'position' => 'required|string|max:255',
-            'hire_date' => 'required|date',
-            'salary' => 'required|numeric|min:0',
-            'employment_type' => 'sometimes|string|in:full-time,part-time,contract',
+            'phone' => 'nullable|string|max:20',
             'national_id' => 'nullable|string|max:50',
             'date_of_birth' => 'nullable|date',
-            'gender' => 'nullable|string|in:male,female',
+            'gender' => 'nullable|in:male,female',
             'address' => 'nullable|string',
-            'city' => 'nullable|string|max:100',
-            'country' => 'nullable|string|max:100',
+            'department' => 'nullable|string|max:100',
+            'position' => 'nullable|string|max:100',
+            'employment_type' => 'nullable|string',
+            'hire_date' => 'nullable|date',
+            'salary' => 'nullable|numeric|min:0',
+            'contract_end_date' => 'nullable|date',
         ]);
 
-        $employee = $this->hrService->createEmployee($validated);
+        $validated['password'] = Hash::make('password123');
+        $validated['status'] = 'active';
+        $validated['employee_code'] = 'EMP-'.str_pad(Employee::count() + 1, 5, '0', STR_PAD_LEFT);
 
-        return redirect()->route('dashboard.hr.employees')
-            ->with('success', __('Employee created successfully.'));
+        Employee::create($validated);
+
+        return redirect()->route('dashboard.hr.employees')->with('success', 'تم إضافة الموظف بنجاح');
     }
 
-    /**
-     * Update an employee
-     */
-    public function updateEmployee(Request $request, int $employeeId)
+    // Flow 2: Update Employee Data
+    public function editEmployee(Employee $employee)
+    {
+        return view('dashboards.hr.employees.edit', compact('employee'));
+    }
+
+    public function updateEmployee(Request $request, Employee $employee)
     {
         $validated = $request->validate([
-            'first_name' => 'sometimes|string|max:255',
-            'last_name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:employees,email,' . $employeeId,
-            'phone' => 'sometimes|string|max:20',
-            'department' => 'sometimes|string|max:255',
-            'position' => 'sometimes|string|max:255',
-            'salary' => 'sometimes|numeric|min:0',
-            'status' => 'sometimes|string|in:active,on_leave,suspended,terminated',
-            'employment_type' => 'sometimes|string|in:full-time,part-time,contract',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:employees,email,'.$employee->id,
+            'phone' => 'nullable|string|max:20',
+            'department' => 'nullable|string|max:100',
+            'position' => 'nullable|string|max:100',
+            'salary' => 'nullable|numeric|min:0',
+            'status' => 'nullable|string',
         ]);
 
-        $employee = $this->hrService->updateEmployee($employeeId, $validated);
+        $employee->update($validated);
 
-        if (!$employee) {
-            return redirect()->back()->with('error', __('Employee not found.'));
-        }
-
-        return redirect()->back()->with('success', __('Employee updated successfully.'));
+        return redirect()->route('dashboard.hr.employees')->with('success', 'تم تحديث بيانات الموظف بنجاح');
     }
 
-
-    /**
-     * Display attendance page
-     * Shows attendance records with filters
-     * 
-     * @see Requirements 10.2
-     */
-    public function attendance(Request $request)
+    // Flow 3: Assign Department
+    public function assignDepartment(Request $request, Employee $employee)
     {
-        $filters = [
-            'per_page' => $request->get('per_page', 25),
-            'employee_id' => $request->get('employee_id'),
-            'status' => $request->get('status'),
-            'date_from' => $request->get('date_from'),
-            'date_to' => $request->get('date_to'),
-            'sort_by' => $request->get('sort_by', 'date'),
-            'sort_direction' => $request->get('sort_direction', 'desc'),
+        $validated = $request->validate([
+            'department' => 'required|string|max:100',
+        ]);
+
+        $employee->update($validated);
+
+        return back()->with('success', 'تم تعيين القسم بنجاح');
+    }
+
+    // Flow 4: Assign Role
+    public function assignRole(Request $request, Employee $employee)
+    {
+        $employee->update([
+            'is_admin' => $request->has('is_admin'),
+            'is_it' => $request->has('is_it'),
+            'is_hr' => $request->has('is_hr'),
+            'is_finance' => $request->has('is_finance'),
+            'is_driver_supervisor' => $request->has('is_driver_supervisor'),
+            'is_trader' => $request->has('is_trader'),
+        ]);
+
+        return back()->with('success', 'تم تعيين الصلاحيات بنجاح');
+    }
+
+    // Flow 5: End Contract
+    public function endContract(Request $request, Employee $employee)
+    {
+        $employee->update([
+            'status' => 'inactive',
+            'contract_end_date' => now(),
+            'notes' => $request->notes,
+        ]);
+
+        return back()->with('success', 'تم إنهاء العقد بنجاح');
+    }
+
+    // ============================================
+    // ATTENDANCE MANAGEMENT (Flows 6-10)
+    // ============================================
+
+    public function attendance()
+    {
+        $attendance = $this->safeQuery(fn () => Attendance::with('employee')
+            ->orderBy('date', 'desc')->paginate(30), collect());
+        $employees = Employee::where('status', 'active')->get();
+
+        $stats = [
+            'present_today' => $this->safeQuery(fn () => Attendance::whereDate('date', today())->where('status', 'present')->count(), 0),
+            'absent_today' => $this->safeQuery(fn () => Attendance::whereDate('date', today())->where('status', 'absent')->count(), 0),
+            'late_today' => $this->safeQuery(fn () => Attendance::whereDate('date', today())->where('status', 'late')->count(), 0),
         ];
 
-        $attendance = $this->hrService->getAttendance($filters);
-        $todayAttendance = $this->hrService->getTodayAttendance();
-        $employees = $this->hrService->getEmployees(['per_page' => 1000]);
-
-        return view('dashboard.hr.attendance', [
-            'attendance' => $attendance,
-            'todayAttendance' => $todayAttendance,
-            'employees' => $employees,
-            'filters' => $filters,
-        ]);
+        return view('dashboards.hr.attendance.index', compact('attendance', 'employees', 'stats'));
     }
 
-    /**
-     * Record attendance for an employee
-     */
+    // Flow 6: Clock-In
+    public function clockIn(Request $request)
+    {
+        $validated = $request->validate([
+            'employee_id' => 'required|exists:employees,id',
+        ]);
+
+        $checkIn = now()->format('H:i:s');
+        $workStartTime = '09:00:00';
+        $status = $checkIn > $workStartTime ? 'late' : 'present';
+
+        Attendance::create([
+            'employee_id' => $validated['employee_id'],
+            'date' => today(),
+            'check_in' => $checkIn,
+            'status' => $status,
+        ]);
+
+        return back()->with('success', 'تم تسجيل الحضور بنجاح');
+    }
+
+    // Flow 7: Clock-Out
+    public function clockOut(Request $request)
+    {
+        $validated = $request->validate([
+            'employee_id' => 'required|exists:employees,id',
+        ]);
+
+        $attendance = Attendance::where('employee_id', $validated['employee_id'])
+            ->whereDate('date', today())
+            ->first();
+
+        if ($attendance) {
+            $checkOut = now()->format('H:i:s');
+            $checkIn = Carbon::parse($attendance->check_in);
+            $checkOutTime = Carbon::parse($checkOut);
+            $workHours = $checkIn->diffInHours($checkOutTime);
+
+            $attendance->update([
+                'check_out' => $checkOut,
+                'work_hours' => $workHours,
+            ]);
+
+            return back()->with('success', 'تم تسجيل الانصراف بنجاح');
+        }
+
+        return back()->with('error', 'لم يتم العثور على سجل حضور');
+    }
+
+    // Flow 8: Late Detection (automatic)
+    // Flow 9: Early Leave Detection (automatic)
+
+    // Flow 10: Missing Attendance Handling
     public function recordAttendance(Request $request)
     {
         $validated = $request->validate([
-            'employee_id' => 'required|integer|exists:employees,id',
+            'employee_id' => 'required|exists:employees,id',
             'date' => 'required|date',
-            'check_in' => 'nullable|date_format:H:i',
-            'check_out' => 'nullable|date_format:H:i',
-            'status' => 'required|string|in:present,absent,late,half_day,on_leave',
-            'notes' => 'nullable|string|max:500',
+            'check_in' => 'nullable',
+            'check_out' => 'nullable',
+            'status' => 'required|in:present,absent,late,leave',
+            'notes' => 'nullable|string',
         ]);
 
-        $attendance = $this->hrService->recordAttendance(
-            $validated['employee_id'],
+        Attendance::updateOrCreate(
+            ['employee_id' => $validated['employee_id'], 'date' => $validated['date']],
             $validated
         );
 
-        return redirect()->back()->with('success', __('Attendance recorded successfully.'));
+        return back()->with('success', 'تم تسجيل الحضور بنجاح');
     }
 
-    /**
-     * Display leave requests page
-     * Shows leave requests with filters
-     * 
-     * @see Requirements 10.3
-     */
-    public function leaves(Request $request)
+    private function safeQuery($callback, $default)
     {
-        $filters = [
-            'per_page' => $request->get('per_page', 25),
-            'employee_id' => $request->get('employee_id'),
-            'status' => $request->get('status'),
-            'leave_type' => $request->get('leave_type'),
-            'date_from' => $request->get('date_from'),
-            'date_to' => $request->get('date_to'),
-            'sort_by' => $request->get('sort_by', 'created_at'),
-            'sort_direction' => $request->get('sort_direction', 'desc'),
-        ];
-
-        $leaveRequests = $this->hrService->getLeaveRequests($filters);
-        $pendingRequests = $this->hrService->getPendingLeaveRequests();
-        $employees = $this->hrService->getEmployees(['per_page' => 1000]);
-
-        return view('dashboard.hr.leaves', [
-            'leaveRequests' => $leaveRequests,
-            'pendingRequests' => $pendingRequests,
-            'employees' => $employees,
-            'filters' => $filters,
-        ]);
-    }
-
-    /**
-     * Approve a leave request
-     * 
-     * @see Requirements 10.3
-     */
-    public function approveLeave(int $leaveRequestId)
-    {
-        $leaveRequest = $this->hrService->approveLeaveRequest($leaveRequestId, Auth::user());
-
-        if (!$leaveRequest) {
-            return redirect()->back()->with('error', __('Leave request not found or already processed.'));
+        try {
+            return $callback();
+        } catch (\Exception $e) {
+            return $default;
         }
-
-        return redirect()->back()->with('success', __('Leave request approved successfully.'));
-    }
-
-    /**
-     * Reject a leave request
-     */
-    public function rejectLeave(Request $request, int $leaveRequestId)
-    {
-        $validated = $request->validate([
-            'rejection_reason' => 'nullable|string|max:500',
-        ]);
-
-        $leaveRequest = $this->hrService->rejectLeaveRequest(
-            $leaveRequestId,
-            Auth::user(),
-            $validated['rejection_reason'] ?? null
-        );
-
-        if (!$leaveRequest) {
-            return redirect()->back()->with('error', __('Leave request not found or already processed.'));
-        }
-
-        return redirect()->back()->with('success', __('Leave request rejected.'));
-    }
-
-
-    /**
-     * Display payroll page
-     * Shows payroll records with filters
-     * 
-     * @see Requirements 10.4
-     */
-    public function payroll(Request $request)
-    {
-        $currentMonth = Carbon::now()->format('Y-m');
-        $selectedMonth = $request->get('month', $currentMonth);
-
-        $filters = [
-            'per_page' => $request->get('per_page', 25),
-            'employee_id' => $request->get('employee_id'),
-            'month' => $selectedMonth,
-            'status' => $request->get('status'),
-            'sort_by' => $request->get('sort_by', 'created_at'),
-            'sort_direction' => $request->get('sort_direction', 'desc'),
-        ];
-
-        $payroll = $this->hrService->getPayroll($filters);
-        $payrollSummary = $this->hrService->getPayrollSummary($selectedMonth);
-        $employees = $this->hrService->getEmployees(['per_page' => 1000]);
-
-        return view('dashboard.hr.payroll', [
-            'payroll' => $payroll,
-            'payrollSummary' => $payrollSummary,
-            'employees' => $employees,
-            'selectedMonth' => $selectedMonth,
-            'filters' => $filters,
-        ]);
-    }
-
-    /**
-     * Calculate payroll for an employee
-     * 
-     * @see Requirements 10.4
-     */
-    public function calculatePayroll(Request $request)
-    {
-        $validated = $request->validate([
-            'employee_id' => 'required|integer|exists:employees,id',
-            'month' => 'required|date_format:Y-m',
-            'allowances' => 'nullable|numeric|min:0',
-            'bonuses' => 'nullable|numeric|min:0',
-            'deductions' => 'nullable|numeric|min:0',
-            'tax' => 'nullable|numeric|min:0',
-            'insurance' => 'nullable|numeric|min:0',
-        ]);
-
-        $adjustments = [
-            'allowances' => $validated['allowances'] ?? 0,
-            'bonuses' => $validated['bonuses'] ?? 0,
-            'deductions' => $validated['deductions'] ?? 0,
-            'tax' => $validated['tax'] ?? 0,
-            'insurance' => $validated['insurance'] ?? 0,
-        ];
-
-        $payroll = $this->hrService->calculatePayroll(
-            $validated['employee_id'],
-            $validated['month'],
-            $adjustments
-        );
-
-        return redirect()->back()->with('success', __('Payroll calculated successfully.'));
-    }
-
-    /**
-     * Generate payroll for all employees
-     * 
-     * @see Requirements 10.4
-     */
-    public function generatePayroll(Request $request)
-    {
-        $validated = $request->validate([
-            'month' => 'required|date_format:Y-m',
-        ]);
-
-        $result = $this->hrService->generateMonthlyPayroll($validated['month']);
-
-        if ($result['success']) {
-            return redirect()->back()->with('success', 
-                __('Payroll generated for :count employees.', ['count' => $result['generated_count']])
-            );
-        }
-
-        return redirect()->back()->with('error', __('Failed to generate payroll.'));
-    }
-
-    /**
-     * Process payroll (mark as processed)
-     */
-    public function processPayroll(int $payrollId)
-    {
-        $payroll = $this->hrService->processPayroll($payrollId);
-
-        if (!$payroll) {
-            return redirect()->back()->with('error', __('Payroll not found or already processed.'));
-        }
-
-        return redirect()->back()->with('success', __('Payroll processed successfully.'));
-    }
-
-    /**
-     * Mark payroll as paid
-     */
-    public function markPayrollPaid(Request $request, int $payrollId)
-    {
-        $validated = $request->validate([
-            'payment_date' => 'nullable|date',
-        ]);
-
-        $paymentDate = isset($validated['payment_date']) 
-            ? Carbon::parse($validated['payment_date']) 
-            : null;
-
-        $payroll = $this->hrService->markPayrollPaid($payrollId, $paymentDate);
-
-        if (!$payroll) {
-            return redirect()->back()->with('error', __('Payroll not found or already paid.'));
-        }
-
-        return redirect()->back()->with('success', __('Payroll marked as paid.'));
-    }
-
-
-    /**
-     * Export employees to CSV
-     */
-    public function exportEmployees(Request $request)
-    {
-        $filters = [
-            'status' => $request->get('status'),
-            'department' => $request->get('department'),
-            'per_page' => 10000, // Get all for export
-        ];
-
-        $employees = $this->hrService->getEmployees($filters);
-
-        $columns = [
-            'employee_code' => 'Employee Code',
-            'first_name' => 'First Name',
-            'last_name' => 'Last Name',
-            'email' => 'Email',
-            'phone' => 'Phone',
-            'department' => 'Department',
-            'position' => 'Position',
-            'hire_date' => 'Hire Date',
-            'salary' => 'Salary',
-            'status' => 'Status',
-        ];
-
-        // Log the export action
-        $this->auditService->log(
-            'export',
-            'employee',
-            null,
-            [
-                'new_values' => [
-                    'filters' => $filters,
-                    'record_count' => $employees->total(),
-                ],
-            ]
-        );
-
-        return $this->exportService->exportToCSV(
-            $employees->getCollection(),
-            $columns,
-            'employees_' . date('Y-m-d') . '.csv'
-        );
-    }
-
-    /**
-     * Export attendance to CSV
-     */
-    public function exportAttendance(Request $request)
-    {
-        $filters = [
-            'employee_id' => $request->get('employee_id'),
-            'status' => $request->get('status'),
-            'date_from' => $request->get('date_from'),
-            'date_to' => $request->get('date_to'),
-            'per_page' => 10000, // Get all for export
-        ];
-
-        $attendance = $this->hrService->getAttendance($filters);
-
-        $columns = [
-            'employee.employee_code' => 'Employee Code',
-            'employee.full_name' => 'Employee Name',
-            'date' => 'Date',
-            'check_in' => 'Check In',
-            'check_out' => 'Check Out',
-            'work_hours' => 'Work Hours',
-            'overtime_hours' => 'Overtime',
-            'status' => 'Status',
-        ];
-
-        // Log the export action
-        $this->auditService->log(
-            'export',
-            'attendance',
-            null,
-            [
-                'new_values' => [
-                    'filters' => $filters,
-                    'record_count' => $attendance->total(),
-                ],
-            ]
-        );
-
-        return $this->exportService->exportToCSV(
-            $attendance->getCollection(),
-            $columns,
-            'attendance_' . date('Y-m-d') . '.csv'
-        );
-    }
-
-    /**
-     * Export payroll to CSV
-     */
-    public function exportPayroll(Request $request)
-    {
-        $filters = [
-            'month' => $request->get('month'),
-            'status' => $request->get('status'),
-            'per_page' => 10000, // Get all for export
-        ];
-
-        $payroll = $this->hrService->getPayroll($filters);
-
-        $columns = [
-            'employee.employee_code' => 'Employee Code',
-            'employee.full_name' => 'Employee Name',
-            'month' => 'Month',
-            'basic_salary' => 'Basic Salary',
-            'allowances' => 'Allowances',
-            'bonuses' => 'Bonuses',
-            'overtime_pay' => 'Overtime Pay',
-            'deductions' => 'Deductions',
-            'tax' => 'Tax',
-            'insurance' => 'Insurance',
-            'net_salary' => 'Net Salary',
-            'status' => 'Status',
-            'payment_date' => 'Payment Date',
-        ];
-
-        // Log the export action
-        $this->auditService->log(
-            'export',
-            'payroll',
-            null,
-            [
-                'new_values' => [
-                    'filters' => $filters,
-                    'record_count' => $payroll->total(),
-                ],
-            ]
-        );
-
-        return $this->exportService->exportToCSV(
-            $payroll->getCollection(),
-            $columns,
-            'payroll_' . date('Y-m-d') . '.csv'
-        );
     }
 }

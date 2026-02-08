@@ -18,11 +18,11 @@ return new class extends Migration
             $table->string('search_query')->nullable();
             $table->json('metadata')->nullable();
             $table->timestamps();
-            
+
             $table->index(['session_id', 'created_at']);
             $table->index(['user_id', 'created_at']);
         });
-        
+
         Schema::create('user_preferences', function (Blueprint $table) {
             $table->id();
             $table->string('session_id')->unique();

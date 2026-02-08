@@ -5,547 +5,800 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $product->name }} - Tulip Store</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Changa:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/store.css?v=2">
+    <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            font-family: 'Cairo', sans-serif;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: #fafafa; }
+        
+        .page-wrapper { min-height: 100vh; padding-bottom: 3rem; }
+        
+        /* Breadcrumb */
+        .breadcrumb-section {
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            padding: 1rem 0;
         }
-        body {
-            background: #f5f5f5;
+        .breadcrumb {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.9rem;
         }
-        .product-container {
-            max-width: 1100px;
+        .breadcrumb a {
+            color: #888;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .breadcrumb a:hover { color: #ea580c; }
+        .breadcrumb span { color: #333; font-weight: 500; }
+        .breadcrumb i { color: #ccc; font-size: 0.7rem; }
+
+        /* Main Product Section */
+        .product-section {
+            max-width: 1300px;
             margin: 2rem auto;
             padding: 0 2rem;
-        }
-        .product-grid {
             display: grid;
-            grid-template-columns: 1fr 440px;
-            gap: 2rem;
-            background: #f8f8f8;
-            padding: 2rem;
-            border-radius: 20px;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
         }
-        
-        /* Left Side - Images */
-        .product-images {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
+
+        /* Gallery */
+        .gallery {
+            position: sticky;
+            top: 2rem;
         }
         .main-image-container {
             position: relative;
-            background: #e8e8e8;
-            border-radius: 20px;
+            background: linear-gradient(145deg, #fff 0%, #f5f5f5 100%);
+            border-radius: 30px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.06);
             overflow: hidden;
-            height: 320px;
+        }
+        .main-image-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ea580c, #f97316, #fb923c);
         }
         .main-image {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: 450px;
+            object-fit: contain;
+            transition: transform 0.5s ease;
+            border-radius: 20px;
         }
-        .favorite-btn-large {
+        .main-image-container:hover .main-image {
+            transform: scale(1.03);
+        }
+        .image-actions {
             position: absolute;
-            top: 1rem;
-            left: 1rem;
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 10;
-        }
-        .favorite-btn-large i {
-            color: #666;
-            font-size: 1.1rem;
-        }
-        .favorite-btn-large:hover i {
-            color: #ff4757;
-        }
-        .favorite-btn-large.active i {
-            color: #ff4757;
-        }
-        .thumbnails {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.8rem;
-        }
-        .thumbnail {
-            background: #e8e8e8;
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s ease;
-            height: 80px;
-        }
-        .thumbnail.active {
-            border-color: #666;
-        }
-        .thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        /* Right Side - Details */
-        .product-details {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
+            top: 1.5rem;
+            left: 1.5rem;
             display: flex;
             flex-direction: column;
-        }
-        .product-title {
-            font-family: 'El Messiri', sans-serif;
-            font-size: 1.8rem;
-            color: #333;
-            margin-bottom: 0.8rem;
-            font-weight: 600;
-            text-align: right;
-        }
-        .product-rating {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 0.3rem;
-            margin-bottom: 1.2rem;
-        }
-        .stars {
-            display: flex;
-            gap: 0.2rem;
-        }
-        .stars i {
-            font-size: 0.95rem;
-            color: #ffc107;
-        }
-        .stars i.empty {
-            color: #ddd;
-        }
-        .price-section {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
             gap: 0.8rem;
-            margin-bottom: 1.2rem;
         }
-        .discount-badge {
-            background: #ff4444;
-            color: white;
-            padding: 0.25rem 0.6rem;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-        .old-price {
-            color: #999;
-            text-decoration: line-through;
-            font-size: 0.95rem;
-        }
-        .current-price {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #333;
-        }
-        .viewers-info {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 0.5rem;
-            color: #666;
-            font-size: 0.85rem;
-            margin-bottom: 1.5rem;
-        }
-        .viewers-info i {
-            font-size: 0.95rem;
-        }
-        
-        /* Sizes */
-        .section-title {
-            font-family: 'El Messiri', sans-serif;
-            font-size: 0.95rem;
-            color: #333;
-            margin-bottom: 0.7rem;
-            text-align: right;
-        }
-        .sizes-grid {
-            display: flex;
-            gap: 0.6rem;
-            justify-content: flex-end;
-            margin-bottom: 1.5rem;
-        }
-        .size-option {
-            width: 45px;
-            height: 45px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+        .img-action-btn {
+            width: 48px;
+            height: 48px;
+            background: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background: white;
-            font-weight: 500;
-            color: #666;
-            font-size: 0.9rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s;
         }
-        .size-option.active {
-            background: #ff6b6b;
-            color: white;
-            border-color: #ff6b6b;
-        }
+        .img-action-btn i { font-size: 1.2rem; color: #666; transition: all 0.3s; }
+        .img-action-btn:hover { transform: scale(1.1); }
+        .img-action-btn:hover i { color: #ea580c; }
+        .img-action-btn.fav-btn.active i { color: #ef4444; }
         
-        /* Colors */
-        .colors-grid {
-            display: flex;
-            gap: 0.7rem;
-            justify-content: flex-end;
-            margin-bottom: 1.5rem;
-        }
-        .color-option {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 2px solid transparent;
-            position: relative;
-        }
-        .color-option.active::after {
-            content: '';
+        .discount-tag {
             position: absolute;
-            inset: -5px;
-            border: 2px solid #ff6b6b;
-            border-radius: 50%;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            box-shadow: 0 4px 20px rgba(239,68,68,0.4);
         }
-        
-        /* Quantity and Add to Cart */
-        .quantity-cart-section {
+
+        .thumbnails {
             display: flex;
-            gap: 0.8rem;
-            margin-bottom: 1.2rem;
-            flex-direction: row-reverse;
+            gap: 1rem;
+            justify-content: center;
         }
-        .add-to-cart-btn {
-            flex: 1;
-            padding: 0.75rem 1.5rem;
-            background: linear-gradient(135deg, #ff6b35 0%, #ff8555 100%);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-size: 0.95rem;
-            font-weight: 600;
+        .thumb {
+            width: 90px;
+            height: 90px;
+            border-radius: 16px;
+            overflow: hidden;
             cursor: pointer;
-            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            background: #fff;
+            padding: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s;
         }
-        .add-to-cart-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        .thumb:hover { border-color: #fed7aa; transform: translateY(-3px); }
+        .thumb.active { border-color: #ea580c; }
+        .thumb img { width: 100%; height: 100%; object-fit: contain; }
+
+        /* Product Info */
+        .product-info {
+            padding-top: 1rem;
         }
-        .quantity-selector {
+        .product-meta {
             display: flex;
             align-items: center;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            overflow: hidden;
-            background: white;
+            gap: 1rem;
+            margin-bottom: 1rem;
         }
-        .quantity-btn {
-            width: 35px;
-            height: 35px;
-            border: none;
-            background: white;
-            cursor: pointer;
-            font-size: 1.1rem;
-            color: #666;
-            transition: all 0.2s ease;
-        }
-        .quantity-btn:hover {
-            background: #f5f5f5;
-        }
-        .quantity-input {
-            width: 45px;
-            text-align: center;
-            border: none;
-            font-size: 0.95rem;
+        .category-badge {
+            background: linear-gradient(135deg, #fff7ed, #ffedd5);
+            color: #ea580c;
+            padding: 0.5rem 1.2rem;
+            border-radius: 25px;
+            font-size: 0.85rem;
             font-weight: 600;
         }
-        
-        /* Share Button */
-        .share-btn {
-            width: 100%;
-            padding: 0.75rem;
-            background: white;
-            color: #0f4f55;
-            border: 1px solid #0f4f55;
-            border-radius: 20px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 1.5rem;
-        }
-        .share-btn:hover {
-            background: #0f4f55;
-            color: white;
-        }
-        
-        /* Shipping Info */
-        .shipping-info {
-            border-top: 1px solid #eee;
-            padding-top: 1.2rem;
-        }
-        .shipping-item {
-            display: flex;
-            align-items: start;
-            gap: 0.8rem;
-            padding: 0.6rem 0;
-            text-align: right;
-        }
-        .shipping-item i {
-            color: #666;
-            font-size: 1.1rem;
-            margin-top: 0.1rem;
-        }
-        .shipping-text {
-            flex: 1;
-        }
-        .shipping-text strong {
-            display: block;
-            color: #333;
-            margin-bottom: 0.2rem;
+        .sku {
+            color: #999;
             font-size: 0.85rem;
         }
-        .shipping-text span {
-            color: #666;
-            font-size: 0.8rem;
+        
+        .product-title {
+            font-family: 'El Messiri', sans-serif;
+            font-size: 2.4rem;
+            color: #1a1a2e;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 1.2rem;
+        }
+
+        .rating-reviews {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .stars { display: flex; gap: 0.15rem; }
+        .stars i { color: #fbbf24; font-size: 1rem; }
+        .stars i.empty { color: #e5e7eb; }
+        .rating-num { font-weight: 700; color: #333; }
+        .reviews-count { color: #888; font-size: 0.9rem; }
+        .sold-count {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: #16a34a;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .sold-count i { font-size: 0.8rem; }
+
+        /* Price */
+        .price-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 20px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .price-section::before {
+            content: '💰';
+            position: absolute;
+            top: 50%;
+            left: 2rem;
+            transform: translateY(-50%);
+            font-size: 3rem;
+            opacity: 0.15;
+        }
+        .price-row {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .current-price {
+            font-family: 'El Messiri', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #b45309;
+        }
+        .currency { font-size: 1.4rem; margin-right: 0.3rem; }
+        .old-price {
+            font-size: 1.3rem;
+            color: #9ca3af;
+            text-decoration: line-through;
+        }
+        .save-amount {
+            background: #dc2626;
+            color: #fff;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        /* Options */
+        .option-group {
+            margin-bottom: 1.8rem;
+        }
+        .option-label {
+            font-family: 'El Messiri', sans-serif;
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .option-label span {
+            color: #ea580c;
+            font-weight: 400;
+            font-size: 0.95rem;
         }
         
+        .size-options {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+        .size-btn {
+            min-width: 55px;
+            height: 50px;
+            padding: 0 1.2rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .size-btn:hover { border-color: #ea580c; color: #ea580c; }
+        .size-btn.active {
+            background: #ea580c;
+            border-color: #ea580c;
+            color: #fff;
+        }
+
+        .color-options {
+            display: flex;
+            gap: 1rem;
+        }
+        .color-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            transition: all 0.3s;
+            position: relative;
+        }
+        .color-btn:hover { transform: scale(1.1); }
+        .color-btn.active::after {
+            content: '✓';
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+        .color-btn.light.active::after { color: #333; text-shadow: none; }
+
+        /* Quantity & Cart */
+        .cart-section {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .qty-control {
+            display: flex;
+            align-items: center;
+            background: #f5f5f5;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .qty-btn {
+            width: 50px;
+            height: 55px;
+            border: none;
+            background: transparent;
+            font-size: 1.4rem;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .qty-btn:hover { background: #eee; color: #ea580c; }
+        .qty-input {
+            width: 60px;
+            height: 55px;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .add-cart-btn {
+            flex: 1;
+            height: 55px;
+            background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-family: 'El Messiri', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            box-shadow: 0 8px 30px rgba(234,88,12,0.3);
+        }
+        .add-cart-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(234,88,12,0.4);
+        }
+        .add-cart-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+        .secondary-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .sec-btn {
+            height: 50px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: #fff;
+            font-family: 'El Messiri', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+        .sec-btn:hover { border-color: #ea580c; color: #ea580c; }
+        .sec-btn.primary {
+            background: #0D464C;
+            border-color: #0D464C;
+            color: #fff;
+        }
+        .sec-btn.primary:hover { background: #1a5a5a; }
+
+        /* Features */
+        .features-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 16px;
+        }
+        .feature-box {
+            text-align: center;
+            padding: 1rem 0.5rem;
+        }
+        .feature-box i {
+            font-size: 1.8rem;
+            color: #ea580c;
+            margin-bottom: 0.6rem;
+        }
+        .feature-box p {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Description Section */
+        .description-section {
+            max-width: 1300px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+        .desc-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.05);
+        }
+        .desc-title {
+            font-family: 'El Messiri', sans-serif;
+            font-size: 1.5rem;
+            color: #1a1a2e;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .desc-title i { color: #ea580c; }
+        .desc-content {
+            color: #555;
+            line-height: 2;
+            font-size: 1.05rem;
+        }
+
+        /* Responsive */
         @media (max-width: 1024px) {
-            .product-grid {
+            .product-section {
                 grid-template-columns: 1fr;
                 gap: 2rem;
             }
+            .gallery { position: static; }
+            .main-image { height: 350px; }
+        }
+        @media (max-width: 600px) {
+            .product-section { padding: 0 1rem; }
+            .product-title { font-size: 1.8rem; }
+            .current-price { font-size: 2.2rem; }
+            .features-strip { grid-template-columns: repeat(2, 1fr); }
+            .thumbnails { flex-wrap: wrap; }
+            .thumb { width: 70px; height: 70px; }
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body>
     @include('components.navbar')
-    <div class="product-container">
-        <div class="product-grid">
-            <!-- Left Side - Product Details -->
-            <div class="product-details">
-                <h1 class="product-title">{{ $product->name }}</h1>
-                
-                <div class="product-rating">
-                    <div class="stars">
-                        @for($i = 0; $i < 5; $i++)
-                            <i class="fas fa-star {{ $i < 4 ? '' : 'empty' }}"></i>
-                        @endfor
-                    </div>
-                </div>
 
-                <div class="price-section">
+    <div class="page-wrapper">
+        <div class="breadcrumb-section">
+            <div class="breadcrumb">
+                <a href="/"><i class="fas fa-home"></i> الرئيسية</a>
+                <i class="fas fa-chevron-left"></i>
+                <a href="/store">المتجر</a>
+                @if($product->category)
+                    <i class="fas fa-chevron-left"></i>
+                    <a href="/store?category={{ $product->category->slug }}">{{ $product->category->name }}</a>
+                @endif
+                <i class="fas fa-chevron-left"></i>
+                <span>{{ Str::limit($product->name, 30) }}</span>
+            </div>
+        </div>
+
+        <div class="product-section">
+            <!-- Gallery -->
+            <div class="gallery">
+                <div class="main-image-container">
                     @if($product->discount_price)
-                        @php
-                            $discount = round((($product->price - $product->discount_price) / $product->price) * 100);
-                        @endphp
-                        <span class="discount-badge">SAVE {{ $discount }}%</span>
+                        @php $discount = round((($product->price - $product->discount_price) / $product->price) * 100); @endphp
+                        <div class="discount-tag">خصم {{ $discount }}%</div>
                     @endif
-                    @if($product->discount_price)
-                        <span class="old-price">${{ number_format($product->price, 2) }}</span>
-                    @endif
-                    <span class="current-price">${{ number_format($product->discount_price ?? $product->price, 2) }}</span>
-                </div>
-
-                <div class="viewers-info">
-                    <span>24 شخصاً يشاهدون هذا الآن</span>
-                    <i class="fas fa-eye"></i>
-                </div>
-
-                <div>
-                    <h3 class="section-title">: المقاس</h3>
-                    <div class="sizes-grid">
-                        <button class="size-option">XL</button>
-                        <button class="size-option">L</button>
-                        <button class="size-option active">M</button>
-                        <button class="size-option">S</button>
+                    <div class="image-actions">
+                        <button class="img-action-btn fav-btn" id="favBtn" onclick="toggleFavorite()">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        <button class="img-action-btn" onclick="shareProduct()">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                        <button class="img-action-btn" onclick="zoomImage()">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
                     </div>
+                    <img id="mainImage" src="{{ $product->image ?? '/images/placeholder.png' }}" alt="{{ $product->name }}" class="main-image">
                 </div>
-
-                <div>
-                    <h3 class="section-title">: اللون</h3>
-                    <div class="colors-grid">
-                        <div class="color-option active" style="background-color: #FFB6C1;" onclick="selectColor(this)"></div>
-                        <div class="color-option" style="background-color: #87CEEB;" onclick="selectColor(this)"></div>
-                        <div class="color-option" style="background-color: #000000;" onclick="selectColor(this)"></div>
-                    </div>
-                </div>
-
-                <div class="quantity-cart-section">
-                    <button id="addToCartBtn" class="add-to-cart-btn" onclick="addToCart()">
-                        أضف إلى السلة
-                    </button>
-                    <div class="quantity-selector">
-                        <button class="quantity-btn" onclick="increaseQty()">+</button>
-                        <input type="text" id="quantity" value="1" class="quantity-input" readonly>
-                        <button class="quantity-btn" onclick="decreaseQty()">-</button>
-                    </div>
-                </div>
-
-                <button class="share-btn" onclick="shareProduct()">
-                    شاركه الآن
-                </button>
-
-                <div class="shipping-info">
-                    <div class="shipping-item">
-                        <div class="shipping-text">
-                            <strong>يتم الشحن خلال Jul 30 - Aug 03</strong>
+                @php
+                    $galleryImages = [];
+                    if (! empty($product->image)) {
+                        $galleryImages[] = $product->image;
+                    }
+                    if (is_array($product->images ?? null)) {
+                        $galleryImages = array_merge($galleryImages, $product->images);
+                    }
+                    $galleryImages = array_values(array_unique(array_filter($galleryImages)));
+                    if (empty($galleryImages)) {
+                        $galleryImages = ['/images/placeholder.png'];
+                    }
+                @endphp
+                <div class="thumbnails">
+                    @foreach(array_slice($galleryImages, 0, 4) as $idx => $imgUrl)
+                        <div class="thumb {{ $idx === 0 ? 'active' : '' }}" onclick="changeImage(this, '{{ $imgUrl }}')">
+                            <img src="{{ $imgUrl }}" alt="صورة {{ $idx + 1 }}">
                         </div>
-                        <i class="fas fa-truck"></i>
-                    </div>
-                    <div class="shipping-item">
-                        <div class="shipping-text">
-                            <span>شحن وإرجاع مجاني على جميع الطلبات التي تزيد عن 75 دولاراً</span>
-                        </div>
-                        <i class="fas fa-box"></i>
-                    </div>
+                    @endforeach
                 </div>
             </div>
 
-            <!-- Right Side - Product Images -->
-            <div class="product-images">
-                <div class="main-image-container">
-                    <button class="favorite-btn-large" id="favoriteBtn" onclick="toggleFavorite()">
-                        <i class="far fa-heart"></i>
-                    </button>
-                    <img id="mainImage" src="{{ $product->image ?? 'https://via.placeholder.com/500x500' }}" alt="{{ $product->name }}" class="main-image">
+            <!-- Product Info -->
+            <div class="product-info">
+                <div class="product-meta">
+                    @if($product->category)
+                        <span class="category-badge">{{ $product->category->name }}</span>
+                    @endif
+                    <span class="sku">SKU: TLP-{{ $product->id }}</span>
                 </div>
-                
-                <div class="thumbnails">
-                    <div class="thumbnail active" onclick="changeImage(this, '{{ $product->image ?? 'https://via.placeholder.com/500x500' }}')">
-                        <img src="{{ $product->image ?? 'https://via.placeholder.com/150x150' }}" alt="صورة 1">
+
+                <h1 class="product-title">{{ $product->name }}</h1>
+
+                <div class="rating-reviews">
+                    <div class="rating">
+                        <div class="stars">
+                            @for($i = 0; $i < 5; $i++)
+                                <i class="fas fa-star {{ $i < floor($avgRating) ? '' : 'empty' }}"></i>
+                            @endfor
+                        </div>
+                        <span class="rating-num">{{ number_format($avgRating, 1) }}</span>
                     </div>
-                    <div class="thumbnail" onclick="changeImage(this, '{{ $product->image ?? 'https://via.placeholder.com/500x500' }}')">
-                        <img src="{{ $product->image ?? 'https://via.placeholder.com/150x150' }}" alt="صورة 2">
+                    <span class="reviews-count">({{ number_format($reviewsCount) }} تقييم)</span>
+                    <span class="sold-count"><i class="fas fa-fire"></i> {{ $unitsSold >= 500 ? '500+' : number_format($unitsSold) }} مبيعات</span>
+                </div>
+
+                <div class="price-section">
+                    <div class="price-row">
+                        <span class="current-price">
+                            <span class="currency">ر.س</span>{{ number_format($product->discount_price ?? $product->price, 0) }}
+                        </span>
+                        @if($product->discount_price)
+                            <span class="old-price">{{ number_format($product->price, 0) }} ر.س</span>
+                            <span class="save-amount">وفر {{ number_format($product->price - $product->discount_price, 0) }} ر.س</span>
+                        @endif
                     </div>
-                    <div class="thumbnail" onclick="changeImage(this, '{{ $product->image ?? 'https://via.placeholder.com/500x500' }}')">
-                        <img src="{{ $product->image ?? 'https://via.placeholder.com/150x150' }}" alt="صورة 3">
+                </div>
+
+                <div class="option-group">
+                    <div class="option-label">المقاس: <span id="selectedSize">M</span></div>
+                    <div class="size-options">
+                        <button class="size-btn" onclick="selectSize(this, 'XS')">XS</button>
+                        <button class="size-btn" onclick="selectSize(this, 'S')">S</button>
+                        <button class="size-btn active" onclick="selectSize(this, 'M')">M</button>
+                        <button class="size-btn" onclick="selectSize(this, 'L')">L</button>
+                        <button class="size-btn" onclick="selectSize(this, 'XL')">XL</button>
+                        <button class="size-btn" onclick="selectSize(this, 'XXL')">XXL</button>
                     </div>
-                    <div class="thumbnail" onclick="changeImage(this, '{{ $product->image ?? 'https://via.placeholder.com/500x500' }}')">
-                        <img src="{{ $product->image ?? 'https://via.placeholder.com/150x150' }}" alt="صورة 4">
+                </div>
+
+                <div class="option-group">
+                    <div class="option-label">اللون:</div>
+                    <div class="color-options">
+                        <button class="color-btn active" style="background:#1a1a2e" onclick="selectColor(this)"></button>
+                        <button class="color-btn" style="background:#ea580c" onclick="selectColor(this)"></button>
+                        <button class="color-btn" style="background:#0D464C" onclick="selectColor(this)"></button>
+                        <button class="color-btn light" style="background:#f5f5f5" onclick="selectColor(this)"></button>
+                        <button class="color-btn" style="background:#dc2626" onclick="selectColor(this)"></button>
+                    </div>
+                </div>
+
+                <div class="cart-section">
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="changeQty(-1)">−</button>
+                        <input type="text" id="quantity" value="1" class="qty-input" readonly>
+                        <button class="qty-btn" onclick="changeQty(1)">+</button>
+                    </div>
+                    <button id="addCartBtn" class="add-cart-btn" onclick="addToCart()">
+                        <i class="fas fa-shopping-cart"></i>
+                        أضف للسلة
+                    </button>
+                </div>
+
+                <div class="secondary-btns">
+                    <button class="sec-btn primary" onclick="buyNow()">
+                        <i class="fas fa-bolt"></i>
+                        اشتري الآن
+                    </button>
+                    <button class="sec-btn" onclick="addToWishlist()">
+                        <i class="far fa-heart"></i>
+                        أضف للمفضلة
+                    </button>
+                </div>
+
+                <div class="features-strip">
+                    <div class="feature-box">
+                        <i class="fas fa-truck-fast"></i>
+                        <p>توصيل سريع<br>خلال 2-3 أيام</p>
+                    </div>
+                    <div class="feature-box">
+                        <i class="fas fa-shield-check"></i>
+                        <p>ضمان الجودة<br>100%</p>
+                    </div>
+                    <div class="feature-box">
+                        <i class="fas fa-rotate-left"></i>
+                        <p>إرجاع مجاني<br>خلال 14 يوم</p>
+                    </div>
+                    <div class="feature-box">
+                        <i class="fas fa-headset"></i>
+                        <p>دعم فني<br>24/7</p>
                     </div>
                 </div>
             </div>
         </div>
+
+        @if($product->description)
+        <div class="description-section">
+            <div class="desc-card">
+                <h2 class="desc-title"><i class="fas fa-file-alt"></i> وصف المنتج</h2>
+                <div class="desc-content">{{ $product->description }}</div>
+            </div>
+        </div>
+        @endif
+
+        @if(($relatedProducts ?? collect())->count() > 0)
+        <div class="description-section">
+            <div class="desc-card">
+                <h2 class="desc-title"><i class="fas fa-layer-group"></i> منتجات مشابهة</h2>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
+                    @foreach($relatedProducts as $rp)
+                        <a href="{{ url('/products/'.$rp->id) }}" style="text-decoration:none; color:inherit; background:#fff; border:1px solid #eee; border-radius:14px; overflow:hidden; display:block;">
+                            <div style="height:160px; background:#f5f5f5; display:flex; align-items:center; justify-content:center;">
+                                <img src="{{ $rp->image ?? '/images/placeholder.png' }}" alt="{{ $rp->name }}" style="width:100%; height:100%; object-fit:cover;">
+                            </div>
+                            <div style="padding:0.9rem;">
+                                <div style="font-family:'El Messiri',sans-serif; font-weight:700; font-size:0.95rem; margin-bottom:0.4rem; line-height:1.4;">
+                                    {{ $rp->name }}
+                                </div>
+                                <div style="font-weight:800; color:#ea580c;">
+                                    {{ number_format($rp->discount_price ?? $rp->price, 0) }} ر.س
+                                </div>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
+
+    <footer style="background:#0D464C; padding:1.8rem 2rem; margin-top:2rem;">
+        <div style="max-width:1300px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.5rem;">
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <img src="/images/white_orange_logo.png" style="height:60px;">
+                <p style="color:rgba(255,255,255,0.7); font-size:0.9rem;">© 2025 Tulip Store</p>
+            </div>
+            <div style="display:flex; gap:2rem;">
+                <a href="/store" style="color:rgba(255,255,255,0.7); text-decoration:none; font-size:0.9rem;">المتجر</a>
+                <a href="/gifts" style="color:rgba(255,255,255,0.7); text-decoration:none; font-size:0.9rem;">الهدايا</a>
+                <a href="/mart" style="color:rgba(255,255,255,0.7); text-decoration:none; font-size:0.9rem;">مارت</a>
+                <a href="/contact" style="color:rgba(255,255,255,0.7); text-decoration:none; font-size:0.9rem;">تواصل معنا</a>
+            </div>
+        </div>
+    </footer>
 
     <script>
         const productId = {{ $product->id }};
         const productData = {
             id: {{ $product->id }},
-            name: "{{ $product->name }}",
+            name: "{{ addslashes($product->name) }}",
             price: {{ $product->discount_price ?? $product->price }},
-            image: "{{ $product->image ?? 'https://via.placeholder.com/250' }}"
+            image: "{{ $product->image ?? '/images/placeholder.png' }}"
         };
-        
-        // Check if product is in favorites on page load
-        window.addEventListener('DOMContentLoaded', function() {
-            checkFavoriteStatus();
-            updateFavoritesCount();
-        });
-        
+        const isAuthenticated = {!! auth()->check() ? 'true' : 'false' !!};
+
+        document.addEventListener('DOMContentLoaded', checkFavoriteStatus);
+
         function checkFavoriteStatus() {
-            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-            const isFavorite = favorites.some(p => p.id === productId);
-            const favoriteBtn = document.getElementById('favoriteBtn');
-            
-            if (isFavorite) {
-                favoriteBtn.classList.add('active');
-                favoriteBtn.querySelector('i').classList.remove('far');
-                favoriteBtn.querySelector('i').classList.add('fas');
-            }
-        }
-        
-        function toggleFavorite() {
-            let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-            const favoriteBtn = document.getElementById('favoriteBtn');
-            const icon = favoriteBtn.querySelector('i');
-            const isFavorite = favorites.some(p => p.id === productId);
-            
-            if (isFavorite) {
-                // Remove from favorites
-                favorites = favorites.filter(p => p.id !== productId);
-                favoriteBtn.classList.remove('active');
-                icon.classList.remove('fas');
-                icon.classList.add('far');
+            const btn = document.getElementById('favBtn');
+            if (isAuthenticated) {
+                fetch('/api/wishlist')
+                    .then(r => r.json())
+                    .then(d => {
+                        const exists = Array.isArray(d.items) && d.items.some(p => p.id === productId);
+                        if (exists) {
+                            btn.classList.add('active');
+                            btn.querySelector('i').classList.replace('far', 'fas');
+                        }
+                    })
+                    .catch(() => {});
             } else {
-                // Add to favorites
-                favorites.push(productData);
-                favoriteBtn.classList.add('active');
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-            }
-            
-            localStorage.setItem('favorites', JSON.stringify(favorites));
-            updateFavoritesCount();
-        }
-        
-        function updateFavoritesCount() {
-            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-            const countElement = document.getElementById('favoritesCount');
-            if (countElement) {
-                countElement.textContent = favorites.length > 99 ? '+99' : favorites.length;
+                const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                if (favorites.some(p => p.id === productId)) {
+                    btn.classList.add('active');
+                    btn.querySelector('i').classList.replace('far', 'fas');
+                }
             }
         }
-        
-        function changeImage(thumbnail, imageUrl) {
-            document.getElementById('mainImage').src = imageUrl;
-            document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
-            thumbnail.classList.add('active');
-        }
 
-        function selectColor(colorElement) {
-            document.querySelectorAll('.color-option').forEach(c => c.classList.remove('active'));
-            colorElement.classList.add('active');
-        }
-
-        document.querySelectorAll('.size-option').forEach(button => {
-            button.addEventListener('click', function() {
-                document.querySelectorAll('.size-option').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-
-        function increaseQty() {
-            const qtyInput = document.getElementById('quantity');
-            qtyInput.value = parseInt(qtyInput.value) + 1;
-        }
-
-        function decreaseQty() {
-            const qtyInput = document.getElementById('quantity');
-            if (parseInt(qtyInput.value) > 1) {
-                qtyInput.value = parseInt(qtyInput.value) - 1;
+        function toggleFavorite() {
+            const btn = document.getElementById('favBtn');
+            const icon = btn.querySelector('i');
+            if (isAuthenticated) {
+                fetch('/api/wishlist/toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                    },
+                    body: JSON.stringify({ product_id: productId })
+                })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.action === 'added') {
+                        btn.classList.add('active');
+                        icon.classList.replace('far', 'fas');
+                    } else {
+                        btn.classList.remove('active');
+                        icon.classList.replace('fas', 'far');
+                    }
+                })
+                .catch(() => {});
+            } else {
+                let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                if (favorites.some(p => p.id === productId)) {
+                    favorites = favorites.filter(p => p.id !== productId);
+                    btn.classList.remove('active');
+                    icon.classList.replace('fas', 'far');
+                } else {
+                    favorites.push(productData);
+                    btn.classList.add('active');
+                    icon.classList.replace('far', 'fas');
+                }
+                localStorage.setItem('favorites', JSON.stringify(favorites));
             }
         }
-        
+
+        function addToWishlist() { toggleFavorite(); }
+
+        function changeImage(thumb, src) {
+            document.getElementById('mainImage').src = src;
+            document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+            thumb.classList.add('active');
+        }
+
+        function selectSize(btn, size) {
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('selectedSize').textContent = size;
+        }
+
+        function selectColor(btn) {
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function changeQty(delta) {
+            const input = document.getElementById('quantity');
+            let val = Math.max(1, Math.min(99, parseInt(input.value) + delta));
+            input.value = val;
+        }
+
         async function addToCart() {
-            const btn = document.getElementById('addToCartBtn');
-            const originalText = btn.innerHTML;
+            const btn = document.getElementById('addCartBtn');
+            const originalHTML = btn.innerHTML;
             const quantity = parseInt(document.getElementById('quantity').value);
             
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإضافة...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             btn.disabled = true;
             
             try {
@@ -556,62 +809,40 @@
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                     },
-                    body: JSON.stringify({
-                        product_id: productId,
-                        quantity: quantity
-                    })
+                    body: JSON.stringify({ product_id: productId, quantity })
                 });
-                
                 const data = await response.json();
-                
                 if (data.success) {
-                    btn.innerHTML = '<i class="fas fa-check"></i> تمت الإضافة بنجاح';
-                    btn.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
-                    
-                    // Update cart count using global function
-                    if (window.updateCartCount) {
-                        window.updateCartCount(data.cart_count || data.count || 0);
-                    }
-                    
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.style.background = '';
-                        btn.disabled = false;
-                    }, 2000);
-                } else {
-                    throw new Error(data.message || 'فشلت الإضافة');
-                }
-            } catch (error) {
-                console.error('Error adding to cart:', error);
-                btn.innerHTML = '<i class="fas fa-times"></i> فشلت الإضافة';
-                btn.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
-                
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.style.background = '';
-                    btn.disabled = false;
-                }, 2000);
+                    btn.innerHTML = '<i class="fas fa-check"></i> تمت الإضافة';
+                    btn.style.background = 'linear-gradient(135deg, #16a34a, #22c55e)';
+                    if (window.updateCartCount) window.updateCartCount(data.cart_count || 0);
+                    setTimeout(() => { btn.innerHTML = originalHTML; btn.style.background = ''; btn.disabled = false; }, 2000);
+                } else throw new Error();
+            } catch (e) {
+                btn.innerHTML = '<i class="fas fa-times"></i> فشل';
+                btn.style.background = 'linear-gradient(135deg, #dc2626, #ef4444)';
+                setTimeout(() => { btn.innerHTML = originalHTML; btn.style.background = ''; btn.disabled = false; }, 2000);
             }
         }
-        
+
+        async function buyNow() {
+            await addToCart();
+            setTimeout(() => window.location.href = '/checkout', 500);
+        }
+
         function shareProduct() {
             if (navigator.share) {
-                navigator.share({
-                    title: productData.name,
-                    text: `تحقق من هذا المنتج الرائع: ${productData.name}`,
-                    url: window.location.href
-                }).catch(err => console.log('Error sharing:', err));
+                navigator.share({ title: productData.name, url: window.location.href });
             } else {
-                navigator.clipboard.writeText(window.location.href).then(() => {
-                    const btn = event.target.closest('.share-btn');
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-check"></i> تم نسخ الرابط';
-                    
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                    }, 2000);
-                });
+                navigator.clipboard.writeText(window.location.href);
+                alert('تم نسخ الرابط!');
             }
+        }
+
+        function zoomImage() {
+            const img = document.getElementById('mainImage');
+            if (img.requestFullscreen) img.requestFullscreen();
+            else if (img.webkitRequestFullscreen) img.webkitRequestFullscreen();
         }
     </script>
 </body>

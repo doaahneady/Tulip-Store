@@ -1411,12 +1411,141 @@ function loadUserData() {
     }
 }
 
+let savedAddresses = [];
+
+async function loadSavedAddresses() {
+    try {
+        const res = await fetch('/api/addresses', { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) return [];
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.items)) {
+            return data.items;
+        }
+    } catch (e) {
+    }
+
+    return [];
+}
+
+function renderSavedAddressesUI(addresses) {
+    const shippingForm = document.getElementById('shippingForm');
+    if (!shippingForm) return;
+
+    const existing = document.getElementById('savedAddressesBlock');
+    if (existing) existing.remove();
+
+    if (!Array.isArray(addresses) || addresses.length === 0) return;
+
+    const block = document.createElement('div');
+    block.id = 'savedAddressesBlock';
+    block.style.marginBottom = '1rem';
+    block.innerHTML = `
+        <div style="background:#f8f9fa; padding:1rem; border-radius:12px; border:1px solid #e8e8e8;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:0.75rem; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <i class="fas fa-map-marker-alt" style="color:#2a7080;"></i>
+                    <span style="font-family:'El Messiri',sans-serif; font-weight:700; color:#2a7080;">عناوين محفوظة</span>
+                </div>
+                <select id="savedAddressSelect" style="flex:1; min-width:220px; padding:0.6rem 0.8rem; border:2px solid #e0e0e0; border-radius:10px; font-family:'El Messiri',sans-serif; background:#fff;">
+                    ${addresses.map(a => {
+                        const label = a.label || a.line1 || ('عنوان #' + a.id);
+                        const suffix = a.is_default ? ' (افتراضي)' : '';
+                        return `<option value="${a.id}">${label}${suffix}</option>`;
+                    }).join('')}
+                </select>
+                <button id="applySavedAddressBtn" type="button" style="background:#2a7080; color:#fff; border:none; padding:0.65rem 1rem; border-radius:10px; font-family:'El Messiri',sans-serif; font-weight:700; cursor:pointer;">
+                    استخدام
+                </button>
+            </div>
+        </div>
+    `;
+
+    const title = shippingForm.querySelector('h2');
+    if (title && title.parentNode) {
+        title.parentNode.insertBefore(block, title.nextSibling);
+    } else {
+        shippingForm.insertBefore(block, shippingForm.firstChild);
+    }
+
+    const btn = document.getElementById('applySavedAddressBtn');
+    if (btn) {
+        btn.addEventListener('click', () => {
+            const sel = document.getElementById('savedAddressSelect');
+            const id = sel ? parseInt(sel.value) : null;
+            const address = savedAddresses.find(a => a.id === id);
+            if (address) {
+                applySavedAddress(address);
+            }
+        });
+    }
+}
+
+function applySavedAddress(address) {
+    const recipient = document.getElementById('recipientName');
+    const phone = document.getElementById('phoneNumber');
+    const village = document.getElementById('village');
+    const villageCoords = document.getElementById('villageCoords');
+    const note = document.getElementById('addressNote');
+
+    if (recipient && address.contact_name) recipient.value = address.contact_name;
+    if (phone && address.phone) phone.value = address.phone;
+    if (village) village.value = [address.line1, address.city].filter(Boolean).join(' - ');
+    if (note && address.line2) note.value = address.line2;
+    if (villageCoords && address.lat && address.lng) villageCoords.value = `${address.lat},${address.lng}`;
+
+    if (address.lat && address.lng) {
+        selectedLocation = { lat: parseFloat(address.lat), lng: parseFloat(address.lng) };
+        if (typeof L !== 'undefined' && typeof window.placeMarkerLeaflet === 'function') {
+            try {
+                window.placeMarkerLeaflet(L.latLng(selectedLocation.lat, selectedLocation.lng));
+            } catch (e) {
+            }
+        }
+    }
+}
+
+async function saveAddressIfPossible(orderData) {
+    try {
+        const payload = {
+            label: orderData.village || 'عنوان التوصيل',
+            contact_name: orderData.recipient_name || null,
+            phone: orderData.phone || null,
+            line1: orderData.village || '',
+            line2: orderData.address_note || null,
+            city: 'As-Suwayda',
+            country: 'SY',
+            lat: orderData.location?.lat ?? null,
+            lng: orderData.location?.lng ?? null,
+            is_default: false
+        };
+
+        if (!payload.line1) return;
+
+        await fetch('/api/addresses', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: JSON.stringify(payload)
+        });
+    } catch (e) {
+    }
+}
+
 // Initialize map when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     console.log('📄 DOM loaded, initializing...');
     fetchExchangeRate();
     populateVillagesDropdown();
     loadUserData();
+    loadSavedAddresses().then(items => {
+        savedAddresses = items;
+        renderSavedAddressesUI(items);
+        const def = items.find(a => a.is_default) || items[0];
+        if (def) applySavedAddress(def);
+    });
     
     // Wait a bit for Leaflet to be fully loaded
     setTimeout(() => {
@@ -1690,6 +1819,8 @@ async function submitOrder() {
     console.log('Order data:', orderData);
     
     try {
+        await saveAddressIfPossible(orderData);
+
         const response = await fetch('/api/orders/create', {
             method: 'POST',
             headers: {

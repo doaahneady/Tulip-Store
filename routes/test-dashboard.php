@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Dashboard\SuperAdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,7 +37,7 @@ Route::get('/test-admin-dashboard', function () {
         'recent_activities' => collect([]),
         'top_performing_stores' => collect([]),
     ];
-    
+
     return view('dashboards.super-admin.index', compact('metrics'));
 });
 
@@ -73,8 +72,8 @@ Route::get('/test-dashboard-structure', function () {
         ],
         'routes' => [
             'dashboard_routes_loaded' => file_exists(base_path('routes/dashboard.php')),
-        ]
+        ],
     ];
-    
+
     return response()->json($structure, 200, [], JSON_PRETTY_PRINT);
 });

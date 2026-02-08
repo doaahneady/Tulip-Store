@@ -73,7 +73,7 @@ class DashboardUsersSeeder extends Seeder
         foreach ($users as $userData) {
             $existingByEmail = User::where('email', $userData['email'])->first();
             $existingByUsername = User::where('username', $userData['username'])->first();
-            
+
             if ($existingByEmail) {
                 // Update existing user by email
                 $existingByEmail->update(array_diff_key($userData, ['username' => '', 'email' => '']));
@@ -89,20 +89,37 @@ class DashboardUsersSeeder extends Seeder
         $this->command->info('Dashboard users created successfully!');
         $this->command->table(
             ['Email', 'Role'],
-            collect($users)->map(fn($u) => [$u['email'], $this->getRole($u)])->toArray()
+            collect($users)->map(fn ($u) => [$u['email'], $this->getRole($u)])->toArray()
         );
     }
 
     private function getRole($user): string
     {
-        if ($user['is_admin'] ?? false) return 'Admin';
-        if ($user['is_it_super'] ?? false) return 'IT Supervisor';
-        if ($user['is_hr'] ?? false) return 'HR';
-        if ($user['is_cs'] ?? false) return 'Customer Service';
-        if ($user['is_finance'] ?? false) return 'Finance';
-        if ($user['is_accountant'] ?? false) return 'Accountant';
-        if ($user['is_driver_supervisor'] ?? false) return 'Delivery Supervisor';
-        if ($user['is_trader'] ?? false) return 'Store Owner';
+        if ($user['is_admin'] ?? false) {
+            return 'Admin';
+        }
+        if ($user['is_it_super'] ?? false) {
+            return 'IT Supervisor';
+        }
+        if ($user['is_hr'] ?? false) {
+            return 'HR';
+        }
+        if ($user['is_cs'] ?? false) {
+            return 'Customer Service';
+        }
+        if ($user['is_finance'] ?? false) {
+            return 'Finance';
+        }
+        if ($user['is_accountant'] ?? false) {
+            return 'Accountant';
+        }
+        if ($user['is_driver_supervisor'] ?? false) {
+            return 'Delivery Supervisor';
+        }
+        if ($user['is_trader'] ?? false) {
+            return 'Store Owner';
+        }
+
         return 'User';
     }
 }

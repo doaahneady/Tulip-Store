@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Form Request for recording attendance
- * 
+ *
  * @see Requirements 10.2, 15.2
  */
 class RecordAttendanceRequest extends FormRequest

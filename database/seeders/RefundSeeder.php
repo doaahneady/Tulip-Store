@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class RefundSeeder extends Seeder
@@ -16,13 +15,13 @@ class RefundSeeder extends Seeder
         $orders = \DB::table('orders')->limit(5)->get();
         $users = \DB::table('users')->get();
         $adminId = $users->where('is_admin', true)->first()->id ?? 1;
-        
+
         if ($orders->isEmpty()) {
             return; // No orders to create refunds for
         }
-        
+
         $refunds = [];
-        
+
         foreach ($orders->take(3) as $index => $order) {
             $refunds[] = [
                 'order_id' => $order->id,
@@ -38,7 +37,7 @@ class RefundSeeder extends Seeder
                 'updated_at' => now()->subDays($index),
             ];
         }
-        
+
         \DB::table('refunds')->insert($refunds);
     }
 }

@@ -11,19 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ticket_replies', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('ticket_id')->constrained('support_tickets')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->text('message');
-            $table->boolean('is_internal_note')->default(false);
-            $table->json('attachments')->nullable();
-            $table->timestamps();
-            
-            $table->index('ticket_id');
-            $table->index('user_id');
-            $table->index('created_at');
-        });
+        if (! Schema::hasTable('ticket_replies')) {
+            Schema::create('ticket_replies', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('ticket_id')->constrained('support_tickets')->onDelete('cascade');
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
+                $table->text('message');
+                $table->boolean('is_internal_note')->default(false);
+                $table->json('attachments')->nullable();
+                $table->timestamps();
+
+                $table->index('ticket_id');
+                $table->index('user_id');
+                $table->index('created_at');
+            });
+        }
     }
 
     /**

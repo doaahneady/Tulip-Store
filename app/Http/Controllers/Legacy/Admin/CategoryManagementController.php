@@ -14,7 +14,7 @@ class CategoryManagementController extends Controller
         $categories = Category::withCount('products')
             ->orderBy('display_order')
             ->paginate(15);
-        
+
         return view('admin.categories.index', compact('categories'));
     }
 
@@ -34,7 +34,7 @@ class CategoryManagementController extends Controller
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
-        
+
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('categories', 'public');
         }
@@ -53,7 +53,7 @@ class CategoryManagementController extends Controller
     public function update(Request $request, Category $category)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
+            'name' => 'required|string|max:255|unique:categories,name,'.$category->id,
             'description' => 'nullable|string',
             'image' => 'nullable|image|max:2048',
             'display_order' => 'nullable|integer',
@@ -61,7 +61,7 @@ class CategoryManagementController extends Controller
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
-        
+
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('categories', 'public');
         }

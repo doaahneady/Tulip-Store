@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class UserTestDataSeeder extends Seeder
 {
@@ -35,8 +35,8 @@ class UserTestDataSeeder extends Seeder
         ];
 
         foreach ($arabicNames as $index => $name) {
-            $email = 'user' . ($index + 1) . '@example.com';
-            
+            $email = 'user'.($index + 1).'@example.com';
+
             // Skip if user already exists
             if (User::where('email', $email)->exists()) {
                 continue;
@@ -47,10 +47,10 @@ class UserTestDataSeeder extends Seeder
 
             User::create([
                 'name' => $name,
-                'username' => 'user' . ($index + 1),
+                'username' => 'user'.($index + 1),
                 'email' => $email,
                 'password' => Hash::make('password123'),
-                'phone' => '05' . rand(10000000, 99999999),
+                'phone' => '05'.rand(10000000, 99999999),
                 'is_admin' => false,
                 'role_id' => null,
                 'email_verified_at' => $createdAt,
@@ -59,7 +59,7 @@ class UserTestDataSeeder extends Seeder
             ]);
         }
 
-        echo "Successfully created " . count($arabicNames) . " test users!\n";
-        echo "Total users: " . User::count() . "\n";
+        echo 'Successfully created '.count($arabicNames)." test users!\n";
+        echo 'Total users: '.User::count()."\n";
     }
 }

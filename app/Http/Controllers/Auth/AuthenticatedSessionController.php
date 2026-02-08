@@ -32,6 +32,7 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        Auth::guard('trader')->logout();
         $request->session()->regenerate();
 
         return redirect()->intended(RouteServiceProvider::HOME);

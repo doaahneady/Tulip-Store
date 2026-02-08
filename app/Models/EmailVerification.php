@@ -22,4 +22,3 @@ class EmailVerification extends Model
         'used' => 'boolean',
     ];
 }
-

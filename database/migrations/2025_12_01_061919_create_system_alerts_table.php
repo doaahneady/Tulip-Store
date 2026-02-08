@@ -23,7 +23,7 @@ return new class extends Migration
             $table->timestamp('resolved_at')->nullable();
             $table->text('resolution_notes')->nullable();
             $table->timestamps();
-            
+
             $table->index('type');
             $table->index('priority');
             $table->index('is_read');

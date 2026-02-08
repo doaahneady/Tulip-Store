@@ -5,172 +5,185 @@ namespace App\Models;
 use App\Exceptions\Dashboard\ImmutableRecordException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class AuditLog extends Model
 {
     use HasFactory;
 
+    const UPDATED_AT = null;
+
     protected $fillable = [
         'user_id',
         'action',
-        'model_type',      // resource_type in design
-        'model_id',        // resource_id in design
-        'old_values',      // metadata - old values
-        'new_values',      // metadata - new values
+        'model_type',
+        'model_id',
+        'old_values',
+        'new_values',
         'ip_address',
         'user_agent',
+        'metadata',
     ];
 
     protected $casts = [
         'old_values' => 'array',
         'new_values' => 'array',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'metadata' => 'array',
     ];
 
-    /**
-     * Boot method to enforce immutability - audit logs cannot be modified or deleted
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        // Prevent updates to audit logs
-        static::updating(function ($model) {
-            throw new ImmutableRecordException('Audit logs cannot be modified');
-        });
-
-        // Prevent deletion of audit logs
-        static::deleting(function ($model) {
-            throw new ImmutableRecordException('Audit logs cannot be deleted');
-        });
-    }
-
-    /**
-     * Get the user who performed the action
-     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the subject model (polymorphic relationship)
-     */
-    public function subject()
+    public function model()
     {
-        return $this->morphTo('model');
+        return $this->morphTo('model', 'model_type', 'model_id');
     }
 
-    /**
-     * Alias for model_type to match design document terminology
-     */
-    public function getResourceTypeAttribute(): ?string
+    public function scopeByUser($query, $userId, $userType = null)
     {
-        return $this->model_type;
+        $query->where('user_id', $userId);
+
+        return $query;
     }
 
-    /**
-     * Alias for model_id to match design document terminology
-     */
-    public function getResourceIdAttribute(): ?int
+    public function scopeByAction($query, $action)
     {
-        return $this->model_id;
+        return $query->where('action', $action);
     }
 
-    /**
-     * Get combined metadata from old_values and new_values
-     */
-    public function getMetadataAttribute(): array
+    public function scopeByModel($query, $modelType, $modelId = null)
     {
-        return [
-            'old_values' => $this->old_values,
-            'new_values' => $this->new_values,
-        ];
-    }
-
-    /**
-     * Serialize the audit log entry to JSON string
-     * Uses consistent field ordering for deterministic output
-     */
-    public function serializeToJson(): string
-    {
-        $data = [
-            'id' => $this->id,
-            'user_id' => $this->user_id,
-            'action' => $this->action,
-            'resource_type' => $this->model_type,
-            'resource_id' => $this->model_id,
-            'metadata' => [
-                'old_values' => $this->old_values,
-                'new_values' => $this->new_values,
-            ],
-            'ip_address' => $this->ip_address,
-            'user_agent' => $this->user_agent,
-            'created_at' => $this->created_at?->toIso8601String(),
-            'updated_at' => $this->updated_at?->toIso8601String(),
-        ];
-
-        // Sort keys for consistent ordering
-        ksort($data);
-        if (isset($data['metadata'])) {
-            ksort($data['metadata']);
+        $query->where('model_type', $modelType);
+        if ($modelId) {
+            $query->where('model_id', $modelId);
         }
 
-        return json_encode($data, JSON_THROW_ON_ERROR);
+        return $query;
     }
 
-    /**
-     * Deserialize JSON string to AuditLog attributes array
-     * Returns an array that can be used to create or compare audit log entries
-     */
-    public static function deserializeFromJson(string $json): array
+    public function getActionColorAttribute()
     {
-        $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-
-        return [
-            'id' => $data['id'] ?? null,
-            'user_id' => $data['user_id'] ?? null,
-            'action' => $data['action'] ?? null,
-            'model_type' => $data['resource_type'] ?? null,
-            'model_id' => $data['resource_id'] ?? null,
-            'old_values' => $data['metadata']['old_values'] ?? null,
-            'new_values' => $data['metadata']['new_values'] ?? null,
-            'ip_address' => $data['ip_address'] ?? null,
-            'user_agent' => $data['user_agent'] ?? null,
-            'created_at' => $data['created_at'] ?? null,
-            'updated_at' => $data['updated_at'] ?? null,
-        ];
+        return match ($this->action) {
+            'create', 'created' => 'text-green-600 bg-green-100',
+            'update', 'updated' => 'text-blue-600 bg-blue-100',
+            'delete', 'deleted' => 'text-red-600 bg-red-100',
+            'login' => 'text-purple-600 bg-purple-100',
+            'logout' => 'text-gray-600 bg-gray-100',
+            default => 'text-indigo-600 bg-indigo-100',
+        };
     }
 
-    /**
-     * Create an AuditLog instance from serialized JSON data
-     */
-    public static function createFromSerializedJson(string $json): self
+    public function getActionIconAttribute()
     {
-        $attributes = self::deserializeFromJson($json);
-        
-        $auditLog = new self();
-        $auditLog->forceFill($attributes);
-        $auditLog->exists = isset($attributes['id']);
-        
-        return $auditLog;
+        return match ($this->action) {
+            'create', 'created' => 'fa-plus',
+            'update', 'updated' => 'fa-edit',
+            'delete', 'deleted' => 'fa-trash',
+            'login' => 'fa-sign-in-alt',
+            'logout' => 'fa-sign-out-alt',
+            'view' => 'fa-eye',
+            'download' => 'fa-download',
+            default => 'fa-cog',
+        };
     }
 
-    /**
-     * Static helper method to create audit log entries
-     */
-    public static function log($action, $model = null, $oldValues = null, $newValues = null)
+    public static function log($action, $model = null, $oldValues = null, $newValues = null, $metadata = null)
     {
-        return static::create([
-            'user_id' => auth()->id(),
+        $webUser = Auth::guard('web')->user();
+        $employeeUser = Auth::guard('employee')->user();
+        $actor = $webUser ?? $employeeUser;
+
+        $userId = $webUser?->id;
+        if ($userId && ! User::whereKey($userId)->exists()) {
+            $userId = null;
+        }
+
+        $meta = is_array($metadata) ? $metadata : (is_null($metadata) ? [] : ['value' => $metadata]);
+        if (! $webUser && $employeeUser) {
+            $meta = array_merge([
+                'actor' => array_filter([
+                    'guard' => 'employee',
+                    'employee_id' => $employeeUser->id ?? null,
+                    'employee_email' => $employeeUser->email ?? null,
+                    'employee_code' => $employeeUser->employee_code ?? null,
+                ], fn ($v) => $v !== null && $v !== ''),
+            ], $meta);
+        }
+
+        $data = [
+            'user_id' => $userId,
             'action' => $action,
             'model_type' => $model ? get_class($model) : null,
-            'model_id' => $model ? $model->id : null,
+            'model_id' => $model?->id,
             'old_values' => $oldValues,
             'new_values' => $newValues,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-        ]);
+            'metadata' => empty($meta) ? null : $meta,
+        ];
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('audit_logs', 'user_type')) {
+            $data['user_type'] = $actor ? get_class($actor) : null;
+        }
+
+        return static::create($data);
+    }
+
+    protected static function sortArrayRecursive($value)
+    {
+        if (! is_array($value)) {
+            return $value;
+        }
+        ksort($value);
+        foreach ($value as $k => $v) {
+            $value[$k] = static::sortArrayRecursive($v);
+        }
+
+        return $value;
+    }
+
+    public function serializeToJson(): string
+    {
+        $payload = [
+            'id' => $this->id,
+            'user_id' => $this->user_id,
+            'action' => $this->action,
+            'model_type' => $this->model_type,
+            'model_id' => $this->model_id,
+            'old_values' => static::sortArrayRecursive($this->old_values),
+            'new_values' => static::sortArrayRecursive($this->new_values),
+            'ip_address' => $this->ip_address,
+            'user_agent' => $this->user_agent,
+        ];
+
+        return json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+
+    public static function deserializeFromJson(string $json): array
+    {
+        return json_decode($json, true) ?? [];
+    }
+
+    public static function createFromSerializedJson(string $json): self
+    {
+        $data = static::deserializeFromJson($json);
+
+        return static::findOrFail($data['id']);
+    }
+
+    public function update(array $attributes = [], array $options = [])
+    {
+        if ($this->exists) {
+            throw new ImmutableRecordException('Audit logs cannot be modified');
+        }
+
+        return parent::update($attributes, $options);
+    }
+
+    public function delete()
+    {
+        throw new ImmutableRecordException('Audit logs cannot be deleted');
     }
 }

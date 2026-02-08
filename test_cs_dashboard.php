@@ -2,11 +2,11 @@
 
 require_once 'vendor/autoload.php';
 
-use Illuminate\Support\Facades\DB;
-use App\Models\User;
+use App\Models\CustomerFeedback;
 use App\Models\SupportTicket;
 use App\Models\TicketReply;
-use App\Models\CustomerFeedback;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 echo "=== Customer Service Dashboard Test ===\n\n";
 
@@ -31,7 +31,7 @@ try {
     $totalTickets = SupportTicket::count();
     $openTickets = SupportTicket::where('status', 'open')->count();
     $resolvedTickets = SupportTicket::where('status', 'resolved')->count();
-    
+
     echo "✓ Total Tickets: {$totalTickets}\n";
     echo "✓ Open Tickets: {$openTickets}\n";
     echo "✓ Resolved Tickets: {$resolvedTickets}\n\n";
@@ -45,35 +45,35 @@ try {
     echo "5. Testing Customer Feedback...\n";
     $totalFeedback = CustomerFeedback::count();
     $avgRating = CustomerFeedback::whereNotNull('rating')->avg('rating');
-    
+
     echo "✓ Total Feedback: {$totalFeedback}\n";
-    echo "✓ Average Rating: " . round($avgRating, 1) . "/5\n\n";
+    echo '✓ Average Rating: '.round($avgRating, 1)."/5\n\n";
 
     // Test Dashboard Controller Methods
     echo "6. Testing Dashboard Data Calculations...\n";
-    
+
     // Response Time
     $avgFirstResponseTime = SupportTicket::whereNotNull('first_response_at')
         ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, created_at, first_response_at)) as avg_time')
         ->value('avg_time');
-    
-    echo "✓ Average First Response Time: " . ($avgFirstResponseTime ? round($avgFirstResponseTime) . ' minutes' : 'N/A') . "\n";
-    
+
+    echo '✓ Average First Response Time: '.($avgFirstResponseTime ? round($avgFirstResponseTime).' minutes' : 'N/A')."\n";
+
     // Resolution Rate
     $resolvedCount = SupportTicket::whereIn('status', ['resolved', 'closed'])->count();
     $resolutionRate = $totalTickets > 0 ? round(($resolvedCount / $totalTickets) * 100) : 0;
-    
+
     echo "✓ Resolution Rate: {$resolutionRate}%\n";
-    
+
     // Satisfaction
     $avgSatisfaction = SupportTicket::whereNotNull('satisfaction_rating')->avg('satisfaction_rating');
-    echo "✓ Average Satisfaction: " . ($avgSatisfaction ? round($avgSatisfaction, 1) : 'N/A') . "/5\n\n";
+    echo '✓ Average Satisfaction: '.($avgSatisfaction ? round($avgSatisfaction, 1) : 'N/A')."/5\n\n";
 
     // Test Recent Data
     echo "7. Testing Recent Data...\n";
     $recentTickets = SupportTicket::with(['user', 'assignedAgent'])->latest()->take(5)->get();
     echo "✓ Recent Tickets: {$recentTickets->count()}\n";
-    
+
     $recentFeedback = CustomerFeedback::with(['user'])->latest()->take(5)->get();
     echo "✓ Recent Feedback: {$recentFeedback->count()}\n\n";
 
@@ -88,7 +88,7 @@ try {
     }
 
 } catch (Exception $e) {
-    echo "✗ Error: " . $e->getMessage() . "\n";
+    echo '✗ Error: '.$e->getMessage()."\n";
     echo "Make sure to run migrations and seeders first:\n";
     echo "php artisan migrate\n";
     echo "php artisan db:seed --class=CustomerServiceDataSeeder\n";

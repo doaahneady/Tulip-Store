@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class CouponSeeder extends Seeder
@@ -94,10 +93,13 @@ class CouponSeeder extends Seeder
         ];
 
         foreach ($coupons as $coupon) {
-            \DB::table('coupons')->insert(array_merge($coupon, [
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]));
+            \DB::table('coupons')->updateOrInsert(
+                ['code' => $coupon['code']],
+                array_merge($coupon, [
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ])
+            );
         }
     }
 }

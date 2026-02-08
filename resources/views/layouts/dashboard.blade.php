@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Styles -->
-    <link href="{{ asset('resources/css/dashboard-system.css') }}" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/css/dashboard-system.css'])
     @stack('styles')
     
     <style>
@@ -111,10 +111,10 @@
                     <!-- User Menu -->
                     <div class="topbar-user" onclick="toggleUserMenu()">
                         <div class="user-avatar">
-                            {{ substr(auth()->user()->name, 0, 1) }}
+                            {{ substr(is_array(data_get(auth()->user(),'name')) ? json_encode(data_get(auth()->user(),'name')) : (data_get(auth()->user(),'name') ?? ''), 0, 1) }}
                         </div>
                         <div class="user-info">
-                            <div class="user-name">{{ auth()->user()->name }}</div>
+                            <div class="user-name">{{ is_array(data_get(auth()->user(),'name')) ? json_encode(data_get(auth()->user(),'name')) : data_get(auth()->user(),'name') }}</div>
                             <div class="user-role">@yield('user-role', 'مستخدم')</div>
                         </div>
                         <i class="fas fa-chevron-down text-xs"></i>

@@ -29,7 +29,7 @@ Route::get('/simple-admin-test', function () {
         'recent_activities' => collect([]),
         'top_performing_stores' => collect([]),
     ];
-    
+
     return view('dashboards.super-admin.index', compact('metrics'));
 });
 
@@ -37,11 +37,11 @@ Route::get('/simple-admin-test', function () {
 Route::get('/test-view-only', function () {
     return '<h1>Dashboard System Status</h1>
     <ul>
-        <li>Super Admin View: ' . (view()->exists('dashboards.super-admin.index') ? '✓ EXISTS' : '✗ MISSING') . '</li>
-        <li>Finance View: ' . (view()->exists('dashboards.finance.index') ? '✓ EXISTS' : '✗ MISSING') . '</li>
-        <li>HR View: ' . (view()->exists('dashboards.hr.index') ? '✓ EXISTS' : '✗ MISSING') . '</li>
-        <li>IT View: ' . (view()->exists('dashboards.it.index') ? '✓ EXISTS' : '✗ MISSING') . '</li>
-        <li>Supervisor View: ' . (view()->exists('dashboards.supervisor.index') ? '✓ EXISTS' : '✗ MISSING') . '</li>
-        <li>Vendor View: ' . (view()->exists('dashboards.vendor.index') ? '✓ EXISTS' : '✗ MISSING') . '</li>
+        <li>Super Admin View: '.(view()->exists('dashboards.super-admin.index') ? '✓ EXISTS' : '✗ MISSING').'</li>
+        <li>Finance View: '.(view()->exists('dashboards.finance.index') ? '✓ EXISTS' : '✗ MISSING').'</li>
+        <li>HR View: '.(view()->exists('dashboards.hr.index') ? '✓ EXISTS' : '✗ MISSING').'</li>
+        <li>IT View: '.(view()->exists('dashboards.it.index') ? '✓ EXISTS' : '✗ MISSING').'</li>
+        <li>Supervisor View: '.(view()->exists('dashboards.supervisor.index') ? '✓ EXISTS' : '✗ MISSING').'</li>
+        <li>Vendor View: '.(view()->exists('dashboards.vendor.index') ? '✓ EXISTS' : '✗ MISSING').'</li>
     </ul>';
 });

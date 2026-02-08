@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Order;
-use App\Models\User;
 use App\Models\Product;
-use Illuminate\Support\Facades\DB;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class OrderTestDataSeeder extends Seeder
 {
@@ -19,6 +19,7 @@ class OrderTestDataSeeder extends Seeder
 
         if ($users->isEmpty() || $products->isEmpty()) {
             echo "Please ensure you have users and products in the database first.\n";
+
             return;
         }
 
@@ -29,29 +30,29 @@ class OrderTestDataSeeder extends Seeder
         // Generate orders for the last 60 days
         for ($day = 60; $day >= 0; $day--) {
             $date = Carbon::now()->subDays($day);
-            
+
             // More orders on recent days, fewer on older days
             $ordersPerDay = $day < 30 ? rand(3, 8) : rand(1, 4);
-            
+
             for ($i = 0; $i < $ordersPerDay; $i++) {
                 $user = $users->random();
                 $status = $this->getWeightedStatus($day);
                 $paymentMethod = $paymentMethods[array_rand($paymentMethods)];
-                
+
                 // Create order
                 $village = $this->getRandomVillage();
                 $orderData = [
-                    'order_number' => 'ORD-' . strtoupper(uniqid()),
+                    'order_number' => 'ORD-'.strtoupper(uniqid()),
                     'user_id' => $user->id,
-                    'recipient_name' => $user->name ?? 'Customer ' . rand(1, 100),
-                    'phone' => $user->phone ?? '05' . rand(10000000, 99999999),
+                    'recipient_name' => $user->name ?? 'Customer '.rand(1, 100),
+                    'phone' => $user->phone ?? '05'.rand(10000000, 99999999),
                     'village' => $village,
                     'address_note' => 'Test address note',
                     'latitude' => rand(2400, 3200) / 100,
                     'longitude' => rand(3400, 4800) / 100,
                     'delivery_method' => $deliveryMethods[array_rand($deliveryMethods)],
                     'shipping_method' => $deliveryMethods[array_rand($deliveryMethods)],
-                    'shipping_address' => $village . ', Saudi Arabia',
+                    'shipping_address' => $village.', Saudi Arabia',
                     'payment_method' => $paymentMethod,
                     'status' => $status,
                     'payment_status' => $status === 'delivered' ? 'paid' : ($status === 'cancelled' ? 'failed' : 'pending'),
@@ -101,7 +102,7 @@ class OrderTestDataSeeder extends Seeder
         }
 
         echo "Successfully created test orders for the last 60 days!\n";
-        echo "Total orders created: " . Order::count() . "\n";
+        echo 'Total orders created: '.Order::count()."\n";
     }
 
     private function getWeightedStatus($daysAgo)

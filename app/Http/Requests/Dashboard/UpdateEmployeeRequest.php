@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Form Request for updating employees
- * 
+ *
  * @see Requirements 10.1, 15.2
  */
 class UpdateEmployeeRequest extends FormRequest
@@ -27,11 +27,11 @@ class UpdateEmployeeRequest extends FormRequest
     public function rules(): array
     {
         $employeeId = $this->route('employeeId');
-        
+
         return [
             'first_name' => 'sometimes|string|max:255',
             'last_name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:employees,email,' . $employeeId,
+            'email' => 'sometimes|email|unique:employees,email,'.$employeeId,
             'phone' => 'sometimes|string|max:20',
             'department' => 'sometimes|string|max:255',
             'position' => 'sometimes|string|max:255',

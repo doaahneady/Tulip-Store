@@ -684,16 +684,39 @@
                 const savings = oldPrice ? (oldPrice - price) * item.quantity : 0;
                 const itemTotal = price * item.quantity;
                 
+                // Check if this is a custom gift/bouquet (string ID)
+                const isCustom = typeof item.id === 'string' && (item.id.startsWith('custom_gift_') || item.id.startsWith('custom_bouquet_'));
+                const itemIdParam = isCustom ? `'${item.id}'` : item.id;
+                
+                // For custom items, show emoji preview instead of image
+                const imageContent = isCustom 
+                    ? `<div style="font-size:4rem;display:flex;align-items:center;justify-content:center;height:100%;">${item.id.startsWith('custom_bouquet_') ? '💐' : '🎁'}</div>`
+                    : `<img src="${item.product.image || 'https://via.placeholder.com/150'}" alt="${item.product.name}">`;
+                
+                // For custom items, hide quantity controls (quantity is always 1)
+                const quantityControls = isCustom 
+                    ? `<div class="quantity-control" style="opacity:0.5;pointer-events:none;"><span class="quantity-value">1</span></div>`
+                    : `<div class="quantity-control">
+                            <button class="quantity-btn" onclick="updateQuantity(${itemIdParam}, ${item.quantity - 1})"><i class="fas fa-minus"></i></button>
+                            <span class="quantity-value">${item.quantity}</span>
+                            <button class="quantity-btn" onclick="updateQuantity(${itemIdParam}, ${item.quantity + 1})"><i class="fas fa-plus"></i></button>
+                       </div>`;
+                
+                // Product ID display
+                const productIdDisplay = !isCustom 
+                    ? `<div class="cart-item-meta-item"><i class="fas fa-box"></i> رقم المنتج: #${item.product.id}</div>`
+                    : `<div class="cart-item-meta-item"><i class="fas fa-gift"></i> هدية مخصصة</div>`;
+                
                 return `
                 <div class="cart-item" data-item-id="${item.id}">
                     <div class="cart-item-image">
-                        <img src="${item.product.image || 'https://via.placeholder.com/150'}" alt="${item.product.name}">
+                        ${imageContent}
                     </div>
                     <div class="cart-item-details">
                         <h3 class="cart-item-name">${item.product.name}</h3>
                         <div class="cart-item-meta">
                             ${item.product.brand ? `<div class="cart-item-meta-item"><i class="fas fa-tag"></i> ${item.product.brand}</div>` : ''}
-                            <div class="cart-item-meta-item"><i class="fas fa-box"></i> رقم المنتج: #${item.product.id}</div>
+                            ${productIdDisplay}
                         </div>
                         <div class="cart-item-stock"><i class="fas fa-check-circle"></i> متوفر في المخزون</div>
                         <div class="cart-item-price-section">
@@ -706,16 +729,8 @@
                         </div>
                     </div>
                     <div class="cart-item-actions-column">
-                        <div class="quantity-control">
-                            <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <span class="quantity-value">${item.quantity}</span>
-                            <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <button class="remove-btn" onclick="showDeleteModal(${item.id})">
+                        ${quantityControls}
+                        <button class="remove-btn" onclick="showDeleteModal(${itemIdParam})">
                             <i class="fas fa-trash-alt"></i> حذف
                         </button>
                     </div>

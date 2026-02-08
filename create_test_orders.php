@@ -1,8 +1,8 @@
 <?php
 
-require __DIR__ . '/vendor/autoload.php';
+require __DIR__.'/vendor/autoload.php';
 
-$app = require_once __DIR__ . '/bootstrap/app.php';
+$app = require_once __DIR__.'/bootstrap/app.php';
 $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
 
 use App\Models\Order;
@@ -13,7 +13,7 @@ echo "Creating test data for Driver Supervisor Orders...\n\n";
 
 // Check if we have any users
 $user = User::first();
-if (!$user) {
+if (! $user) {
     echo "No users found. Creating a test user...\n";
     $user = User::create([
         'name' => 'عميل تجريبي',
@@ -27,7 +27,7 @@ echo "User ID: {$user->id}\n";
 // Create test orders
 $orders = [
     [
-        'order_number' => 'ORD-TEST-' . rand(1000, 9999),
+        'order_number' => 'ORD-TEST-'.rand(1000, 9999),
         'user_id' => $user->id,
         'recipient_name' => 'أحمد محمود',
         'phone' => '0912345678',
@@ -45,7 +45,7 @@ $orders = [
         'total' => 57.50,
     ],
     [
-        'order_number' => 'ORD-TEST-' . rand(1000, 9999),
+        'order_number' => 'ORD-TEST-'.rand(1000, 9999),
         'user_id' => $user->id,
         'recipient_name' => 'فاطمة علي',
         'phone' => '0923456789',
@@ -63,7 +63,7 @@ $orders = [
         'total' => 115.00,
     ],
     [
-        'order_number' => 'ORD-TEST-' . rand(1000, 9999),
+        'order_number' => 'ORD-TEST-'.rand(1000, 9999),
         'user_id' => $user->id,
         'recipient_name' => 'محمد حسن',
         'phone' => '0934567890',
@@ -85,7 +85,7 @@ $orders = [
 foreach ($orders as $orderData) {
     $order = Order::create($orderData);
     echo "Created order: {$order->order_number} (Status: {$order->status}, Payment: {$order->payment_method})\n";
-    
+
     // Create order items
     OrderItem::create([
         'order_id' => $order->id,
@@ -108,7 +108,7 @@ $drivers = [
 
 foreach ($drivers as $driverData) {
     $existing = User::where('email', $driverData['email'])->first();
-    if (!$existing) {
+    if (! $existing) {
         $driver = User::create([
             'name' => $driverData['name'],
             'email' => $driverData['email'],

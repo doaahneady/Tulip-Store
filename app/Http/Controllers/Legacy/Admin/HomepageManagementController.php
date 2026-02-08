@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Legacy\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -22,10 +23,40 @@ class HomepageManagementController extends Controller
     public function getSections()
     {
         $sections = Cache::get('homepage_sections', $this->getDefaultSections());
-        
+
         return response()->json([
             'success' => true,
-            'sections' => $sections
+            'sections' => $sections,
+        ]);
+    }
+
+    public function getSlides()
+    {
+        $slides = Setting::get('homepage_slider_slides', null);
+        if (! is_array($slides) || empty($slides)) {
+            $slides = [
+                [
+                    'image' => '/images/footer.jpg',
+                    'title' => 'أرسل ابتسامتك أينما كنت',
+                    'subtitle' => 'تسوق معنا أفضل المنتجات والعروض',
+                ],
+                [
+                    'image' => '/images/logo-girl.jpg',
+                    'title' => 'هدايا توليب',
+                    'subtitle' => 'لحظات استثنائية تستحق هدايا مميزة',
+                ],
+                [
+                    'image' => '/images/white_orange_logo.png',
+                    'title' => 'وصل حديثاً',
+                    'subtitle' => 'اكتشف أحدث المنتجات في متجرنا',
+                ],
+            ];
+            Setting::set('homepage_slider_slides', $slides, 'json', 'Home page slider slides');
+        }
+
+        return response()->json([
+            'success' => true,
+            'slides' => $slides,
         ]);
     }
 
@@ -42,14 +73,14 @@ class HomepageManagementController extends Controller
         ]);
 
         $sections = $request->input('sections');
-        
+
         // Store in cache (or database for persistence)
         Cache::put('homepage_sections', $sections, now()->addYear());
-        
+
         return response()->json([
             'success' => true,
             'message' => 'تم تحديث إعدادات الصفحة الرئيسية',
-            'sections' => $sections
+            'sections' => $sections,
         ]);
     }
 
@@ -59,20 +90,20 @@ class HomepageManagementController extends Controller
     public function toggleSection(Request $request, $sectionId)
     {
         $sections = Cache::get('homepage_sections', $this->getDefaultSections());
-        
+
         foreach ($sections as &$section) {
             if ($section['id'] === $sectionId) {
-                $section['visible'] = !$section['visible'];
+                $section['visible'] = ! $section['visible'];
                 break;
             }
         }
-        
+
         Cache::put('homepage_sections', $sections, now()->addYear());
-        
+
         return response()->json([
             'success' => true,
             'message' => 'تم تحديث حالة القسم',
-            'sections' => $sections
+            'sections' => $sections,
         ]);
     }
 
@@ -99,11 +130,11 @@ class HomepageManagementController extends Controller
         ];
 
         Cache::put('lightning_deals_settings', $settings, now()->addYear());
-        
+
         return response()->json([
             'success' => true,
             'message' => 'تم تحديث إعدادات عروض البرق',
-            'settings' => $settings
+            'settings' => $settings,
         ]);
     }
 
@@ -122,7 +153,7 @@ class HomepageManagementController extends Controller
 
         return response()->json([
             'success' => true,
-            'settings' => $settings
+            'settings' => $settings,
         ]);
     }
 
@@ -138,7 +169,7 @@ class HomepageManagementController extends Controller
 
         $newOrder = $request->input('order');
         $sections = Cache::get('homepage_sections', $this->getDefaultSections());
-        
+
         // Reorder sections based on new order
         $reordered = [];
         foreach ($newOrder as $index => $sectionId) {
@@ -150,13 +181,13 @@ class HomepageManagementController extends Controller
                 }
             }
         }
-        
+
         Cache::put('homepage_sections', $reordered, now()->addYear());
-        
+
         return response()->json([
             'success' => true,
             'message' => 'تم إعادة ترتيب الأقسام',
-            'sections' => $reordered
+            'sections' => $reordered,
         ]);
     }
 
@@ -207,7 +238,7 @@ class HomepageManagementController extends Controller
     public function getFeaturedProducts(Request $request, $type)
     {
         $validTypes = ['featured', 'flash', 'new'];
-        if (!in_array($type, $validTypes)) {
+        if (! in_array($type, $validTypes)) {
             return response()->json(['success' => false, 'message' => 'Invalid type'], 400);
         }
 
@@ -217,7 +248,7 @@ class HomepageManagementController extends Controller
         return response()->json([
             'success' => true,
             'type' => $type,
-            'product_ids' => $productIds
+            'product_ids' => $productIds,
         ]);
     }
 
@@ -227,12 +258,12 @@ class HomepageManagementController extends Controller
     public function saveFeaturedProducts(Request $request, $type)
     {
         $validTypes = ['featured', 'flash', 'new'];
-        if (!in_array($type, $validTypes)) {
+        if (! in_array($type, $validTypes)) {
             return response()->json(['success' => false, 'message' => 'Invalid type'], 400);
         }
 
         $productIds = $request->input('product_ids', []);
-        
+
         // Convert to integers
         $productIds = array_map('intval', $productIds);
 
@@ -243,7 +274,7 @@ class HomepageManagementController extends Controller
             'success' => true,
             'message' => 'تم حفظ المنتجات بنجاح',
             'type' => $type,
-            'product_ids' => $productIds
+            'product_ids' => $productIds,
         ]);
     }
 
@@ -257,8 +288,8 @@ class HomepageManagementController extends Controller
             'counts' => [
                 'featured' => count(Cache::get('homepage_featured_products', [])),
                 'flash' => count(Cache::get('homepage_flash_products', [])),
-                'new' => count(Cache::get('homepage_new_products', []))
-            ]
+                'new' => count(Cache::get('homepage_new_products', [])),
+            ],
         ]);
     }
 
@@ -268,10 +299,10 @@ class HomepageManagementController extends Controller
     public function getPackages()
     {
         $packages = Cache::get('homepage_packages', $this->getDefaultPackages());
-        
+
         return response()->json([
             'success' => true,
-            'packages' => $packages
+            'packages' => $packages,
         ]);
     }
 
@@ -281,14 +312,14 @@ class HomepageManagementController extends Controller
     public function savePackages(Request $request)
     {
         $request->validate([
-            'packages' => 'required|array'
+            'packages' => 'required|array',
         ]);
 
         Cache::put('homepage_packages', $request->input('packages'), now()->addYear());
 
         return response()->json([
             'success' => true,
-            'message' => 'تم حفظ الباقات بنجاح'
+            'message' => 'تم حفظ الباقات بنجاح',
         ]);
     }
 
@@ -299,17 +330,17 @@ class HomepageManagementController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100',
-            'product_ids' => 'nullable|array'
+            'product_ids' => 'nullable|array',
         ]);
 
         $packages = Cache::get('homepage_packages', $this->getDefaultPackages());
-        
+
         $newPackage = [
-            'id' => 'pkg_' . time(),
+            'id' => 'pkg_'.time(),
             'name' => $request->input('name'),
             'product_ids' => $request->input('product_ids', []),
             'visible' => true,
-            'order' => count($packages)
+            'order' => count($packages),
         ];
 
         $packages[] = $newPackage;
@@ -318,7 +349,7 @@ class HomepageManagementController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'تم إضافة الباقة بنجاح',
-            'package' => $newPackage
+            'package' => $newPackage,
         ]);
     }
 
@@ -328,7 +359,7 @@ class HomepageManagementController extends Controller
     public function updatePackage(Request $request, $packageId)
     {
         $packages = Cache::get('homepage_packages', $this->getDefaultPackages());
-        
+
         foreach ($packages as &$package) {
             if ($package['id'] === $packageId) {
                 if ($request->has('name')) {
@@ -350,7 +381,7 @@ class HomepageManagementController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تحديث الباقة بنجاح'
+            'message' => 'تم تحديث الباقة بنجاح',
         ]);
     }
 
@@ -360,14 +391,14 @@ class HomepageManagementController extends Controller
     public function deletePackage($packageId)
     {
         $packages = Cache::get('homepage_packages', $this->getDefaultPackages());
-        $packages = array_filter($packages, fn($p) => $p['id'] !== $packageId);
+        $packages = array_filter($packages, fn ($p) => $p['id'] !== $packageId);
         $packages = array_values($packages);
-        
+
         Cache::put('homepage_packages', $packages, now()->addYear());
 
         return response()->json([
             'success' => true,
-            'message' => 'تم حذف الباقة بنجاح'
+            'message' => 'تم حذف الباقة بنجاح',
         ]);
     }
 
@@ -378,14 +409,14 @@ class HomepageManagementController extends Controller
     {
         $packages = Cache::get('homepage_packages', $this->getDefaultPackages());
         $package = collect($packages)->firstWhere('id', $packageId);
-        
-        if (!$package) {
+
+        if (! $package) {
             return redirect('/store');
         }
-        
+
         return view('package-products', [
             'package' => $package,
-            'packageId' => $packageId
+            'packageId' => $packageId,
         ]);
     }
 
@@ -400,29 +431,29 @@ class HomepageManagementController extends Controller
                 'name' => 'هدايا فاخرة',
                 'product_ids' => [],
                 'visible' => true,
-                'order' => 0
+                'order' => 0,
             ],
             [
                 'id' => 'pkg_jewelry',
                 'name' => 'المجوهرات',
                 'product_ids' => [],
                 'visible' => true,
-                'order' => 1
+                'order' => 1,
             ],
             [
                 'id' => 'pkg_special_offers',
                 'name' => 'عروض خاصة',
                 'product_ids' => [],
                 'visible' => true,
-                'order' => 2
+                'order' => 2,
             ],
             [
                 'id' => 'pkg_new_arrivals',
                 'name' => 'وصل حديثاً',
                 'product_ids' => [],
                 'visible' => true,
-                'order' => 3
-            ]
+                'order' => 3,
+            ],
         ];
     }
 }

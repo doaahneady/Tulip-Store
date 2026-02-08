@@ -25,7 +25,7 @@ return new class extends Migration
             $table->text('last_output')->nullable();
             $table->boolean('is_enabled')->default(true);
             $table->timestamps();
-            
+
             $table->index('status');
             $table->index('is_enabled');
             $table->index('next_run_at');

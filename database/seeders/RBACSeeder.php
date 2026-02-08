@@ -16,7 +16,7 @@ class RBACSeeder extends Seeder
         // =====================================================
         // PERMISSIONS DEFINITION
         // =====================================================
-        
+
         $permissions = [
             // Super Admin Permissions (God Mode)
             ['name' => 'users.create', 'display_name' => 'Create Users', 'category' => 'users'],
@@ -104,7 +104,7 @@ class RBACSeeder extends Seeder
         // =====================================================
         // ROLES DEFINITION
         // =====================================================
-        
+
         $roles = [
             [
                 'name' => 'super_admin',
@@ -115,8 +115,8 @@ class RBACSeeder extends Seeder
                     'users.create', 'users.read', 'users.update', 'users.delete',
                     'roles.manage', 'permissions.manage', 'audit.read',
                     'analytics.global', 'emergency.override', 'system.maintenance',
-                    'dashboard.access', 'profile.update', 'notifications.read'
-                ]
+                    'dashboard.access', 'profile.update', 'notifications.read',
+                ],
             ],
             [
                 'name' => 'it_admin',
@@ -127,8 +127,8 @@ class RBACSeeder extends Seeder
                     'system.monitor', 'logs.read', 'logs.export',
                     'database.monitor', 'database.backup', 'deployments.manage',
                     'integrations.monitor', 'alerts.manage',
-                    'dashboard.access', 'profile.update', 'notifications.read'
-                ]
+                    'dashboard.access', 'profile.update', 'notifications.read',
+                ],
             ],
             [
                 'name' => 'devops_engineer',
@@ -138,8 +138,8 @@ class RBACSeeder extends Seeder
                 'permissions' => [
                     'system.monitor', 'logs.read', 'deployments.manage',
                     'database.monitor', 'integrations.monitor', 'alerts.manage',
-                    'dashboard.access', 'profile.update', 'notifications.read'
-                ]
+                    'dashboard.access', 'profile.update', 'notifications.read',
+                ],
             ],
             [
                 'name' => 'hr_manager',
@@ -150,8 +150,8 @@ class RBACSeeder extends Seeder
                     'employees.create', 'employees.read', 'employees.update',
                     'shifts.manage', 'payroll.calculate', 'payroll.submit',
                     'reviews.manage', 'recruiting.manage', 'announcements.create',
-                    'dashboard.access', 'profile.update', 'notifications.read'
-                ]
+                    'dashboard.access', 'profile.update', 'notifications.read',
+                ],
             ],
             [
                 'name' => 'hr_coordinator',
@@ -160,8 +160,8 @@ class RBACSeeder extends Seeder
                 'is_system_role' => true,
                 'permissions' => [
                     'employees.read', 'shifts.manage', 'recruiting.manage',
-                    'dashboard.access', 'profile.update', 'notifications.read'
-                ]
+                    'dashboard.access', 'profile.update', 'notifications.read',
+                ],
             ],
             [
                 'name' => 'driver_supervisor',
@@ -172,8 +172,8 @@ class RBACSeeder extends Seeder
                     'drivers.read', 'drivers.update', 'locations.track',
                     'orders.assign', 'routes.optimize', 'deliveries.monitor',
                     'vehicles.manage', 'delivery.verify',
-                    'dashboard.access', 'profile.update', 'notifications.read'
-                ]
+                    'dashboard.access', 'profile.update', 'notifications.read',
+                ],
             ],
             [
                 'name' => 'logistics_coordinator',
@@ -183,8 +183,8 @@ class RBACSeeder extends Seeder
                 'permissions' => [
                     'drivers.read', 'locations.track', 'orders.assign',
                     'routes.optimize', 'deliveries.monitor',
-                    'dashboard.access', 'profile.update', 'notifications.read'
-                ]
+                    'dashboard.access', 'profile.update', 'notifications.read',
+                ],
             ],
             [
                 'name' => 'finance_manager',
@@ -195,8 +195,8 @@ class RBACSeeder extends Seeder
                     'transactions.read', 'transactions.approve', 'payouts.approve',
                     'payouts.process', 'payroll.approve', 'payroll.process',
                     'reports.financial', 'tax.manage', 'revenue.track',
-                    'dashboard.access', 'profile.update', 'notifications.read'
-                ]
+                    'dashboard.access', 'profile.update', 'notifications.read',
+                ],
             ],
             [
                 'name' => 'accountant',
@@ -206,8 +206,8 @@ class RBACSeeder extends Seeder
                 'permissions' => [
                     'transactions.read', 'reports.financial', 'tax.manage',
                     'revenue.track', 'payroll.approve',
-                    'dashboard.access', 'profile.update', 'notifications.read'
-                ]
+                    'dashboard.access', 'profile.update', 'notifications.read',
+                ],
             ],
             [
                 'name' => 'product_owner',
@@ -218,8 +218,8 @@ class RBACSeeder extends Seeder
                     'products.create', 'products.read', 'products.update', 'products.delete',
                     'inventory.manage', 'orders.read_own', 'orders.update_own',
                     'sales.analytics', 'payouts.request', 'store.manage',
-                    'dashboard.access', 'profile.update', 'notifications.read'
-                ]
+                    'dashboard.access', 'profile.update', 'notifications.read',
+                ],
             ],
             [
                 'name' => 'store_manager',
@@ -229,8 +229,8 @@ class RBACSeeder extends Seeder
                 'permissions' => [
                     'products.read', 'products.update', 'inventory.manage',
                     'orders.read_own', 'orders.update_own', 'sales.analytics',
-                    'dashboard.access', 'profile.update', 'notifications.read'
-                ]
+                    'dashboard.access', 'profile.update', 'notifications.read',
+                ],
             ],
             [
                 'name' => 'driver',
@@ -238,8 +238,8 @@ class RBACSeeder extends Seeder
                 'description' => 'Delivery driver with mobile app access',
                 'is_system_role' => true,
                 'permissions' => [
-                    'dashboard.access', 'profile.update', 'notifications.read'
-                ]
+                    'dashboard.access', 'profile.update', 'notifications.read',
+                ],
             ],
             [
                 'name' => 'customer',
@@ -247,9 +247,9 @@ class RBACSeeder extends Seeder
                 'description' => 'Platform customer with shopping access',
                 'is_system_role' => true,
                 'permissions' => [
-                    'profile.update', 'notifications.read'
-                ]
-            ]
+                    'profile.update', 'notifications.read',
+                ],
+            ],
         ];
 
         foreach ($roles as $roleData) {
@@ -267,11 +267,9 @@ class RBACSeeder extends Seeder
             foreach ($roleData['permissions'] as $permissionName) {
                 $permission = DB::table('permissions')->where('name', $permissionName)->first();
                 if ($permission) {
-                    DB::table('role_permissions')->insertOrIgnore([
-                        'role_id' => $roleId,
+                    DB::table('permission_role')->insertOrIgnore([
                         'permission_id' => $permission->id,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'role_id' => $roleId,
                     ]);
                 }
             }
@@ -280,7 +278,7 @@ class RBACSeeder extends Seeder
         // =====================================================
         // CREATE DEFAULT ADMIN USER
         // =====================================================
-        
+
         $adminUserId = DB::table('users')->insertGetId([
             'name' => 'Super Administrator',
             'email' => 'admin@webstore.com',
@@ -305,38 +303,38 @@ class RBACSeeder extends Seeder
         // =====================================================
         // CREATE SAMPLE DASHBOARD USERS
         // =====================================================
-        
+
         $sampleUsers = [
             [
                 'name' => 'IT Administrator',
                 'email' => 'it@webstore.com',
                 'role' => 'it_admin',
-                'department' => 'IT'
+                'department' => 'IT',
             ],
             [
                 'name' => 'HR Manager',
                 'email' => 'hr@webstore.com',
                 'role' => 'hr_manager',
-                'department' => 'Human Resources'
+                'department' => 'Human Resources',
             ],
             [
                 'name' => 'Fleet Supervisor',
                 'email' => 'supervisor@webstore.com',
                 'role' => 'driver_supervisor',
-                'department' => 'Logistics'
+                'department' => 'Logistics',
             ],
             [
                 'name' => 'Finance Manager',
                 'email' => 'finance@webstore.com',
                 'role' => 'finance_manager',
-                'department' => 'Finance'
+                'department' => 'Finance',
             ],
             [
                 'name' => 'Sample Vendor',
                 'email' => 'vendor@webstore.com',
                 'role' => 'product_owner',
-                'department' => 'Sales'
-            ]
+                'department' => 'Sales',
+            ],
         ];
 
         foreach ($sampleUsers as $userData) {
@@ -366,7 +364,7 @@ class RBACSeeder extends Seeder
             if (in_array($userData['role'], ['hr_manager', 'driver_supervisor', 'finance_manager', 'it_admin'])) {
                 DB::table('employees')->insert([
                     'user_id' => $userId,
-                    'employee_id' => 'EMP' . str_pad($userId, 4, '0', STR_PAD_LEFT),
+                    'employee_id' => 'EMP'.str_pad($userId, 4, '0', STR_PAD_LEFT),
                     'department' => $userData['department'],
                     'position' => $userData['name'],
                     'employment_type' => 'full_time',
@@ -397,7 +395,7 @@ class RBACSeeder extends Seeder
         // =====================================================
         // SYSTEM SETTINGS
         // =====================================================
-        
+
         $systemSettings = [
             ['key' => 'platform.name', 'value' => 'Webstore Platform', 'type' => 'string', 'is_public' => true],
             ['key' => 'platform.version', 'value' => '1.0.0', 'type' => 'string', 'is_public' => true],

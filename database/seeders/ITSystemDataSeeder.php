@@ -2,14 +2,13 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
+use App\Models\ScheduledTask;
+use App\Models\SlowQuery;
+use App\Models\SystemAlert;
 use App\Models\SystemLog;
 use App\Models\SystemService;
-use App\Models\ScheduledTask;
-use App\Models\SystemAlert;
-use App\Models\SlowQuery;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class ITSystemDataSeeder extends Seeder
 {

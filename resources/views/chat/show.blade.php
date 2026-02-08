@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<title>محادثة مع {{ $user->name }} - Tulip Store</title>
+<title>محادثة مع {{ is_array(data_get($user,'name')) ? json_encode(data_get($user,'name')) : (data_get($user,'name') ?? '') }} - Tulip Store</title>
 <link rel="stylesheet" href="/css/store.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -54,10 +54,10 @@ body{background:#f5f5f5;margin:0;padding:0}
 @foreach($specialUsers as $specialUser)
 <a href="{{ route('chat.show', $specialUser) }}" class="user-item {{ $specialUser->id == $user->id ? 'active' : '' }}" style="text-decoration:none">
 <div class="user-avatar">
-{{ strtoupper(substr($specialUser->name ?? $specialUser->email, 0, 1)) }}
+{{ strtoupper(substr((is_array(data_get($specialUser,'name')) ? json_encode(data_get($specialUser,'name')) : (data_get($specialUser,'name') ?? $specialUser->email)), 0, 1)) }}
 </div>
 <div class="user-info">
-<div class="user-name">{{ $specialUser->name ?? $specialUser->email }}</div>
+<div class="user-name">{{ is_array(data_get($specialUser,'name')) ? json_encode(data_get($specialUser,'name')) : (data_get($specialUser,'name') ?? $specialUser->email) }}</div>
 <div class="user-role">
 <i class="fas fa-user-shield"></i>
 {{ $specialUser->role->display_name ?? 'مستخدم' }}
@@ -72,10 +72,10 @@ body{background:#f5f5f5;margin:0;padding:0}
 <div class="chat-box">
 <div class="chat-header">
 <div class="user-avatar">
-{{ strtoupper(substr($user->name ?? $user->email, 0, 1)) }}
+{{ strtoupper(substr((is_array(data_get($user,'name')) ? json_encode(data_get($user,'name')) : (data_get($user,'name') ?? $user->email)), 0, 1)) }}
 </div>
 <div>
-<div style="font-size:1.2rem;font-weight:700">{{ $user->name ?? $user->email }}</div>
+<div style="font-size:1.2rem;font-weight:700">{{ is_array(data_get($user,'name')) ? json_encode(data_get($user,'name')) : (data_get($user,'name') ?? $user->email) }}</div>
 <div style="font-size:0.9rem;opacity:0.9">
 <i class="fas fa-user-shield"></i>
 {{ $user->role->display_name ?? 'مستخدم' }}
@@ -87,7 +87,7 @@ body{background:#f5f5f5;margin:0;padding:0}
 @forelse($messages as $message)
 <div class="message {{ $message->sender_id == auth()->id() ? 'sent' : 'received' }}">
 <div class="message-avatar">
-{{ strtoupper(substr($message->sender->name ?? $message->sender->email, 0, 1)) }}
+{{ strtoupper(substr((is_array(data_get($message->sender,'name')) ? json_encode(data_get($message->sender,'name')) : (data_get($message->sender,'name') ?? $message->sender->email)), 0, 1)) }}
 </div>
 <div class="message-content">
 <p class="message-text">{{ $message->message }}</p>

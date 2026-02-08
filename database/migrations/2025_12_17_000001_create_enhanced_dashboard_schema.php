@@ -15,16 +15,20 @@ return new class extends Migration
         // =====================================================
         // ENHANCED GEOSPATIAL SUPPORT
         // =====================================================
-        
+
         // Add current location to drivers table for quick queries
         Schema::table('drivers', function (Blueprint $table) {
-            $table->point('last_location')->nullable()->after('working_hours');
-            $table->timestamp('last_location_update')->nullable()->after('last_location');
-            $table->decimal('current_speed', 8, 2)->nullable()->after('last_location_update');
-            $table->decimal('current_heading', 8, 2)->nullable()->after('current_speed');
-            
-            // Add spatial index for location queries
-            $table->spatialIndex('last_location');
+            if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+                $table->point('last_location')->nullable()->after('working_hours');
+                $table->timestamp('last_location_update')->nullable()->after('last_location');
+                $table->decimal('current_speed', 8, 2)->nullable()->after('last_location_update');
+                $table->decimal('current_heading', 8, 2)->nullable()->after('current_speed');
+                $table->spatialIndex('last_location');
+            } else {
+                $table->timestamp('last_location_update')->nullable()->after('working_hours');
+                $table->decimal('current_speed', 8, 2)->nullable()->after('last_location_update');
+                $table->decimal('current_heading', 8, 2)->nullable()->after('current_speed');
+            }
         });
 
         // Route optimization table
@@ -40,7 +44,7 @@ return new class extends Migration
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['driver_id', 'route_date']);
             $table->index(['status', 'route_date']);
         });
@@ -59,7 +63,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->json('attachments')->nullable(); // Photos, receipts
             $table->timestamps();
-            
+
             $table->index(['driver_id', 'maintenance_date']);
             $table->index(['type', 'status']);
         });
@@ -67,26 +71,28 @@ return new class extends Migration
         // =====================================================
         // ENHANCED HR SYSTEM
         // =====================================================
-        
+
         // Performance reviews
-        Schema::create('performance_reviews', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('employee_id')->constrained()->onDelete('cascade');
-            $table->foreignId('reviewer_id')->constrained('users')->onDelete('cascade');
-            $table->string('review_period'); // Q1-2024, 2024-Annual, etc.
-            $table->enum('type', ['quarterly', 'annual', 'probation', 'special']);
-            $table->json('ratings'); // Performance categories and scores
-            $table->text('strengths')->nullable();
-            $table->text('areas_for_improvement')->nullable();
-            $table->text('goals')->nullable();
-            $table->decimal('overall_rating', 3, 2); // 1.00 to 5.00
-            $table->enum('status', ['draft', 'submitted', 'approved', 'completed'])->default('draft');
-            $table->timestamp('review_date');
-            $table->timestamps();
-            
-            $table->index(['employee_id', 'review_period']);
-            $table->index(['reviewer_id', 'status']);
-        });
+        if (! Schema::hasTable('performance_reviews')) {
+            Schema::create('performance_reviews', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('employee_id')->constrained()->onDelete('cascade');
+                $table->foreignId('reviewer_id')->constrained('users')->onDelete('cascade');
+                $table->string('review_period');
+                $table->enum('type', ['quarterly', 'annual', 'probation', 'special']);
+                $table->json('ratings');
+                $table->text('strengths')->nullable();
+                $table->text('areas_for_improvement')->nullable();
+                $table->text('goals')->nullable();
+                $table->decimal('overall_rating', 3, 2);
+                $table->enum('status', ['draft', 'submitted', 'approved', 'completed'])->default('draft');
+                $table->timestamp('review_date');
+                $table->timestamps();
+
+                $table->index(['employee_id', 'review_period']);
+                $table->index(['reviewer_id', 'status']);
+            });
+        }
 
         // Job applications and recruiting
         Schema::create('job_positions', function (Blueprint $table) {
@@ -102,7 +108,7 @@ return new class extends Migration
             $table->foreignId('hiring_manager_id')->constrained('users')->onDelete('cascade');
             $table->date('application_deadline')->nullable();
             $table->timestamps();
-            
+
             $table->index(['status', 'department']);
             $table->index(['hiring_manager_id', 'status']);
         });
@@ -117,13 +123,13 @@ return new class extends Migration
             $table->text('cover_letter')->nullable();
             $table->json('attachments'); // Resume, portfolio files
             $table->enum('status', [
-                'applied', 'screening', 'interview_scheduled', 
-                'interviewed', 'offer_made', 'hired', 'rejected'
+                'applied', 'screening', 'interview_scheduled',
+                'interviewed', 'offer_made', 'hired', 'rejected',
             ])->default('applied');
             $table->json('interview_notes')->nullable();
             $table->decimal('rating', 3, 2)->nullable(); // Interview rating
             $table->timestamps();
-            
+
             $table->index(['position_id', 'status']);
             $table->index(['applicant_email', 'status']);
         });
@@ -141,7 +147,7 @@ return new class extends Migration
             $table->timestamp('published_at')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['type', 'published_at']);
             $table->index(['target_audience', 'is_pinned']);
         });
@@ -149,26 +155,28 @@ return new class extends Migration
         // =====================================================
         // ENHANCED IT/DEVOPS MONITORING
         // =====================================================
-        
+
         // System alerts and monitoring
-        Schema::create('system_alerts', function (Blueprint $table) {
-            $table->id();
-            $table->string('alert_type'); // cpu_high, disk_full, service_down, etc.
-            $table->enum('severity', ['info', 'warning', 'critical', 'emergency']);
-            $table->string('title');
-            $table->text('description');
-            $table->json('metadata'); // Service details, metrics, etc.
-            $table->enum('status', ['active', 'acknowledged', 'resolved', 'suppressed'])->default('active');
-            $table->foreignId('acknowledged_by')->nullable()->constrained('users');
-            $table->timestamp('acknowledged_at')->nullable();
-            $table->foreignId('resolved_by')->nullable()->constrained('users');
-            $table->timestamp('resolved_at')->nullable();
-            $table->text('resolution_notes')->nullable();
-            $table->timestamps();
-            
-            $table->index(['severity', 'status']);
-            $table->index(['alert_type', 'created_at']);
-        });
+        if (! Schema::hasTable('system_alerts')) {
+            Schema::create('system_alerts', function (Blueprint $table) {
+                $table->id();
+                $table->string('alert_type');
+                $table->enum('severity', ['info', 'warning', 'critical', 'emergency']);
+                $table->string('title');
+                $table->text('description');
+                $table->json('metadata');
+                $table->enum('status', ['active', 'acknowledged', 'resolved', 'suppressed'])->default('active');
+                $table->foreignId('acknowledged_by')->nullable()->constrained('users');
+                $table->timestamp('acknowledged_at')->nullable();
+                $table->foreignId('resolved_by')->nullable()->constrained('users');
+                $table->timestamp('resolved_at')->nullable();
+                $table->text('resolution_notes')->nullable();
+                $table->timestamps();
+
+                $table->index(['severity', 'status']);
+                $table->index(['alert_type', 'created_at']);
+            });
+        }
 
         // Database backup tracking
         Schema::create('database_backups', function (Blueprint $table) {
@@ -185,7 +193,7 @@ return new class extends Migration
             $table->integer('duration_seconds')->nullable();
             $table->text('error_message')->nullable();
             $table->timestamps();
-            
+
             $table->index(['database_name', 'status']);
             $table->index(['type', 'completed_at']);
         });
@@ -204,34 +212,36 @@ return new class extends Migration
             $table->text('user_agent')->nullable();
             $table->decimal('response_time', 8, 3); // Milliseconds
             $table->timestamp('occurred_at')->useCurrent();
-            
+
             $table->index(['endpoint', 'status_code']);
             $table->index(['occurred_at', 'status_code']);
             $table->index(['user_id', 'occurred_at']);
         });
 
         // Slow query tracking
-        Schema::create('slow_queries', function (Blueprint $table) {
-            $table->id();
-            $table->text('query_sql');
-            $table->string('query_hash'); // MD5 hash for grouping similar queries
-            $table->decimal('execution_time', 10, 3); // Seconds
-            $table->integer('rows_examined')->nullable();
-            $table->integer('rows_sent')->nullable();
-            $table->string('database_name');
-            $table->string('user_name')->nullable();
-            $table->string('host')->nullable();
-            $table->timestamp('executed_at')->useCurrent();
-            
-            $table->index(['query_hash', 'execution_time']);
-            $table->index(['execution_time', 'executed_at']);
-            $table->index(['database_name', 'executed_at']);
-        });
+        if (! Schema::hasTable('slow_queries')) {
+            Schema::create('slow_queries', function (Blueprint $table) {
+                $table->id();
+                $table->text('query_sql');
+                $table->string('query_hash');
+                $table->decimal('execution_time', 10, 3);
+                $table->integer('rows_examined')->nullable();
+                $table->integer('rows_sent')->nullable();
+                $table->string('database_name');
+                $table->string('user_name')->nullable();
+                $table->string('host')->nullable();
+                $table->timestamp('executed_at')->useCurrent();
+
+                $table->index(['query_hash', 'execution_time']);
+                $table->index(['execution_time', 'executed_at']);
+                $table->index(['database_name', 'executed_at']);
+            });
+        }
 
         // =====================================================
         // ENHANCED FINANCIAL SYSTEM
         // =====================================================
-        
+
         // Commission tracking per store
         Schema::create('commission_rates', function (Blueprint $table) {
             $table->id();
@@ -244,7 +254,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             $table->index(['store_id', 'effective_from']);
             $table->index(['is_active', 'effective_from']);
         });
@@ -261,7 +271,7 @@ return new class extends Migration
             $table->string('tax_jurisdiction')->nullable(); // Country, state, city
             $table->json('calculation_details')->nullable(); // Breakdown of calculation
             $table->timestamps();
-            
+
             $table->index(['order_id', 'tax_type']);
             $table->index(['tax_type', 'created_at']);
         });
@@ -281,7 +291,7 @@ return new class extends Migration
             $table->timestamp('reconciled_at')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             $table->index(['reconciliation_date', 'status']);
             $table->index(['account_type', 'reconciliation_date']);
         });
@@ -289,7 +299,7 @@ return new class extends Migration
         // =====================================================
         // ENHANCED ANALYTICS & REPORTING
         // =====================================================
-        
+
         // Materialized views for dashboard performance
         Schema::create('daily_analytics', function (Blueprint $table) {
             $table->id();
@@ -300,7 +310,7 @@ return new class extends Migration
             $table->decimal('metric_value', 15, 2);
             $table->json('additional_data')->nullable();
             $table->timestamp('calculated_at')->useCurrent();
-            
+
             $table->unique(['analytics_date', 'metric_type', 'dimension', 'dimension_value']);
             $table->index(['analytics_date', 'metric_type']);
         });
@@ -313,7 +323,7 @@ return new class extends Migration
             $table->json('cache_data');
             $table->timestamp('expires_at');
             $table->timestamps();
-            
+
             $table->unique(['dashboard_type', 'cache_key']);
             $table->index(['expires_at']);
         });
@@ -321,7 +331,7 @@ return new class extends Migration
         // =====================================================
         // ENHANCED NOTIFICATION SYSTEM
         // =====================================================
-        
+
         // Notification preferences per user
         Schema::create('notification_preferences', function (Blueprint $table) {
             $table->id();
@@ -331,7 +341,7 @@ return new class extends Migration
             $table->boolean('is_enabled')->default(true);
             $table->json('schedule')->nullable(); // Time preferences, frequency
             $table->timestamps();
-            
+
             $table->unique(['user_id', 'notification_type']);
         });
 
@@ -346,14 +356,14 @@ return new class extends Migration
             $table->json('variables')->nullable(); // Available template variables
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-            
+
             $table->index(['type', 'channel']);
         });
 
         // =====================================================
         // PERFORMANCE OPTIMIZATION INDEXES
         // =====================================================
-        
+
         // Add composite indexes for common dashboard queries
         Schema::table('orders', function (Blueprint $table) {
             $table->index(['store_id', 'status', 'created_at'], 'orders_store_status_date');

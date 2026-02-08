@@ -16,14 +16,14 @@ class FiscalPeriod extends Model
         'period_type',
         'is_closed',
         'closed_at',
-        'closed_by'
+        'closed_by',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
         'is_closed' => 'boolean',
-        'closed_at' => 'datetime'
+        'closed_at' => 'datetime',
     ];
 
     public function closedByUser()

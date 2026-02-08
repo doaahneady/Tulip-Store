@@ -3,19 +3,16 @@
 namespace App\Http\Controllers\Legacy;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
+use App\Models\Driver;
+use App\Models\Employee;
+use App\Models\FinancialTransaction;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Store;
-use App\Models\FinancialTransaction;
 use App\Models\SupportTicket;
-use App\Models\Employee;
-use App\Models\Driver;
 use App\Models\SystemLog;
-use App\Models\AuditLog;
-use Carbon\Carbon;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -23,14 +20,14 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $dashboardData = $this->getDashboardData($user);
-        
+
         return view('dashboard.index', compact('dashboardData', 'user'));
     }
 
     public function admin()
     {
         $this->authorize('admin');
-        
+
         $data = [
             'total_users' => User::count(),
             'total_orders' => Order::count(),
@@ -49,7 +46,7 @@ class DashboardController extends Controller
     public function it()
     {
         $this->authorize('it');
-        
+
         $data = [
             'system_status' => $this->getSystemStatus(),
             'server_metrics' => $this->getServerMetrics(),
@@ -64,7 +61,7 @@ class DashboardController extends Controller
     public function cs()
     {
         $this->authorize('cs');
-        
+
         $data = [
             'open_tickets' => SupportTicket::where('status', 'open')->count(),
             'pending_tickets' => SupportTicket::where('status', 'pending')->count(),
@@ -79,16 +76,16 @@ class DashboardController extends Controller
     public function hr()
     {
         $this->authorize('hr');
-        
+
         $data = [
             'total_employees' => Employee::count(),
-            'present_today' => Employee::whereHas('attendance', function($q) {
+            'present_today' => Employee::whereHas('attendance', function ($q) {
                 $q->whereDate('date', today())->where('status', 'present');
             })->count(),
-            'on_leave' => Employee::whereHas('leaveRequests', function($q) {
+            'on_leave' => Employee::whereHas('leaveRequests', function ($q) {
                 $q->where('status', 'approved')
-                  ->where('start_date', '<=', today())
-                  ->where('end_date', '>=', today());
+                    ->where('start_date', '<=', today())
+                    ->where('end_date', '>=', today());
             })->count(),
             'recent_applications' => Employee::latest()->take(10)->get(),
             'payroll_summary' => $this->getPayrollSummary(),
@@ -100,7 +97,7 @@ class DashboardController extends Controller
     public function delivery()
     {
         $this->authorize('delivery');
-        
+
         $data = [
             'active_drivers' => Driver::where('status', 'active')->count(),
             'pending_deliveries' => Order::where('status', 'processing')->count(),
@@ -115,7 +112,7 @@ class DashboardController extends Controller
     public function finance()
     {
         $this->authorize('finance');
-        
+
         $data = [
             'revenue_today' => FinancialTransaction::where('type', 'income')->whereDate('created_at', today())->sum('amount'),
             'revenue_month' => FinancialTransaction::where('type', 'income')->whereMonth('created_at', now()->month)->sum('amount'),
@@ -131,24 +128,24 @@ class DashboardController extends Controller
     public function storeOwner()
     {
         $this->authorize('store-owner');
-        
+
         $user = Auth::user();
         $store = $user->store;
-        
-        if (!$store) {
+
+        if (! $store) {
             return redirect()->route('store.setup');
         }
 
         $data = [
             'store' => $store,
             'total_products' => $store->products()->count(),
-            'total_orders' => Order::whereHas('items.product', function($q) use ($store) {
+            'total_orders' => Order::whereHas('items.product', function ($q) use ($store) {
                 $q->where('store_id', $store->id);
             })->count(),
-            'revenue_month' => Order::whereHas('items.product', function($q) use ($store) {
+            'revenue_month' => Order::whereHas('items.product', function ($q) use ($store) {
                 $q->where('store_id', $store->id);
             })->whereMonth('created_at', now()->month)->sum('total_amount'),
-            'recent_orders' => Order::whereHas('items.product', function($q) use ($store) {
+            'recent_orders' => Order::whereHas('items.product', function ($q) use ($store) {
                 $q->where('store_id', $store->id);
             })->latest()->take(10)->get(),
             'top_products' => $this->getTopProducts($store),
@@ -160,31 +157,31 @@ class DashboardController extends Controller
     private function getDashboardData($user)
     {
         $data = [];
-        
+
         if ($user->is_admin) {
             $data['admin'] = true;
         }
-        
+
         if ($user->is_it || $user->is_it_super) {
             $data['it'] = true;
         }
-        
+
         if ($user->is_cs) {
             $data['cs'] = true;
         }
-        
+
         if ($user->is_hr) {
             $data['hr'] = true;
         }
-        
+
         if ($user->is_driver_supervisor) {
             $data['delivery'] = true;
         }
-        
+
         if ($user->is_finance || $user->is_accountant) {
             $data['finance'] = true;
         }
-        
+
         if ($user->is_trader) {
             $data['store_owner'] = true;
         }

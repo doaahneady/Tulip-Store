@@ -18,15 +18,15 @@ class DriverLocationHistory extends Model
         'speed',
         'accuracy',
         'battery_level',
-        'recorded_at'
+        'recorded_at',
     ];
 
     protected $casts = [
-        'recorded_at' => 'datetime'
+        'recorded_at' => 'datetime',
     ];
 
     public function driver()
     {
-        return $this->belongsTo(DeliveryDriver::class, 'driver_id');
+        return $this->belongsTo(Driver::class, 'driver_id');
     }
 }

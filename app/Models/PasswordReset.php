@@ -21,5 +21,3 @@ class PasswordReset extends Model
         'used' => 'boolean',
     ];
 }
-
-
