@@ -406,12 +406,6 @@
                     <a href="#" style="width: 45px; height: 45px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.8); text-decoration: none; transition: all 0.3s; font-size: 1.2rem;">
                         <i class="fab fa-facebook"></i>
                     </a>
-                    <a href="#" style="width: 45px; height: 45px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.8); text-decoration: none; transition: all 0.3s; font-size: 1.2rem;">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a href="#" style="width: 45px; height: 45px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.8); text-decoration: none; transition: all 0.3s; font-size: 1.2rem;">
-                        <i class="fab fa-snapchat"></i>
-                    </a>
                 </div>
             </div>
             
@@ -460,34 +454,11 @@
 
 <script>
 const API_BASE = window.location.origin + '/api';
-
-const products = {
-    fruits: [
-        { id: 'm1', name: 'تفاح أحمر', emoji: '🍎', price: 8.5, oldPrice: 10, unit: 'كيلو', origin: 'تركيا' },
-        { id: 'm2', name: 'موز', emoji: '🍌', price: 6, oldPrice: null, unit: 'كيلو', origin: 'الإكوادور' },
-        { id: 'm3', name: 'برتقال', emoji: '🍊', price: 5.5, oldPrice: 7, unit: 'كيلو', origin: 'مصر' },
-        { id: 'm4', name: 'عنب أحمر', emoji: '🍇', price: 15, oldPrice: null, unit: 'كيلو', origin: 'تشيلي' },
-        { id: 'm5', name: 'مانجو', emoji: '🥭', price: 12, oldPrice: 14, unit: 'كيلو', origin: 'باكستان' },
-        { id: 'm6', name: 'فراولة', emoji: '🍓', price: 18, oldPrice: null, unit: 'علبة', origin: 'محلي' }
-    ],
-    vegetables: [
-        { id: 'm7', name: 'طماطم', emoji: '🍅', price: 4, oldPrice: 5, unit: 'كيلو', origin: 'محلي' },
-        { id: 'm8', name: 'خيار', emoji: '🥒', price: 3.5, oldPrice: null, unit: 'كيلو', origin: 'محلي' },
-        { id: 'm9', name: 'جزر', emoji: '🥕', price: 4.5, oldPrice: null, unit: 'كيلو', origin: 'محلي' },
-        { id: 'm10', name: 'بطاطس', emoji: '🥔', price: 3, oldPrice: 3.5, unit: 'كيلو', origin: 'محلي' },
-        { id: 'm11', name: 'بصل', emoji: '🧅', price: 2.5, oldPrice: null, unit: 'كيلو', origin: 'محلي' },
-        { id: 'm12', name: 'فلفل ألوان', emoji: '🫑', price: 12, oldPrice: null, unit: 'كيلو', origin: 'هولندا' }
-    ]
-};
-
-const categoryInfo = {
-    fruits: { title: 'الفواكه', emoji: '🍎', color: '#e17055' },
-    vegetables: { title: 'الخضروات', emoji: '🥬', color: '#00b894' }
-};
+let productsData = { categories: { fruits: [], vegetables: [] }, date: null };
 
 document.addEventListener('DOMContentLoaded', () => {
     loadDate();
-    loadCategories();
+    fetchDailyPrices();
 });
 
 function loadDate() {
@@ -495,15 +466,31 @@ function loadDate() {
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('ar-SA', options);
 }
 
-function loadCategories() {
+async function fetchDailyPrices() {
+    try {
+        const r = await fetch(`${API_BASE}/mart/daily-prices`);
+        const d = await r.json();
+        productsData = d || productsData;
+        renderCategories();
+    } catch (e) {
+        renderCategories();
+    }
+}
+
+function renderCategories() {
     const container = document.getElementById('categoriesContainer');
-    container.innerHTML = Object.entries(products).map(([key, items]) => {
-        const info = categoryInfo[key];
+    const categoryInfo = {
+        fruits: { title: 'الفواكه', emojiFallback: '🍎' },
+        vegetables: { title: 'الخضروات', emojiFallback: '🥬' }
+    };
+    const entries = Object.entries(productsData.categories || {});
+    container.innerHTML = entries.map(([key, items]) => {
+        const info = categoryInfo[key] || { title: key, emojiFallback: '🥗' };
         return `
             <section class="category-section" id="${key}">
                 <div class="category-header">
                     <h2 class="category-title">
-                        <span class="emoji">${info.emoji}</span>
+                        <span class="emoji">${info.emojiFallback}</span>
                         ${info.title}
                     </h2>
                 </div>
@@ -516,19 +503,22 @@ function loadCategories() {
 }
 
 function createCard(p) {
+    const icon = p.photo
+        ? `<img src="${p.photo}" alt="${p.name}" style="width:52px;height:52px;border-radius:14px;object-fit:cover;border:1px solid #eee;">`
+        : `<span class="emoji">${p.emoji || '🛍️'}</span>`;
     return `
         <div class="price-card">
-            <span class="emoji">${p.emoji}</span>
+            ${icon}
             <div class="info">
                 <div class="name">${p.name}</div>
-                <div class="origin"><i class="fas fa-map-marker-alt"></i> ${p.origin}</div>
+                <div class="origin"><i class="fas fa-map-marker-alt"></i> ${p.origin || ''}</div>
                 <div class="prices">
                     <span class="current">${p.price} ر.س</span>
                     ${p.oldPrice ? `<span class="old">${p.oldPrice} ر.س</span>` : ''}
-                    <span class="unit">/ ${p.unit}</span>
+                    <span class="unit">/ ${p.unit || ''}</span>
                 </div>
             </div>
-            <button class="add-btn" onclick="addToCart('${p.id}', this)">
+            <button class="add-btn" onclick="addToCart('${p.id || p.name}', this)">
                 <i class="fas fa-plus"></i>
             </button>
         </div>
@@ -539,9 +529,8 @@ async function addToCart(id, btn) {
     const orig = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    
-    const all = Object.values(products).flat();
-    const p = all.find(x => x.id === id);
+    const all = [...(productsData.categories?.fruits || []), ...(productsData.categories?.vegetables || [])];
+    const p = all.find(x => (x.id || x.name) === id);
     
     try {
         const r = await fetch(`${API_BASE}/cart/add`, {

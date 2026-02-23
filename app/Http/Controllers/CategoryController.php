@@ -16,6 +16,12 @@ class CategoryController extends Controller
             ->orderBy('name')
             ->get();
 
+        if ($categories->isEmpty()) {
+            $categories = Category::orderBy('display_order')
+                ->orderBy('name')
+                ->get();
+        }
+
         return response()->json($categories);
     }
 }

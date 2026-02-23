@@ -231,9 +231,6 @@
                     <a href="#" style="width:40px; height:40px; background:rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.8); text-decoration:none;">
                         <i class="fab fa-facebook"></i>
                     </a>
-                    <a href="#" style="width:40px; height:40px; background:rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.8); text-decoration:none;">
-                        <i class="fab fa-twitter"></i>
-                    </a>
                 </div>
             </div>
             

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Shipping Information - Tulip Store</title>
+    <title>معلومات الشحن والتوصيل - متجر توليب</title>
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -18,10 +18,9 @@
 <main style="flex:1;">
     <div class="container-custom" style="padding:3rem 1.5rem;">
         <div style="max-width:900px; margin:0 auto;">
-            <!-- Header -->
             <div style="text-align:center; margin-bottom:3rem;">
-                <h1 style="font-size:2.5rem; font-weight:700; color:#0D464C; margin-bottom:1rem;">Shipping & Delivery</h1>
-                <p style="font-size:1.1rem; color:#666;">Fast and reliable shipping to your doorstep</p>
+                <h1 style="font-size:2.5rem; font-weight:700; color:#0D464C; margin-bottom:1rem;">الشحن والتوصيل</h1>
+                <p style="font-size:1.1rem; color:#666;">خيارات شحن سريعة وموثوقة لباب منزلك</p>
             </div>
 
             <!-- Shipping Options -->
@@ -30,28 +29,28 @@
                     <div style="width:60px; height:60px; background:#0D464C; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
                         <i class="fas fa-truck" style="color:#fff; font-size:1.5rem;"></i>
                     </div>
-                    <h3 style="font-size:1.3rem; font-weight:600; color:#0D464C; margin-bottom:0.5rem;">Standard Shipping</h3>
-                    <p style="color:#666; margin-bottom:1rem;">3-7 business days</p>
-                    <p style="color:#0D464C; font-weight:600; font-size:1.1rem;">Free</p>
+                    <h3 style="font-size:1.3rem; font-weight:600; color:#0D464C; margin-bottom:0.5rem;">شحن عادي</h3>
+                    <p style="color:#666; margin-bottom:1rem;">من ٣ إلى ٧ أيام عمل</p>
+                    <p style="color:#0D464C; font-weight:600; font-size:1.1rem;">مجاني للطلبات المؤهلة</p>
                 </div>
 
                 <div style="background:#fff; padding:2rem; border-radius:12px; border:2px solid #0D464C; text-align:center; position:relative;">
-                    <div style="position:absolute; top:-10px; right:20px; background:#0D464C; color:#fff; padding:0.25rem 0.75rem; border-radius:12px; font-size:0.85rem; font-weight:600;">POPULAR</div>
+                    <div style="position:absolute; top:-10px; right:20px; background:#0D464C; color:#fff; padding:0.25rem 0.75rem; border-radius:12px; font-size:0.85rem; font-weight:600;">الأكثر طلباً</div>
                     <div style="width:60px; height:60px; background:#0D464C; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
                         <i class="fas fa-shipping-fast" style="color:#fff; font-size:1.5rem;"></i>
                     </div>
-                    <h3 style="font-size:1.3rem; font-weight:600; color:#0D464C; margin-bottom:0.5rem;">Express Shipping</h3>
-                    <p style="color:#666; margin-bottom:1rem;">1-3 business days</p>
-                    <p style="color:#0D464C; font-weight:600; font-size:1.1rem;">$15.00</p>
+                    <h3 style="font-size:1.3rem; font-weight:600; color:#0D464C; margin-bottom:0.5rem;">شحن سريع</h3>
+                    <p style="color:#666; margin-bottom:1rem;">من ١ إلى ٣ أيام عمل</p>
+                    <p style="color:#0D464C; font-weight:600; font-size:1.1rem;">رسوم إضافية حسب المدينة</p>
                 </div>
 
                 <div style="background:#fff; padding:2rem; border-radius:12px; border:2px solid #e9ecef; text-align:center;">
                     <div style="width:60px; height:60px; background:#0D464C; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
                         <i class="fas fa-rocket" style="color:#fff; font-size:1.5rem;"></i>
                     </div>
-                    <h3 style="font-size:1.3rem; font-weight:600; color:#0D464C; margin-bottom:0.5rem;">Same Day Delivery</h3>
-                    <p style="color:#666; margin-bottom:1rem;">Same day (within city)</p>
-                    <p style="color:#0D464C; font-weight:600; font-size:1.1rem;">$25.00</p>
+                    <h3 style="font-size:1.3rem; font-weight:600; color:#0D464C; margin-bottom:0.5rem;">توصيل في نفس اليوم</h3>
+                    <p style="color:#666; margin-bottom:1rem;">في نفس اليوم داخل المدينة المتاحة</p>
+                    <p style="color:#0D464C; font-weight:600; font-size:1.1rem;">رسوم خاصة</p>
                 </div>
             </div>
 
@@ -60,75 +59,72 @@
                 <section style="background:#fff; padding:2rem; border-radius:12px; border:2px solid #e9ecef; margin-bottom:2rem;">
                     <h2 style="font-size:1.8rem; font-weight:600; color:#0D464C; margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
                         <i class="fas fa-globe" style="color:#0D464C;"></i>
-                        Shipping Locations
+                        مناطق الشحن
                     </h2>
-                    <p style="color:#666; line-height:1.8; font-size:1.05rem; margin-bottom:1rem;">We currently ship to the following locations:</p>
+                    <p style="color:#666; line-height:1.8; font-size:1.05rem; margin-bottom:1rem;">نقوم حالياً بالشحن إلى المناطق التالية:</p>
                     <ul style="color:#666; line-height:2; margin-left:1.5rem; font-size:1.05rem;">
-                        <li><strong>Within City:</strong> 3-7 business days (Free shipping on orders over $50)</li>
-                        <li><strong>Other Cities:</strong> 7-14 business days</li>
-                        <li><strong>International:</strong> 14-21 business days (subject to customs)</li>
+                        <li><strong>داخل المدينة:</strong> من ٣ إلى ٧ أيام عمل (مع عروض شحن مجاني لبعض الطلبات)</li>
+                        <li><strong>المدن الأخرى:</strong> من ٧ إلى ١٤ يوم عمل حسب شركة الشحن</li>
+                        <li><strong>دولي:</strong> متوفر لبعض الدول، والمدة تعتمد على شركة الشحن والجمارك</li>
                     </ul>
                 </section>
 
                 <section style="background:#fff; padding:2rem; border-radius:12px; border:2px solid #e9ecef; margin-bottom:2rem;">
                     <h2 style="font-size:1.8rem; font-weight:600; color:#0D464C; margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
                         <i class="fas fa-box" style="color:#0D464C;"></i>
-                        Processing Time
+                        وقت تجهيز الطلب
                     </h2>
-                    <p style="color:#666; line-height:1.8; font-size:1.05rem;">All orders are processed within <strong>1-2 business days</strong> (excluding weekends and holidays) after we receive your order confirmation and payment. Once your order has shipped, you will receive a tracking number via email.</p>
+                    <p style="color:#666; line-height:1.8; font-size:1.05rem;">يتم عادةً تجهيز الطلبات خلال <strong>١–٢ يوم عمل</strong> (باستثناء العطل الرسمية). بعد شحن الطلب، سيصلك رقم التتبع عبر البريد الإلكتروني أو الرسائل النصية.</p>
                 </section>
 
                 <section style="background:#fff; padding:2rem; border-radius:12px; border:2px solid #e9ecef; margin-bottom:2rem;">
                     <h2 style="font-size:1.8rem; font-weight:600; color:#0D464C; margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
                         <i class="fas fa-map-marked-alt" style="color:#0D464C;"></i>
-                        Tracking Your Order
+                        تتبع الطلب
                     </h2>
-                    <p style="color:#666; line-height:1.8; font-size:1.05rem; margin-bottom:1rem;">Once your order ships, you'll receive:</p>
+                    <p style="color:#666; line-height:1.8; font-size:1.05rem; margin-bottom:1rem;">بعد شحن طلبك، ستصلك المعلومات التالية:</p>
                     <ul style="color:#666; line-height:2; margin-left:1.5rem; font-size:1.05rem;">
-                        <li>An email confirmation with your tracking number</li>
-                        <li>Real-time updates on your package location</li>
-                        <li>Estimated delivery date</li>
-                        <li>SMS notifications (if opted in)</li>
+                        <li>رسالة تأكيد تحتوي على رقم تتبع الشحنة</li>
+                        <li>تحديثات لحالة الشحن وموقعها</li>
+                        <li>تقدير مبدئي لتاريخ الوصول</li>
+                        <li>إشعارات عبر الرسائل النصية (في حال تفعيلها)</li>
                     </ul>
-                    <p style="color:#666; line-height:1.8; font-size:1.05rem; margin-top:1rem;">You can track your order by logging into your account or using the tracking number provided in your shipping confirmation email.</p>
+                    <p style="color:#666; line-height:1.8; font-size:1.05rem; margin-top:1rem;">يمكنك تتبع طلبك من خلال حسابك في الموقع أو باستخدام رقم التتبع المرسل لك.</p>
                 </section>
 
                 <section style="background:#fff; padding:2rem; border-radius:12px; border:2px solid #e9ecef; margin-bottom:2rem;">
                     <h2 style="font-size:1.8rem; font-weight:600; color:#0D464C; margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
                         <i class="fas fa-dollar-sign" style="color:#0D464C;"></i>
-                        Shipping Costs
+                        رسوم الشحن
                     </h2>
                     <div style="color:#666; line-height:1.8; font-size:1.05rem;">
-                        <p style="margin-bottom:1rem;"><strong>Free Standard Shipping:</strong> Available on all orders over $50</p>
-                        <p style="margin-bottom:1rem;"><strong>Standard Shipping:</strong> $5.00 for orders under $50</p>
-                        <p style="margin-bottom:1rem;"><strong>Express Shipping:</strong> $15.00 (1-3 business days)</p>
-                        <p style="margin-bottom:1rem;"><strong>Same Day Delivery:</strong> $25.00 (available within city limits)</p>
-                        <p><strong>International Shipping:</strong> Calculated at checkout based on destination and weight</p>
+                        <p style="margin-bottom:1rem;"><strong>الشحن العادي:</strong> قد يكون مجانياً أو برسوم رمزية حسب قيمة الطلب والعروض المتاحة.</p>
+                        <p style="margin-bottom:1rem;"><strong>الشحن السريع / نفس اليوم:</strong> برسوم إضافية تُحدد عند إتمام الطلب.</p>
+                        <p><strong>الشحن الدولي:</strong> تُحتسب الرسوم عند إنهاء الطلب حسب الدولة والوزن.</p>
                     </div>
                 </section>
 
                 <section style="background:#fff; padding:2rem; border-radius:12px; border:2px solid #e9ecef; margin-bottom:2rem;">
                     <h2 style="font-size:1.8rem; font-weight:600; color:#0D464C; margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
                         <i class="fas fa-exclamation-triangle" style="color:#0D464C;"></i>
-                        Important Notes
+                        ملاحظات مهمة
                     </h2>
                     <ul style="color:#666; line-height:2; margin-left:1.5rem; font-size:1.05rem;">
-                        <li>Delivery times are estimates and may vary due to weather, holidays, or carrier delays</li>
-                        <li>We are not responsible for delays caused by incorrect shipping addresses</li>
-                        <li>Please ensure someone is available to receive the package during delivery hours</li>
-                        <li>For international orders, customers are responsible for any customs duties or taxes</li>
-                        <li>Orders are shipped Monday through Friday, excluding holidays</li>
+                        <li>أوقات التوصيل تقديرية وقد تتأثر بالظروف الجوية أو ضغط العمل أو سياسات شركة الشحن.</li>
+                        <li>من مسؤولية العميل التأكد من صحة عنوان الشحن وبيانات التواصل.</li>
+                        <li>الطلبات تُشحن عادةً من الأحد إلى الخميس، باستثناء العطل الرسمية.</li>
+                        <li>للشحن الدولي، يتحمل العميل أي رسوم جمركية أو ضرائب محلية.</li>
                     </ul>
                 </section>
 
                 <section style="background:#f8f9fa; padding:2rem; border-radius:12px; border:2px solid #0D464C;">
                     <h2 style="font-size:1.8rem; font-weight:600; color:#0D464C; margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
                         <i class="fas fa-question-circle" style="color:#0D464C;"></i>
-                        Questions About Shipping?
+                        أسئلة حول الشحن؟
                     </h2>
-                    <p style="color:#666; line-height:1.8; font-size:1.05rem; margin-bottom:1.5rem;">If you have any questions about shipping or need to make changes to your order, please contact us as soon as possible:</p>
+                    <p style="color:#666; line-height:1.8; font-size:1.05rem; margin-bottom:1.5rem;">إذا كان لديك أي استفسار بخصوص الشحن أو تعديل على طلبك، تواصل معنا في أسرع وقت ممكن:</p>
                     <a href="/contact" style="display:inline-block; background:#0D464C; color:#fff; padding:0.75rem 1.5rem; border-radius:8px; text-decoration:none; font-weight:600; transition:background 0.3s;" onmouseover="this.style.background='#0a3538'" onmouseout="this.style.background='#0D464C'">
-                        Contact Support
+                        تواصل مع الدعم
                     </a>
                 </section>
             </div>
@@ -142,4 +138,3 @@
 
 </body>
 </html>
-

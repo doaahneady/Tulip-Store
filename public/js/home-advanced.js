@@ -175,11 +175,11 @@ function goToModernSlide(index) {
 // ============================================
 
 function scrollCategoriesLeft() {
-    document.getElementById('categoriesScroll').scrollBy({left: -300, behavior: 'smooth'});
+    document.getElementById('categoriesScroll').scrollBy({left: 300, behavior: 'smooth'});
 }
 
 function scrollCategoriesRight() {
-    document.getElementById('categoriesScroll').scrollBy({left: 300, behavior: 'smooth'});
+    document.getElementById('categoriesScroll').scrollBy({left: -300, behavior: 'smooth'});
 }
 
 // ============================================

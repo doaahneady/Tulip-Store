@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
@@ -82,6 +83,9 @@ class CustomGiftController extends Controller
             'fillers' => 'array',
             'fillers.*.id' => 'integer',
             'fillers.*.qty' => 'integer|min:1',
+            'store_products' => 'array',
+            'store_products.*.product_id' => 'integer',
+            'store_products.*.qty' => 'integer|min:1',
             'wrapping_id' => 'nullable|integer',
             'ribbon_id' => 'nullable|integer',
             'card_id' => 'nullable|integer',
@@ -170,6 +174,28 @@ class CustomGiftController extends Controller
             }
         }
 
+        // Add Tulip Store products
+        $selectedStoreProducts = [];
+        if ($request->store_products) {
+            foreach ($request->store_products as $pData) {
+                $p = Product::query()->active()->find($pData['product_id'] ?? 0);
+                if ($p && ($p->stock === null || $p->stock > 0)) {
+                    $qty = max(1, (int) ($pData['qty'] ?? 1));
+                    $price = (float) ($p->discount_price ?? $p->price);
+                    $totalPrice += $price * $qty;
+                    $selectedStoreProducts[] = [
+                        'id' => $p->id,
+                        'name' => $p->name,
+                        'price' => $price,
+                        'qty' => $qty,
+                        'image' => $p->image ?? null,
+                        'category_id' => $p->category_id,
+                    ];
+                    $giftDescription[] = $p->name.' × '.$qty;
+                }
+            }
+        }
+
         // Create custom gift item for cart
         $customGiftId = 'custom_gift_'.Str::random(8);
 
@@ -182,6 +208,7 @@ class CustomGiftController extends Controller
             'price' => $totalPrice,
             'box' => $box,
             'fillers' => $selectedFillers,
+            'store_products' => $selectedStoreProducts,
             'wrapping' => $selectedWrapping,
             'ribbon' => $selectedRibbon,
             'card' => $selectedCard,

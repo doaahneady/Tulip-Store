@@ -20,6 +20,10 @@
             <i class="fas fa-store"></i>
             <span>Tulip Mart</span>
         </a>
+        <a href="{{ route('dashboard.admin.mart.daily-prices.manage') }}" class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition">
+            <i class="fas fa-tags"></i>
+            <span>أسعار يومية</span>
+        </a>
         <a href="{{ route('dashboard.admin.attendance') }}" class="inline-flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-xl hover:bg-teal-700 transition">
             <i class="fas fa-user-clock"></i>
             <span>حضور الموظفين</span>
@@ -157,6 +161,10 @@
                     <a class="btn btn-secondary btn-sm" href="{{ route('dashboard.admin.export.products', array_merge(request()->query(), ['format' => 'csv'])) }}">
                         <i class="fas fa-download"></i>
                         تصدير
+                    </a>
+                    <a href="{{ route('dashboard.admin.mart.products.create') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i>
+                        إضافة منتج
                     </a>
                 </form>
             </div>

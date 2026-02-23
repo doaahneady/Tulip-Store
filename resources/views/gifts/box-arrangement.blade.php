@@ -247,7 +247,7 @@
 
     <script>
         let currentStep = 1;
-        let giftState = { box: null, fillers: [], wrapping: null, ribbon: null, card: null, message: '', recipientName: '' };
+        let giftState = { box: null, fillers: [], storeProducts: [], wrapping: null, ribbon: null, card: null, message: '', recipientName: '' };
 
         const boxes = [
             { id: 1, name: 'صندوق صغير', emoji: '📦', price: 25, maxItems: 3, image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&h=200&fit=crop' },
@@ -300,9 +300,11 @@
             { id: 'perfume', name: 'عطور', emoji: '🌺' },
             { id: 'accessory', name: 'إكسسوارات', emoji: '💍' },
             { id: 'candy', name: 'حلويات', emoji: '🍬' },
+            { id: 'tulip', name: 'منتجات Tulip', emoji: '🛍️' },
         ];
 
-        document.addEventListener('DOMContentLoaded', () => { loadBoxes(); loadCategories(); loadFillers(); loadWrappings(); loadRibbons(); loadCards(); setupMessage(); });
+        let storeProducts = [];
+        document.addEventListener('DOMContentLoaded', () => { loadBoxes(); loadCategories(); loadFillers(); loadWrappings(); loadRibbons(); loadCards(); setupMessage(); loadStoreProducts(); });
 
         function loadBoxes() {
             document.getElementById('boxesGrid').innerHTML = boxes.map(b => `
@@ -327,6 +329,22 @@
         }
 
         function loadFillers(cat = 'all') {
+            if (cat === 'tulip') {
+                const selectedIds = giftState.storeProducts.map(p => p.id);
+                document.getElementById('fillersGrid').innerHTML = storeProducts.length ? storeProducts.map(p => `
+                    <div class="option-card ${selectedIds.includes(p.id) ? 'selected' : ''}" onclick="toggleStoreProduct(${p.id})">
+                        <div class="tooltip">
+                            <div class="tooltip-img"><img src="${p.image || '/images/gift-placeholder.jpg'}" alt="${p.name}"></div>
+                            <div class="tooltip-name">${p.name}</div>
+                            <div class="tooltip-price">${p.price} ر.س</div>
+                        </div>
+                        <div class="option-visual"><i class="fas fa-box"></i></div>
+                        <div class="option-name">${p.name}</div>
+                        <div class="option-price">${p.price} ر.س</div>
+                    </div>
+                `).join('') : '<div class="summary-empty">جاري تحميل منتجات Tulip...</div>';
+                return;
+            }
             const filtered = cat === 'all' ? fillers : fillers.filter(f => f.cat === cat);
             document.getElementById('fillersGrid').innerHTML = filtered.map(f => `
                 <div class="option-card ${giftState.fillers.includes(f.id) ? 'selected' : ''}" onclick="toggleFiller(${f.id})">
@@ -340,6 +358,23 @@
                     <div class="option-price">${f.price} ر.س</div>
                 </div>
             `).join('');
+        }
+
+        async function loadStoreProducts() {
+            try {
+                const res = await fetch('/api/products?per_page=12&sort_by=created_at&sort_order=desc');
+                const data = await res.json();
+                const items = data.data || [];
+                storeProducts = items.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    price: Number(p.discount_price ?? p.price),
+                    image: p.image ?? null
+                }));
+                if (document.querySelector('.filter-tab.active')?.dataset.cat === 'tulip') loadFillers('tulip');
+            } catch (e) {
+                storeProducts = [];
+            }
         }
 
         function loadWrappings() {
@@ -392,9 +427,22 @@
             if (!giftState.box) { alert('اختر صندوق أولاً'); return; }
             const idx = giftState.fillers.indexOf(id);
             if (idx >= 0) { giftState.fillers.splice(idx, 1); }
-            else if (giftState.fillers.length < giftState.box.maxItems) { giftState.fillers.push(id); }
+            else if ((giftState.fillers.length + giftState.storeProducts.length) < giftState.box.maxItems) { giftState.fillers.push(id); }
             else { alert(`الصندوق يتسع لـ ${giftState.box.maxItems} عناصر فقط`); return; }
             loadFillers(document.querySelector('.filter-tab.active')?.dataset.cat || 'all'); updatePreview(); updateSummary();
+        }
+
+        function toggleStoreProduct(id) {
+            if (!giftState.box) { alert('اختر صندوق أولاً'); return; }
+            const idx = giftState.storeProducts.findIndex(p => p.id === id);
+            if (idx >= 0) {
+                giftState.storeProducts.splice(idx, 1);
+            } else {
+                if ((giftState.fillers.length + giftState.storeProducts.length) >= giftState.box.maxItems) { alert(`الصندوق يتسع لـ ${giftState.box.maxItems} عناصر فقط`); return; }
+                const p = storeProducts.find(x => x.id === id);
+                if (p) giftState.storeProducts.push({ id: p.id, name: p.name, price: p.price, qty: 1 });
+            }
+            loadFillers('tulip'); updateSummary();
         }
 
         function filterCategory(cat) {
@@ -427,6 +475,7 @@
             let items = [], total = 0;
             if (giftState.box) { items.push({ name: giftState.box.name, price: giftState.box.price }); total += giftState.box.price; }
             giftState.fillers.forEach(id => { const f = fillers.find(x => x.id === id); if (f) { items.push({ name: f.name, price: f.price }); total += f.price; } });
+            giftState.storeProducts.forEach(p => { items.push({ name: p.name, price: p.price }); total += p.price; });
             if (giftState.wrapping?.price > 0) { items.push({ name: giftState.wrapping.name, price: giftState.wrapping.price }); total += giftState.wrapping.price; }
             if (giftState.ribbon?.price > 0) { items.push({ name: giftState.ribbon.name, price: giftState.ribbon.price }); total += giftState.ribbon.price; }
             if (giftState.card?.price > 0) { items.push({ name: giftState.card.name, price: giftState.card.price }); total += giftState.card.price; }
@@ -455,7 +504,7 @@
                 const res = await fetch('/api/custom-gift/add-to-cart', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' },
-                    body: JSON.stringify({ box_id: giftState.box.id, fillers: giftState.fillers.map(id => ({ id, qty: 1 })), wrapping_id: giftState.wrapping?.id, ribbon_id: giftState.ribbon?.id, card_id: giftState.card?.id, message: giftState.message, recipient_name: giftState.recipientName })
+                    body: JSON.stringify({ box_id: giftState.box.id, fillers: giftState.fillers.map(id => ({ id, qty: 1 })), store_products: giftState.storeProducts.map(p => ({ product_id: p.id, qty: p.qty })), wrapping_id: giftState.wrapping?.id, ribbon_id: giftState.ribbon?.id, card_id: giftState.card?.id, message: giftState.message, recipient_name: giftState.recipientName })
                 });
                 const data = await res.json();
                 if (data.success) {
@@ -467,7 +516,7 @@
         }
 
         function resetBuilder() {
-            giftState = { box: null, fillers: [], wrapping: null, ribbon: null, card: null, message: '', recipientName: '' };
+            giftState = { box: null, fillers: [], storeProducts: [], wrapping: null, ribbon: null, card: null, message: '', recipientName: '' };
             currentStep = 1; goToStep(1); loadBoxes(); loadFillers(); loadWrappings(); loadRibbons(); loadCards(); updatePreview(); updateSummary();
             document.getElementById('cardMessage').value = ''; document.getElementById('recipientName').value = ''; document.getElementById('charCount').textContent = '0';
             document.getElementById('addToCartBtn').style.background = ''; document.getElementById('addToCartBtn').innerHTML = '<i class="fas fa-shopping-cart"></i> أضف للسلة';

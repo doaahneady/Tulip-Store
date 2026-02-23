@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>أدخل الكود - Tulip Store</title>
     <link rel="stylesheet" href="/css/store.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -271,41 +272,91 @@
             });
         });
 
+        function getQueryParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+
         async function handleVerifyCode() {
             const code = Array.from(inputs).map(input => input.value).join('');
             if(code.length !== 6) return;
 
+            const target = getQueryParam('target');
+            const isEmailChange = target === 'email-change';
+
             try {
-                const response = await fetch('/api/verify-code', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ code })
-                });
+                let ok = false;
+                if (isEmailChange) {
+                    const newEmail = sessionStorage.getItem('email_change:new_email');
+                    if (!newEmail) throw new Error('لا يوجد بريد جديد محفوظ');
+                    const res = await fetch('/profile/email/verify-confirm', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                        },
+                        body: JSON.stringify({ new_email: newEmail, code })
+                    });
+                    const data = await res.json();
+                    ok = res.ok && data.success;
 
-                const data = await response.json();
+                    // Apply pending non-email updates if exist
+                    if (ok) {
+                        const pending = sessionStorage.getItem('profile_pending_update');
+                        if (pending) {
+                            try {
+                                const payload = JSON.parse(pending);
+                                await fetch('/profile/update', {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                                    },
+                                    body: JSON.stringify({
+                                        name: payload.name,
+                                        phone: payload.phone,
+                                        address: payload.address
+                                    })
+                                });
+                            } catch (_) {}
+                        }
+                    }
+                } else {
+                    const response = await fetch('/api/verify-code', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ code })
+                    });
+                    const data = await response.json();
+                    ok = !!data.success;
+                }
 
-                if (data.success) {
-                    // Show success - green glow
+                if (ok) {
                     inputs.forEach(input => {
                         input.classList.remove('error');
                         input.classList.add('success');
                     });
                     
-                    // Redirect after animation
                     setTimeout(() => {
-                        window.location.href = '/ar-reset-password';
+                        if (isEmailChange) {
+                            sessionStorage.removeItem('email_change:new_email');
+                            sessionStorage.removeItem('profile_pending_update');
+                            window.location.href = '/profile';
+                        } else {
+                            window.location.href = '/ar-reset-password';
+                        }
                     }, 800);
                 } else {
-                    // Show error - red glow
                     inputs.forEach(input => {
                         input.classList.remove('success');
                         input.classList.add('error');
                     });
                     
-                    // Clear after animation
                     setTimeout(() => {
                         inputs.forEach(input => {
                             input.value = '';
@@ -315,7 +366,6 @@
                     }, 1000);
                 }
             } catch (error) {
-                // Show error - red glow
                 inputs.forEach(input => {
                     input.classList.remove('success');
                     input.classList.add('error');
@@ -331,9 +381,30 @@
             }
         }
 
-        function resendCode() {
-            alert('تم إرسال الكود مرة أخرى');
-            // In production, call API to resend code
+        async function resendCode() {
+            const target = getQueryParam('target');
+            const isEmailChange = target === 'email-change';
+            if (isEmailChange) {
+                const newEmail = sessionStorage.getItem('email_change:new_email');
+                if (!newEmail) { alert('لا يوجد بريد جديد محفوظ'); return; }
+                try {
+                    await fetch('/profile/email/verify-request', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                        },
+                        body: JSON.stringify({ new_email: newEmail })
+                    });
+                    alert('تم إرسال الكود مرة أخرى');
+                } catch (_) {
+                    alert('تعذر إعادة الإرسال');
+                }
+            } else {
+                alert('تم إرسال الكود مرة أخرى');
+                // Default flow: call API to resend password reset code
+            }
         }
     </script>
 </body>

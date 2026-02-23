@@ -8,6 +8,70 @@
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .products-grid {
+            display: grid !important;
+            grid-template-columns: repeat(5, 1fr) !important;
+            gap: 1.5rem !important;
+            margin-top: 2rem !important;
+        }
+
+        @media (max-width: 1400px) {
+            .products-grid { grid-template-columns: repeat(4, 1fr) !important; }
+        }
+
+        @media (max-width: 1100px) {
+            .products-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
+
+        @media (max-width: 768px) {
+            .products-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+
+        @media (max-width: 480px) {
+            .products-grid { grid-template-columns: repeat(1, 1fr) !important; }
+        }
+
+        .product-card {
+            background: #fff !important;
+            border-radius: 15px !important;
+            overflow: hidden !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+            transition: all 0.3s ease !important;
+            position: relative !important;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px) !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .product-card-actions {
+            display: flex !important;
+            justify-content: flex-start !important;
+            align-items: center !important;
+            padding: 0.9rem 1rem 1.1rem !important;
+        }
+
+        .product-card-btn-cart {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            width: auto !important;
+            height: auto !important;
+            padding: 0 !important;
+        }
+
+        .product-card-btn-cart:not([disabled]) i {
+            font-size: 1.4rem !important;
+            color: #ff6b35 !important;
+        }
+
+        .product-card-btn-cart[disabled] i {
+            font-size: 1.35rem !important;
+            color: #b91c1c !important;
+        }
+    </style>
 </head>
 <body style="margin:0; font-family:'El Messiri',sans-serif; background:#fff; overflow-x:hidden;">
 
@@ -158,15 +222,36 @@
 <section style="position:relative; height:350px; overflow:hidden; background:white; padding:2rem 1.2rem;">
     <div style="max-width:600px; margin:0 auto; position:relative; height:100%;">
         <div id="modernSlider" style="position:relative; height:100%; display:flex; align-items:center; justify-content:center;">
-            <!-- Slides will be inserted here -->
+            @php
+                $slidesData = is_array($slides ?? null) ? array_values($slides) : [];
+            @endphp
+            @foreach($slidesData as $i => $slide)
+                @php
+                    $slideClass = 'hidden';
+                    if ($i === 0) {
+                        $slideClass = 'active';
+                    } elseif ($i === 1) {
+                        $slideClass = 'next';
+                    } elseif ($i === 2) {
+                        $slideClass = 'prev';
+                    }
+                @endphp
+                <div class="modern-slide {{ $slideClass }}">
+                    <img src="{{ $slide['image'] ?? '' }}" alt="{{ $slide['title'] ?? '' }}">
+                    <div class="modern-slide-content">
+                        <h2 style="font-family:'Changa',sans-serif; font-size:2rem; font-weight:900; margin:0 0 0.8rem 0;">{{ $slide['title'] ?? '' }}</h2>
+                        <p style="font-family:'Changa',sans-serif; font-size:1.1rem; margin:0;">{{ $slide['subtitle'] ?? '' }}</p>
+                    </div>
+                </div>
+            @endforeach
         </div>
         
         <!-- Smaller Navigation Buttons -->
         <button onclick="changeModernSlide(-1)" style="position:absolute; left:1.5rem; top:50%; transform:translateY(-50%); width:50px; height:50px; background:rgba(255,255,255,0.95); border:none; border-radius:50%; cursor:pointer; font-size:1.3rem; color:#2a7080; transition:all 0.3s; z-index:10; box-shadow:0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-50%) scale(1.1)'" onmouseout="this.style.transform='translateY(-50%) scale(1)'">
-            <i class="fas fa-chevron-right"></i>
+            <i class="fas fa-chevron-left"></i>
         </button>
         <button onclick="changeModernSlide(1)" style="position:absolute; right:1.5rem; top:50%; transform:translateY(-50%); width:50px; height:50px; background:rgba(255,255,255,0.95); border:none; border-radius:50%; cursor:pointer; font-size:1.3rem; color:#2a7080; transition:all 0.3s; z-index:10; box-shadow:0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-50%) scale(1.1)'" onmouseout="this.style.transform='translateY(-50%) scale(1)'">
-            <i class="fas fa-chevron-left"></i>
+            <i class="fas fa-chevron-right"></i>
         </button>
         
         <!-- Dots -->
@@ -245,25 +330,58 @@
             <h2 style="font-family:'El Messiri',sans-serif; font-size:1.6rem; font-weight:800; color:#1a1a1a; margin:0;">
                  تسوق حسب الفئة
             </h2>
-            <a href="/store" style="color:#2a7080; font-size:1rem; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:0.5rem; transition:all 0.3s;" onmouseover="this.style.gap='0.8rem'" onmouseout="this.style.gap='0.5rem'">
+            <a href="/categories" style="color:#2a7080; font-size:1rem; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:0.5rem; transition:all 0.3s;" onmouseover="this.style.gap='0.8rem'" onmouseout="this.style.gap='0.5rem'">
                 عرض الكل <i class="fas fa-arrow-left"></i>
             </a>
         </div>
         
         <!-- Smaller Left Arrow -->
         <button onclick="scrollCategoriesLeft()" style="position:absolute; left:-15px; top:50%; transform:translateY(-50%); width:45px; height:45px; background:#fff; border:2px solid #e0e0e0; border-radius:50%; cursor:pointer; font-size:1.1rem; color:#2a7080; transition:all 0.3s; z-index:10; box-shadow:0 3px 10px rgba(0,0,0,0.08);" onmouseover="this.style.transform='translateY(-50%) scale(1.1)'; this.style.borderColor='#2a7080'" onmouseout="this.style.transform='translateY(-50%) scale(1)'; this.style.borderColor='#e0e0e0'">
-            <i class="fas fa-chevron-right"></i>
+            <i class="fas fa-chevron-left"></i>
         </button>
         
         <!-- Smaller Right Arrow -->
         <button onclick="scrollCategoriesRight()" style="position:absolute; right:-15px; top:50%; transform:translateY(-50%); width:45px; height:45px; background:#fff; border:2px solid #e0e0e0; border-radius:50%; cursor:pointer; font-size:1.1rem; color:#2a7080; transition:all 0.3s; z-index:10; box-shadow:0 3px 10px rgba(0,0,0,0.08);" onmouseover="this.style.transform='translateY(-50%) scale(1.1)'; this.style.borderColor='#2a7080'" onmouseout="this.style.transform='translateY(-50%) scale(1)'; this.style.borderColor='#e0e0e0'">
-            <i class="fas fa-chevron-left"></i>
+            <i class="fas fa-chevron-right"></i>
         </button>
         
         <div style="position:relative; overflow:hidden;">
             <div id="categoriesScroll" style="display:flex; gap:1.5rem; overflow-x:auto; scroll-behavior:smooth; padding:0.8rem 0; scrollbar-width:none; -ms-overflow-style:none;">
                 <div id="categoriesGrid" style="display:flex; gap:1.5rem; min-width:max-content;">
-                    <div style="text-align:center; padding:2rem; color:#999;">جاري التحميل...</div>
+                    @php
+                        $categoryColors = [
+                            '#ff6b35', '#2a7080', '#9b59b6', '#e74c3c', '#3498db',
+                            '#f39c12', '#1abc9c', '#e91e63', '#00bcd4', '#ff5722',
+                        ];
+                        $categoriesData = $categories ?? collect();
+                    @endphp
+                    @forelse($categoriesData as $index => $category)
+                        @php
+                            $name = (string) ($category->name ?? '');
+                            $slug = (string) ($category->slug ?? '');
+                            $color = $categoryColors[$index % count($categoryColors)];
+                            $icon = 'fa-box';
+                            if (str_contains($name, 'ورد') || str_contains($name, 'زهور')) {
+                                $icon = 'fa-seedling';
+                            } elseif (str_contains($name, 'شوكولات')) {
+                                $icon = 'fa-cookie-bite';
+                            } elseif (str_contains($name, 'عطر')) {
+                                $icon = 'fa-spray-can-sparkles';
+                            } elseif (str_contains($name, 'مجوهر') || str_contains($name, 'اكسسو') || str_contains($name, 'إكسسو')) {
+                                $icon = 'fa-gem';
+                            } elseif (str_contains($name, 'هدايا') || str_contains($name, 'هدية')) {
+                                $icon = 'fa-gift';
+                            }
+                        @endphp
+                        <div class="category-card" onclick="window.location.href='/category/{{ $slug }}'" style="--cat-color:{{ $color }};">
+                            <div class="category-icon">
+                                <i class="fas {{ $icon }}"></i>
+                            </div>
+                            <p class="category-name">{{ $name }}</p>
+                        </div>
+                    @empty
+                        <p style="text-align:center;color:#666;font-family:'El Messiri',sans-serif;font-size:0.95rem;margin:1.5rem 0;">لا توجد تصنيفات متاحة حالياً.</p>
+                    @endforelse
                 </div>
             </div>
             
@@ -363,11 +481,40 @@
 
         <!-- Featured Gifts Grid -->
         <div id="featuredGifts" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:2rem; margin-bottom:2.5rem;">
-            <!-- Loading placeholder -->
-            <div style="grid-column:1/-1; text-align:center; padding:3rem; color:#999;">
-                <i class="fas fa-gift fa-3x" style="margin-bottom:1rem; opacity:0.3;"></i>
-                <p>جاري تحميل الهدايا المميزة...</p>
-            </div>
+            @php
+                $featuredGiftsData = $featuredGifts ?? collect();
+            @endphp
+            @if($featuredGiftsData->isNotEmpty())
+                @foreach($featuredGiftsData as $gift)
+                    <div style="background:white; border-radius:20px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.1); transition:all 0.3s; cursor:pointer;" onclick="window.location.href='/gifts/{{ $gift->id }}'" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 30px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.1)'">
+                        <div style="height:200px; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); position:relative; overflow:hidden;">
+                            <img src="{{ $gift->main_image }}" alt="{{ $gift->name }}" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'; this.parentElement.innerHTML='<i class=\\'fas fa-gift fa-3x\\'></i>'">
+                            @if($gift->is_featured)
+                                <div style="position:absolute; top:1rem; right:1rem; background:#ff6b35; color:white; padding:0.5rem 1rem; border-radius:20px; font-size:0.8rem; font-weight:600;"><i class="fas fa-star"></i> مميز</div>
+                            @endif
+                        </div>
+                        <div style="padding:1.5rem;">
+                            <div style="display:inline-block; padding:0.25rem 0.75rem; background:#f5f5f5; border-radius:15px; font-size:0.8rem; font-weight:600; margin-bottom:0.75rem;">
+                                {{ $gift->occasion ?: ($gift->category ?: '') }}
+                            </div>
+                            <h3 style="margin:0 0 0.5rem 0; font-size:1.2rem; font-weight:700; color:#333; line-height:1.3;">{{ $gift->name }}</h3>
+                            <p style="color:#666; font-size:0.9rem; margin:0 0 1rem 0; line-height:1.5;">{{ \Illuminate\Support\Str::limit($gift->description ?? '', 80) }}</p>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-size:1.3rem; font-weight:700; color:#2a7080;">{{ $gift->formatted_price }}</span>
+                                <div style="display:flex; align-items:center; gap:0.3rem; color:#ffa500;">
+                                    <i class="fas fa-star"></i>
+                                    <span style="font-size:0.9rem;">{{ $gift->rating ?: '0.0' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            @else
+                <div style="grid-column:1/-1; text-align:center; padding:3rem; color:#999;">
+                    <i class="fas fa-gift fa-3x" style="margin-bottom:1rem; opacity:0.3;"></i>
+                    <p>جاري تحميل الهدايا المميزة...</p>
+                </div>
+            @endif
         </div>
 
         <!-- View All Gifts Button -->
@@ -381,155 +528,62 @@
     </div>
 </section>
 
-<script>
-// Load featured gifts
-async function loadFeaturedGifts() {
-    try {
-        const response = await fetch('/api/gifts/featured');
-        const data = await response.json();
-        
-        if (data.success && data.data.length > 0) {
-            const giftsGrid = document.getElementById('featuredGifts');
-            giftsGrid.innerHTML = data.data.map(gift => `
-                <div style="background:white; border-radius:20px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.1); transition:all 0.3s; cursor:pointer;" onclick="window.location.href='/gifts/${gift.id}'" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 30px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.1)'">
-                    <div style="height:200px; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); position:relative; overflow:hidden;">
-                        <img src="${gift.main_image || '/images/gift-placeholder.jpg'}" alt="${gift.name}" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'; this.parentElement.innerHTML='<i class=\\'fas fa-gift fa-3x\\'></i>'">
-                        ${gift.is_featured ? '<div style="position:absolute; top:1rem; right:1rem; background:#ff6b35; color:white; padding:0.5rem 1rem; border-radius:20px; font-size:0.8rem; font-weight:600;"><i class="fas fa-star"></i> مميز</div>' : ''}
-                    </div>
-                    <div style="padding:1.5rem;">
-                        <div style="display:inline-block; padding:0.25rem 0.75rem; background:${getCategoryColor(gift.category)}; border-radius:15px; font-size:0.8rem; font-weight:600; margin-bottom:0.75rem;">
-                            ${getCategoryName(gift.category)}
+@if(($featuredGifts ?? collect())->isEmpty())
+    <script>
+    async function loadFeaturedGifts() {
+        try {
+            let response = await fetch('/api/gifts/featured');
+            let data = await response.json();
+            if (!data.success || (data.data || []).length === 0) {
+                response = await fetch('/api/gifts?sort=featured&per_page=8');
+                data = await response.json();
+            }
+            if (data.success && (data.data || []).length > 0) {
+                const giftsGrid = document.getElementById('featuredGifts');
+                giftsGrid.innerHTML = data.data.map(gift => `
+                    <div style="background:white; border-radius:20px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.1); transition:all 0.3s; cursor:pointer;" onclick="window.location.href='/gifts/${gift.id}'" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 30px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.1)'">
+                        <div style="height:200px; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); position:relative; overflow:hidden;">
+                            <img src="${(gift.images && gift.images[0]) || gift.main_image || '/images/gift-placeholder.jpg'}" alt="${gift.name}" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'; this.parentElement.innerHTML='<i class=\\'fas fa-gift fa-3x\\'></i>'">
+                            ${gift.is_featured ? '<div style="position:absolute; top:1rem; right:1rem; background:#ff6b35; color:white; padding:0.5rem 1rem; border-radius:20px; font-size:0.8rem; font-weight:600;"><i class="fas fa-star"></i> مميز</div>' : ''}
                         </div>
-                        <h3 style="margin:0 0 0.5rem 0; font-size:1.2rem; font-weight:700; color:#333; line-height:1.3;">${gift.name}</h3>
-                        <p style="color:#666; font-size:0.9rem; margin:0 0 1rem 0; line-height:1.5;">${gift.description.substring(0, 80)}...</p>
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:1.3rem; font-weight:700; color:#2a7080;">${gift.formatted_price || (gift.price + ' ر.س')}</span>
-                            <div style="display:flex; align-items:center; gap:0.3rem; color:#ffa500;">
-                                <i class="fas fa-star"></i>
-                                <span style="font-size:0.9rem;">${gift.rating || '0.0'}</span>
+                        <div style="padding:1.5rem;">
+                            <div style="display:inline-block; padding:0.25rem 0.75rem; background:#f5f5f5; border-radius:15px; font-size:0.8rem; font-weight:600; margin-bottom:0.75rem;">
+                                ${(gift.occasion || gift.category || '')}
+                            </div>
+                            <h3 style="margin:0 0 0.5rem 0; font-size:1.2rem; font-weight:700; color:#333; line-height:1.3;">${gift.name}</h3>
+                            <p style="color:#666; font-size:0.9rem; margin:0 0 1rem 0; line-height:1.5;">${(gift.description || '').substring(0, 80)}...</p>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-size:1.3rem; font-weight:700; color:#2a7080;">${gift.formatted_price || (gift.price + ' ر.س')}</span>
+                                <div style="display:flex; align-items:center; gap:0.3rem; color:#ffa500;">
+                                    <i class="fas fa-star"></i>
+                                    <span style="font-size:0.9rem;">${gift.rating || '0.0'}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
-        }
-    } catch (error) {
-        console.error('Error loading featured gifts:', error);
-        document.getElementById('featuredGifts').innerHTML = `
-            <div style="grid-column:1/-1; text-align:center; padding:3rem; color:#e74c3c;">
-                <i class="fas fa-exclamation-triangle fa-2x" style="margin-bottom:1rem;"></i>
-                <p>حدث خطأ في تحميل الهدايا</p>
-            </div>
-        `;
-    }
-}
-
-// Helper functions for gift categories
-function getCategoryColor(category) {
-    const colors = {
-        'birthday': '#fce4ec',
-        'wedding': '#f3e5f5',
-        'anniversary': '#ffebee',
-        'graduation': '#e3f2fd',
-        'baby': '#e8f5e8',
-        'valentine': '#ffebee',
-        'mothers_day': '#fce4ec',
-        'fathers_day': '#e3f2fd',
-        'christmas': '#e8f5e8',
-        'eid': '#fff3e0',
-        'general': '#f5f5f5'
-    };
-    return colors[category] || '#f5f5f5';
-}
-
-function getCategoryName(category) {
-    const names = {
-        'birthday': 'عيد ميلاد',
-        'wedding': 'زفاف',
-        'anniversary': 'ذكرى سنوية',
-        'graduation': 'تخرج',
-        'baby': 'مولود جديد',
-        'valentine': 'عيد الحب',
-        'mothers_day': 'عيد الأم',
-        'fathers_day': 'عيد الأب',
-        'christmas': 'عيد الميلاد',
-        'eid': 'عيد',
-        'general': 'عام'
-    };
-    return names[category] || category;
-}
-
-// Load gifts when page loads
-document.addEventListener('DOMContentLoaded', loadFeaturedGifts);
-</script>
-
-<!-- DYNAMIC PACKAGES SECTION -->
-<section style="padding:2rem 1.5rem; background:#f8f9fa;">
-    <div style="max-width:1400px; margin:0 auto;">
-        <div id="packagesGrid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:1.5rem;">
-            <div style="grid-column:1/-1; text-align:center; padding:2rem; color:#999;">جاري تحميل الباقات...</div>
-        </div>
-    </div>
-</section>
-
-<script>
-// Load packages dynamically
-async function loadHomepagePackages() {
-    try {
-        const [packagesRes, productsRes] = await Promise.all([
-            fetch('/api/homepage/packages'),
-            fetch('/api/products')
-        ]);
-        
-        const packagesData = await packagesRes.json();
-        const productsData = await productsRes.json();
-        
-        const packages = packagesData.packages || [];
-        const products = productsData.data || [];
-        
-        // Filter visible packages
-        const visiblePackages = packages.filter(p => p.visible !== false);
-        
-        if (visiblePackages.length === 0) {
-            document.getElementById('packagesGrid').innerHTML = '';
-            return;
-        }
-        
-        document.getElementById('packagesGrid').innerHTML = visiblePackages.map(pkg => {
-            // Get product images for this package
-            const packageProducts = (pkg.product_ids || []).map(id => products.find(p => p.id === id)).filter(Boolean);
-            
-            // Generate 4 image slots
-            const images = [];
-            for (let i = 0; i < 4; i++) {
-                if (packageProducts[i]) {
-                    images.push(`<img src="${packageProducts[i].image || 'https://via.placeholder.com/200x120'}" style="width:100%; height:85px; object-fit:cover; border-radius:8px; transition:transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">`);
-                } else {
-                    images.push(`<div style="width:100%; height:85px; background:#e0e0e0; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#999;"><i class="fas fa-image"></i></div>`);
-                }
-            }
-            
-            return `
-                <div style="background:#fff; padding:1.5rem; box-shadow:0 3px 12px rgba(0,0,0,0.06); cursor:pointer; transition:all 0.3s; border-radius:12px;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 12px rgba(0,0,0,0.06)'" onclick="window.location.href='/package/${pkg.id}'">
-                    <h3 style="font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:800; color:#1a1a1a; margin:0 0 1.2rem 0;">${pkg.name}</h3>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin-bottom:1.2rem;">
-                        ${images.join('')}
+                `).join('');
+            } else {
+                const giftsGrid = document.getElementById('featuredGifts');
+                giftsGrid.innerHTML = `
+                    <div style="grid-column:1/-1; text-align:center; padding:3rem; color:#999;">
+                        <i class="fas fa-box-open fa-3x" style="margin-bottom:1rem; opacity:0.3;"></i>
+                        <p>لا توجد هدايا متاحة حالياً.</p>
                     </div>
-                    <a href="/package/${pkg.id}" style="color:#2a7080; font-size:0.95rem; font-weight:700; text-decoration:none; display:flex; align-items:center; gap:0.5rem; transition:all 0.3s;" onmouseover="this.style.gap='0.8rem'" onmouseout="this.style.gap='0.5rem'">
-                        تسوق الآن <i class="fas fa-arrow-left" style="font-size:0.85rem;"></i>
-                    </a>
+                `;
+            }
+        } catch (error) {
+            document.getElementById('featuredGifts').innerHTML = `
+                <div style="grid-column:1/-1; text-align:center; padding:3rem; color:#e74c3c;">
+                    <i class="fas fa-exclamation-triangle fa-2x" style="margin-bottom:1rem;"></i>
+                    <p>حدث خطأ في تحميل الهدايا</p>
                 </div>
             `;
-        }).join('');
-    } catch (error) {
-        console.error('Error loading packages:', error);
-        document.getElementById('packagesGrid').innerHTML = '';
+        }
     }
-}
 
-// Load packages on page load
-document.addEventListener('DOMContentLoaded', loadHomepagePackages);
-</script>
+    document.addEventListener('DOMContentLoaded', loadFeaturedGifts);
+    </script>
+@endif
 
 <!-- PERSONALIZED FOR YOU - NO CIRCLE, SIMPLE DESIGN -->
 <section id="personalizedSection" style="padding:2.5rem 1.5rem; background:#fff;">
@@ -540,8 +594,53 @@ document.addEventListener('DOMContentLoaded', loadHomepagePackages);
             </h2>
             <p style="font-family:'El Messiri',sans-serif; font-size:1.1rem; color:#666; margin:0;">بناءً على اهتماماتك وتصفحك السابق</p>
         </div>
-        <div id="personalizedProducts" style="display:grid; grid-template-columns:repeat(5,1fr); gap:1.2rem;">
-            <div style="grid-column:1/-1; text-align:center; padding:2.5rem; color:#999;">جاري التحميل...</div>
+        <div id="personalizedProducts" class="products-grid">
+            @php
+                $productsData = $products ?? collect();
+                $personalized = $productsData->take(5);
+            @endphp
+            @forelse($personalized as $product)
+                @php
+                    $stock = (int) ($product->stock_quantity ?? 0);
+                    $trackInv = (bool) ($product->track_inventory ?? false);
+                    $isOutOfStock = $trackInv && $stock <= 0;
+                    $stockLabel = $trackInv ? ($isOutOfStock ? 'غير متوفر' : 'متوفر: '.$stock) : 'متوفر';
+                    $price = (float) ($product->discount_price ?? $product->price ?? 0);
+                    $oldPrice = (float) ($product->price ?? 0);
+                @endphp
+                <div class="product-card" data-product-id="{{ $product->id }}" onclick="window.location.href='/products/{{ $product->id }}'">
+                    <button class="product-favorite-btn" onclick="event.stopPropagation(); toggleProductFavorite(event, {{ $product->id }})">
+                        <i class="far fa-heart"></i>
+                    </button>
+                    <div style="position:absolute; top: 14px; left: 14px; z-index: 3; background: {{ $isOutOfStock ? '#fee2e2' : '#dcfce7' }}; color: {{ $isOutOfStock ? '#b91c1c' : '#166534' }}; padding: 6px 10px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;">
+                        {{ $stockLabel }}
+                    </div>
+                    <div class="product-image-wrapper">
+                        <img src="{{ $product->image ?? 'https://via.placeholder.com/250' }}" alt="{{ $product->name }}" class="product-img">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">{{ $product->name }}</h3>
+                        <div class="product-price-rating-wrapper">
+                            <div class="product-price-wrapper">
+                                <span class="product-price">${{ number_format($price, 2) }}</span>
+                                @if(!empty($product->discount_price))
+                                    <span class="product-old-price">${{ number_format($oldPrice, 2) }}</span>
+                                @endif
+                            </div>
+                            <div class="product-rating">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-card-actions">
+                        <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)" data-product-id="{{ $product->id }}" {{ $isOutOfStock ? 'disabled' : '' }} style="{{ $isOutOfStock ? 'opacity: 0.55; cursor: not-allowed;' : 'cursor: pointer;' }}">
+                            <i class="fas {{ $isOutOfStock ? 'fa-ban' : 'fa-shopping-cart' }}"></i>
+                        </button>
+                    </div>
+                </div>
+            @empty
+                <div style="grid-column:1/-1; text-align:center; padding:2.5rem; color:#999;">لا توجد منتجات متاحة حالياً.</div>
+            @endforelse
         </div>
     </div>
 </section>
@@ -555,49 +654,56 @@ document.addEventListener('DOMContentLoaded', loadHomepagePackages);
             </h2>
             <p style="font-family:'El Messiri',sans-serif; font-size:1.1rem; color:#666; margin:0;">المنتجات الأكثر طلباً هذا الأسبوع</p>
         </div>
-        <div id="trendingProducts" style="display:grid; grid-template-columns:repeat(5,1fr); gap:1.2rem;">
-            <div style="grid-column:1/-1; text-align:center; padding:2.5rem; color:#999;">جاري التحميل...</div>
-        </div>
-    </div>
-</section>
-
-<!-- FLASH DEALS - BLUE BACKGROUND -->
-<section style="padding:2.5rem 1.5rem; background:linear-gradient(135deg, #2a7080 0%, #1a5060 100%); position:relative; overflow:hidden;">
-    <div style="position:absolute; inset:0; opacity:0.08; background-image:repeating-linear-gradient(45deg, transparent, transparent 12px, rgba(255,255,255,0.5) 12px, rgba(255,255,255,0.5) 24px);"></div>
-    
-    <div style="max-width:1400px; margin:0 auto; position:relative; z-index:2;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2.5rem;">
-            <div style="text-align:center; flex:1;">
-                <h2 style="font-family:'El Messiri',sans-serif; font-size:2rem; font-weight:900; color:#fff; margin:0 0 0.8rem 0; text-shadow:0 3px 12px rgba(0,0,0,0.15);">
-                    صفقات البرق
-                </h2>
-                <p style="font-family:'El Messiri',sans-serif; font-size:1.1rem; color:rgba(255,255,255,0.95); margin:0;">عروض محدودة لن تدوم طويلاً!</p>
-            </div>
-            <div id="flashTimer" style="background:rgba(0,0,0,0.25); backdrop-filter:blur(12px); padding:1.5rem 2.5rem; border-radius:16px; text-align:center; border:2px solid rgba(255,255,255,0.15);">
-                <div style="font-family:'El Messiri',sans-serif; font-size:2.5rem; font-weight:900; color:#fff; margin:0;">00:00:00</div>
-                <div style="font-family:'El Messiri',sans-serif; font-size:0.9rem; color:rgba(255,255,255,0.9); margin-top:0.5rem;">ينتهي العرض</div>
-            </div>
-        </div>
-        <div id="flashDeals" style="display:grid; grid-template-columns:repeat(5,1fr); gap:1.2rem;">
-            <div style="grid-column:1/-1; text-align:center; padding:2.5rem; color:rgba(255,255,255,0.7);">جاري التحميل...</div>
-        </div>
-    </div>
-</section>
-
-<!-- DISCOUNTS - WHITE BACKGROUND, ORANGE BANNER -->
-<section style="padding:2.5rem 1.5rem; background:#fff;">
-    <div style="max-width:1400px; margin:0 auto;">
-        <div style="text-align:center; margin-bottom:2.5rem;">
-            <h2 style="font-family:'El Messiri',sans-serif; font-size:2rem; font-weight:900; color:#1a1a1a; margin:0 0 0.8rem 0;">
-                عروض وخصومات
-            </h2>
-            <p style="font-family:'El Messiri',sans-serif; font-size:1.1rem; color:#666; margin:0;">
-                <span style="background:#ff6b35; color:#fff; padding:0.3rem 1rem; border-radius:20px; font-weight:700; margin-left:0.5rem;">خصم حتى 30%</span>
-                على منتجات مختارة
-            </p>
-        </div>
-        <div id="discountItems" style="display:grid; grid-template-columns:repeat(5,1fr); gap:1.2rem;">
-            <div style="grid-column:1/-1; text-align:center; padding:2.5rem; color:#999;">جاري التحميل...</div>
+        <div id="trendingProducts" class="products-grid">
+            @php
+                $productsData = $products ?? collect();
+                $trending = $productsData->slice(5, 5);
+                if ($trending->isEmpty()) {
+                    $trending = $productsData->take(5);
+                }
+            @endphp
+            @forelse($trending as $product)
+                @php
+                    $stock = (int) ($product->stock_quantity ?? 0);
+                    $trackInv = (bool) ($product->track_inventory ?? false);
+                    $isOutOfStock = $trackInv && $stock <= 0;
+                    $stockLabel = $trackInv ? ($isOutOfStock ? 'غير متوفر' : 'متوفر: '.$stock) : 'متوفر';
+                    $price = (float) ($product->discount_price ?? $product->price ?? 0);
+                    $oldPrice = (float) ($product->price ?? 0);
+                @endphp
+                <div class="product-card" data-product-id="{{ $product->id }}" onclick="window.location.href='/products/{{ $product->id }}'">
+                    <button class="product-favorite-btn" onclick="event.stopPropagation(); toggleProductFavorite(event, {{ $product->id }})">
+                        <i class="far fa-heart"></i>
+                    </button>
+                    <div style="position:absolute; top: 14px; left: 14px; z-index: 3; background: {{ $isOutOfStock ? '#fee2e2' : '#dcfce7' }}; color: {{ $isOutOfStock ? '#b91c1c' : '#166534' }}; padding: 6px 10px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;">
+                        {{ $stockLabel }}
+                    </div>
+                    <div class="product-image-wrapper">
+                        <img src="{{ $product->image ?? 'https://via.placeholder.com/250' }}" alt="{{ $product->name }}" class="product-img">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">{{ $product->name }}</h3>
+                        <div class="product-price-rating-wrapper">
+                            <div class="product-price-wrapper">
+                                <span class="product-price">${{ number_format($price, 2) }}</span>
+                                @if(!empty($product->discount_price))
+                                    <span class="product-old-price">${{ number_format($oldPrice, 2) }}</span>
+                                @endif
+                            </div>
+                            <div class="product-rating">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-card-actions">
+                        <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)" data-product-id="{{ $product->id }}" {{ $isOutOfStock ? 'disabled' : '' }} style="{{ $isOutOfStock ? 'opacity: 0.55; cursor: not-allowed;' : 'cursor: pointer;' }}">
+                            <i class="fas {{ $isOutOfStock ? 'fa-ban' : 'fa-shopping-cart' }}"></i>
+                        </button>
+                    </div>
+                </div>
+            @empty
+                <div style="grid-column:1/-1; text-align:center; padding:2.5rem; color:#999;">لا توجد منتجات متاحة حالياً.</div>
+            @endforelse
         </div>
     </div>
 </section>
@@ -608,7 +714,11 @@ document.addEventListener('DOMContentLoaded', loadHomepagePackages);
     ; background-position:center;"></div>
     <div style="position:relative; text-align:center; padding:2rem; max-width:650px;">
         <h2 style="font-size:2rem; font-weight:700; color:#fff; margin:0 0 1rem 0; text-shadow:0 4px 15px rgba(0,0,0,0.6);">تسوق بثقة معنا</h2>
-        <p style="font-size:1.1rem; color:#fff; text-shadow:0 3px 12px rgba(0,0,0,0.6);">جودة عالية • توصيل سريع • خدمة عملاء متميزة</p>
+        <p style="font-size:1.1rem; color:#fff; text-shadow:0 3px 12px rgba(0,0,0,0.6); margin:0 0 1.5rem 0;">جودة عالية • توصيل سريع • خدمة عملاء متميزة</p>
+        <a href="/trader/login" style="display:inline-flex; align-items:center; gap:0.6rem; background:#ff6b35; color:#fff; padding:0.7rem 1.9rem; border-radius:999px; text-decoration:none; font-size:1rem; font-weight:700; box-shadow:0 8px 20px rgba(0,0,0,0.25); transition:all 0.3s;">
+            بوابة التجار
+            <i class="fas fa-store"></i>
+        </a>
     </div>
 </section>
 
@@ -656,7 +766,7 @@ document.addEventListener('DOMContentLoaded', loadHomepagePackages);
 
         footer > div > div:last-of-type .payments { display:flex; gap:1.2rem; align-items:center; flex-wrap:wrap; justify-content:center; }
 
-        footer img.payment-icon { height:26px !important; opacity:0.6 !important; }
+        footer img.payment-icon { height:30px !important; opacity:1 !important; }
 
         /* Responsive breakpoints */
         @media (max-width:1200px) {
@@ -680,7 +790,7 @@ document.addEventListener('DOMContentLoaded', loadHomepagePackages);
             footer h2 { font-size:0.95rem !important; }
             footer p { font-size:0.9rem !important; }
             footer > div > div:first-of-type > div:first-of-type img { height:78px !important; }
-            footer img.payment-icon { height:22px !important; }
+            footer img.payment-icon { height:26px !important; }
         }
     </style>
 
@@ -699,12 +809,6 @@ document.addEventListener('DOMContentLoaded', loadHomepagePackages);
                     </a>
                     <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
                         <i class="fab fa-facebook"></i>
-                    </a>
-                    <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
-                        <i class="fab fa-x"></i>
-                    </a>
-                    <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
-                        <i class="fab fa-snapchat"></i>
                     </a>
                 </div>
             </div>
@@ -740,16 +844,16 @@ document.addEventListener('DOMContentLoaded', loadHomepagePackages);
         <div style="padding-top:2rem; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:center; align-items:center; gap:1.2rem; flex-wrap:wrap;">
             <p style="color:rgba(255,255,255,0.5); margin:0; font-size:0.95rem;">© 2025 Tulip Store. جميع الحقوق محفوظة</p>
             <div class="payments" style="display:flex; gap:1.2rem; align-items:center; justify-content:center;">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" class="payment-icon" style="height:30px; opacity:0.5;">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" class="payment-icon" style="height:30px; opacity:0.5;">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" class="payment-icon" style="height:30px; opacity:0.5;">
-                <img src="https://i.ibb.co/Q32tLdZg/Syriatel-Cash.png" class="payment-icon" style="height:30px; opacity:0.5;" alt="syriatelCash">
+                <i class="fab fa-cc-visa" style="font-size:28px; color:#fff;"></i>
+                <i class="fab fa-cc-mastercard" style="font-size:28px; color:#fff;"></i>
+                <i class="fas fa-hand-holding-dollar" style="font-size:26px; color:#fff;"></i>
             </div>
         </div>
     </div>
     
 </footer>
 
+<script>window.isAuthenticated = {!! auth()->check() ? 'true' : 'false' !!};</script>
 <script src="/js/home-final.js?v={{ time() }}"></script>
 </body>
 </html>

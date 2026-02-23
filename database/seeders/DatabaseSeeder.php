@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
@@ -22,6 +23,12 @@ class DatabaseSeeder extends Seeder
             ActivityLogSeeder::class,
             RefundSeeder::class,
         ]);
+
+        if (Schema::hasTable('gifts')) {
+            $this->call([
+                GiftSeeder::class,
+            ]);
+        }
 
         if (app()->environment('local')) {
             $this->call([

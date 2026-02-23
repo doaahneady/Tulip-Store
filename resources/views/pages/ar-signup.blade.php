@@ -502,9 +502,6 @@
     </style>
 </head>
 <body>
-    <a href="/" class="home-logo" title="العودة للصفحة الرئيسية">
-        <img src="/images/photo_2025-11-17_11-18-40.jpg" alt="Home">
-    </a>
     <div class="auth-shell">
         <div class="auth-card-wrap">
             <div class="auth-card">
@@ -917,4 +914,3 @@
     </script>
 </body>
 </html>
-

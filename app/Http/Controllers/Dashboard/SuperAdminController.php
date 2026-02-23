@@ -1067,6 +1067,172 @@ class SuperAdminController extends Controller
         return view('dashboards.super-admin.mart', compact('categories', 'products'));
     }
 
+    public function createMartProduct()
+    {
+        abort_unless(Schema::hasTable('products'), 404);
+        $categories = Schema::hasTable('categories')
+            ? Category::query()->orderBy('display_order')->orderBy('name')->get()
+            : collect();
+        return view('dashboards.super-admin.mart-product-create', compact('categories'));
+    }
+
+    public function storeMartProduct(Request $request)
+    {
+        abort_unless(Schema::hasTable('products'), 404);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'details' => 'nullable|string',
+            'category_id' => 'nullable|integer|exists:categories,id',
+            'sku' => 'nullable|string|max:255',
+            'price' => 'nullable|numeric|min:0',
+            'discount_price' => 'nullable|numeric|min:0',
+            'stock_quantity' => 'nullable|integer|min:0',
+            'low_stock_threshold' => 'nullable|integer|min:0',
+            'track_inventory' => 'nullable|boolean',
+            'is_featured' => 'nullable|boolean',
+            'is_active' => 'nullable|boolean',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'unit' => 'nullable|string|max:50',
+            'origin' => 'nullable|string|max:100',
+        ]);
+
+        $slug = trim((string) ($validated['slug'] ?? ''));
+        $slug = $slug === '' ? Str::slug($validated['name']) : Str::slug($slug);
+        if ($slug === '') {
+            $slug = 'product';
+        }
+        $baseSlug = $slug;
+        $i = 0;
+        while (Product::where('slug', $slug)->exists() && $i < 50) {
+            $slug = $baseSlug.'-'.random_int(1000, 9999);
+            $i++;
+        }
+
+        $imagePath = null;
+        if ($request->file('image') && Schema::hasColumn('products', 'image')) {
+            $imagePath = Storage::disk('public')->putFile('products', $request->file('image'));
+        }
+
+        $data = [
+            'name' => $validated['name'],
+            'slug' => $slug,
+        ];
+        foreach (['description','details','category_id','sku'] as $col) {
+            if (Schema::hasColumn('products', $col) && array_key_exists($col, $validated)) {
+                $data[$col] = $validated[$col];
+            }
+        }
+        foreach (['price','discount_price','stock_quantity','low_stock_threshold'] as $col) {
+            if (Schema::hasColumn('products', $col) && array_key_exists($col, $validated)) {
+                $data[$col] = $validated[$col];
+            }
+        }
+        foreach (['track_inventory','is_featured','is_active'] as $col) {
+            if (Schema::hasColumn('products', $col) && array_key_exists($col, $validated)) {
+                $data[$col] = (bool) $validated[$col];
+            }
+        }
+        if ($imagePath !== null) {
+            $data['image'] = $imagePath;
+        }
+
+        $product = Product::create($data);
+
+        // Optional attributes: unit, origin
+        if (!empty($validated['unit'])) {
+            $product->attributes()->create(['name' => 'unit', 'value' => $validated['unit']]);
+        }
+        if (!empty($validated['origin'])) {
+            $product->attributes()->create(['name' => 'origin', 'value' => $validated['origin']]);
+        }
+
+        return redirect()->route('dashboard.admin.mart')->with('success', 'Product created');
+    }
+
+    public function editMartProduct(Product $product)
+    {
+        abort_unless(Schema::hasTable('products'), 404);
+        $categories = Schema::hasTable('categories')
+            ? Category::query()->orderBy('display_order')->orderBy('name')->get()
+            : collect();
+        $attrs = $product->attributes()->get()->pluck('value','name');
+        return view('dashboards.super-admin.mart-product-edit', compact('product','categories','attrs'));
+    }
+
+    public function updateMartProduct(Request $request, Product $product)
+    {
+        abort_unless(Schema::hasTable('products'), 404);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'details' => 'nullable|string',
+            'category_id' => 'nullable|integer|exists:categories,id',
+            'sku' => 'nullable|string|max:255',
+            'price' => 'nullable|numeric|min:0',
+            'discount_price' => 'nullable|numeric|min:0',
+            'stock_quantity' => 'nullable|integer|min:0',
+            'low_stock_threshold' => 'nullable|integer|min:0',
+            'track_inventory' => 'nullable|boolean',
+            'is_featured' => 'nullable|boolean',
+            'is_active' => 'nullable|boolean',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'unit' => 'nullable|string|max:50',
+            'origin' => 'nullable|string|max:100',
+        ]);
+
+        $slug = trim((string) ($validated['slug'] ?? ''));
+        $slug = $slug === '' ? Str::slug($validated['name']) : Str::slug($slug);
+        if ($slug === '') {
+            $slug = 'product';
+        }
+        $baseSlug = $slug;
+        $i = 0;
+        while (Product::where('slug', $slug)->where('id','!=',$product->id)->exists() && $i < 50) {
+            $slug = $baseSlug.'-'.random_int(1000, 9999);
+            $i++;
+        }
+
+        $updates = [
+            'name' => $validated['name'],
+            'slug' => $slug,
+        ];
+        foreach (['description','details','category_id','sku'] as $col) {
+            if (Schema::hasColumn('products', $col) && array_key_exists($col, $validated)) {
+                $updates[$col] = $validated[$col];
+            }
+        }
+        foreach (['price','discount_price','stock_quantity','low_stock_threshold'] as $col) {
+            if (Schema::hasColumn('products', $col) && array_key_exists($col, $validated)) {
+                $updates[$col] = $validated[$col];
+            }
+        }
+        foreach (['track_inventory','is_featured','is_active'] as $col) {
+            if (Schema::hasColumn('products', $col) && array_key_exists($col, $validated)) {
+                $updates[$col] = (bool) $validated[$col];
+            }
+        }
+        if ($request->file('image') && Schema::hasColumn('products', 'image')) {
+            $updates['image'] = Storage::disk('public')->putFile('products', $request->file('image'));
+        }
+
+        $product->update($updates);
+
+        // Update attributes
+        if (isset($validated['unit'])) {
+            $product->attributes()->updateOrCreate(['name'=>'unit'], ['value'=>$validated['unit']]);
+        }
+        if (isset($validated['origin'])) {
+            $product->attributes()->updateOrCreate(['name'=>'origin'], ['value'=>$validated['origin']]);
+        }
+
+        return redirect()->route('dashboard.admin.mart')->with('success', 'Product updated');
+    }
+
     public function createMartCategory()
     {
         abort_unless(Schema::hasTable('categories'), 404);
@@ -1346,6 +1512,86 @@ class SuperAdminController extends Controller
         $product->delete();
 
         return back()->with('success', 'Product deleted');
+    }
+
+    public function manageDailyPrices()
+    {
+        abort_unless(Schema::hasTable('products'), 404);
+        $categories = Schema::hasTable('categories')
+            ? Category::query()->orderBy('display_order')->orderBy('name')->get()
+            : collect();
+        $products = Product::query()
+            ->with(['category', 'attributes'])
+            ->orderByRaw('category_id is null, category_id')
+            ->orderBy('name')
+            ->get();
+        $productsPayload = $products->map(function ($p) {
+            $rel = $p->relationLoaded('attributes') ? $p->getRelation('attributes') : null;
+            $attrs = ($rel instanceof \Illuminate\Support\Collection)
+                ? $rel->pluck('value', 'name')
+                : $p->attributes()->pluck('value', 'name');
+            return [
+                'id' => $p->id,
+                'name' => $p->name,
+                'category_id' => $p->category_id,
+                'category_name' => optional($p->category)->name,
+                'image' => $p->image,
+                'price' => $p->price,
+                'discount_price' => $p->discount_price,
+                'unit' => $attrs['unit'] ?? '',
+                'origin' => $attrs['origin'] ?? '',
+                'is_active' => (bool) ($p->is_active ?? true),
+            ];
+        })->values()->all();
+        return view('dashboards.super-admin.mart-daily-prices', compact('productsPayload','categories'));
+    }
+
+    public function saveDailyPrices(Request $request)
+    {
+        abort_unless(Schema::hasTable('products'), 404);
+        $raw = $request->input('items');
+        $items = is_string($raw) ? json_decode($raw, true) : (is_array($raw) ? $raw : []);
+        if (!is_array($items)) {
+            return back()->with('error', 'بيانات غير صالحة');
+        }
+        DB::beginTransaction();
+        try {
+            foreach ($items as $item) {
+                if (!isset($item['id']) || !is_numeric($item['id'])) {
+                    continue;
+                }
+                $product = Product::find($item['id']);
+                if (!$product) {
+                    continue;
+                }
+                $updates = [];
+                if (Schema::hasColumn('products', 'price') && array_key_exists('price', $item)) {
+                    $updates['price'] = is_numeric($item['price']) ? $item['price'] + 0 : null;
+                }
+                if (Schema::hasColumn('products', 'discount_price') && array_key_exists('discount_price', $item)) {
+                    $updates['discount_price'] = is_numeric($item['discount_price']) ? $item['discount_price'] + 0 : null;
+                } elseif (Schema::hasColumn('products', 'discount_price') && array_key_exists('price', $item)) {
+                    $updates['discount_price'] = $product->price;
+                }
+                if (Schema::hasColumn('products', 'is_active') && array_key_exists('is_active', $item)) {
+                    $updates['is_active'] = (bool) $item['is_active'];
+                }
+                if (!empty($updates)) {
+                    $product->update($updates);
+                }
+                if (array_key_exists('unit', $item)) {
+                    $product->attributes()->updateOrCreate(['name'=>'unit'], ['value'=>$item['unit'] ?? '']);
+                }
+                if (array_key_exists('origin', $item)) {
+                    $product->attributes()->updateOrCreate(['name'=>'origin'], ['value'=>$item['origin'] ?? '']);
+                }
+            }
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->with('error', 'فشل حفظ الأسعار: '.$e->getMessage());
+        }
+        return redirect()->route('dashboard.admin.mart.daily-prices.manage')->with('success','تم حفظ الأسعار وتحديث حالة المنتجات');
     }
 
     public function toggleMartCategoryActive(Category $category)

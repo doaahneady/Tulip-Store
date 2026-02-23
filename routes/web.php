@@ -16,9 +16,88 @@ use Inertia\Inertia;
 |
 */
 
-// Home page - New Design
+use App\Models\Category as PublicCategory;
+use App\Models\Gift as PublicGift;
+use App\Models\Product as PublicProduct;
+use App\Models\Setting as PublicSetting;
+use Illuminate\Support\Facades\Schema;
+
 Route::get('/', function () {
-    return view('home-new');
+    $productsQuery = PublicProduct::with('category')->active();
+    $products = $productsQuery->orderBy('created_at', 'desc')->take(20)->get();
+
+    if ($products->isEmpty()) {
+        $products = PublicProduct::with('category')
+            ->orderBy('created_at', 'desc')
+            ->take(20)
+            ->get();
+    }
+
+    $categoriesQuery = PublicCategory::query()->where('is_active', true);
+    $categories = $categoriesQuery
+        ->orderBy('display_order')
+        ->orderBy('name')
+        ->take(12)
+        ->get();
+
+    if ($categories->isEmpty()) {
+        $categories = PublicCategory::query()
+            ->orderBy('display_order')
+            ->orderBy('name')
+            ->take(12)
+            ->get();
+    }
+
+    $slides = PublicSetting::get('homepage_slider_slides', []);
+    $defaultSlides = [
+        [
+            'image' => '/images/footer.jpg',
+            'title' => 'أرسل ابتسامتك أينما كنت',
+            'subtitle' => 'تسوق معنا أفضل المنتجات والعروض',
+        ],
+        [
+            'image' => '/images/logo-girl.jpg',
+            'title' => 'هدايا توليب',
+            'subtitle' => 'لحظات استثنائية تستحق هدايا مميزة',
+        ],
+        [
+            'image' => '/images/white_orange_logo.png',
+            'title' => 'وصل حديثاً',
+            'subtitle' => 'اكتشف أحدث المنتجات في متجرنا',
+        ],
+    ];
+
+    if (! is_array($slides)) {
+        $slides = [];
+    }
+
+    $slides = array_values(array_filter($slides, fn ($s) => is_array($s)));
+
+    if (count($slides) < 3) {
+        for ($i = count($slides); $i < 3; $i++) {
+            $slides[] = $defaultSlides[$i];
+        }
+        PublicSetting::set('homepage_slider_slides', $slides, 'json', 'Home page slider slides');
+    }
+
+    if (empty($slides)) {
+        $slides = $defaultSlides;
+        PublicSetting::set('homepage_slider_slides', $slides, 'json', 'Home page slider slides');
+    }
+
+    $featuredGifts = collect();
+    if (Schema::hasTable('gifts')) {
+        $featuredGifts = PublicGift::active()->featured()->take(6)->get();
+        if ($featuredGifts->isEmpty()) {
+            $featuredGifts = PublicGift::active()->orderBy('created_at', 'desc')->take(6)->get();
+        }
+    }
+    return view('home-new', [
+        'products' => $products,
+        'categories' => $categories,
+        'slides' => $slides,
+        'featuredGifts' => $featuredGifts,
+    ]);
 })->name('home');
 
 // Quick access to employee login for testing
@@ -312,6 +391,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/settings', function () {
+        return view('profile');
+    })->name('settings');
 });
 
 // Arabic auth pages (custom static views)
@@ -397,6 +479,8 @@ Route::middleware(['web'])->group(function () {
         Route::get('/profile/notifications', [\App\Http\Controllers\Api\UserProfileController::class, 'notifications']);
         Route::put('/profile/update', [\App\Http\Controllers\Api\UserProfileController::class, 'updateProfile']);
         Route::put('/profile/password', [\App\Http\Controllers\Api\UserProfileController::class, 'changePassword']);
+        Route::post('/profile/email/verify-request', [\App\Http\Controllers\Api\UserProfileController::class, 'requestEmailVerification']);
+        Route::post('/profile/email/verify-confirm', [\App\Http\Controllers\Api\UserProfileController::class, 'confirmEmailVerification']);
     });
 
     // Custom Gift API routes
@@ -450,6 +534,14 @@ Route::middleware(['web'])->group(function () {
 
 // Category page route
 Route::get('/category/{slug}', [ProductController::class, 'byCategory'])->name('category.show');
+
+Route::get('/categories', function () {
+    return view('pages.categories');
+})->name('categories');
+
+Route::get('/about', function () {
+    return view('pages.about');
+})->name('about');
 
 // Product details page route
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('product.show');

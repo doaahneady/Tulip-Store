@@ -611,11 +611,8 @@
                                     </div>
                                 </div>
                                 <div class="product-card-actions">
-                                    <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart(event, ${product.id})" data-product-id="${product.id}" ${isOutOfStock ? 'disabled' : ''} style="width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center; ${isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : ''}">
-                                        <i class="fas fa-shopping-cart" style="font-size: 1.2rem;"></i>
-                                    </button>
-                                    <button class="product-card-btn product-card-btn-share" style=" font-family: 'El Messiri', sans-serif;" onclick="event.stopPropagation(); shareProduct(event, '${product.name}')">
-                                        شاركه الآن
+                                <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart(event, ${product.id})" data-product-id="${product.id}" ${isOutOfStock ? 'disabled' : ''} style="background: transparent; border: none; box-shadow: none; width: auto; height: auto; padding: 0; display: inline-flex; align-items: center; justify-content: center; ${isOutOfStock ? 'opacity: 0.55; cursor: not-allowed;' : 'cursor: pointer;'}">
+                                        ${isOutOfStock ? '<i class="fas fa-ban" style="font-size: 1.35rem; color: #b91c1c;"></i>' : '<i class="fas fa-shopping-cart" style="font-size: 1.4rem; color: #ff6b35;"></i>'}
                                     </button>
                                 </div>
                             </div>
@@ -717,7 +714,15 @@
             event.stopPropagation();
             
             const btn = event.target.closest('.product-card-btn-cart');
-            if (btn.disabled) {
+            const product = window.__productsById ? window.__productsById[productId] : null;
+            const stock = parseInt(product?.stock_quantity ?? 0);
+            const isOutOfStock = !!product?.track_inventory && stock <= 0;
+            if (btn.disabled || isOutOfStock) {
+                if (window.showToast) {
+                    window.showToast('هذا المنتج غير متوفر في المخزون');
+                } else {
+                    alert('هذا المنتج غير متوفر في المخزون');
+                }
                 return;
             }
             
@@ -738,7 +743,15 @@
                         quantity: 1
                     })
                 });
-                
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    if (window.showToast) {
+                        window.showToast(errData.message || 'غير قادر على إضافة المنتج للسلة');
+                    } else {
+                        alert(errData.message || 'غير قادر على إضافة المنتج للسلة');
+                    }
+                    throw new Error(errData.message || 'Add to cart failed');
+                }
                 const data = await response.json();
                 
                 if (data.success) {
@@ -789,6 +802,17 @@
         async function addToCartFromFloating(productId) {
             const btn = document.getElementById('floatingCartBtn');
             const originalText = btn.innerHTML;
+            const product = window.__productsById ? window.__productsById[productId] : null;
+            const stock = parseInt(product?.stock_quantity ?? 0);
+            const isOutOfStock = !!product?.track_inventory && stock <= 0;
+            if (isOutOfStock) {
+                if (window.showToast) {
+                    window.showToast('هذا المنتج غير متوفر في المخزون');
+                } else {
+                    alert('هذا المنتج غير متوفر في المخزون');
+                }
+                return;
+            }
             
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإضافة...';
             btn.disabled = true;
@@ -806,7 +830,15 @@
                         quantity: 1
                     })
                 });
-                
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    if (window.showToast) {
+                        window.showToast(errData.message || 'غير قادر على إضافة المنتج للسلة');
+                    } else {
+                        alert(errData.message || 'غير قادر على إضافة المنتج للسلة');
+                    }
+                    throw new Error(errData.message || 'Add to cart failed');
+                }
                 const data = await response.json();
                 
                 if (data.success) {
@@ -947,30 +979,6 @@
             }
         }
         
-        // Share product function
-        function shareProduct(event, productName) {
-            event.stopPropagation();
-            
-            if (navigator.share) {
-                navigator.share({
-                    title: productName,
-                    text: `تحقق من هذا المنتج الرائع: ${productName}`,
-                    url: window.location.href
-                }).catch(err => console.log('Error sharing:', err));
-            } else {
-                // Fallback: copy link to clipboard
-                navigator.clipboard.writeText(window.location.href).then(() => {
-                    const btn = event.target.closest('.product-btn-share');
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
-                    
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                    }, 2000);
-                });
-            }
-        }
-
         // Check and update cart icons for products
         async function updateCartIcons() {
             try {
@@ -1287,7 +1295,7 @@
 
         footer > div > div:last-of-type .payments { display:flex; gap:1.2rem; align-items:center; flex-wrap:wrap; justify-content:center; }
 
-        footer img.payment-icon { height:26px !important; opacity:0.6 !important; }
+        footer img.payment-icon { height:30px !important; opacity:1 !important; }
 
         /* Responsive breakpoints */
         @media (max-width:1200px) {
@@ -1311,7 +1319,7 @@
             footer h2 { font-size:0.95rem !important; }
             footer p { font-size:0.9rem !important; }
             footer > div > div:first-of-type > div:first-of-type img { height:78px !important; }
-            footer img.payment-icon { height:22px !important; }
+            footer img.payment-icon { height:26px !important; }
         }
     </style>
 
@@ -1331,12 +1339,6 @@
                     <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
                         <i class="fab fa-facebook"></i>
                     </a>
-                    <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
-                        <i class="fab fa-x"></i>
-                    </a>
-                    <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
-                        <i class="fab fa-snapchat"></i>
-                    </a>
                 </div>
             </div>
             
@@ -1344,26 +1346,26 @@
                 <h2 style="color:#ff6b35; font-weight:800; margin-bottom:1rem;margin-top:1rem ">روابط سريعة</h2>
                 <div style="display:flex; flex-direction:column; gap:1.1rem; align-items:center;">
                     <a href="/store" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">المتجر</a>
-                    <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">من نحن؟</a>
-                    <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">تواصل معنا</a>
+                    <a href="/about" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">من نحن؟</a>
+                    <a href="/contact" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">تواصل معنا</a>
                 </div>
             </div>
             
             <div>
                 <h2 style="color:#ff6b35; font-weight:800; margin-bottom:1rem;margin-top:1rem ">الدعم التقني</h2>
                 <div style="display:flex; flex-direction:column; gap:1.1rem; align-items:center;">
-                    <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">الأسئلة الشائعة</a>
-                    <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الشحن</a>
-                    <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الإرجاع</a>
-                    <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الخصوصية</a>
+                    <a href="/faq" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">الأسئلة الشائعة</a>
+                    <a href="/shipping" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الشحن</a>
+                    <a href="/returns" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الإرجاع</a>
+                    <a href="/privacy" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الخصوصية</a>
                 </div>
             </div>
             
             <div>
                 <h2 style="color:#ff6b35; font-weight:800; margin-bottom:1rem;margin-top:1rem ">الأقسام الخاصة</h2>
                 <div style="display:flex; flex-direction:column; gap:1.1rem; align-items:center;">
-                    <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">توليب مارت</a>
-                    <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">توليب للتنسيق العطايا</a>
+                    <a href="/mart" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">توليب مارت</a>
+                    <a href="/gifts" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">توليب للتنسيق العطايا</a>
                 </div>
             </div>
         </div>
@@ -1371,10 +1373,9 @@
         <div style="padding-top:2rem; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:center; align-items:center; gap:1.2rem; flex-wrap:wrap;">
             <p style="color:rgba(255,255,255,0.5); margin:0; font-size:0.95rem;">© 2025 Tulip Store. جميع الحقوق محفوظة</p>
             <div class="payments" style="display:flex; gap:1.2rem; align-items:center; justify-content:center;">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" class="payment-icon" style="height:30px; opacity:0.5;">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" class="payment-icon" style="height:30px; opacity:0.5;">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" class="payment-icon" style="height:30px; opacity:0.5;">
-                <img src="https://i.ibb.co/Q32tLdZg/Syriatel-Cash.png" class="payment-icon" style="height:30px; opacity:0.5;" alt="syriatelCash">
+                <i class="fab fa-cc-visa" style="font-size:28px; color:#fff;"></i>
+                <i class="fab fa-cc-mastercard" style="font-size:28px; color:#fff;"></i>
+                <i class="fas fa-hand-holding-dollar" style="font-size:26px; color:#fff;"></i>
             </div>
         </div>
     </div>

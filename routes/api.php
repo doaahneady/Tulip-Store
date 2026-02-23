@@ -123,6 +123,51 @@ Route::prefix('store3d')->group(function () {
 // Countries
 Route::get('/countries', [CountryController::class, 'index']);
 
+// Mart Daily Prices
+Route::prefix('mart')->group(function () {
+    Route::get('/daily-prices', function () {
+        $data = [
+            'date' => now()->toDateString(),
+            'categories' => [],
+        ];
+        if (\Illuminate\Support\Facades\Schema::hasTable('categories') && \Illuminate\Support\Facades\Schema::hasTable('products')) {
+            $cats = \App\Models\Category::query()->where(function($q){
+                if (\Illuminate\Support\Facades\Schema::hasColumn('categories','is_active')) {
+                    $q->where('is_active', true);
+                }
+            })->orderBy('display_order')->orderBy('name')->get();
+            foreach ($cats as $cat) {
+                $items = \App\Models\Product::query()
+                    ->with('attributes')
+                    ->where('category_id', $cat->id)
+                    ->active()
+                    ->orderBy('name')
+                    ->get()
+                    ->map(function($p) use ($cat){
+                        $rel = $p->relationLoaded('attributes') ? $p->getRelation('attributes') : null;
+                        $attrs = ($rel instanceof \Illuminate\Support\Collection)
+                            ? $rel->pluck('value', 'name')
+                            : $p->attributes()->pluck('value', 'name');
+                        $price = $p->price;
+                        $old = $p->discount_price ?: null;
+                        $photo = $p->image ? (url('/storage/'.$p->image)) : null;
+                        return [
+                            'id' => (string) $p->id,
+                            'name' => $p->name,
+                            'price' => $price,
+                            'oldPrice' => $old,
+                            'unit' => $attrs['unit'] ?? '',
+                            'origin' => $attrs['origin'] ?? '',
+                            'photo' => $photo,
+                        ];
+                    })->all();
+                $data['categories'][$cat->name] = $items;
+            }
+        }
+        return response()->json($data);
+    });
+});
+
 // User Activity & Personalization
 use App\Http\Controllers\UserActivityController;
 

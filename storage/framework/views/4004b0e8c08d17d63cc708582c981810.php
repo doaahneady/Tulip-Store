@@ -29,29 +29,6 @@
             <i class="fas fa-user-circle"></i>
             <span>الملف الشخصي</span>
           </div>
-          <div class="dropdown-item" onclick="window.location.href='/settings'">
-            <i class="fas fa-cog"></i>
-            <span>الإعدادات</span>
-          </div>
-          <div class="dropdown-item has-submenu" id="languageItem">
-            <i class="fas fa-language"></i>
-            <span>اللغة</span>
-            <i class="fas fa-chevron-right submenu-arrow"></i>
-            
-            <!-- Language Submenu -->
-            <div class="dropdown-submenu" id="languageSubmenu">
-              <div class="dropdown-item lang-option" data-lang="ar" onclick="changeLanguage('ar')">
-                <img src="https://flagcdn.com/w40/sy.png" alt="Syria" class="flag-icon">
-                <span>العربية</span>
-                <i class="fas fa-check lang-check" style="display: none;"></i>
-              </div>
-              <div class="dropdown-item lang-option" data-lang="en" onclick="changeLanguage('en')">
-                <img src="https://flagcdn.com/w40/gb.png" alt="UK" class="flag-icon">
-                <span>English</span>
-                <i class="fas fa-check lang-check" style="display: none;"></i>
-              </div>
-            </div>
-          </div>
 
           <div class="dropdown-item logout-item" onclick="handleLogout()">
             <i class="fas fa-sign-out-alt"></i>

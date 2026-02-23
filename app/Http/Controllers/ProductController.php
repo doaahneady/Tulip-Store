@@ -23,10 +23,7 @@ class ProductController extends Controller
         }
 
         $products = Product::with('category')
-            ->where('is_active', true)
-            ->when(Schema::hasColumn('products', 'status'), function ($q) {
-                $q->whereIn('status', ['approved', 'active']);
-            })
+            ->active()
             ->where('name', 'LIKE', "%{$query}%")
             ->limit(10)
             ->get();
@@ -41,17 +38,22 @@ class ProductController extends Controller
     {
         $categorySlug = $request->input('category');
 
-        $query = Product::with('category')
-            ->where('is_active', true);
+        $baseQuery = Product::with('category');
+        $query = (clone $baseQuery)->active();
 
         if ($categorySlug) {
             $category = Category::where('slug', $categorySlug)->first();
             if ($category) {
                 $query->where('category_id', $category->id);
+                $baseQuery->where('category_id', $category->id);
             }
         }
 
         $products = $query->orderBy('created_at', 'desc')->paginate(12);
+
+        if ($products->isEmpty()) {
+            $products = $baseQuery->orderBy('created_at', 'desc')->paginate(12);
+        }
 
         return response()->json($products);
     }
@@ -67,7 +69,7 @@ class ProductController extends Controller
 
         $query = Product::with('category')
             ->where('category_id', $category->id)
-            ->where('is_active', true);
+            ->active();
 
         // Apply price filters
         if ($request->has('min_price')) {
@@ -200,7 +202,7 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::with('category')
-            ->where('is_active', true)
+            ->active()
             ->findOrFail($id);
 
         $reviewsCount = Review::where('product_id', $product->id)->where('is_approved', true)->count();
@@ -215,7 +217,7 @@ class ProductController extends Controller
             ->sum('quantity');
 
         $relatedProducts = Product::query()
-            ->where('is_active', true)
+            ->active()
             ->where('id', '!=', $product->id)
             ->when($product->category_id, fn ($q) => $q->where('category_id', $product->category_id))
             ->orderByDesc('created_at')

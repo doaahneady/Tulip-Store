@@ -2,6 +2,8 @@
 // TULIP STORE - FINAL VERSION
 // ============================================
 
+// (moved to top)
+
 // Activity Tracker with Database Integration
 class DatabaseActivityTracker {
     constructor() {
@@ -71,22 +73,38 @@ let sliderData = [];
 
 let currentModernSlide = 0;
 
+const FALLBACK_SLIDER_DATA = [
+    {
+        image: '/images/footer.jpg',
+        title: 'أرسل ابتسامتك أينما كنت',
+        subtitle: 'تسوق معنا أفضل المنتجات والعروض'
+    },
+    {
+        image: '/images/logo-girl.jpg',
+        title: 'هدايا توليب',
+        subtitle: 'لحظات استثنائية تستحق هدايا مميزة'
+    },
+    {
+        image: '/images/white_orange_logo.png',
+        title: 'وصل حديثاً',
+        subtitle: 'اكتشف أحدث المنتجات في متجرنا'
+    }
+];
+
 async function loadSliderData() {
     try {
         const response = await fetch('/api/homepage/slides', { headers: { 'Accept': 'application/json' } });
-        if (!response.ok) {
-            return [];
-        }
-
-        const data = await response.json();
-        if (data && data.success && Array.isArray(data.slides)) {
-            return data.slides;
+        if (response.ok) {
+            const data = await response.json();
+            if (data && data.success && Array.isArray(data.slides) && data.slides.length) {
+                return data.slides;
+            }
         }
     } catch (error) {
         console.error('Error loading slider data:', error);
     }
 
-    return [];
+    return FALLBACK_SLIDER_DATA;
 }
 
 function initializeModernSlider() {
@@ -95,6 +113,10 @@ function initializeModernSlider() {
     
     if (!container || !dotsContainer) return;
     if (!Array.isArray(sliderData) || sliderData.length === 0) return;
+
+    container.innerHTML = '';
+    dotsContainer.innerHTML = '';
+    currentModernSlide = 0;
     
     // Create slides
     sliderData.forEach((slide, index) => {
@@ -345,56 +367,61 @@ function getCategoryIcon(categoryName) {
 // PRODUCT CARD FUNCTIONS - SMALLER BUTTON, USD, CART ICON
 // ============================================
 
-function createProductCard(p, bgColor = '#fff') {
-    // Same price color for all
-    const priceColor = '#2a7080';
-    
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function createProductCard(p) {
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const isFavorite = favorites.some(x => x.id === p.id);
+    const stockQty = parseInt(p?.stock_quantity ?? 0);
+    const trackInv = !!p?.track_inventory;
+    const isOutOfStock = trackInv && stockQty <= 0;
+    const stockLabel = trackInv ? (isOutOfStock ? 'غير متوفر' : `متوفر: ${stockQty}`) : 'متوفر';
+
+    const price = parseFloat(p.discount_price || p.price || 0);
+    const oldPrice = parseFloat(p.price || 0);
+    const safeName = escapeHtml(p.name || '');
+
     return `
-        <div onclick="window.location.href='/products/${p.id}'" style="cursor:pointer;background:${bgColor};border:1px solid #e8e8e8;border-radius:14px;overflow:hidden;transition:all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);" onmouseover="this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)';this.style.borderColor='#2a7080';this.style.transform='translateY(-6px) scale(1.02)'" onmouseout="this.style.boxShadow='none';this.style.borderColor='#e8e8e8';this.style.transform='translateY(0) scale(1)'">
-            <div style="aspect-ratio:1/1;overflow:hidden;background:#f8f8f8;position:relative;">
-                <img src="${p.image || 'https://via.placeholder.com/320'}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;" onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform='scale(1)'">
+        <div class="product-card" data-product-id="${p.id}" onclick="window.location.href='/products/${p.id}'">
+            <button class="product-favorite-btn ${isFavorite ? 'active' : ''}" onclick="event.stopPropagation(); toggleProductFavorite(event, ${p.id})">
+                <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
+            </button>
+            <div style="position:absolute; top: 14px; left: 14px; z-index: 3; background: ${isOutOfStock ? '#fee2e2' : '#dcfce7'}; color: ${isOutOfStock ? '#b91c1c' : '#166534'}; padding: 6px 10px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;">
+                ${stockLabel}
             </div>
-            <div style="padding:1rem;">
-                <h3 style="font-family:'El Messiri',sans-serif;font-size:0.95rem;font-weight:600;color:#1a1a1a;margin:0 0 0.7rem 0;line-height:1.4;height:2.8em;overflow:hidden;">${p.name}</h3>
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0;">
-                    <div style="font-family:'El Messiri',sans-serif;font-size:1.2rem;font-weight:700;color:${priceColor};">${p.price} USD</div>
-                    <button onclick="event.stopPropagation();addToCart(${p.id},this)" class="add-cart-btn" data-product-id="${p.id}" style="background:#ff6b35;color:#fff;border:none;padding:0.7rem;width:40px;height:40px;font-size:1.3rem;cursor:pointer;border-radius:8px;transition:all 0.3s;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;" onmouseover="this.style.background='#e55a2b';this.style.transform='scale(1.1)'" onmouseout="if(!this.classList.contains('added')){this.style.background='#ff6b35';this.style.transform='scale(1)'}">
-                        <i class="fas fa-shopping-cart"></i>
-                    </button>
+            <div class="product-image-wrapper">
+                <img src="${p.image || 'https://via.placeholder.com/250'}" alt="${safeName}" class="product-img">
+            </div>
+            <div class="product-info">
+                <h3 class="product-name">${safeName}</h3>
+                <div class="product-price-rating-wrapper">
+                    <div class="product-price-wrapper">
+                        <span class="product-price">$${price.toFixed(2)}</span>
+                        ${p.discount_price ? `<span class="product-old-price">$${oldPrice.toFixed(2)}</span>` : ''}
+                    </div>
+                    <div class="product-rating">
+                        ${'<i class="fas fa-star"></i>'.repeat(5)}
+                    </div>
                 </div>
+            </div>
+            <div class="product-card-actions">
+                <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart(${p.id}, this)" data-product-id="${p.id}" ${isOutOfStock ? 'disabled' : ''} style="background: transparent; border: none; box-shadow: none; width: auto; height: auto; padding: 0; display: inline-flex; align-items: center; justify-content: center; ${isOutOfStock ? 'opacity: 0.55; cursor: not-allowed;' : 'cursor: pointer;'}">
+                    ${isOutOfStock ? '<i class="fas fa-ban" style="font-size: 1.35rem; color: #b91c1c;"></i>' : '<i class="fas fa-shopping-cart" style="font-size: 1.4rem; color: #ff6b35;"></i>'}
+                </button>
             </div>
         </div>
     `;
 }
 
 function createDiscountCard(p) {
-    const originalPrice = (parseFloat(p.price.replace(/[^\d.]/g, '')) * 1.3).toFixed(2);
-    const priceColor = '#2a7080';
-    
-    return `
-        <div onclick="window.location.href='/products/${p.id}'" style="cursor:pointer;background:#fff;border:1px solid #e8e8e8;border-radius:14px;overflow:hidden;transition:all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);position:relative;" onmouseover="this.style.boxShadow='0 10px 25px rgba(255,107,53,0.2)';this.style.borderColor='#ff6b35';this.style.transform='translateY(-6px) scale(1.02)'" onmouseout="this.style.boxShadow='none';this.style.borderColor='#e8e8e8';this.style.transform='translateY(0) scale(1)'">
-            <div style="position:absolute;top:-2px;right:-2px;z-index:3;width:100px;height:100px;overflow:hidden;">
-                <div style="position:absolute;top:20px;right:-25px;width:150px;background:linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%);text-align:center;transform:rotate(45deg);box-shadow:0 4px 12px rgba(255,107,53,0.5);padding:0.4rem 0;">
-                    <span style="color:#fff;font-size:0.75rem;font-weight:800;font-family:'El Messiri',sans-serif;text-shadow:0 2px 4px rgba(0,0,0,0.3);">خصم 30%</span>
-                </div>
-            </div>
-            <div style="aspect-ratio:1/1;overflow:hidden;background:#f8f8f8;">
-                <img src="${p.image || 'https://via.placeholder.com/320'}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;" onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform='scale(1)'">
-            </div>
-            <div style="padding:1rem;">
-                <h3 style="font-family:'El Messiri',sans-serif;font-size:0.95rem;font-weight:600;color:#1a1a1a;margin:0 0 0.7rem 0;line-height:1.4;height:2.8em;overflow:hidden;">${p.name}</h3>
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0;">
-                    <div style="display:flex;align-items:center;gap:0.6rem;">
-                        <div style="font-family:'El Messiri',sans-serif;font-size:1.2rem;font-weight:700;color:${priceColor};">${p.price} USD</div>
-                        <div style="font-family:'El Messiri',sans-serif;font-size:0.9rem;color:#999;text-decoration:line-through;">${originalPrice}</div>
-                    </div>
-                    <button onclick="event.stopPropagation();addToCart(${p.id},this)" class="add-cart-btn" data-product-id="${p.id}" style="background:#ff6b35;color:#fff;border:none;padding:0.7rem;width:40px;height:40px;font-size:1.3rem;cursor:pointer;border-radius:8px;transition:all 0.3s;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;" onmouseover="this.style.background='#e55a2b';this.style.transform='scale(1.1)'" onmouseout="if(!this.classList.contains('added')){this.style.background='#ff6b35';this.style.transform='scale(1)'}">
-                        <i class="fas fa-shopping-cart"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
+    return createProductCard(p);
 }
 
 // ============================================
@@ -403,33 +430,36 @@ function createDiscountCard(p) {
 
 async function loadCategories() {
     try {
-        const response = await fetch('/api/categories');
+        const response = await fetch('/api/categories', { headers: { 'Accept': 'application/json' } });
         if (!response.ok) throw new Error('Failed to load categories');
-        const categories = await response.json();
-        
-        if (categories.length === 0) {
-            document.getElementById('categoriesGrid').innerHTML = '<div style="padding:2.5rem; color:#999;">لا توجد فئات متاحة حالياً</div>';
+        const json = await response.json();
+        const categories = Array.isArray(json) ? json : (json.data || []);
+        const grid = document.getElementById('categoriesGrid');
+        if (!grid) return;
+
+        if (!categories.length) {
+            grid.innerHTML = `
+                <p style="text-align:center;color:#666;font-family:'El Messiri',sans-serif;font-size:0.95rem;margin:1.5rem 0;">
+                    لا توجد تصنيفات متاحة حالياً.
+                </p>
+            `;
             return;
         }
-        
-        // Colorful category icon colors
+
         const categoryColors = [
             '#ff6b35', '#2a7080', '#9b59b6', '#e74c3c', '#3498db',
             '#f39c12', '#1abc9c', '#e91e63', '#00bcd4', '#ff5722'
         ];
-        
-        document.getElementById('categoriesGrid').innerHTML = categories.map((c, index) => {
-            // Get icon based on category name, or use index-based fallback
+
+        grid.innerHTML = categories.map((c, index) => {
             let icon = getCategoryIcon(c.name);
-            
-            // If all categories have same icon, use different icons based on index
             const fallbackIcons = ['fa-gift', 'fa-gem', 'fa-tshirt', 'fa-laptop', 'fa-book', 'fa-gamepad', 'fa-home', 'fa-spa', 'fa-bag-shopping', 'fa-clock'];
             if (icon === 'fa-box') {
                 icon = fallbackIcons[index % fallbackIcons.length];
             }
-            
+
             const iconColor = categoryColors[index % categoryColors.length];
-            
+
             return `
                 <div class="category-card" onclick="window.location.href='/category/${c.slug}'" style="--cat-color:${iconColor};">
                     <div class="category-icon">
@@ -441,7 +471,13 @@ async function loadCategories() {
         }).join('');
     } catch (error) {
         console.error('Error loading categories:', error);
-        document.getElementById('categoriesGrid').innerHTML = '<div style="padding:2.5rem; color:#999;">حدث خطأ في تحميل الفئات</div>';
+        const grid = document.getElementById('categoriesGrid');
+        if (!grid) return;
+        grid.innerHTML = `
+            <p style="text-align:center;color:#c00;font-family:'El Messiri',sans-serif;font-size:0.95rem;margin:1.5rem 0;">
+                تعذر تحميل التصنيفات حالياً. يرجى المحاولة لاحقاً.
+            </p>
+        `;
     }
 }
 
@@ -453,77 +489,145 @@ async function loadPersonalizedProducts() {
     try {
         const recommendations = await activityTracker.getRecommendations();
         const personalizedProducts = recommendations.personalized_products || [];
+        const container = document.getElementById('personalizedProducts');
+        if (!container) return;
         
-        if (personalizedProducts.length === 0) {
-            const response = await fetch('/api/products');
+        window.__productsById = window.__productsById || {};
+
+        let products = personalizedProducts;
+
+        if (products.length === 0) {
+            const response = await fetch(`${API_BASE}/products`, { headers: { 'Accept': 'application/json' } });
             if (!response.ok) throw new Error('Failed to load products');
             const data = await response.json();
-            const products = (data.data || []).slice(0, 5);
-            document.getElementById('personalizedProducts').innerHTML = products.map(p => createProductCard(p, '#fff')).join('');
-        } else {
-            document.getElementById('personalizedProducts').innerHTML = personalizedProducts.slice(0, 5).map(p => createProductCard(p, '#fff')).join('');
+            const productsRaw = Array.isArray(data) ? data : (data.data || []);
+            products = productsRaw.slice(0, 5);
         }
+
+        if (!products.length) {
+            container.innerHTML = `
+                <p style="text-align:center;color:#666;font-family:'El Messiri',sans-serif;font-size:0.95rem;margin:1.5rem 0;">
+                    لا توجد منتجات متاحة حالياً.
+                </p>
+            `;
+            return;
+        }
+
+        const list = products.slice(0, 5);
+        list.forEach(p => { window.__productsById[p.id] = p; });
+        container.innerHTML = list.map(p => createProductCard(p, '#fff')).join('');
     } catch (error) {
         console.error('Error loading personalized products:', error);
-        document.getElementById('personalizedProducts').innerHTML = '<div style="grid-column:1/-1; padding:2.5rem; color:#999;">حدث خطأ في تحميل المنتجات</div>';
+        const container = document.getElementById('personalizedProducts');
+        if (!container) return;
+        container.innerHTML = `
+            <p style="text-align:center;color:#c00;font-family:'El Messiri',sans-serif;font-size:0.95rem;margin:1.5rem 0;">
+                تعذر تحميل المنتجات المخصصة حالياً. يرجى المحاولة لاحقاً.
+            </p>
+        `;
     }
 }
 
 async function loadTrendingProducts() {
     try {
-        const response = await fetch('/api/products');
+        const response = await fetch(`${API_BASE}/products`, { headers: { 'Accept': 'application/json' } });
         if (!response.ok) throw new Error('Failed to load products');
         const data = await response.json();
-        const products = (data.data || []).slice(0, 5);
-        
-        if (products.length === 0) {
-            document.getElementById('trendingProducts').innerHTML = '<div style="grid-column:1/-1; padding:2.5rem; color:#999;">لا توجد منتجات متاحة حالياً</div>';
+        const productsRaw = Array.isArray(data) ? data : (data.data || []);
+        const products = productsRaw.slice(0, 5);
+        const container = document.getElementById('trendingProducts');
+        if (!container) return;
+
+        if (!products.length) {
+            container.innerHTML = `
+                <p style="text-align:center;color:#666;font-family:'El Messiri',sans-serif;font-size:0.95rem;margin:1.5rem 0;">
+                    لا توجد منتجات متاحة حالياً.
+                </p>
+            `;
             return;
         }
         
-        document.getElementById('trendingProducts').innerHTML = products.map(p => createProductCard(p, '#fff')).join('');
+        window.__productsById = window.__productsById || {};
+        products.forEach(p => { window.__productsById[p.id] = p; });
+        container.innerHTML = products.map(p => createProductCard(p, '#fff')).join('');
     } catch (error) {
         console.error('Error loading trending products:', error);
-        document.getElementById('trendingProducts').innerHTML = '<div style="grid-column:1/-1; padding:2.5rem; color:#999;">حدث خطأ في تحميل المنتجات</div>';
+        const container = document.getElementById('trendingProducts');
+        if (!container) return;
+        container.innerHTML = `
+            <p style="text-align:center;color:#c00;font-family:'El Messiri',sans-serif;font-size:0.95rem;margin:1.5rem 0;">
+                تعذر تحميل المنتجات الأكثر رواجاً حالياً. يرجى المحاولة لاحقاً.
+            </p>
+        `;
     }
 }
 
 async function loadFlashDeals() {
     try {
-        const response = await fetch('/api/products');
+        const response = await fetch(`${API_BASE}/products`, { headers: { 'Accept': 'application/json' } });
         if (!response.ok) throw new Error('Failed to load products');
         const data = await response.json();
-        const products = (data.data || []).slice(5, 10);
-        
-        if (products.length === 0) {
-            document.getElementById('flashDeals').innerHTML = '<div style="grid-column:1/-1; padding:2.5rem; color:rgba(255,255,255,0.7);">لا توجد عروض متاحة حالياً</div>';
+        const productsRaw = Array.isArray(data) ? data : (data.data || []);
+        const products = productsRaw.slice(5, 10);
+        const container = document.getElementById('flashDeals');
+        if (!container) return;
+
+        if (!products.length) {
+            container.innerHTML = `
+                <p style="text-align:center;color:#666;font-family:'El Messiri',sans-serif;font-size:0.95rem;margin:1.5rem 0;">
+                    لا توجد عروض فلاش متاحة حالياً.
+                </p>
+            `;
             return;
         }
         
-        document.getElementById('flashDeals').innerHTML = products.map(p => createDiscountCard(p)).join('');
+        window.__productsById = window.__productsById || {};
+        products.forEach(p => { window.__productsById[p.id] = p; });
+        container.innerHTML = products.map(p => createDiscountCard(p)).join('');
         startFlashTimer();
     } catch (error) {
         console.error('Error loading flash deals:', error);
-        document.getElementById('flashDeals').innerHTML = '<div style="grid-column:1/-1; padding:2.5rem; color:rgba(255,255,255,0.7);">حدث خطأ في تحميل العروض</div>';
+        const container = document.getElementById('flashDeals');
+        if (!container) return;
+        container.innerHTML = `
+            <p style="text-align:center;color:#c00;font-family:'El Messiri',sans-serif;font-size:0.95rem;margin:1.5rem 0;">
+                تعذر تحميل عروض الفلاش حالياً. يرجى المحاولة لاحقاً.
+            </p>
+        `;
     }
 }
 
 async function loadDiscountItems() {
     try {
-        const response = await fetch('/api/products');
+        const response = await fetch(`${API_BASE}/products`, { headers: { 'Accept': 'application/json' } });
         if (!response.ok) throw new Error('Failed to load products');
         const data = await response.json();
-        const products = (data.data || []).slice(10, 15);
-        
-        if (products.length === 0) {
-            document.getElementById('discountItems').innerHTML = '<div style="grid-column:1/-1; padding:2.5rem; color:#999;">لا توجد عروض متاحة حالياً</div>';
+        const productsRaw = Array.isArray(data) ? data : (data.data || []);
+        const products = productsRaw.slice(10, 15);
+        const container = document.getElementById('discountItems');
+        if (!container) return;
+
+        if (!products.length) {
+            container.innerHTML = `
+                <p style="text-align:center;color:#666;font-family:'El Messiri',sans-serif;font-size:0.95rem;margin:1.5rem 0;">
+                    لا توجد عروض خصم متاحة حالياً.
+                </p>
+            `;
             return;
         }
         
-        document.getElementById('discountItems').innerHTML = products.map(createDiscountCard).join('');
+        window.__productsById = window.__productsById || {};
+        products.forEach(p => { window.__productsById[p.id] = p; });
+        container.innerHTML = products.map(createDiscountCard).join('');
     } catch (error) {
         console.error('Error loading discount items:', error);
-        document.getElementById('discountItems').innerHTML = '<div style="grid-column:1/-1; padding:2.5rem; color:#999;">حدث خطأ في تحميل العروض</div>';
+        const container = document.getElementById('discountItems');
+        if (!container) return;
+        container.innerHTML = `
+            <p style="text-align:center;color:#c00;font-family:'El Messiri',sans-serif;font-size:0.95rem;margin:1.5rem 0;">
+                تعذر تحميل عروض الخصم حالياً. يرجى المحاولة لاحقاً.
+            </p>
+        `;
     }
 }
 
@@ -675,6 +779,23 @@ window.showToast = showToast;
 
 async function addToCart(productId, buttonElement) {
     try {
+        const p = (window.__productsById || {})[productId];
+        const stockQty = parseInt(p?.stock_quantity ?? 0);
+        const trackInv = !!p?.track_inventory;
+        if (p && trackInv && stockQty <= 0) {
+            if (window.showToast) {
+                window.showToast('هذا المنتج غير متوفر في المخزون');
+            }
+            if (buttonElement) {
+                buttonElement.style.background = '#e74c3c';
+                buttonElement.innerHTML = '<i class="fas fa-times"></i>';
+                setTimeout(() => {
+                    buttonElement.style.background = '#ff6b35';
+                    buttonElement.innerHTML = '<i class="fas fa-shopping-cart"></i>';
+                }, 1500);
+            }
+            return;
+        }
         // Track activity
         activityTracker.trackCartAdd(productId);
         
@@ -732,6 +853,13 @@ async function addToCart(productId, buttonElement) {
 
 window.addEventListener('DOMContentLoaded', async () => {
     sliderData = await loadSliderData();
+    if (Array.isArray(sliderData) && sliderData.length < 3) {
+        const filled = sliderData.slice();
+        for (let i = filled.length; i < 3; i++) {
+            filled.push(FALLBACK_SLIDER_DATA[i] || FALLBACK_SLIDER_DATA[0]);
+        }
+        sliderData = filled;
+    }
     initializeModernSlider();
     
     // Load all sections
@@ -763,6 +891,17 @@ const API_BASE = window.location.origin + '/api';
 // Add to cart with green check icon - RESETS AFTER 2 SECONDS
 async function addToCart(productId, button) {
     // Show loading
+    const p = (window.__productsById || {})[productId];
+    const stockQty = parseInt(p?.stock_quantity ?? 0);
+    const trackInv = !!p?.track_inventory;
+    if (p && trackInv && stockQty <= 0) {
+        if (window.showToast) {
+            window.showToast('هذا المنتج غير متوفر في المخزون');
+        } else {
+            alert('هذا المنتج غير متوفر في المخزون');
+        }
+        return;
+    }
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     button.disabled = true;
     
@@ -863,4 +1002,107 @@ async function updateCartIcons() {
 // Load cart icons when products are loaded
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(updateCartIcons, 1000);
+});
+
+// ============================================
+// FAVORITES
+// ============================================
+
+function updateFavoritesCount() {
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const countElement = document.getElementById('favoritesCount');
+    if (countElement) {
+        const c = favorites.length;
+        countElement.textContent = c > 99 ? '+99' : c;
+    }
+}
+
+async function syncFavoritesFromServer() {
+    const isAuth = window.isAuthenticated === true || window.isAuthenticated === 'true';
+    if (!isAuth) {
+        updateFavoritesCount();
+        return;
+    }
+    try {
+        const res = await fetch('/api/wishlist', { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data.items)) {
+            localStorage.setItem('favorites', JSON.stringify(data.items));
+            const countElement = document.getElementById('favoritesCount');
+            if (countElement) {
+                const c = data.count || data.items.length || 0;
+                countElement.textContent = c > 99 ? '+99' : c;
+            }
+        }
+    } catch (e) {}
+}
+
+async function toggleProductFavorite(event, productId) {
+    event.stopPropagation();
+    const btn = event.currentTarget;
+    const icon = btn.querySelector('i');
+    const isAuth = window.isAuthenticated === true || window.isAuthenticated === 'true';
+    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const isFavorite = favorites.some(p => p.id === productId);
+    const product = (window.__productsById || {})[productId];
+    
+    if (isAuth) {
+        try {
+            const res = await fetch('/api/wishlist/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                },
+                body: JSON.stringify({ product_id: productId })
+            });
+            const data = await res.json();
+            if (data.action === 'added') {
+                btn.classList.add('active');
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                if (product) {
+                    favorites.push({
+                        id: product.id,
+                        name: product.name,
+                        price: product.discount_price || product.price,
+                        image: product.image
+                    });
+                }
+            } else if (data.action === 'removed') {
+                btn.classList.remove('active');
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                favorites = favorites.filter(p => p.id !== productId);
+            }
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            updateFavoritesCount();
+        } catch (e) {}
+    } else {
+        if (isFavorite) {
+            favorites = favorites.filter(p => p.id !== productId);
+            btn.classList.remove('active');
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+        } else if (product) {
+            favorites.push({
+                id: product.id,
+                name: product.name,
+                price: product.discount_price || product.price,
+                image: product.image
+            });
+            btn.classList.add('active');
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+        }
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        updateFavoritesCount();
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    syncFavoritesFromServer();
+    updateFavoritesCount();
 });

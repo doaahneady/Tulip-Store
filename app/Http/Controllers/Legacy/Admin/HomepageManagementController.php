@@ -33,7 +33,44 @@ class HomepageManagementController extends Controller
     public function getSlides()
     {
         $slides = Setting::get('homepage_slider_slides', null);
-        if (! is_array($slides) || empty($slides)) {
+
+        $defaultSlides = [
+            [
+                'image' => '/images/footer.jpg',
+                'title' => 'أرسل ابتسامتك أينما كنت',
+                'subtitle' => 'تسوق معنا أفضل المنتجات والعروض',
+            ],
+            [
+                'image' => '/images/logo-girl.jpg',
+                'title' => 'هدايا توليب',
+                'subtitle' => 'لحظات استثنائية تستحق هدايا مميزة',
+            ],
+            [
+                'image' => '/images/white_orange_logo.png',
+                'title' => 'وصل حديثاً',
+                'subtitle' => 'اكتشف أحدث المنتجات في متجرنا',
+            ],
+        ];
+
+        if (! is_array($slides)) {
+            $slides = [];
+        }
+
+        $slides = array_values(array_filter($slides, fn ($s) => is_array($s)));
+
+        if (count($slides) < 3) {
+            for ($i = count($slides); $i < 3; $i++) {
+                $slides[] = $defaultSlides[$i];
+            }
+            Setting::set('homepage_slider_slides', $slides, 'json', 'Home page slider slides');
+        }
+
+        if (empty($slides)) {
+            $slides = $defaultSlides;
+            Setting::set('homepage_slider_slides', $slides, 'json', 'Home page slider slides');
+        }
+
+        if (empty($slides)) {
             $slides = [
                 [
                     'image' => '/images/footer.jpg',

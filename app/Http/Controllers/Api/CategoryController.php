@@ -23,7 +23,7 @@ class CategoryController extends Controller
         $category = Category::where('id', $id)
             ->orWhere('slug', $id)
             ->with(['products' => function ($query) {
-                $query->where('is_active', true);
+                $query->active();
             }])
             ->firstOrFail();
 
@@ -38,7 +38,7 @@ class CategoryController extends Controller
             ->firstOrFail();
 
         $products = $category->products()
-            ->where('is_active', true)
+            ->active()
             ->get();
 
         return response()->json(['data' => $products]);

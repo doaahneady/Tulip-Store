@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Returns & Refunds - Tulip Store</title>
+    <title>سياسة الإرجاع والاسترداد - متجر توليب</title>
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -18,10 +18,9 @@
 <main style="flex:1;">
     <div class="container-custom" style="padding:3rem 1.5rem;">
         <div style="max-width:900px; margin:0 auto;">
-            <!-- Header -->
             <div style="text-align:center; margin-bottom:3rem;">
-                <h1 style="font-size:2.5rem; font-weight:700; color:#0D464C; margin-bottom:1rem;">Returns & Refunds Policy</h1>
-                <p style="font-size:1.1rem; color:#666;">Our commitment to your satisfaction</p>
+                <h1 style="font-size:2.5rem; font-weight:700; color:#0D464C; margin-bottom:1rem;">سياسة الإرجاع واسترداد المبلغ</h1>
+                <p style="font-size:1.1rem; color:#666;">نهدف دائماً إلى ضمان رضاك عن تجربتك في متجر توليب</p>
             </div>
 
             <!-- Return Policy Sections -->
@@ -29,55 +28,55 @@
                 <section style="background:#fff; padding:2rem; border-radius:12px; border:2px solid #e9ecef; margin-bottom:2rem;">
                     <h2 style="font-size:1.8rem; font-weight:600; color:#0D464C; margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
                         <i class="fas fa-clock" style="color:#0D464C;"></i>
-                        Return Timeframe
+                        مدة الإرجاع
                     </h2>
-                    <p style="color:#666; line-height:1.8; font-size:1.05rem;">You have <strong>30 days</strong> from the date of delivery to return items for a full refund or exchange. The return period starts from the day you receive your order.</p>
+                    <p style="color:#666; line-height:1.8; font-size:1.05rem;">يمكنك إرجاع المنتجات خلال مدة تصل إلى <strong>٧ أيام</strong> من تاريخ استلام الطلب، بشرط أن تكون المنتجات مطابقة لشروط الإرجاع الموضحة في هذه الصفحة.</p>
                 </section>
 
                 <section style="background:#fff; padding:2rem; border-radius:12px; border:2px solid #e9ecef; margin-bottom:2rem;">
                     <h2 style="font-size:1.8rem; font-weight:600; color:#0D464C; margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
                         <i class="fas fa-check-circle" style="color:#0D464C;"></i>
-                        Eligible Items
+                        الشروط العامة لقبول الإرجاع
                     </h2>
-                    <p style="color:#666; line-height:1.8; font-size:1.05rem; margin-bottom:1rem;">Items must meet the following criteria to be eligible for return:</p>
+                    <p style="color:#666; line-height:1.8; font-size:1.05rem; margin-bottom:1rem;">يجب أن تتوفر الشروط التالية في المنتج ليكون مقبولاً للإرجاع:</p>
                     <ul style="color:#666; line-height:2; margin-left:1.5rem; font-size:1.05rem;">
-                        <li>Items must be unused, unwashed, and in original condition</li>
-                        <li>All original tags and labels must be attached</li>
-                        <li>Items must be in their original packaging</li>
-                        <li>Proof of purchase (receipt or order number) must be provided</li>
-                        <li>Items must not be damaged due to customer negligence</li>
+                        <li>أن يكون المنتج غير مستخدم أو متضرر أو مغسول.</li>
+                        <li>وجود جميع الملصقات والبطاقات الأصلية على المنتج.</li>
+                        <li>أن يكون المنتج في عبوته الأصلية وبحالة جيدة.</li>
+                        <li>توفير فاتورة الشراء أو رقم الطلب.</li>
+                        <li>ألا يكون التلف ناتجاً عن سوء استخدام من قبل العميل.</li>
                     </ul>
                 </section>
 
                 <section style="background:#fff; padding:2rem; border-radius:12px; border:2px solid #e9ecef; margin-bottom:2rem;">
                     <h2 style="font-size:1.8rem; font-weight:600; color:#0D464C; margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
                         <i class="fas fa-times-circle" style="color:#0D464C;"></i>
-                        Non-Returnable Items
+                        المنتجات غير القابلة للإرجاع
                     </h2>
-                    <p style="color:#666; line-height:1.8; font-size:1.05rem; margin-bottom:1rem;">The following items cannot be returned:</p>
+                    <p style="color:#666; line-height:1.8; font-size:1.05rem; margin-bottom:1rem;">لا يمكن إرجاع المنتجات التالية:</p>
                     <ul style="color:#666; line-height:2; margin-left:1.5rem; font-size:1.05rem;">
-                        <li>Personalized or customized items</li>
-                        <li>Items marked as "Final Sale"</li>
-                        <li>Perishable goods</li>
-                        <li>Intimate or sanitary goods (for hygiene reasons)</li>
-                        <li>Items damaged by misuse or accidents</li>
+                        <li>المنتجات المصنّعة حسب الطلب أو المخصصة بشكل شخصي.</li>
+                        <li>المنتجات المندرجة ضمن عروض "تخفيض نهائي" أو "لا تُستبدل ولا تُرد".</li>
+                        <li>المنتجات ذات الطبيعة الاستهلاكية السريعة أو القابلة للتلف.</li>
+                        <li>المنتجات الشخصية أو الحساسة التي تتعلق بالنظافة.</li>
+                        <li>المنتجات المتضررة نتيجة سوء الاستخدام أو الحوادث.</li>
                     </ul>
                 </section>
 
                 <section style="background:#fff; padding:2rem; border-radius:12px; border:2px solid #e9ecef; margin-bottom:2rem;">
                     <h2 style="font-size:1.8rem; font-weight:600; color:#0D464C; margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
                         <i class="fas fa-redo" style="color:#0D464C;"></i>
-                        How to Return
+                        طريقة طلب الإرجاع
                     </h2>
                     <div style="color:#666; line-height:1.8; font-size:1.05rem;">
-                        <p style="margin-bottom:1rem;">Follow these simple steps to return an item:</p>
+                        <p style="margin-bottom:1rem;">لإتمام طلب إرجاع، يرجى اتباع الخطوات التالية:</p>
                         <ol style="margin-left:1.5rem; line-height:2.5;">
-                            <li><strong>Contact us:</strong> Email us at returns@tulipstore.com or contact customer service with your order number</li>
-                            <li><strong>Get authorization:</strong> We'll provide you with a Return Authorization Number (RAN)</li>
-                            <li><strong>Package securely:</strong> Pack the item in its original packaging with all tags attached</li>
-                            <li><strong>Include documentation:</strong> Add the RAN and a copy of your order receipt</li>
-                            <li><strong>Ship back:</strong> Send the package to the address we provide</li>
-                            <li><strong>Wait for processing:</strong> We'll process your return within 5-7 business days after receiving it</li>
+                            <li><strong>التواصل معنا:</strong> قم بالتواصل مع خدمة العملاء أو عبر البريد returns@tulipstore.com مع ذكر رقم الطلب.</li>
+                            <li><strong>الحصول على الموافقة:</strong> سنزوّدك برقم لطلب الإرجاع وتعليمات الإرسال.</li>
+                            <li><strong>تغليف المنتج:</strong> ضع المنتج في عبوته الأصلية مع جميع الملحقات والملصقات.</li>
+                            <li><strong>إرفاق البيانات:</strong> أرفق رقم طلب الإرجاع ونسخة من فاتورة الشراء إن أمكن.</li>
+                            <li><strong>إرسال الشحنة:</strong> يتم تسليم المنتج لمندوب الشحن أو للعنوان المحدد من قبلنا.</li>
+                            <li><strong>انتظار المعالجة:</strong> تتم مراجعة المنتج وإتمام الإجراءات خلال ٣–٥ أيام عمل من تاريخ استلامه.</li>
                         </ol>
                     </div>
                 </section>
@@ -85,16 +84,16 @@
                 <section style="background:#fff; padding:2rem; border-radius:12px; border:2px solid #e9ecef; margin-bottom:2rem;">
                     <h2 style="font-size:1.8rem; font-weight:600; color:#0D464C; margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
                         <i class="fas fa-dollar-sign" style="color:#0D464C;"></i>
-                        Refund Process
+                        آلية استرداد المبلغ
                     </h2>
                     <div style="color:#666; line-height:1.8; font-size:1.05rem;">
-                        <p style="margin-bottom:1rem;">Once we receive and inspect your return:</p>
+                        <p style="margin-bottom:1rem;">بعد استلام المنتج والتحقق من حالته:</p>
                         <ul style="margin-left:1.5rem; line-height:2;">
-                            <li>We'll send you an email confirming receipt of your return</li>
-                            <li>Refunds will be processed within 5-7 business days</li>
-                            <li>The refund will be issued to your original payment method</li>
-                            <li>Shipping costs are non-refundable unless the item was defective or incorrectly shipped</li>
-                            <li>You'll receive a confirmation email once the refund is processed</li>
+                            <li>سيتم إشعارك باستلام المنتج المطلوب إرجاعه.</li>
+                            <li>يتم استرداد المبلغ خلال مدة تقريبية من ٣–٧ أيام عمل.</li>
+                            <li>يتم تحويل المبلغ إلى نفس وسيلة الدفع المستخدمة في الطلب.</li>
+                            <li>رسوم الشحن غير مستردة إلا في حال كان الخطأ من طرفنا أو وجود عيب مصنعي.</li>
+                            <li>سيصلك إشعار عند إتمام عملية الاسترداد.</li>
                         </ul>
                     </div>
                 </section>
@@ -102,23 +101,23 @@
                 <section style="background:#fff; padding:2rem; border-radius:12px; border:2px solid #e9ecef; margin-bottom:2rem;">
                     <h2 style="font-size:1.8rem; font-weight:600; color:#0D464C; margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
                         <i class="fas fa-exchange-alt" style="color:#0D464C;"></i>
-                        Exchanges
+                        الاستبدال
                     </h2>
-                    <p style="color:#666; line-height:1.8; font-size:1.05rem;">If you need a different size, color, or style, you can request an exchange. Simply indicate your preference when initiating the return. Exchanges are subject to item availability. If the desired item is not available, we'll issue a full refund instead.</p>
+                    <p style="color:#666; line-height:1.8; font-size:1.05rem;">يمكنك طلب استبدال المنتج بمقاس أو لون أو موديل آخر في حال توفره في المخزون، وذلك من خلال توضيح رغبتك بالاستبدال عند تقديم طلب الإرجاع. في حال عدم توفر المنتج المطلوب، يتم استرداد المبلغ وفق سياسة الاسترداد.</p>
                 </section>
 
                 <section style="background:#f8f9fa; padding:2rem; border-radius:12px; border:2px solid #0D464C;">
                     <h2 style="font-size:1.8rem; font-weight:600; color:#0D464C; margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
                         <i class="fas fa-headset" style="color:#0D464C;"></i>
-                        Need Help?
+                        تحتاج مساعدة؟
                     </h2>
-                    <p style="color:#666; line-height:1.8; font-size:1.05rem; margin-bottom:1.5rem;">If you have any questions about returns or need assistance with your return request, please don't hesitate to contact us:</p>
+                    <p style="color:#666; line-height:1.8; font-size:1.05rem; margin-bottom:1.5rem;">إذا كان لديك أي استفسار حول الإرجاع أو واجهت أي مشكلة في طلبك، لا تتردد في التواصل معنا:</p>
                     <div style="display:flex; gap:1.5rem; flex-wrap:wrap;">
                         <a href="/contact" style="display:inline-block; background:#0D464C; color:#fff; padding:0.75rem 1.5rem; border-radius:8px; text-decoration:none; font-weight:600; transition:background 0.3s;" onmouseover="this.style.background='#0a3538'" onmouseout="this.style.background='#0D464C'">
-                            Contact Support
+                            تواصل مع الدعم
                         </a>
                         <a href="mailto:returns@tulipstore.com" style="display:inline-block; background:#fff; color:#0D464C; padding:0.75rem 1.5rem; border-radius:8px; text-decoration:none; font-weight:600; border:2px solid #0D464C; transition:all 0.3s;" onmouseover="this.style.background='#0D464C'; this.style.color='#fff'" onmouseout="this.style.background='#fff'; this.style.color='#0D464C'">
-                            Email Us
+                            راسلنا عبر البريد
                         </a>
                     </div>
                 </section>
@@ -133,4 +132,3 @@
 
 </body>
 </html>
-

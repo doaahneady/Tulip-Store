@@ -39,21 +39,21 @@
     @include('components.navbar')
     <style>
         :root {
-            --teal: #0d9488;
-            --teal-light: #14b8a6;
-            --teal-dark: #0f766e;
-            --orange: #f97316;
+            --teal: #0f4f55;
+            --teal-light: #2a7080;
+            --teal-dark: #0f4f55;
+            --orange: #ff6f35;
             --yellow: #fbbf24;
             --green: #22c55e;
             --red: #ef4444;
-            --bg: #f8fafc;
+            --bg: #fdf8f3;
             --card: #ffffff;
-            --text: #1e293b;
+            --text: #1a1a1a;
             --muted: #64748b;
-            --border: #e2e8f0;
+            --border: #e8e8e8;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Tajawal', sans-serif; background: var(--bg); min-height: 100vh; }
+        body { font-family: 'El Messiri', sans-serif; background: var(--bg); min-height: 100vh; }
 
         /* Page Header */
         .page-header {
@@ -83,6 +83,9 @@
         .page-subtitle { opacity: 0.9; }
 </style>
 <style>
+        .hero { padding: 1.5rem 0; background: transparent; }
+        .hero-card { max-width: 1400px; margin: 0 auto; }
+        .hero-card-img { width: 100%; height: 280px; object-fit: cover; display: block; }
         /* Main Layout */
         .main-container {
             max-width: 1400px;
@@ -96,12 +99,13 @@
         /* Sidebar Filters */
         .filters-sidebar {
             background: var(--card);
-            border-radius: 16px;
+            border-radius: 24px;
             padding: 1.5rem;
             height: fit-content;
             position: sticky;
             top: 100px;
             border: 1px solid var(--border);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
         }
         .filters-header {
             display: flex;
@@ -297,16 +301,17 @@
         /* Product Card */
         .product-card {
             background: var(--card);
-            border-radius: 16px;
+            border-radius: 32px;
             overflow: hidden;
             transition: all 0.3s;
             position: relative;
             border: 1px solid var(--border);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
         }
         .product-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-            border-color: var(--teal-light);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+            border-color: var(--teal);
         }
         .products-grid.list-view .product-card {
             display: grid;
@@ -331,8 +336,8 @@
         .badge-new { background: var(--teal); color: #fff; }
         .badge-fresh { background: var(--green); color: #fff; }
         .product-image {
-            height: 150px;
-            background: linear-gradient(135deg, #f0fdfa, #e0f2fe);
+            height: 180px;
+            background: linear-gradient(135deg, #eaf7f8, #f8f9fa);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -358,7 +363,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .product-favorite:hover, .product-favorite.active { color: var(--red); }
-        .product-body { padding: 1rem; }
+        .product-body { padding: 1rem; display: flex; flex-direction: column; min-height: 220px; }
         .product-category {
             font-size: 0.75rem;
             color: var(--teal);
@@ -371,7 +376,7 @@
             font-size: 1rem;
             color: var(--text);
             margin-bottom: 0.3rem;
-            font-weight: 600;
+            font-weight: 700;
         }
         .product-origin {
             font-size: 0.8rem;
@@ -387,6 +392,7 @@
             justify-content: space-between;
             padding-top: 0.8rem;
             border-top: 1px solid var(--border);
+            margin-top: auto;
         }
         .price-wrapper { display: flex; flex-direction: column; }
         .price-current {
@@ -408,9 +414,10 @@
             border-radius: 25px;
             cursor: pointer;
             font-family: inherit;
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.9rem;
+            font-weight: 700;
             transition: all 0.3s;
+            box-shadow: 0 6px 16px rgba(15,79,85,0.25);
         }
         .add-cart-btn:hover { background: var(--teal-dark); transform: scale(1.05); }
         .add-cart-btn.added { background: var(--green); }
@@ -527,20 +534,11 @@
         }
     </style>
 
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="header-container">
-            <div class="breadcrumb">
-                <a href="/"><i class="fas fa-home"></i></a>
-                <i class="fas fa-chevron-left"></i>
-                <a href="/mart">توليب مارت</a>
-                <i class="fas fa-chevron-left"></i>
-                <span>جميع المنتجات</span>
-            </div>
-            <h1 class="page-title">جميع المنتجات</h1>
-            <p class="page-subtitle">تصفح مجموعتنا الكاملة من المنتجات الطازجة</p>
+    <section class="hero">
+        <div class="hero-card">
+            <img src="/images/banner-flower.jpg" alt="Tulip Banner" class="hero-card-img">
         </div>
-    </div>
+    </section>
 
     <div class="filters-overlay" id="filtersOverlay" onclick="toggleFilters()"></div>
 

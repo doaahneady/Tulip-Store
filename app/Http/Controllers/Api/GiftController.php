@@ -88,6 +88,9 @@ class GiftController extends Controller
     public function featured()
     {
         $gifts = Gift::active()->featured()->take(6)->get();
+        if ($gifts->isEmpty()) {
+            $gifts = Gift::active()->orderBy('created_at', 'desc')->take(6)->get();
+        }
 
         return response()->json([
             'success' => true,

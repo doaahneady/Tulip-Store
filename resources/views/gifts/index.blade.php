@@ -15,92 +15,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Tajawal', sans-serif; background: #f8f9fa; min-height: 100vh; }
 
-        /* Elegant Hero Section */
-        .gifts-hero {
-            background: linear-gradient(135deg, #1a3a3a 0%, #2d5a5a 40%, #3d7a7a 70%, #4d9a8a 100%);
-            position: relative;
-            padding: 5rem 2rem 8rem;
-            overflow: hidden;
-        }
-        .gifts-hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
-            opacity: 0.5;
-        }
-        .gifts-hero::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            right: 0;
-            height: 100px;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100'%3E%3Cpath fill='%23f8f9fa' d='M0,50 C360,100 1080,0 1440,50 L1440,100 L0,100 Z'/%3E%3C/svg%3E");
-            background-size: cover;
-        }
-        .hero-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
-            padding: 0.5rem 1.5rem;
-            border-radius: 50px;
-            color: #fff;
-            font-size: 0.9rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        .hero-icons {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        .hero-icon-item {
-            font-size: 3.5rem;
-            animation: float 3s ease-in-out infinite;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
-        }
-        .hero-icon-item:nth-child(2) { animation-delay: 0.5s; }
-        .hero-icon-item:nth-child(3) { animation-delay: 1s; }
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(-5deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-        }
-        .hero-title {
-            font-family: 'El Messiri', sans-serif;
-            font-size: 3.5rem;
-            color: #fff;
-            margin-bottom: 1rem;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            font-weight: 700;
-        }
-        .hero-title span { color: #7dd3c0; }
-        .hero-subtitle {
-            font-size: 1.3rem;
-            color: rgba(255,255,255,0.9);
-            max-width: 700px;
-            margin: 0 auto;
-            line-height: 2;
-        }
+        .hero { padding: 1.5rem 0; background: transparent; }
+        .hero-card { max-width: 1400px; margin: 0 auto; }
+        .hero-card-img { width: 100%; height: auto; display: block; }
 
         /* Main Container */
-        .gifts-container {
-            max-width: 1300px;
-            margin: -3rem auto 0;
-            padding: 0 2rem 4rem;
-            position: relative;
-            z-index: 2;
-        }
+        .gifts-container { max-width: 1300px; margin: 2rem auto 0; padding: 0 2rem 4rem; position: relative; z-index: 2; }
 
         /* Premium Cards Section */
         .premium-cards {
@@ -119,6 +39,9 @@
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 520px;
         }
         .premium-card:hover {
             transform: translateY(-15px) scale(1.02);
@@ -152,6 +75,18 @@
             inset: 0;
             background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8) 0%, transparent 60%);
         }
+        .card-image {
+            height: 180px;
+            width: auto;
+            max-height: 100%;
+            position: relative;
+            z-index: 1;
+            transition: all 0.5s ease;
+            filter: drop-shadow(0 15px 30px rgba(0,0,0,0.2));
+        }
+        .premium-card:hover .card-image {
+            transform: scale(1.05);
+        }
         .card-emoji {
             font-size: 7rem;
             position: relative;
@@ -179,6 +114,9 @@
         .card-content {
             padding: 2rem;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
         }
         .card-tag {
             display: inline-block;
@@ -233,6 +171,8 @@
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            margin-top: auto;
+            align-self: center;
         }
         .card-btn:hover {
             transform: scale(1.05);
@@ -298,9 +238,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 5rem;
             position: relative;
             overflow: hidden;
+        }
+        .gift-image img {
+            height: 100%;
+            max-height: 180px;
+            width: auto;
+            object-fit: contain;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
         }
         .gift-image::before {
             content: '';
@@ -324,7 +272,10 @@
         .gift-badge.sale { background: linear-gradient(135deg, #27ae60, #2ecc71); box-shadow: 0 4px 15px rgba(39,174,96,0.4); }
         .gift-info {
             padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
         }
+        .gift-add-btn { margin-top: auto; }
         .gift-name {
             font-family: 'El Messiri', sans-serif;
             font-size: 1.15rem;
@@ -427,20 +378,9 @@
 <body>
     @include('components.navbar')
 
-    <!-- Hero Section -->
-    <section class="gifts-hero">
-        <div class="hero-content">
-            <div class="hero-badge">
-                <i class="fas fa-sparkles"></i>
-                أفضل الهدايا في المملكة
-            </div>
-            <div class="hero-icons">
-                <span class="hero-icon-item">🎁</span>
-                <span class="hero-icon-item">💐</span>
-                <span class="hero-icon-item">🎀</span>
-            </div>
-            <h1 class="hero-title">هدايا <span>توليب</span> المميزة</h1>
-            <p class="hero-subtitle">اكتشف عالماً من الهدايا الفاخرة والباقات الساحرة. صمم هديتك بنفسك أو اختر من مجموعتنا المنسقة بعناية</p>
+    <section class="hero">
+        <div class="hero-card">
+            <img src="/images/banner-flower.jpg" alt="Tulip Banner" class="hero-card-img">
         </div>
     </section>
 
@@ -453,7 +393,7 @@
                     <span class="card-floating">✨</span>
                     <span class="card-floating">🎀</span>
                     <span class="card-floating">💝</span>
-                    <span class="card-emoji">🎁</span>
+                        <img src="/images/mistery_box.jpg" alt="Gift Box" class="card-image">
                 </div>
                 <div class="card-content">
                     <span class="card-tag">الأكثر طلباً</span>
@@ -477,7 +417,7 @@
                     <span class="card-floating">🌸</span>
                     <span class="card-floating">🌺</span>
                     <span class="card-floating">🌷</span>
-                    <span class="card-emoji">💐</span>
+                        <img src="/images/banner-flower.jpg" alt="Rose Bouquet" class="card-image">
                 </div>
                 <div class="card-content">
                     <span class="card-tag">ورد طازج يومياً</span>
@@ -501,7 +441,7 @@
                     <span class="card-floating">⭐</span>
                     <span class="card-floating">🏆</span>
                     <span class="card-floating">💎</span>
-                    <span class="card-emoji">🛍️</span>
+                        <img src="/images/gift-placeholder.jpg" alt="Ready Gifts" class="card-image">
                 </div>
                 <div class="card-content">
                     <span class="card-tag">جاهزة للتوصيل</span>
@@ -583,7 +523,7 @@
 
             footer > div > div:last-of-type .payments { display:flex; gap:1.2rem; align-items:center; flex-wrap:wrap; justify-content:center; }
 
-            footer img.payment-icon { height:26px !important; opacity:0.6 !important; }
+            footer img.payment-icon { height:30px !important; opacity:1 !important; }
 
             /* Responsive breakpoints */
             @media (max-width:1200px) {
@@ -607,7 +547,7 @@
                 footer h2 { font-size:0.95rem !important; }
                 footer p { font-size:0.9rem !important; }
                 footer > div > div:first-of-type > div:first-of-type img { height:78px !important; }
-                footer img.payment-icon { height:22px !important; }
+                footer img.payment-icon { height:26px !important; }
             }
         </style>
 
@@ -626,12 +566,6 @@
                         </a>
                         <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
                             <i class="fab fa-facebook"></i>
-                        </a>
-                        <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
-                            <i class="fab fa-x"></i>
-                        </a>
-                        <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
-                            <i class="fab fa-snapchat"></i>
                         </a>
                     </div>
                 </div>
@@ -668,10 +602,9 @@
             <div style="padding-top:2rem; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:center; align-items:center; gap:1.2rem; flex-wrap:wrap;">
                 <p style="color:rgba(255,255,255,0.5); margin:0; font-size:0.95rem;">© 2025 Tulip Store. جميع الحقوق محفوظة</p>
                 <div class="payments" style="display:flex; gap:1.2rem; align-items:center; justify-content:center;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" class="payment-icon" style="height:30px; opacity:0.5;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" class="payment-icon" style="height:30px; opacity:0.5;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" class="payment-icon" style="height:30px; opacity:0.5;">
-                    <img src="https://i.ibb.co/Q32tLdZg/Syriatel-Cash.png" class="payment-icon" style="height:30px; opacity:0.5;" alt="syriatelCash">
+                    <i class="fab fa-cc-visa" style="font-size:28px; color:#fff;"></i>
+                    <i class="fab fa-cc-mastercard" style="font-size:28px; color:#fff;"></i>
+                    <i class="fas fa-hand-holding-dollar" style="font-size:26px; color:#fff;"></i>
                 </div>
             </div>
         </div>
@@ -680,14 +613,14 @@
     <script>
         // Sample ready-made gifts data
         const readyGifts = [
-            { id: 1, name: 'صندوق هدية فاخر', emoji: '🎁', price: 299, oldPrice: 350, badge: 'الأكثر مبيعاً', rating: 4.9, reviews: 128 },
-            { id: 2, name: 'باقة ورد رومانسية', emoji: '🌹', price: 199, oldPrice: null, badge: null, rating: 4.8, reviews: 95 },
-            { id: 3, name: 'صندوق شوكولاتة فاخرة', emoji: '🍫', price: 149, oldPrice: 180, badge: 'sale', badgeText: 'خصم 17%', rating: 4.7, reviews: 67 },
-            { id: 4, name: 'طقم عطور مميز', emoji: '🌸', price: 399, oldPrice: null, badge: 'new', badgeText: 'جديد', rating: 5.0, reviews: 23 },
-            { id: 5, name: 'سلة فواكه طازجة', emoji: '🍇', price: 179, oldPrice: 220, badge: 'sale', badgeText: 'خصم 19%', rating: 4.6, reviews: 54 },
-            { id: 6, name: 'صندوق هدية للأطفال', emoji: '🧸', price: 129, oldPrice: null, badge: null, rating: 4.8, reviews: 89 },
-            { id: 7, name: 'باقة ورد مع شوكولاتة', emoji: '💐', price: 249, oldPrice: 299, badge: 'الأكثر مبيعاً', rating: 4.9, reviews: 156 },
-            { id: 8, name: 'طقم إكسسوارات نسائية', emoji: '💍', price: 349, oldPrice: null, badge: 'new', badgeText: 'جديد', rating: 4.7, reviews: 34 },
+            { id: 1, name: 'صندوق هدية فاخر', image: '/images/mistery_box.jpg', price: 299, oldPrice: 350, badge: 'الأكثر مبيعاً', rating: 4.9, reviews: 128 },
+            { id: 2, name: 'باقة ورد رومانسية', image: '/images/banner-flower.jpg', price: 199, oldPrice: null, badge: null, rating: 4.8, reviews: 95 },
+            { id: 3, name: 'صندوق شوكولاتة فاخرة', image: '/images/gift-placeholder.jpg', price: 149, oldPrice: 180, badge: 'sale', badgeText: 'خصم 17%', rating: 4.7, reviews: 67 },
+            { id: 4, name: 'طقم عطور مميز', image: '/images/gift-placeholder.jpg', price: 399, oldPrice: null, badge: 'new', badgeText: 'جديد', rating: 5.0, reviews: 23 },
+            { id: 5, name: 'سلة فواكه طازجة', image: '/images/grocery.jpg', price: 179, oldPrice: 220, badge: 'sale', badgeText: 'خصم 19%', rating: 4.6, reviews: 54 },
+            { id: 6, name: 'صندوق هدية للأطفال', image: '/images/gift-placeholder.jpg', price: 129, oldPrice: null, badge: null, rating: 4.8, reviews: 89 },
+            { id: 7, name: 'باقة ورد مع شوكولاتة', image: '/images/banner-flower.jpg', price: 249, oldPrice: 299, badge: 'الأكثر مبيعاً', rating: 4.9, reviews: 156 },
+            { id: 8, name: 'طقم إكسسوارات نسائية', image: '/images/gift-placeholder.jpg', price: 349, oldPrice: null, badge: 'new', badgeText: 'جديد', rating: 4.7, reviews: 34 },
         ];
 
         // Load gifts
@@ -705,7 +638,7 @@
                     <div class="gift-card" onclick="window.location.href='/product/${gift.id}'">
                         <div class="gift-image">
                             ${badgeText ? `<span class="gift-badge ${badgeClass}">${badgeText}</span>` : ''}
-                            ${gift.emoji}
+                            <img src="${gift.image}" alt="${gift.name}">
                         </div>
                         <div class="gift-info">
                             <h3 class="gift-name">${gift.name}</h3>

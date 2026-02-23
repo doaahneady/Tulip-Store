@@ -37,37 +37,39 @@
             color: var(--text);
         }
 
-        /* Modern Hero Section */
+        /* Store/Gifts-like Hero Banner */
         .hero {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
             position: relative;
-            overflow: hidden;
+            margin: 1.5rem auto 0 auto;
+            max-width: 1280px;
+            min-height: auto;
+            background: transparent;
         }
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        .hero::before, .hero::after { display: none; }
+        .hero-card {
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+        .hero-card-img {
+            display: block;
+            width: 100%;
+            height: auto;
         }
         .hero-container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 2rem;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
+            grid-template-columns: 1fr;
+            gap: 2rem;
             align-items: center;
             position: relative;
             z-index: 1;
         }
         .hero-content {
             animation: slideInRight 1s ease-out;
+            text-align: center;
         }
         @keyframes slideInRight {
             from { opacity: 0; transform: translateX(50px); }
@@ -77,19 +79,19 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            background: rgba(255,255,255,0.15);
-            padding: 0.75rem 1.5rem;
+            background: rgba(255,255,255,0.12);
+            padding: 0.7rem 1.4rem;
             border-radius: 50px;
-            color: #fef3c7;
+            color: #fff;
             font-size: 0.9rem;
             font-weight: 600;
             margin-bottom: 2rem;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.25);
         }
         .hero-title {
             font-family: 'El Messiri', sans-serif;
-            font-size: 4rem;
+            font-size: 3.6rem;
             font-weight: 800;
             color: #fff;
             margin-bottom: 1.5rem;
@@ -99,12 +101,30 @@
             color: var(--secondary);
             text-shadow: 0 0 30px rgba(245, 158, 11, 0.3);
         }
+        .hero-icons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .hero-icon-item {
+            font-size: 3rem;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.25));
+        }
+        .hero-icon-item:nth-child(2) { animation-delay: 0.5s; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-18px) rotate(5deg); }
+        }
         .hero-subtitle {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             color: rgba(255,255,255,0.9);
             margin-bottom: 3rem;
             line-height: 1.7;
-            max-width: 500px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .hero-actions {
             display: flex;
@@ -112,7 +132,7 @@
             margin-bottom: 3rem;
         }
         .btn {
-            padding: 1rem 2.5rem;
+            padding: 0.9rem 2.3rem;
             border-radius: 50px;
             font-family: inherit;
             font-weight: 600;
@@ -149,26 +169,39 @@
         .hero-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
+            gap: 1.5rem;
         }
         .stat-card {
             text-align: center;
-            padding: 1.5rem;
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
+            padding: 1.4rem;
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+        }
+        .stat-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            background: rgba(5, 150, 105, 0.12);
+            border: 1px solid rgba(5, 150, 105, 0.25);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
         }
         .stat-number {
             font-family: 'El Messiri', sans-serif;
-            font-size: 2.5rem;
+            font-size: 2.3rem;
             font-weight: 800;
-            color: var(--secondary);
+            color: var(--primary);
             display: block;
             margin-bottom: 0.5rem;
         }
         .stat-label {
-            color: rgba(255,255,255,0.8);
+            color: var(--text-light);
             font-size: 0.95rem;
         }
 
@@ -185,13 +218,13 @@
         }
         .visual-container {
             position: relative;
-            width: 500px;
-            height: 500px;
+            width: 480px;
+            height: 480px;
         }
         .main-circle {
-            width: 350px;
-            height: 350px;
-            background: rgba(255,255,255,0.1);
+            width: 330px;
+            height: 330px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.08));
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -201,15 +234,22 @@
             left: 50%;
             transform: translate(-50%, -50%);
             backdrop-filter: blur(20px);
-            border: 2px solid rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.25);
             animation: pulse 4s ease-in-out infinite;
         }
+        .accent-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.18);
+        }
+        .accent-ring.ring-1 { width: 420px; height: 420px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .accent-ring.ring-2 { width: 470px; height: 470px; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.6; }
         @keyframes pulse {
             0%, 100% { transform: translate(-50%, -50%) scale(1); }
             50% { transform: translate(-50%, -50%) scale(1.05); }
         }
         .main-icon {
-            font-size: 8rem;
+            font-size: 6.5rem;
             animation: bounce 3s ease-in-out infinite;
         }
         @keyframes bounce {
@@ -223,7 +263,7 @@
         }
         .floating-element {
             position: absolute;
-            font-size: 3rem;
+            font-size: 2.6rem;
             animation: float 6s ease-in-out infinite;
             filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
         }
@@ -323,6 +363,15 @@
             margin-bottom: 1.5rem;
             display: block;
             filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
+        }
+        .category-photo {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            display: block;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
         }
         .category-name {
             font-family: 'El Messiri', sans-serif;
@@ -434,6 +483,13 @@
         .price-item-icon {
             font-size: 3rem;
         }
+        .price-item-photo {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            object-fit: cover;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+        }
         .price-item-info {
             flex: 1;
         }
@@ -514,13 +570,15 @@
         .badge-fresh { background: var(--success); color: #fff; }
         .product-image {
             height: 180px;
-            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            background: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 5rem;
             position: relative;
+            overflow: hidden;
+            border-bottom: 2px solid #f1f5f9;
         }
+        .product-image img { width: 100%; height: 100%; object-fit: cover; }
         .product-favorite {
             position: absolute;
             top: 15px;
@@ -658,62 +716,10 @@
         }
     </style>
 
-    <!-- Hero Section -->
+    <!-- Hero Banner -->
     <section class="hero">
-        <div class="hero-container">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <i class="fas fa-bolt"></i>
-                    توصيل سريع خلال ساعة
-                </div>
-                <h1 class="hero-title">
-                    مرحباً بك في<br>
-                    <span class="highlight">توليب مارت</span>
-                </h1>
-                <p class="hero-subtitle">
-                    سوبرماركتك الذكي للمنتجات الطازجة والعالية الجودة. نوفر لك تجربة تسوق استثنائية مع أفضل الأسعار وأسرع خدمة توصيل.
-                </p>
-                <div class="hero-actions">
-                    <a href="/mart/products" class="btn btn-primary">
-                        <i class="fas fa-shopping-basket"></i>
-                        ابدأ التسوق
-                    </a>
-                    <a href="/mart/daily-prices" class="btn btn-outline">
-                        <i class="fas fa-chart-line"></i>
-                        أسعار اليوم
-                    </a>
-                </div>
-                <div class="hero-stats">
-                    <div class="stat-card">
-                        <span class="stat-number">1000+</span>
-                        <span class="stat-label">منتج متوفر</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number">24/7</span>
-                        <span class="stat-label">خدمة مستمرة</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number">100%</span>
-                        <span class="stat-label">طازج يومياً</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="hero-visual">
-                <div class="visual-container">
-                    <div class="main-circle">
-                        <span class="main-icon">🛒</span>
-                    </div>
-                    <div class="floating-elements">
-                        <span class="floating-element">🍎</span>
-                        <span class="floating-element">🥬</span>
-                        <span class="floating-element">🥛</span>
-                        <span class="floating-element">🍞</span>
-                        <span class="floating-element">🧀</span>
-                        <span class="floating-element">🥕</span>
-                    </div>
-                </div>
-            </div>
+        <div class="hero-card">
+            <img src="/images/banner-flower.jpg" alt="Tulip Banner" class="hero-card-img">
         </div>
     </section>
 
@@ -819,7 +825,7 @@
 
             footer > div > div:last-of-type .payments { display:flex; gap:1.2rem; align-items:center; flex-wrap:wrap; justify-content:center; }
 
-            footer img.payment-icon { height:26px !important; opacity:0.6 !important; }
+            footer img.payment-icon { height:30px !important; opacity:1 !important; }
 
             /* Responsive breakpoints */
             @media (max-width:1200px) {
@@ -843,7 +849,7 @@
                 footer h2 { font-size:0.95rem !important; }
                 footer p { font-size:0.9rem !important; }
                 footer > div > div:first-of-type > div:first-of-type img { height:78px !important; }
-                footer img.payment-icon { height:22px !important; }
+                footer img.payment-icon { height:26px !important; }
             }
         </style>
 
@@ -863,12 +869,6 @@
                         <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
                             <i class="fab fa-facebook"></i>
                         </a>
-                        <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
-                            <i class="fab fa-x"></i>
-                        </a>
-                        <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
-                            <i class="fab fa-snapchat"></i>
-                        </a>
                     </div>
                 </div>
                 
@@ -877,18 +877,18 @@
                     <div style="display:flex; flex-direction:column; gap:1.1rem; align-items:center;">
                         <a href="/mart" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">توليب مارت</a>
                         <a href="/gifts" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">هدايا توليب</a>
-                        <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">من نحن؟</a>
-                        <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">تواصل معنا</a>
+                        <a href="/about" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">من نحن؟</a>
+                        <a href="/contact" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">تواصل معنا</a>
                     </div>
                 </div>
                 
                 <div>
                     <h2 style="color:#ff6b35; font-weight:800; margin-bottom:1rem;margin-top:1rem ">الدعم التقني</h2>
                     <div style="display:flex; flex-direction:column; gap:1.1rem; align-items:center;">
-                        <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">الأسئلة الشائعة</a>
-                        <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الشحن</a>
-                        <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الإرجاع</a>
-                        <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الخصوصية</a>
+                        <a href="/faq" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">الأسئلة الشائعة</a>
+                        <a href="/shipping" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الشحن</a>
+                        <a href="/returns" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الإرجاع</a>
+                        <a href="/privacy" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الخصوصية</a>
                     </div>
                 </div>
                 
@@ -904,10 +904,9 @@
             <div style="padding-top:2rem; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:center; align-items:center; gap:1.2rem; flex-wrap:wrap;">
                 <p style="color:rgba(255,255,255,0.5); margin:0; font-size:0.95rem;">© 2025 Tulip Store. جميع الحقوق محفوظة</p>
                 <div class="payments" style="display:flex; gap:1.2rem; align-items:center; justify-content:center;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" class="payment-icon" style="height:30px; opacity:0.5;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" class="payment-icon" style="height:30px; opacity:0.5;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" class="payment-icon" style="height:30px; opacity:0.5;">
-                    <img src="https://i.ibb.co/Q32tLdZg/Syriatel-Cash.png" class="payment-icon" style="height:30px; opacity:0.5;" alt="syriatelCash">
+                    <i class="fab fa-cc-visa" style="font-size:28px; color:#fff;"></i>
+                    <i class="fab fa-cc-mastercard" style="font-size:28px; color:#fff;"></i>
+                    <i class="fas fa-hand-holding-dollar" style="font-size:26px; color:#fff;"></i>
                 </div>
             </div>
         </div>
@@ -967,13 +966,21 @@
             ]
         };
 
+        const categoryImages = {
+            fruits: 'https://images.unsplash.com/photo-1543353071-873f17a7a5c0?auto=format&fit=crop&w=600&q=60',
+            vegetables: 'https://images.unsplash.com/photo-1510627498534-cf7e9002facc?auto=format&fit=crop&w=600&q=60',
+            leafy: 'https://images.unsplash.com/photo-1524594144026-4f37c3f0b8c2?auto=format&fit=crop&w=600&q=60',
+            dairy: 'https://images.unsplash.com/photo-1580910051073-7c7b48dde3b1?auto=format&fit=crop&w=600&q=60',
+            bakery: 'https://images.unsplash.com/photo-1509440159598-8b4c12f6990b?auto=format&fit=crop&w=600&q=60',
+            grocery: '/images/grocery.jpg'
+        };
         const categories = [
-            { id: 'fruits', name: 'فواكه', emoji: '🍎', color: '#f97316', gradient: 'linear-gradient(135deg, #f97316, #fb923c)' },
-            { id: 'vegetables', name: 'خضروات', emoji: '🥕', color: '#22c55e', gradient: 'linear-gradient(135deg, #22c55e, #16a34a)' },
-            { id: 'leafy', name: 'ورقيات', emoji: '🥬', color: '#10b981', gradient: 'linear-gradient(135deg, #10b981, #059669)' },
-            { id: 'dairy', name: 'ألبان وبيض', emoji: '🥛', color: '#3b82f6', gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)' },
-            { id: 'bakery', name: 'مخبوزات', emoji: '🍞', color: '#d97706', gradient: 'linear-gradient(135deg, #d97706, #b45309)' },
-            { id: 'grocery', name: 'بقالة', emoji: '🛒', color: '#7c3aed', gradient: 'linear-gradient(135deg, #7c3aed, #6d28d9)' },
+            { id: 'fruits', name: 'فواكه', image: categoryImages.fruits, color: '#f97316', gradient: 'linear-gradient(135deg, #f97316, #fb923c)' },
+            { id: 'vegetables', name: 'خضروات', image: categoryImages.vegetables, color: '#22c55e', gradient: 'linear-gradient(135deg, #22c55e, #16a34a)' },
+            { id: 'leafy', name: 'ورقيات', image: categoryImages.leafy, color: '#10b981', gradient: 'linear-gradient(135deg, #10b981, #059669)' },
+            { id: 'dairy', name: 'ألبان وبيض', image: categoryImages.dairy, color: '#3b82f6', gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)' },
+            { id: 'bakery', name: 'مخبوزات', image: categoryImages.bakery, color: '#d97706', gradient: 'linear-gradient(135deg, #d97706, #b45309)' },
+            { id: 'grocery', name: 'بقالة', image: categoryImages.grocery, color: '#7c3aed', gradient: 'linear-gradient(135deg, #7c3aed, #6d28d9)' },
         ];
 
         // Store products globally for search
@@ -1005,7 +1012,7 @@
         function loadCategories() {
             document.getElementById('categoriesGrid').innerHTML = categories.map(c => `
                 <div class="category-card" style="--cat-color: ${c.color}; --cat-gradient: ${c.gradient}" onclick="filterCategory('${c.id}')">
-                    <span class="category-icon">${c.emoji}</span>
+                    <img src="${c.image}" alt="${c.name}" class="category-photo">
                     <div class="category-name">${c.name}</div>
                     <div class="category-count">${products[c.id]?.length || 0} منتج</div>
                 </div>
@@ -1021,7 +1028,7 @@
             const fruitsSpecial = products.fruits.slice(0, 4);
             document.getElementById('fruitsSpecialPrices').innerHTML = fruitsSpecial.map(p => `
                 <div class="price-item" onclick="addToCart('${p.id}', event)" style="--category-color: #f97316;">
-                    <span class="price-item-icon">${p.emoji}</span>
+                    <img src="${getProductImage(p)}" alt="${p.name}" class="price-item-photo">
                     <div class="price-item-info">
                         <div class="price-item-name">${p.name}</div>
                         <div class="price-item-value">${p.price} ر.س / ${p.unit}</div>
@@ -1033,7 +1040,7 @@
             const vegetablesSpecial = products.vegetables.slice(0, 4);
             document.getElementById('vegetablesSpecialPrices').innerHTML = vegetablesSpecial.map(p => `
                 <div class="price-item" onclick="addToCart('${p.id}', event)" style="--category-color: #22c55e;">
-                    <span class="price-item-icon">${p.emoji}</span>
+                    <img src="${getProductImage(p)}" alt="${p.name}" class="price-item-photo">
                     <div class="price-item-info">
                         <div class="price-item-name">${p.name}</div>
                         <div class="price-item-value">${p.price} ر.س / ${p.unit}</div>
@@ -1063,7 +1070,7 @@
                         <button class="product-favorite" onclick="toggleFavorite('${p.id}', event)">
                             <i class="far fa-heart"></i>
                         </button>
-                        ${p.emoji}
+                        <img src="${getProductImage(p)}" alt="${p.name}">
                     </div>
                     <div class="product-body">
                         <div class="product-category">${p.category}</div>
@@ -1086,6 +1093,18 @@
                     </div>
                 </div>
             `;
+        }
+        function getProductImage(p) {
+            const map = {
+                'فواكه': categoryImages.fruits,
+                'خضروات': categoryImages.vegetables,
+                'ورقيات': categoryImages.leafy,
+                'ألبان': categoryImages.dairy,
+                'ألبان وبيض': categoryImages.dairy,
+                'مخبوزات': categoryImages.bakery,
+                'بقالة': categoryImages.grocery
+            };
+            return map[p.category] || categoryImages.grocery;
         }
 
         function toggleFavorite(productId, event) {
@@ -1125,11 +1144,19 @@
                         name: product.name,
                         price: product.price,
                         quantity: 1,
-                        image: product.emoji,
+                        image: getProductImage(product),
                         unit: product.unit
                     })
                 });
-                
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    if (window.showToast) {
+                        window.showToast(errData.message || 'غير قادر على إضافة المنتج للسلة');
+                    } else {
+                        alert(errData.message || 'غير قادر على إضافة المنتج للسلة');
+                    }
+                    throw new Error(errData.message || 'Add to cart failed');
+                }
                 const data = await response.json();
                 
                 // Show success
@@ -1240,8 +1267,8 @@
                 }
                 
                 searchResults.innerHTML = results.slice(0, 8).map(p => `
-                    <div class="search-result-item" onclick="addToCart('${p.id}', event)" style="cursor:pointer;padding:1rem;border-bottom:1px solid #f1f5f9;transition:all 0.3s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
-                        <span style="font-size:2.5rem;margin-left:1rem">${p.emoji}</span>
+                    <div class="search-result-item" onclick="addToCart('${p.id}', event)" style="cursor:pointer;padding:1rem;border-bottom:1px solid #f1f5f9;transition:all 0.3s;display:flex;align-items:center;gap:1rem;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                        <img src="${getProductImage(p)}" alt="${p.name}" style="width:42px;height:42px;border-radius:10px;object-fit:cover;box-shadow:0 4px 10px rgba(0,0,0,0.08);">
                         <div class="search-result-info" style="flex:1;">
                             <div class="search-result-name" style="font-weight:600;color:#1f2937;margin-bottom:0.3rem;">${p.name}</div>
                             <div style="display:flex;align-items:center;gap:1rem;font-size:0.85rem;color:#6b7280;">

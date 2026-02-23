@@ -882,18 +882,23 @@ function selectDelivery(type) {
     
     document.querySelectorAll('.delivery-option').forEach(option => {
         const optionType = option.getAttribute('data-type');
-        const icons = option.querySelectorAll('i');
+        const statusIcon = option.querySelector('.delivery-status-icon');
+        const mainIcon = option.querySelector('.delivery-main-icon');
         
         if (optionType === type) {
             option.style.borderColor = '#ff6b35';
-            icons[0].style.color = '#ff6b35';
-            icons[1].className = 'fas fa-check-circle';
-            icons[1].style.color = '#ff6b35';
+            if (mainIcon) mainIcon.style.filter = 'drop-shadow(0 2px 6px rgba(255,107,53,0.35))';
+            if (statusIcon) {
+                statusIcon.className = 'fas fa-check-circle delivery-status-icon';
+                statusIcon.style.color = '#ff6b35';
+            }
         } else {
             option.style.borderColor = '#e0e0e0';
-            icons[0].style.color = '#2a7080';
-            icons[1].className = 'far fa-circle';
-            icons[1].style.color = '#ccc';
+            if (mainIcon) mainIcon.style.filter = '';
+            if (statusIcon) {
+                statusIcon.className = 'far fa-circle delivery-status-icon';
+                statusIcon.style.color = '#ccc';
+            }
         }
     });
     

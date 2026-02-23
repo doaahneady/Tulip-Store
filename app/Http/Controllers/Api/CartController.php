@@ -56,9 +56,15 @@ class CartController extends Controller
 
         if ($product->track_inventory) {
             $available = (int) ($product->stock_quantity ?? 0);
+            if ($available <= 0) {
+                return response()->json([
+                    'message' => 'المخزون لهذا المنتج صفر. لا يمكن إضافته للسلة',
+                    'available' => $available,
+                ], 422);
+            }
             if ($newQuantity > $available) {
                 return response()->json([
-                    'message' => 'Insufficient stock',
+                    'message' => 'الكمية المطلوبة تتجاوز المخزون المتاح',
                     'available' => $available,
                 ], 422);
             }
@@ -91,9 +97,15 @@ class CartController extends Controller
 
         if ($product && $product->track_inventory) {
             $available = (int) ($product->stock_quantity ?? 0);
+            if ($available <= 0) {
+                return response()->json([
+                    'message' => 'المخزون لهذا المنتج صفر. لا يمكن إضافة كميات',
+                    'available' => $available,
+                ], 422);
+            }
             if ((int) $request->quantity > $available) {
                 return response()->json([
-                    'message' => 'Insufficient stock',
+                    'message' => 'الكمية المطلوبة تتجاوز المخزون المتاح',
                     'available' => $available,
                 ], 422);
             }

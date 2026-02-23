@@ -329,6 +329,7 @@
     
     <script>
         const API_BASE = window.location.origin;
+        const CURRENT_EMAIL = "{{ Auth::user()->email ?? '' }}";
         let ordersData = [];
         
         function showSection(section) {
@@ -350,33 +351,66 @@
             btn.disabled = true;
             
             try {
+                const payload = {
+                    name: document.getElementById('fullName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    address: document.getElementById('address').value
+                };
+
+                // If email changed, request verification and redirect to code page
+                if (payload.email && payload.email !== CURRENT_EMAIL) {
+                    const req = await fetch(API_BASE + '/profile/email/verify-request', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ new_email: payload.email })
+                    });
+                    const reqData = await req.json();
+                    if (!req.ok || !reqData.success) { throw new Error(reqData.message || 'فشل إرسال رمز التحقق'); }
+
+                    // Persist pending updates (excluding email) and redirect to code page
+                    sessionStorage.setItem('email_change:new_email', payload.email);
+                    sessionStorage.setItem('profile_pending_update', JSON.stringify({
+                        name: payload.name,
+                        phone: payload.phone,
+                        address: payload.address
+                    }));
+                    window.location.href = '/ar-verify-code?target=email-change';
+                    return;
+                }
+
+                // Save other fields
                 const response = await fetch(API_BASE + '/profile/update', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        name: document.getElementById('fullName').value,
-                        email: document.getElementById('email').value,
-                        phone: document.getElementById('phone').value,
-                        address: document.getElementById('address').value
+                        name: payload.name,
+                        phone: payload.phone,
+                        address: payload.address
                     })
                 });
-                
-                if (response.ok) {
-                    btn.innerHTML = '<i class="fas fa-check"></i> تم الحفظ';
-                    btn.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
-                    document.getElementById('userName').textContent = document.getElementById('fullName').value;
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.style.background = '';
-                        btn.disabled = false;
-                    }, 2000);
-                } else {
-                    throw new Error('Failed to save');
+                if (!response.ok) {
+                    let msg = 'فشل حفظ البيانات';
+                    try { const err = await response.json(); msg = err.message || msg; } catch (_) {}
+                    throw new Error(msg);
                 }
+
+                btn.innerHTML = '<i class="fas fa-check"></i> تم الحفظ';
+                btn.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                document.getElementById('userName').textContent = payload.name;
+                // Auto refresh to reflect latest changes
+                setTimeout(() => {
+                    window.location.reload();
+                }, 800);
             } catch (error) {
                 btn.innerHTML = '<i class="fas fa-times"></i> فشل الحفظ';
                 btn.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
