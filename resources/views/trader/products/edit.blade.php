@@ -8,7 +8,7 @@
 @endphp
 
 <div class="card">
-    <form method="POST" action="{{ route('trader.products.update', $product) }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ route('trader.products.update', $product) }}" enctype="multipart/form-data" id="productForm">
         @csrf
         @method('PUT')
 
@@ -82,11 +82,58 @@
             </div>
         </div>
 
+        @php
+            $customAttributes = old('custom_attributes');
+            if (! is_array($customAttributes)) {
+                $customAttributes = [];
+                if (\Illuminate\Support\Facades\Schema::hasTable('product_attributes') && \Illuminate\Support\Facades\Schema::hasColumn('product_attributes', 'is_custom')) {
+                    $customAttributes = $product->attributes()->where('is_custom', true)->orderBy('sort_order')->orderBy('id')->limit(200)->get()->map(function ($a) {
+                        $opts = is_array($a->options ?? null) ? $a->options : [];
+                        return [
+                            'id' => $a->id,
+                            'name' => $a->name,
+                            'key' => $a->attribute_key ?? null,
+                            'type' => $a->type ?? 'text',
+                            'value' => $a->value_json ?? $a->value,
+                            'options' => $opts ? implode("\n", $opts) : '',
+                            'is_required' => (bool) ($a->is_required ?? false),
+                            'rules' => $a->rules ?? null,
+                            'uid' => $a->attribute_key ? ($a->attribute_key.'-'.$a->id) : ('attr-'.$a->id),
+                        ];
+                    })->all();
+                }
+            }
+        @endphp
+        <div class="card" style="margin-top:1rem">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:.75rem; flex-wrap:wrap; margin-bottom:.75rem">
+                <div style="font-weight:900">Custom Attributes</div>
+                <button type="button" class="btn gray" data-action="add"><i class="fas fa-plus"></i> إضافة</button>
+            </div>
+            <div style="color:#6b7280; font-size:.9rem; margin-bottom:.75rem">يدعم: dropdown, textbox, multi-line, number, date, checkbox group, radio group, file upload</div>
+            <div style="display:grid; grid-template-columns:1.2fr 0.8fr; gap:1rem;" id="attrBuilder">
+                <div>
+                    <div style="font-weight:800; margin-bottom:.5rem;">Builder</div>
+                    <div data-role="attr-list"></div>
+                </div>
+                <div>
+                    <div style="font-weight:800; margin-bottom:.5rem;">Preview</div>
+                    <div class="card" style="padding:1rem;">
+                        <div data-role="attr-preview"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div style="display:flex;justify-content:space-between;gap:.5rem;margin-top:1rem;flex-wrap:wrap">
             <a class="btn gray" href="{{ route('trader.products.index') }}">رجوع</a>
             <button class="btn primary" type="submit"><i class="fas fa-save"></i> حفظ</button>
         </div>
     </form>
 </div>
+
+<script src="/js/trader-attribute-builder.js"></script>
+<script>
+    window.initTraderAttributeBuilder?.(document.getElementById('attrBuilder'), @json(array_values($customAttributes)));
+</script>
 
 @endsection

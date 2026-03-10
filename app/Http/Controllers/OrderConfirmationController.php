@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Driver;
 use App\Models\Order;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class OrderConfirmationController extends Controller
 {
@@ -46,17 +45,11 @@ class OrderConfirmationController extends Controller
             // Get the assigned driver ID before updating
             $driverId = $order->assigned_driver_id;
 
-            // Update order status to 'delivered' using DB to bypass foreign key issues
-            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-
-            DB::table('orders')->where('id', $orderId)->update([
+            $order->update([
                 'confirmed_at' => now(),
                 'customer_signature' => $request->signature,
                 'status' => 'delivered',
-                'updated_at' => now(),
             ]);
-
-            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
             // Update driver status back to 'available'
             if ($driverId) {

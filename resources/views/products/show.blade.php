@@ -78,6 +78,8 @@
             object-fit: contain;
             transition: transform 0.5s ease;
             border-radius: 20px;
+            position: relative;
+            z-index: 1;
         }
         .main-image-container:hover .main-image {
             transform: scale(1.03);
@@ -89,6 +91,7 @@
             display: flex;
             flex-direction: column;
             gap: 0.8rem;
+            z-index: 5;
         }
         .img-action-btn {
             width: 48px;
@@ -174,24 +177,6 @@
             margin-bottom: 1.2rem;
         }
 
-        .rating-reviews {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid #eee;
-        }
-        .rating {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .stars { display: flex; gap: 0.15rem; }
-        .stars i { color: #fbbf24; font-size: 1rem; }
-        .stars i.empty { color: #e5e7eb; }
-        .rating-num { font-weight: 700; color: #333; }
-        .reviews-count { color: #888; font-size: 0.9rem; }
         .sold-count {
             display: flex;
             align-items: center;
@@ -518,25 +503,52 @@
                             <i class="fas fa-search-plus"></i>
                         </button>
                     </div>
-                    <img id="mainImage" src="{{ $product->image ?? '/images/placeholder.png' }}" alt="{{ $product->name }}" class="main-image">
+                    <img id="mainImage" src="{{ $product->primary_image_url }}" srcset="{{ $product->primary_image_srcset }}" sizes="(max-width: 768px) 100vw, 50vw" alt="{{ $product->name }}" class="main-image" loading="eager" width="900" height="450" data-image-context="product-main">
                 </div>
                 @php
                     $galleryImages = [];
-                    if (! empty($product->image)) {
-                        $galleryImages[] = $product->image;
-                    }
+                    $galleryImages[] = $product->primary_image_url;
                     if (is_array($product->images ?? null)) {
                         $galleryImages = array_merge($galleryImages, $product->images);
                     }
                     $galleryImages = array_values(array_unique(array_filter($galleryImages)));
                     if (empty($galleryImages)) {
-                        $galleryImages = ['/images/placeholder.png'];
+                        $galleryImages = ['/images/gift-placeholder.svg'];
                     }
+                    $galleryImages = array_map(function ($p) {
+                        $path = trim((string) $p);
+                        if ($path === '') {
+                            return '/images/gift-placeholder.svg';
+                        }
+                        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+                            return $path;
+                        }
+                        if (str_starts_with($path, '/storage/')) {
+                            return $path;
+                        }
+                        if (str_starts_with($path, '/images/')) {
+                            return $path;
+                        }
+                        if (str_starts_with($path, '/')) {
+                            return $path;
+                        }
+                        if (str_starts_with($path, 'images/')) {
+                            return '/'.$path;
+                        }
+                        if (file_exists(public_path($path))) {
+                            return '/'.$path;
+                        }
+                        $clean = preg_replace('#^storage/#', '', $path) ?? $path;
+                        if ($clean !== '') {
+                            return '/storage/'.ltrim($clean, '/');
+                        }
+                        return '/images/gift-placeholder.svg';
+                    }, $galleryImages);
                 @endphp
                 <div class="thumbnails">
                     @foreach(array_slice($galleryImages, 0, 4) as $idx => $imgUrl)
                         <div class="thumb {{ $idx === 0 ? 'active' : '' }}" onclick="changeImage(this, '{{ $imgUrl }}')">
-                            <img src="{{ $imgUrl }}" alt="صورة {{ $idx + 1 }}">
+                            <img src="{{ $imgUrl }}" alt="صورة {{ $idx + 1 }}" loading="lazy" width="70" height="70" data-image-context="product-thumb-{{ $idx + 1 }}">
                         </div>
                     @endforeach
                 </div>
@@ -553,53 +565,127 @@
 
                 <h1 class="product-title">{{ $product->name }}</h1>
 
-                <div class="rating-reviews">
-                    <div class="rating">
-                        <div class="stars">
-                            @for($i = 0; $i < 5; $i++)
-                                <i class="fas fa-star {{ $i < floor($avgRating) ? '' : 'empty' }}"></i>
-                            @endfor
-                        </div>
-                        <span class="rating-num">{{ number_format($avgRating, 1) }}</span>
-                    </div>
-                    <span class="reviews-count">({{ number_format($reviewsCount) }} تقييم)</span>
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #eee;">
                     <span class="sold-count"><i class="fas fa-fire"></i> {{ $unitsSold >= 500 ? '500+' : number_format($unitsSold) }} مبيعات</span>
                 </div>
 
                 <div class="price-section">
                     <div class="price-row">
-                        <span class="current-price">
-                            <span class="currency">ر.س</span>{{ number_format($product->discount_price ?? $product->price, 0) }}
-                        </span>
+                        <span class="current-price" id="currentPrice" data-usd="{{ $product->discount_price ?? $product->price }}"></span>
                         @if($product->discount_price)
-                            <span class="old-price">{{ number_format($product->price, 0) }} ر.س</span>
-                            <span class="save-amount">وفر {{ number_format($product->price - $product->discount_price, 0) }} ر.س</span>
+                            <span class="old-price" id="oldPrice" data-usd="{{ $product->price }}"></span>
+                            <span class="save-amount" id="saveAmount" data-usd="{{ $product->price - $product->discount_price }}"></span>
                         @endif
                     </div>
                 </div>
 
-                <div class="option-group">
-                    <div class="option-label">المقاس: <span id="selectedSize">M</span></div>
-                    <div class="size-options">
-                        <button class="size-btn" onclick="selectSize(this, 'XS')">XS</button>
-                        <button class="size-btn" onclick="selectSize(this, 'S')">S</button>
-                        <button class="size-btn active" onclick="selectSize(this, 'M')">M</button>
-                        <button class="size-btn" onclick="selectSize(this, 'L')">L</button>
-                        <button class="size-btn" onclick="selectSize(this, 'XL')">XL</button>
-                        <button class="size-btn" onclick="selectSize(this, 'XXL')">XXL</button>
-                    </div>
-                </div>
+                @php
+                    $customAttributes = collect();
+                    if (isset($product->attributes) && $product->attributes instanceof \Illuminate\Support\Collection) {
+                        $customAttributes = $product->attributes->where('is_custom', true)->sortBy('sort_order')->values();
+                    } elseif (\Illuminate\Support\Facades\Schema::hasTable('product_attributes') && \Illuminate\Support\Facades\Schema::hasColumn('product_attributes', 'is_custom')) {
+                        $q = $product->attributes()->where('is_custom', true);
+                        if (\Illuminate\Support\Facades\Schema::hasColumn('product_attributes', 'sort_order')) {
+                            $q->orderBy('sort_order');
+                        }
+                        $customAttributes = $q->get();
+                    }
+                    $customAttributes = $customAttributes->take(5);
+                @endphp
 
-                <div class="option-group">
-                    <div class="option-label">اللون:</div>
-                    <div class="color-options">
-                        <button class="color-btn active" style="background:#1a1a2e" onclick="selectColor(this)"></button>
-                        <button class="color-btn" style="background:#ea580c" onclick="selectColor(this)"></button>
-                        <button class="color-btn" style="background:#0D464C" onclick="selectColor(this)"></button>
-                        <button class="color-btn light" style="background:#f5f5f5" onclick="selectColor(this)"></button>
-                        <button class="color-btn" style="background:#dc2626" onclick="selectColor(this)"></button>
+                @if($customAttributes->count() > 0)
+                    <div class="option-group" id="productAttributes">
+                        <div class="option-label"><i class="fas fa-sliders"></i> الخصائص</div>
+                        <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:1rem;">
+                            @foreach($customAttributes as $attr)
+                                @php
+                                    $type = (string) ($attr->type ?? 'text');
+                                    $options = is_array($attr->options ?? null) ? $attr->options : [];
+                                    $fieldId = 'attr_'.$attr->id;
+                                    $jsonVal = is_array($attr->value_json ?? null) ? $attr->value_json : null;
+                                @endphp
+                                <div class="attr-field" style="display:flex; flex-direction:column; gap:0.45rem;">
+                                    <label for="{{ $fieldId }}" style="font-weight:700; color:#333;">{{ $attr->name }}</label>
+                                    @if($type === 'select' || $type === 'radio' || $type === 'radio_group')
+                                        <select id="{{ $fieldId }}" class="qty-control" style="width:100%; height:55px; padding:0 1rem; border-radius:14px; border:2px solid #e5e7eb; background:#fff;" aria-label="{{ $attr->name }}">
+                                            @if(!empty($options))
+                                                @foreach($options as $opt)
+                                                    <option value="{{ $opt }}" @selected((string) $attr->value === (string) $opt)>{{ $opt }}</option>
+                                                @endforeach
+                                            @else
+                                                <option value="{{ $attr->value }}">{{ $attr->value }}</option>
+                                            @endif
+                                        </select>
+                                    @elseif($type === 'checkbox_group' || $type === 'multiselect')
+                                        @php
+                                            $selected = [];
+                                            if (is_array($jsonVal)) {
+                                                $selected = $jsonVal;
+                                            } else {
+                                                try {
+                                                    $decoded = json_decode((string) $attr->value, true);
+                                                    if (is_array($decoded)) {
+                                                        $selected = $decoded;
+                                                    }
+                                                } catch (\Throwable $e) {
+                                                }
+                                            }
+                                            $selected = array_values(array_filter(array_map(fn ($v) => (string) $v, $selected), fn ($v) => $v !== ''));
+                                        @endphp
+                                        <select id="{{ $fieldId }}" class="qty-control" style="width:100%; min-height:55px; padding:0.5rem 1rem; border-radius:14px; border:2px solid #e5e7eb; background:#fff;" multiple aria-label="{{ $attr->name }}">
+                                            @foreach($options as $opt)
+                                                <option value="{{ $opt }}" @selected(in_array((string) $opt, $selected, true))>{{ $opt }}</option>
+                                            @endforeach
+                                        </select>
+                                    @elseif($type === 'date')
+                                        <input id="{{ $fieldId }}" type="date" value="{{ $attr->value }}" style="width:100%; height:55px; padding:0 1rem; border-radius:14px; border:2px solid #e5e7eb; background:#fff;" aria-label="{{ $attr->name }}">
+                                    @elseif($type === 'checkbox')
+                                        <div style="display:flex; align-items:center; gap:0.6rem; height:55px; padding:0 1rem; border-radius:14px; border:2px solid #e5e7eb; background:#fff;">
+                                            <input id="{{ $fieldId }}" type="checkbox" aria-label="{{ $attr->name }}" @checked(filter_var($attr->value, FILTER_VALIDATE_BOOLEAN))>
+                                            <span style="font-weight:600; color:#444;">{{ $attr->name }}</span>
+                                        </div>
+                                    @elseif($type === 'textarea')
+                                        <textarea id="{{ $fieldId }}" rows="2" style="width:100%; padding:0.8rem 1rem; border-radius:14px; border:2px solid #e5e7eb; background:#fff; resize:vertical;" aria-label="{{ $attr->name }}">{{ $attr->value }}</textarea>
+                                    @elseif($type === 'number')
+                                        <input id="{{ $fieldId }}" type="number" value="{{ $attr->value }}" style="width:100%; height:55px; padding:0 1rem; border-radius:14px; border:2px solid #e5e7eb; background:#fff;" aria-label="{{ $attr->name }}">
+                                    @elseif($type === 'file')
+                                        @php
+                                            $path = (string) ($attr->value_text ?? $attr->value ?? '');
+                                            $url = $path !== '' ? asset('storage/'.$path) : '';
+                                            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                                            $isImage = in_array($ext, ['jpg','jpeg','png','webp','gif'], true);
+                                        @endphp
+                                        @if($url)
+                                            @if($isImage)
+                                                <img src="{{ $url }}" alt="{{ $attr->name }}" style="width:100%; max-height:180px; object-fit:cover; border-radius:14px; border:2px solid #e5e7eb; background:#fff;">
+                                            @else
+                                                <a href="{{ $url }}" style="display:inline-flex; align-items:center; justify-content:center; height:55px; padding:0 1rem; border-radius:14px; border:2px solid #e5e7eb; background:#fff; font-weight:800; color:#2a7080; text-decoration:none;" target="_blank" rel="noopener noreferrer">تحميل الملف</a>
+                                            @endif
+                                        @else
+                                            <div style="height:55px; display:flex; align-items:center; padding:0 1rem; border-radius:14px; border:2px solid #e5e7eb; background:#fff; color:#6b7280; font-weight:700;">لا يوجد ملف</div>
+                                        @endif
+                                    @elseif($type === 'color')
+                                        @php
+                                            $colors = $options;
+                                            if (empty($colors) && (string) $attr->value !== '') {
+                                                $colors = [$attr->value];
+                                            }
+                                        @endphp
+                                        <div role="radiogroup" aria-label="{{ $attr->name }}" style="display:flex; flex-wrap:wrap; gap:0.6rem; padding:0.7rem 0.2rem;">
+                                            @foreach($colors as $i => $c)
+                                                @php $cid = $fieldId.'_'.$i; @endphp
+                                                <input type="radio" id="{{ $cid }}" name="color_{{ $attr->id }}" value="{{ $c }}" @checked((string) $attr->value === (string) $c) style="position:absolute; opacity:0; width:1px; height:1px;">
+                                                <label for="{{ $cid }}" aria-label="{{ $attr->name }} {{ $c }}" style="width:44px; height:44px; border-radius:999px; background:{{ $c }}; border:3px solid #fff; box-shadow:0 2px 10px rgba(0,0,0,0.15); cursor:pointer;"></label>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <input id="{{ $fieldId }}" type="text" value="{{ $attr->value }}" style="width:100%; height:55px; padding:0 1rem; border-radius:14px; border:2px solid #e5e7eb; background:#fff;" aria-label="{{ $attr->name }}">
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
-                </div>
+                @endif
 
                 <div class="cart-section">
                     <div class="qty-control">
@@ -614,10 +700,6 @@
                 </div>
 
                 <div class="secondary-btns">
-                    <button class="sec-btn primary" onclick="buyNow()">
-                        <i class="fas fa-bolt"></i>
-                        اشتري الآن
-                    </button>
                     <button class="sec-btn" onclick="addToWishlist()">
                         <i class="far fa-heart"></i>
                         أضف للمفضلة
@@ -630,7 +712,7 @@
                         <p>توصيل سريع<br>خلال 2-3 أيام</p>
                     </div>
                     <div class="feature-box">
-                        <i class="fas fa-shield-check"></i>
+                        <i class="fas fa-shield-halved"></i>
                         <p>ضمان الجودة<br>100%</p>
                     </div>
                     <div class="feature-box">
@@ -662,7 +744,7 @@
                     @foreach($relatedProducts as $rp)
                         <a href="{{ url('/products/'.$rp->id) }}" style="text-decoration:none; color:inherit; background:#fff; border:1px solid #eee; border-radius:14px; overflow:hidden; display:block;">
                             <div style="height:160px; background:#f5f5f5; display:flex; align-items:center; justify-content:center;">
-                                <img src="{{ $rp->image ?? '/images/placeholder.png' }}" alt="{{ $rp->name }}" style="width:100%; height:100%; object-fit:cover;">
+                                <img src="{{ $rp->primary_image_url }}" srcset="{{ $rp->primary_image_srcset }}" sizes="(max-width: 768px) 50vw, 20vw" alt="{{ $rp->name }}" style="width:100%; height:100%; object-fit:cover;" loading="lazy" width="320" height="160" onerror="this.src='/images/gift-placeholder.svg'">
                             </div>
                             <div style="padding:0.9rem;">
                                 <div style="font-family:'El Messiri',sans-serif; font-weight:700; font-size:0.95rem; margin-bottom:0.4rem; line-height:1.4;">
@@ -701,16 +783,43 @@
             id: {{ $product->id }},
             name: "{{ addslashes($product->name) }}",
             price: {{ $product->discount_price ?? $product->price }},
-            image: "{{ $product->image ?? '/images/placeholder.png' }}"
+            image: "{{ $product->primary_image_url }}"
         };
+        const trackInventory = {!! (bool) ($product->track_inventory ?? false) ? 'true' : 'false' !!};
+        const stockQuantity = {{ (int) ($product->stock_quantity ?? 0) }};
         const isAuthenticated = {!! auth()->check() ? 'true' : 'false' !!};
 
-        document.addEventListener('DOMContentLoaded', checkFavoriteStatus);
+        document.addEventListener('DOMContentLoaded', function () {
+            checkFavoriteStatus();
+            const formatter = window.formatDualMoney || function (amountUsd) {
+                const n = Number(amountUsd || 0);
+                const rate = Number(window.TULIP_USD_TO_SYP || 0);
+                const usd = '$' + n.toFixed(2);
+                if (!rate) return usd;
+                const syp = Math.round(n * rate).toLocaleString() + ' SYP';
+                return `${usd} • ${syp}`;
+            };
+
+            const currentEl = document.getElementById('currentPrice');
+            if (currentEl) {
+                currentEl.textContent = formatter(currentEl.dataset.usd);
+            }
+
+            const oldEl = document.getElementById('oldPrice');
+            if (oldEl) {
+                oldEl.textContent = formatter(oldEl.dataset.usd);
+            }
+
+            const saveEl = document.getElementById('saveAmount');
+            if (saveEl) {
+                saveEl.textContent = 'وفر ' + formatter(saveEl.dataset.usd);
+            }
+        });
 
         function checkFavoriteStatus() {
             const btn = document.getElementById('favBtn');
             if (isAuthenticated) {
-                fetch('/api/wishlist')
+                fetch('/api/wishlist', { credentials: 'same-origin' })
                     .then(r => r.json())
                     .then(d => {
                         const exists = Array.isArray(d.items) && d.items.some(p => p.id === productId);
@@ -740,6 +849,7 @@
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                     },
+                    credentials: 'same-origin',
                     body: JSON.stringify({ product_id: productId })
                 })
                 .then(r => r.json())
@@ -771,20 +881,14 @@
         function addToWishlist() { toggleFavorite(); }
 
         function changeImage(thumb, src) {
-            document.getElementById('mainImage').src = src;
+            const img = document.getElementById('mainImage');
+            if (img && window.setImageWithFallback) {
+                window.setImageWithFallback(img, src, [], '/images/gift-placeholder.svg', 2000);
+            } else if (img) {
+                img.src = src;
+            }
             document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
             thumb.classList.add('active');
-        }
-
-        function selectSize(btn, size) {
-            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById('selectedSize').textContent = size;
-        }
-
-        function selectColor(btn) {
-            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
         }
 
         function changeQty(delta) {
@@ -794,6 +898,12 @@
         }
 
         async function addToCart() {
+            if (trackInventory && stockQuantity <= 0) {
+                const msg = `لا يوجد مخزون من ${productData.name}`;
+                if (window.showToast) window.showToast(msg, 3500);
+                else alert(msg);
+                return;
+            }
             const btn = document.getElementById('addCartBtn');
             const originalHTML = btn.innerHTML;
             const quantity = parseInt(document.getElementById('quantity').value);
@@ -809,6 +919,7 @@
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                     },
+                    credentials: 'same-origin',
                     body: JSON.stringify({ product_id: productId, quantity })
                 });
                 const data = await response.json();
@@ -817,17 +928,17 @@
                     btn.style.background = 'linear-gradient(135deg, #16a34a, #22c55e)';
                     if (window.updateCartCount) window.updateCartCount(data.cart_count || 0);
                     setTimeout(() => { btn.innerHTML = originalHTML; btn.style.background = ''; btn.disabled = false; }, 2000);
-                } else throw new Error();
+                } else {
+                    const msg = data && data.message ? data.message : 'فشل إضافة المنتج للسلة';
+                    if (window.showToast) window.showToast(msg, 3500);
+                    else alert(msg);
+                    throw new Error(msg);
+                }
             } catch (e) {
                 btn.innerHTML = '<i class="fas fa-times"></i> فشل';
                 btn.style.background = 'linear-gradient(135deg, #dc2626, #ef4444)';
                 setTimeout(() => { btn.innerHTML = originalHTML; btn.style.background = ''; btn.disabled = false; }, 2000);
             }
-        }
-
-        async function buyNow() {
-            await addToCart();
-            setTimeout(() => window.location.href = '/checkout', 500);
         }
 
         function shareProduct() {
@@ -844,6 +955,22 @@
             if (img.requestFullscreen) img.requestFullscreen();
             else if (img.webkitRequestFullscreen) img.webkitRequestFullscreen();
         }
+
+        window.IMAGE_FALLBACK_LOG_URL = '/api/image-fallback/log';
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const placeholder = '/images/gift-placeholder.svg';
+            const main = document.getElementById('mainImage');
+            if (main && window.setImageWithFallback) {
+                window.setImageWithFallback(main, main.getAttribute('src'), [], placeholder, 2000);
+            }
+            document.querySelectorAll('.thumbnails img').forEach((img) => {
+                if (window.setImageWithFallback) {
+                    window.setImageWithFallback(img, img.getAttribute('src'), [], placeholder, 2000);
+                }
+            });
+        });
     </script>
+    <script src="/js/image-fallback.js"></script>
 </body>
 </html>

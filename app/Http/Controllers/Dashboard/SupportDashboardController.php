@@ -7,11 +7,15 @@ use App\Models\AuditLog;
 use App\Models\DeliveryAssignment;
 use App\Models\DriverLocation;
 use App\Models\Order;
+use App\Models\PayrollRecord;
 use App\Models\Product;
 use App\Models\SupportTicket;
+use App\Models\SystemSetting;
 use App\Models\User;
 use App\Services\Dashboard\CSDashboardService;
+use App\Services\StatusTransitionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class SupportDashboardController extends Controller
@@ -172,13 +176,54 @@ class SupportDashboardController extends Controller
     {
         abort_unless(Schema::hasTable('products') && Schema::hasColumn('products', 'status'), 404);
 
+        $hasAttrTable = Schema::hasTable('product_attributes');
+        $hasIsCustom = $hasAttrTable && Schema::hasColumn('product_attributes', 'is_custom');
+        $hasType = $hasAttrTable && Schema::hasColumn('product_attributes', 'type');
+
         $products = Product::query()
             ->with(['trader', 'store'])
+            ->when($hasIsCustom, function ($q) {
+                $q->with(['attributes' => function ($qq) {
+                    $qq->where('is_custom', true);
+                }]);
+            })
             ->whereNotNull('trader_id')
             ->where('status', 'pending')
             ->when($request->search, function ($q, $search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('sku', 'like', "%{$search}%");
+                $q->where(function ($inner) use ($search) {
+                    $inner->where('name', 'like', "%{$search}%")
+                        ->orWhere('sku', 'like', "%{$search}%")
+                        ->when(
+                            Schema::hasTable('product_attributes')
+                            && Schema::hasColumn('product_attributes', 'is_custom'),
+                            function ($qq) use ($search) {
+                            $qq->orWhereHas('attributes', function ($a) use ($search) {
+                                $a->where('is_custom', true)
+                                    ->where(function ($ax) use ($search) {
+                                        $ax->where('name', 'like', "%{$search}%")
+                                            ->orWhere('value', 'like', "%{$search}%")
+                                            ->when(
+                                                Schema::hasColumn('product_attributes', 'type'),
+                                                function ($qx) use ($search) {
+                                                    $qx->orWhere('type', 'like', "%{$search}%");
+                                                }
+                                            );
+                                    });
+                            });
+                        });
+                });
+            })
+            ->when($request->attr_type, function ($q, $type) {
+                if (
+                    ! Schema::hasTable('product_attributes')
+                    || ! Schema::hasColumn('product_attributes', 'is_custom')
+                    || ! Schema::hasColumn('product_attributes', 'type')
+                ) {
+                    return;
+                }
+                $q->whereHas('attributes', function ($a) use ($type) {
+                    $a->where('is_custom', true)->where('type', $type);
+                });
             })
             ->orderBy('created_at', 'asc')
             ->paginate(20)
@@ -193,7 +238,7 @@ class SupportDashboardController extends Controller
         abort_unless($product->trader_id !== null, 404);
 
         $update = [
-            'status' => 'approved',
+            'status' => 'active',
         ];
         if (Schema::hasColumn('products', 'is_active')) {
             $update['is_active'] = true;
@@ -278,6 +323,33 @@ class SupportDashboardController extends Controller
         return view('dashboards.cs.orders', compact('orders', 'statusOptions', 'paymentOptions'));
     }
 
+    public function payrolls(Request $request)
+    {
+        $query = PayrollRecord::query()->with(['employee.user'])->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->string('status'));
+        }
+
+        if ($request->filled('search')) {
+            $search = trim((string) $request->input('search'));
+            $query->whereHas('employee', function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $payrolls = $query->paginate(20)->appends($request->query());
+        $statusOptions = ['draft', 'approved', 'paid'];
+
+        return view('dashboards.cs.payrolls', compact('payrolls', 'statusOptions'));
+    }
+
     public function showOrder(Order $order)
     {
         $order->load([
@@ -326,6 +398,10 @@ class SupportDashboardController extends Controller
                 ->get()
             : collect();
 
+        $statusManager = app(\App\Services\OrderStatusManager::class);
+        $currentStatus = $statusManager->normalize((string) ($order->status ?? 'pending'));
+        $allowedNextStatuses = StatusTransitionService::getAllowedTransitions('order', $currentStatus);
+
         return view('dashboards.cs.order', compact(
             'order',
             'delivery',
@@ -334,7 +410,97 @@ class SupportDashboardController extends Controller
             'driverLat',
             'driverLng',
             'driverTrack',
-            'auditLogs'
+            'auditLogs',
+            'allowedNextStatuses'
         ));
+    }
+
+    public function orderRoute(Order $order)
+    {
+        abort_unless(auth('employee')->check(), 403);
+
+        $order->load([
+            'deliveryAssignments.driver',
+            'assignedDriver',
+        ]);
+
+        $delivery = $order->deliveryAssignments->sortByDesc('created_at')->first() ?? $order->deliveryAssignment;
+
+        $customerLat = $order->latitude ?? ($order->shipping_address['lat'] ?? $order->shipping_address['latitude'] ?? null);
+        $customerLng = $order->longitude ?? ($order->shipping_address['lng'] ?? $order->shipping_address['longitude'] ?? null);
+        if (! $customerLat && $delivery) {
+            $customerLat = $delivery->delivery_latitude ?? null;
+        }
+        if (! $customerLng && $delivery) {
+            $customerLng = $delivery->delivery_longitude ?? null;
+        }
+
+        $driverTrack = collect();
+        $driverLast = null;
+        if ($delivery && $delivery->driver_id && Schema::hasTable('driver_locations')) {
+            $from = $delivery->assigned_at ?? $order->assigned_at ?? $order->created_at ?? now()->subHours(6);
+            $to = $delivery->delivered_at ?? now();
+            $driverTrack = DriverLocation::query()
+                ->where('driver_id', $delivery->driver_id)
+                ->whereBetween('recorded_at', [$from, $to])
+                ->orderBy('recorded_at')
+                ->limit(600)
+                ->get(['latitude', 'longitude', 'recorded_at', 'speed']);
+            $driverLast = $driverTrack->last();
+        }
+
+        $driverLat = $driverLast?->latitude ?? ($delivery?->driver?->current_latitude ?? null);
+        $driverLng = $driverLast?->longitude ?? ($delivery?->driver?->current_longitude ?? null);
+
+        return response()->json([
+            'success' => true,
+            'order_id' => $order->id,
+            'customer' => ['lat' => $customerLat, 'lng' => $customerLng],
+            'driver' => ['lat' => $driverLat, 'lng' => $driverLng],
+            'track' => $driverTrack->map(fn ($p) => [
+                'lat' => (float) $p->latitude,
+                'lng' => (float) $p->longitude,
+                'at' => optional($p->recorded_at)->toIso8601String(),
+                'speed' => $p->speed,
+            ])->values()->all(),
+            'updated_at' => now()->toIso8601String(),
+        ]);
+    }
+
+    public function changeOrderStatus(Request $request, Order $order)
+    {
+        abort_unless(auth('employee')->check(), 403);
+        $request->validate([
+            'status' => 'required|string|max:50',
+        ]);
+        $statusManager = app(\App\Services\OrderStatusManager::class);
+        $current = $statusManager->normalize((string) ($order->status ?? 'pending'));
+        $next = $statusManager->normalize((string) $request->input('status'));
+        $canonical = (array) config('order_statuses.canonical', []);
+        if (! in_array($next, $canonical, true)) {
+            return back()->with('error', 'حالة غير صالحة');
+        }
+        $employee = auth('employee')->user();
+        if ($current === $next) {
+            return back()->with('success', 'تم تحديث حالة الطلب');
+        }
+        $adminOverride = (bool) ($employee->is_admin ?? false);
+        if (! StatusTransitionService::canTransition('order', $current, $next, $adminOverride)) {
+            return back()->with('error', 'انتقال غير مسموح للحالة المطلوبة');
+        }
+
+        DB::transaction(function () use ($order, $current, $next, $employee, $adminOverride) {
+            StatusTransitionService::transition($order, 'status', $next, $employee?->id, $adminOverride);
+            if (class_exists(\App\Events\Dashboard\DashboardUpdated::class)) {
+                event(new \App\Events\Dashboard\DashboardUpdated('cs', [
+                    'type' => 'order_status_changed',
+                    'order_id' => $order->id,
+                    'from' => $current,
+                    'to' => $next,
+                ]));
+            }
+        });
+
+        return back()->with('success', 'تم تحديث حالة الطلب');
     }
 }

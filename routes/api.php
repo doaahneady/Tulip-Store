@@ -12,6 +12,7 @@ use App\Http\Controllers\Trader\TraderAnalyticsController;
 use App\Http\Controllers\Trader\TraderProductController;
 use App\Http\Controllers\Trader\TraderSupportController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ImageFallbackLogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,6 +74,8 @@ Route::prefix('trader')->group(function () {
     });
 });
 
+Route::post('/image-fallback/log', [ImageFallbackLogController::class, 'store']);
+
 // Categories
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{id}', [CategoryController::class, 'show']);
@@ -131,16 +134,40 @@ Route::prefix('mart')->group(function () {
             'categories' => [],
         ];
         if (\Illuminate\Support\Facades\Schema::hasTable('categories') && \Illuminate\Support\Facades\Schema::hasTable('products')) {
+            $fruitSlugs = ['fruits', 'mart-fruits'];
+            $vegetableSlugs = ['vegetables', 'khdroaat', 'khodraat', 'mart-vegetables'];
+            $allowedSlugs = array_values(array_unique(array_merge($fruitSlugs, $vegetableSlugs)));
+
             $cats = \App\Models\Category::query()->where(function($q){
                 if (\Illuminate\Support\Facades\Schema::hasColumn('categories','is_active')) {
                     $q->where('is_active', true);
                 }
-            })->orderBy('display_order')->orderBy('name')->get();
+                if (\Illuminate\Support\Facades\Schema::hasColumn('categories', 'market')) {
+                    $q->where('market', 'mart');
+                }
+            })
+                ->when(\Illuminate\Support\Facades\Schema::hasColumn('categories', 'slug'), fn ($q) => $q->whereIn('slug', $allowedSlugs))
+                ->orderBy('display_order')
+                ->orderBy('name')
+                ->get();
             foreach ($cats as $cat) {
+                $slug = strtolower((string) ($cat->slug ?? ''));
+                $name = mb_strtolower(trim((string) ($cat->name ?? '')));
+                $key = null;
+                if (in_array($slug, $fruitSlugs, true) || str_contains($name, 'فواكه') || str_contains($name, 'فاكه')) {
+                    $key = 'fruits';
+                } elseif (in_array($slug, $vegetableSlugs, true) || str_contains($name, 'خضار') || str_contains($name, 'خضرو')) {
+                    $key = 'vegetables';
+                }
+                if (! $key) {
+                    continue;
+                }
+
                 $items = \App\Models\Product::query()
                     ->with('attributes')
                     ->where('category_id', $cat->id)
                     ->active()
+                    ->when(\Illuminate\Support\Facades\Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'mart'))
                     ->orderBy('name')
                     ->get()
                     ->map(function($p) use ($cat){
@@ -161,7 +188,10 @@ Route::prefix('mart')->group(function () {
                             'photo' => $photo,
                         ];
                     })->all();
-                $data['categories'][$cat->name] = $items;
+                if (! isset($data['categories'][$key])) {
+                    $data['categories'][$key] = [];
+                }
+                $data['categories'][$key] = array_values(collect(array_merge($data['categories'][$key], $items))->unique('id')->all());
             }
         }
         return response()->json($data);

@@ -16,6 +16,7 @@ class Category extends Model
         'image',
         'display_order',
         'is_active',
+        'market',
     ];
 
     protected $casts = [

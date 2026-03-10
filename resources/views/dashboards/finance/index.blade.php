@@ -95,14 +95,15 @@
     </a>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <x-dashboard.stat-card title="إيرادات اليوم" :value="'$'.number_format($metrics['todays_revenue'] ?? 0, 2)" icon="fas fa-sun" color="orange" />
-    <x-dashboard.stat-card title="إيرادات الشهر" :value="'$'.number_format($metrics['monthly_revenue'] ?? 0, 2)" icon="fas fa-calendar-alt" color="blue" />
-    <x-dashboard.stat-card title="المدفوعات المعلقة" :value="'$'.number_format($metrics['outstanding_payments'] ?? 0, 2)" icon="fas fa-exclamation-circle" color="red" />
-    <x-dashboard.stat-card title="الاستردادات المعلقة" :value="'$'.number_format($metrics['pending_refunds'] ?? 0, 2)" icon="fas fa-undo" color="purple" />
+<div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+    <x-dashboard.stat-card title="إيرادات اليوم" :value="app(\App\Services\CurrencyService::class)->formatUsd((float) ($metrics['todays_revenue'] ?? 0))" icon="fas fa-sun" color="orange" />
+    <x-dashboard.stat-card title="إيرادات الشهر" :value="app(\App\Services\CurrencyService::class)->formatUsd((float) ($metrics['monthly_revenue'] ?? 0))" icon="fas fa-calendar-alt" color="blue" />
+    <x-dashboard.stat-card title="إيراد التوصيل (الشهر)" :value="app(\App\Services\CurrencyService::class)->formatUsd((float) ($metrics['monthly_delivery'] ?? 0))" icon="fas fa-truck" color="teal" />
+    <x-dashboard.stat-card title="المدفوعات المعلقة" :value="app(\App\Services\CurrencyService::class)->formatUsd((float) ($metrics['outstanding_payments'] ?? 0))" icon="fas fa-exclamation-circle" color="red" />
+    <x-dashboard.stat-card title="الاستردادات المعلقة" :value="app(\App\Services\CurrencyService::class)->formatUsd((float) ($metrics['pending_refunds'] ?? 0))" icon="fas fa-undo" color="purple" />
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
     <div class="lg:col-span-2">
         @component('components.dashboard.chart-card', ['title' => 'الإيرادات مقابل المصروفات', 'icon' => 'fas fa-chart-line', 'chartId' => 'revExpChart'])
         @endcomponent
@@ -116,25 +117,28 @@
         @endcomponent
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm">
-        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900">الأكثر ربحاً (المتاجر)</h3>
-            <span class="text-xs text-gray-500">آخر 30 يوم</span>
-        </div>
-        <div class="p-6">
-            <div class="overflow-x-auto">
+    <div class="lg:col-span-2">
+        <x-dashboard.collapsible title="تقارير تفصيلية" icon="fas fa-layer-group" subtitle="المتاجر / المستخدمون / السائقون / الرواتب">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+                <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+                    <h3 class="text-sm font-black text-gray-900">الأكثر ربحاً (المتاجر)</h3>
+                    <span class="text-xs text-gray-500">آخر 30 يوم</span>
+                </div>
+                <div class="p-4">
+            <div class="overflow-auto max-h-[340px]">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">المتجر</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الإيرادات</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">المتجر</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">الإيرادات</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse(($metrics['revenue_by_store'] ?? []) as $store)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-sm text-gray-800">{{ is_array(data_get($store,'name')) ? json_encode(data_get($store,'name')) : data_get($store,'name') }}</td>
-                                <td class="px-4 py-3 text-sm font-semibold text-gray-900">${{ number_format($store->total_revenue ?? 0, 2) }}</td>
+                                <td class="px-4 py-2.5 text-sm text-gray-800">{{ is_array(data_get($store,'name')) ? json_encode(data_get($store,'name')) : data_get($store,'name') }}</td>
+                                <td class="px-4 py-2.5 text-sm font-semibold text-gray-900">@money($store->total_revenue ?? 0)</td>
                             </tr>
                         @empty
                             <tr><td colspan="2" class="px-4 py-6 text-center text-gray-500">لا توجد بيانات</td></tr>
@@ -142,28 +146,28 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
+                </div>
+            </div>
 
-    <div class="bg-white rounded-2xl shadow-sm">
-        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900">الإنفاق حسب المستخدمين</h3>
-            <span class="text-xs text-gray-500">آخر 30 يوم</span>
-        </div>
-        <div class="p-6">
-            <div class="overflow-x-auto">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+                <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+                    <h3 class="text-sm font-black text-gray-900">الإنفاق حسب المستخدمين</h3>
+                    <span class="text-xs text-gray-500">آخر 30 يوم</span>
+                </div>
+                <div class="p-4">
+            <div class="overflow-auto max-h-[340px]">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">المستخدم</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الإجمالي</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">المستخدم</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">الإجمالي</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse(($metrics['revenue_by_user'] ?? []) as $user)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-sm text-gray-800">{{ is_array(data_get($user,'name')) ? json_encode(data_get($user,'name')) : data_get($user,'name') }}</td>
-                                <td class="px-4 py-3 text-sm font-semibold text-gray-900">${{ number_format($user->total_spent ?? 0, 2) }}</td>
+                                <td class="px-4 py-2.5 text-sm text-gray-800">{{ is_array(data_get($user,'name')) ? json_encode(data_get($user,'name')) : data_get($user,'name') }}</td>
+                                <td class="px-4 py-2.5 text-sm font-semibold text-gray-900">@money($user->total_spent ?? 0)</td>
                             </tr>
                         @empty
                             <tr><td colspan="2" class="px-4 py-6 text-center text-gray-500">لا توجد بيانات</td></tr>
@@ -171,28 +175,28 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
+                </div>
+            </div>
 
-    <div class="bg-white rounded-2xl shadow-sm">
-        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900">قيمة الطلبات حسب السائقين</h3>
-            <span class="text-xs text-gray-500">آخر 30 يوم</span>
-        </div>
-        <div class="p-6">
-            <div class="overflow-x-auto">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+                <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+                    <h3 class="text-sm font-black text-gray-900">قيمة الطلبات حسب السائقين</h3>
+                    <span class="text-xs text-gray-500">آخر 30 يوم</span>
+                </div>
+                <div class="p-4">
+            <div class="overflow-auto max-h-[340px]">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">السائق</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">القيمة</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">السائق</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">القيمة</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse(($metrics['revenue_by_driver'] ?? []) as $driver)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-sm text-gray-800">{{ is_array(data_get($driver,'driver_name')) ? json_encode(data_get($driver,'driver_name')) : (data_get($driver,'driver_name') ?? (is_array(data_get($driver,'name')) ? json_encode(data_get($driver,'name')) : (data_get($driver,'name') ?? ('Driver #'.$driver->id)))) }}</td>
-                                <td class="px-4 py-3 text-sm font-semibold text-gray-900">${{ number_format($driver->total_delivered_value ?? 0, 2) }}</td>
+                                <td class="px-4 py-2.5 text-sm text-gray-800">{{ is_array(data_get($driver,'driver_name')) ? json_encode(data_get($driver,'driver_name')) : (data_get($driver,'driver_name') ?? (is_array(data_get($driver,'name')) ? json_encode(data_get($driver,'name')) : (data_get($driver,'name') ?? ('Driver #'.$driver->id)))) }}</td>
+                                <td class="px-4 py-2.5 text-sm font-semibold text-gray-900">@money($driver->total_delivered_value ?? 0)</td>
                             </tr>
                         @empty
                             <tr><td colspan="2" class="px-4 py-6 text-center text-gray-500">لا توجد بيانات</td></tr>
@@ -200,28 +204,28 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
+                </div>
+            </div>
 
-    <div class="bg-white rounded-2xl shadow-sm">
-        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900">تكلفة الرواتب حسب الموظف</h3>
-            <span class="text-xs text-gray-500">الشهر الحالي</span>
-        </div>
-        <div class="p-6">
-            <div class="overflow-x-auto">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+                <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+                    <h3 class="text-sm font-black text-gray-900">تكلفة الرواتب حسب الموظف</h3>
+                    <span class="text-xs text-gray-500">الشهر الحالي</span>
+                </div>
+                <div class="p-4">
+            <div class="overflow-auto max-h-[340px]">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الموظف</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الصافي</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">الموظف</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">الصافي</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse(($metrics['money_by_employee'] ?? []) as $employee)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-sm text-gray-800">{{ ($employee->first_name ?? '') . ' ' . ($employee->last_name ?? '') }}</td>
-                                <td class="px-4 py-3 text-sm font-semibold text-gray-900">${{ number_format($employee->total_pay ?? 0, 2) }}</td>
+                                <td class="px-4 py-2.5 text-sm text-gray-800">{{ ($employee->first_name ?? '') . ' ' . ($employee->last_name ?? '') }}</td>
+                                <td class="px-4 py-2.5 text-sm font-semibold text-gray-900">@money($employee->total_pay ?? 0)</td>
                             </tr>
                         @empty
                             <tr><td colspan="2" class="px-4 py-6 text-center text-gray-500">لا توجد بيانات</td></tr>
@@ -229,36 +233,40 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+                </div>
+            </div>
+            </div>
+        </x-dashboard.collapsible>
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+<x-dashboard.collapsible title="طلبات قيد الانتظار" icon="fas fa-hourglass-half" subtitle="الموافقات والتحويلات">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900">طلبات الاسترداد / الموافقات</h3>
-            <a href="{{ route('dashboard.finance.approvals') }}" class="text-sm text-indigo-600 hover:text-indigo-800">عرض الكل</a>
+        <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-sm font-black text-gray-900">طلبات الاسترداد / الموافقات</h3>
+            <a href="{{ route('dashboard.finance.approvals') }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">عرض الكل</a>
         </div>
-        <div class="p-6">
-            <div class="overflow-x-auto">
+        <div class="p-4">
+            <div class="overflow-auto max-h-[360px]">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">النوع</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">المبلغ</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">الطلب</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">تاريخ</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">إجراء</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">النوع</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">المبلغ</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">الطلب</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">تاريخ</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">إجراء</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse(($metrics['pending_approvals_list'] ?? []) as $t)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-sm text-gray-800">{{ $t->type }}</td>
-                                <td class="px-4 py-3 text-sm font-semibold text-gray-900">${{ number_format($t->amount ?? 0, 2) }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-700">{{ optional($t->order)->order_number ?? '-' }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-500">{{ $t->created_at?->diffForHumans() }}</td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-2.5 text-sm text-gray-800">{{ $t->type }}</td>
+                                <td class="px-4 py-2.5 text-sm font-semibold text-gray-900">@money($t->amount ?? 0)</td>
+                                <td class="px-4 py-2.5 text-sm text-gray-700">{{ optional($t->order)->order_number ?? '-' }}</td>
+                                <td class="px-4 py-2.5 text-sm text-gray-500">{{ $t->created_at?->diffForHumans() }}</td>
+                                <td class="px-4 py-2.5">
                                     <div class="flex items-center gap-2">
                                         <form method="POST" action="{{ route('dashboard.finance.approvals.transactions.approve', $t->id) }}">
                                             @csrf
@@ -281,28 +289,28 @@
     </div>
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900">طلبات تحويل المتاجر</h3>
-            <a href="{{ route('dashboard.finance.payouts') }}" class="text-sm text-indigo-600 hover:text-indigo-800">عرض الكل</a>
+        <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-sm font-black text-gray-900">طلبات تحويل المتاجر</h3>
+            <a href="{{ route('dashboard.finance.payouts') }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">عرض الكل</a>
         </div>
-        <div class="p-6">
-            <div class="overflow-x-auto">
+        <div class="p-4">
+            <div class="overflow-auto max-h-[360px]">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">المتجر</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">المبلغ</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">تاريخ</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-600">إجراء</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">المتجر</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">المبلغ</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">تاريخ</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">إجراء</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse(($metrics['pending_payouts_list'] ?? []) as $p)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-sm text-gray-800">{{ optional($p->store)->name ?? ('Store #'.$p->store_id) }}</td>
-                                <td class="px-4 py-3 text-sm font-semibold text-gray-900">${{ number_format($p->amount ?? 0, 2) }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-500">{{ $p->created_at?->diffForHumans() }}</td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-2.5 text-sm text-gray-800">{{ optional($p->store)->name ?? ('Store #'.$p->store_id) }}</td>
+                                <td class="px-4 py-2.5 text-sm font-semibold text-gray-900">@money($p->amount ?? 0)</td>
+                                <td class="px-4 py-2.5 text-sm text-gray-500">{{ $p->created_at?->diffForHumans() }}</td>
+                                <td class="px-4 py-2.5">
                                     <div class="flex items-center gap-2">
                                         <form method="POST" action="{{ route('dashboard.finance.approvals.payouts.approve', $p->id) }}">
                                             @csrf
@@ -324,6 +332,8 @@
         </div>
     </div>
 </div>
+    </div>
+</x-dashboard.collapsible>
 @endsection
 
 @push('scripts')
@@ -441,7 +451,7 @@ async function loadTraderPayouts() {
             <tr class="hover:bg-gray-50">
                 <td class="px-4 py-3 text-sm text-gray-800">#${p.id}</td>
                 <td class="px-4 py-3 text-sm text-gray-800">${p.trader_id}</td>
-                <td class="px-4 py-3 text-sm text-gray-900 font-semibold">$${Number(p.amount ?? 0).toFixed(2)}</td>
+                <td class="px-4 py-3 text-sm text-gray-900 font-semibold">${window.formatMoney ? window.formatMoney(p.amount ?? 0) : ('$' + Number(p.amount ?? 0).toFixed(2))}</td>
                 <td class="px-4 py-3 text-sm text-gray-800">${p.status}</td>
                 <td class="px-4 py-3 text-sm text-gray-800">${p.reference_number ?? '-'}</td>
                 <td class="px-4 py-3 text-sm">

@@ -28,32 +28,32 @@ if ($change !== null) {
 }
 @endphp
 
-<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-5 border border-gray-100 dark:border-gray-700 group">
-    <div class="flex items-start justify-between">
-        <div class="flex-1">
-            <p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">{{ $title }}</p>
-            <h3 class="text-2xl lg:text-3xl font-bold text-gray-800 dark:text-white">{{ $value }}</h3>
+<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 p-4 border border-gray-100 dark:border-gray-700 group h-full">
+    <div class="flex items-center justify-between gap-3">
+        <div class="min-w-0">
+            <p class="text-gray-500 dark:text-gray-400 text-xs font-semibold">{{ $title }}</p>
+            <h3 class="text-xl lg:text-2xl font-black text-gray-800 dark:text-white leading-tight">{{ $value }}</h3>
             @if($subtitle)
                 <p class="text-gray-400 text-xs mt-1">{{ $subtitle }}</p>
             @endif
             @if($changeDisplay !== null && $changeDisplay !== '')
-                <div class="flex items-center gap-1 mt-2">
+                <div class="flex items-center gap-1 mt-1.5">
                     @if($changeType === 'up')
-                        <span class="text-emerald-500 text-sm font-medium flex items-center gap-1">
+                        <span class="text-emerald-600 text-xs font-semibold flex items-center gap-1">
                             <i class="fas fa-arrow-up text-xs"></i> {{ $changeDisplay }}
                         </span>
                     @elseif($changeType === 'down')
-                        <span class="text-red-500 text-sm font-medium flex items-center gap-1">
+                        <span class="text-red-600 text-xs font-semibold flex items-center gap-1">
                             <i class="fas fa-arrow-down text-xs"></i> {{ $changeDisplay }}
                         </span>
                     @else
-                        <span class="text-gray-400 text-sm font-medium">{{ $changeDisplay }}</span>
+                        <span class="text-gray-500 text-xs font-semibold">{{ $changeDisplay }}</span>
                     @endif
                 </div>
             @endif
         </div>
-        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br {{ $gradient }} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-            <i class="{{ $icon }} text-white text-xl"></i>
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br {{ $gradient }} flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform shrink-0">
+            <i class="{{ $icon }} text-white text-lg"></i>
         </div>
     </div>
 </div>

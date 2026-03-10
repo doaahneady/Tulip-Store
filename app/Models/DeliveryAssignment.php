@@ -14,6 +14,7 @@ class DeliveryAssignment extends Model
         'order_id',
         'status',
         'assigned_at',
+        'assigned_by',
         'picked_up_at',
         'delivered_at',
         'delivery_latitude',
@@ -123,6 +124,27 @@ class DeliveryAssignment extends Model
             $updates['notes'] = $notes;
         }
 
-        return $this->update($updates);
+        $updated = $this->update($updates);
+
+        $driver = $this->driver;
+        if ($driver) {
+            $activeStatuses = ['assigned', 'picked_up', 'in_transit'];
+
+            if (in_array($status, $activeStatuses, true)) {
+                if ($driver->availability !== 'busy') {
+                    $driver->update(['availability' => 'busy']);
+                }
+            } else {
+                $hasOtherActive = $driver->activeAssignments()
+                    ->where('id', '!=', $this->id)
+                    ->exists();
+
+                if (! $hasOtherActive && $driver->availability !== 'available') {
+                    $driver->update(['availability' => 'available']);
+                }
+            }
+        }
+
+        return $updated;
     }
 }

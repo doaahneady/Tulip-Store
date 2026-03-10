@@ -936,6 +936,72 @@
                 padding: 1.5rem;
             }
         }
+
+        .grid {
+            display: grid;
+        }
+
+        .grid-cols-1 {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+
+        .auto-rows-fr {
+            grid-auto-rows: 1fr;
+            align-items: stretch;
+        }
+
+        .gap-6 {
+            gap: 1.5rem;
+        }
+
+        .mb-8 {
+            margin-bottom: 2rem;
+        }
+
+        .h-full {
+            height: 100%;
+        }
+
+        @media (min-width: 640px) {
+            .sm\:grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .lg\:grid-cols-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .xl\:grid-cols-4 {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
+
+        @supports not (display: grid) {
+            .grid {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .grid > * {
+                flex: 1 1 320px;
+                min-width: 260px;
+            }
+
+            @supports not (gap: 1rem) {
+                .grid {
+                    margin: -0.75rem;
+                }
+
+                .grid > * {
+                    margin: 0.75rem;
+                }
+            }
+        }
     </style>
 </head>
 <body>
@@ -972,56 +1038,12 @@
             </div>
         </div>
 
-        <!-- Elegant Stats -->
         <div class="stats-container">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-content">
-                        <div class="stat-info">
-                            <h3>{{ $totalDrivers }}</h3>
-                            <p>إجمالي السائقين</p>
-                        </div>
-                        <div class="stat-icon" style="background: var(--primary-gradient);">
-                            <i class="fas fa-users"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-content">
-                        <div class="stat-info">
-                            <h3>{{ $availableDrivers }}</h3>
-                            <p>سائقين متاحين</p>
-                        </div>
-                        <div class="stat-icon" style="background: var(--success-gradient);">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-content">
-                        <div class="stat-info">
-                            <h3>{{ $busyDrivers }}</h3>
-                            <p>سائقين مشغولين</p>
-                        </div>
-                        <div class="stat-icon" style="background: var(--warning-gradient);">
-                            <i class="fas fa-shipping-fast"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-content">
-                        <div class="stat-info">
-                            <h3>{{ $completedToday }}</h3>
-                            <p>مكتمل اليوم</p>
-                        </div>
-                        <div class="stat-icon" style="background: var(--accent-gradient);">
-                            <i class="fas fa-check-double"></i>
-                        </div>
-                    </div>
-                </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr gap-6 mb-8">
+                @include('components.dashboard.stat-card', ['title' => 'إجمالي السائقين', 'value' => $totalDrivers, 'icon' => 'fas fa-users', 'color' => 'primary'])
+                @include('components.dashboard.stat-card', ['title' => 'سائقين متاحين', 'value' => $availableDrivers, 'icon' => 'fas fa-check-circle', 'color' => 'green'])
+                @include('components.dashboard.stat-card', ['title' => 'سائقين مشغولين', 'value' => $busyDrivers, 'icon' => 'fas fa-shipping-fast', 'color' => 'orange'])
+                @include('components.dashboard.stat-card', ['title' => 'مكتمل اليوم', 'value' => $completedToday, 'icon' => 'fas fa-check-double', 'color' => 'purple'])
             </div>
         </div>
 

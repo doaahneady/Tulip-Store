@@ -4,18 +4,24 @@
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
-        <div class="text-gray-500 text-xs">الحالة</div>
-        <div class="text-2xl font-bold mt-1 {{ ($databaseHealth['status'] ?? 'ok') === 'ok' ? 'text-emerald-700' : 'text-red-700' }}">
-            {{ ($databaseHealth['status'] ?? 'ok') === 'ok' ? 'جيدة' : 'تحذير' }}
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div class="text-gray-500 text-xs font-semibold">الحالة</div>
+            <div class="text-2xl font-black {{ ($databaseHealth['status'] ?? 'ok') === 'ok' ? 'text-emerald-700' : 'text-red-700' }}">
+                {{ ($databaseHealth['status'] ?? 'ok') === 'ok' ? 'جيدة' : 'تحذير' }}
+            </div>
         </div>
     </div>
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
-        <div class="text-gray-500 text-xs">متوسط زمن الاستعلام</div>
-        <div class="text-2xl font-bold mt-1 text-gray-900">{{ number_format((float) ($queryStats['avg_ms'] ?? 0), 1) }} ms</div>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div class="text-gray-500 text-xs font-semibold">متوسط زمن الاستعلام</div>
+            <div class="text-2xl font-black text-gray-900">{{ number_format((float) ($queryStats['avg_ms'] ?? 0), 1) }} ms</div>
+        </div>
     </div>
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
-        <div class="text-gray-500 text-xs">استعلامات بطيئة</div>
-        <div class="text-2xl font-bold mt-1 text-gray-900">{{ number_format((int) ($queryStats['slow_count'] ?? 0)) }}</div>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div class="text-gray-500 text-xs font-semibold">استعلامات بطيئة</div>
+            <div class="text-2xl font-black text-gray-900">{{ number_format((int) ($queryStats['slow_count'] ?? 0)) }}</div>
+        </div>
     </div>
 </div>
 
@@ -55,4 +61,3 @@
     </div>
 </div>
 @endsection
-

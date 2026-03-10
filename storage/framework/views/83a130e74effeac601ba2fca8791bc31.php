@@ -14,19 +14,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css']); ?>
 </head>
 <body class="h-full font-sans antialiased bg-gray-50">
     <div class="min-h-full">
@@ -74,6 +62,36 @@
                 <?php if(count($availableDashboards) > 0): ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
                         <?php $__currentLoopData = $availableDashboards; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dashboard): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
+                                $color = $dashboard['color'] ?? 'gray';
+                                $hoverTitleClass = match ($color) {
+                                    'purple' => 'group-hover:text-purple-600',
+                                    'blue' => 'group-hover:text-blue-600',
+                                    'green' => 'group-hover:text-green-600',
+                                    'emerald' => 'group-hover:text-emerald-600',
+                                    'orange' => 'group-hover:text-orange-600',
+                                    'indigo' => 'group-hover:text-indigo-600',
+                                    default => 'group-hover:text-gray-600',
+                                };
+                                $hoverCircleBgClass = match ($color) {
+                                    'purple' => 'group-hover:bg-purple-100',
+                                    'blue' => 'group-hover:bg-blue-100',
+                                    'green' => 'group-hover:bg-green-100',
+                                    'emerald' => 'group-hover:bg-emerald-100',
+                                    'orange' => 'group-hover:bg-orange-100',
+                                    'indigo' => 'group-hover:bg-indigo-100',
+                                    default => 'group-hover:bg-gray-100',
+                                };
+                                $hoverArrowClass = match ($color) {
+                                    'purple' => 'group-hover:text-purple-600',
+                                    'blue' => 'group-hover:text-blue-600',
+                                    'green' => 'group-hover:text-green-600',
+                                    'emerald' => 'group-hover:text-emerald-600',
+                                    'orange' => 'group-hover:text-orange-600',
+                                    'indigo' => 'group-hover:text-indigo-600',
+                                    default => 'group-hover:text-gray-600',
+                                };
+                            ?>
                             <a href="<?php echo e(route($dashboard['route'])); ?>" 
                                class="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-200 overflow-hidden">
                                 <!-- Color accent -->
@@ -104,7 +122,7 @@
                                     
                                     <!-- Content -->
                                     <div class="text-center">
-                                        <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-<?php echo e($dashboard['color']); ?>-600 transition-colors">
+                                        <h3 class="text-xl font-bold text-gray-900 mb-3 <?php echo e($hoverTitleClass); ?> transition-colors">
                                             <?php echo e($dashboard['name']); ?>
 
                                         </h3>
@@ -116,8 +134,8 @@
                                     
                                     <!-- Arrow -->
                                     <div class="flex justify-center mt-6">
-                                        <div class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 group-hover:bg-<?php echo e($dashboard['color']); ?>-100 transition-colors">
-                                            <i class="fas fa-arrow-right text-gray-400 group-hover:text-<?php echo e($dashboard['color']); ?>-600 transition-colors"></i>
+                                        <div class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 <?php echo e($hoverCircleBgClass); ?> transition-colors">
+                                            <i class="fas fa-arrow-right text-gray-400 <?php echo e($hoverArrowClass); ?> transition-colors"></i>
                                         </div>
                                     </div>
                                 </div>

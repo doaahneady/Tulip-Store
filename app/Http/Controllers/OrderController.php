@@ -28,7 +28,7 @@ class OrderController extends Controller
             'delivery_method' => 'required|in:normal,express,instant',
             'payment_method' => 'required|in:cash,card,syriatel,bank',
             'delivery_cost' => 'required|numeric|min:0',
-            'service_fee' => 'required|numeric|min:0',
+            'service_fee' => 'nullable|numeric|min:0',
         ]);
 
         try {
@@ -80,16 +80,14 @@ class OrderController extends Controller
             }
 
             $deliveryCost = (float) $validated['delivery_cost'];
-            $serviceFee = array_key_exists('service_fee', $validated)
-                ? (float) $validated['service_fee']
-                : 0;
+            $serviceFee = 0;
             $user = Auth::user();
             $tags = $user?->tags ?? '';
             $isVip = is_string($tags) && stripos($tags, 'vip') !== false;
             if ($isVip) {
                 $deliveryCost = 0;
             }
-            $total = $subtotal + $deliveryCost + $serviceFee;
+            $total = $subtotal + $deliveryCost;
 
             // Determine payment status based on payment method
             $paymentStatus = $validated['payment_method'] === 'cash' ? 'pending' : 'pending'; // Default to pending for safety
@@ -105,6 +103,20 @@ class OrderController extends Controller
             $orderData = [
                 'order_number' => 'ORD-'.strtoupper(uniqid()),
             ];
+            if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'store_id')) {
+                $storeId = null;
+                foreach ($orderItemsData as $item) {
+                    $pid = $item['product'] ?? null;
+                    $candidate = $pid?->store_id ?? null;
+                    if ($candidate) {
+                        $storeId = $candidate;
+                        break;
+                    }
+                }
+                if ($storeId) {
+                    $orderData['store_id'] = $storeId;
+                }
+            }
             if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'user_id')) {
                 $orderData['user_id'] = Auth::id();
             } elseif (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'customer_id')) {
@@ -139,7 +151,8 @@ class OrderController extends Controller
             }
             if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'shipping_cost')) {
                 $orderData['shipping_cost'] = $deliveryCost;
-            } elseif (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'delivery_cost')) {
+            }
+            if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'delivery_cost')) {
                 $orderData['delivery_cost'] = $deliveryCost;
             }
             if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'service_fee')) {
@@ -163,13 +176,13 @@ class OrderController extends Controller
                 $orderData['estimated_delivery'] = $estimatedDelivery;
             }
             if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'shipping_address')) {
-                $orderData['shipping_address'] = json_encode([
+                $orderData['shipping_address'] = [
                     'recipient_name' => $validated['recipient_name'],
                     'phone' => $validated['phone'],
                     'village' => $validated['village'],
                     'address_note' => $validated['address_note'] ?? null,
                     'location' => $validated['location'],
-                ]);
+                ];
             }
             $order = Order::create($orderData);
 
@@ -202,7 +215,7 @@ class OrderController extends Controller
             }
 
             // 4. Create Financial Transaction
-            \App\Models\FinancialTransaction::create([
+            $ftData = [
                 'transaction_id' => 'TXN-'.strtoupper(uniqid()),
                 'user_id' => Auth::id(),
                 'order_id' => $order->id,
@@ -211,12 +224,15 @@ class OrderController extends Controller
                 'amount' => $total,
                 'currency' => 'SYP', // Assuming default currency
                 'description' => "Order Payment #{$order->order_number}",
-                'metadata' => [
+            ];
+            if (\Illuminate\Support\Facades\Schema::hasColumn('financial_transactions', 'metadata')) {
+                $ftData['metadata'] = [
                     'payment_method' => $validated['payment_method'],
                     'items_count' => count($cart),
                     'vip_order' => $isVip,
-                ],
-            ]);
+                ];
+            }
+            \App\Models\FinancialTransaction::create($ftData);
 
             session()->forget('cart');
             if (Auth::check() && \Illuminate\Support\Facades\Schema::hasTable('carts') && \Illuminate\Support\Facades\Schema::hasTable('cart_items')) {
@@ -359,7 +375,7 @@ class OrderController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $pdf = \PDF::loadView('invoices.template', compact('order'));
+        $pdf = \PDF::loadView('invoices.template-en', compact('order'));
 
         return $pdf->download('invoice-'.$order->order_number.'.pdf');
     }

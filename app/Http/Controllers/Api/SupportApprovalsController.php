@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\Product;
 use App\Models\Trader;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class SupportApprovalsController extends Controller
 {
@@ -54,20 +55,33 @@ class SupportApprovalsController extends Controller
     public function pendingTraderProducts(Request $request)
     {
         $products = Product::query()
-            ->where('is_trader_product', true)
-            ->where('status', 'pending_approval')
+            ->when(Schema::hasColumn('products', 'is_trader_product'), fn ($q) => $q->where('is_trader_product', true))
+            ->when(Schema::hasColumn('products', 'trader_id'), fn ($q) => $q->whereNotNull('trader_id'))
+            ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return response()->json(['products' => $products]);
+        return response()->json(['success' => true, 'products' => $products]);
     }
 
     public function approveTraderProduct(Request $request, Product $product)
     {
-        $product->update([
+        $update = [
             'status' => 'active',
-            'is_active' => true,
-        ]);
+        ];
+        if (Schema::hasColumn('products', 'is_active')) {
+            $update['is_active'] = true;
+        }
+        if (Schema::hasColumn('products', 'reviewed_by')) {
+            $update['reviewed_by'] = auth('employee')->id();
+        }
+        if (Schema::hasColumn('products', 'reviewed_at')) {
+            $update['reviewed_at'] = now();
+        }
+        if (Schema::hasColumn('products', 'rejection_reason')) {
+            $update['rejection_reason'] = null;
+        }
+        $product->update($update);
 
         AuditLog::log('support_trader_product_approved', $product);
 
@@ -80,10 +94,22 @@ class SupportApprovalsController extends Controller
             'reason' => 'nullable|string|max:500',
         ]);
 
-        $product->update([
+        $update = [
             'status' => 'rejected',
-            'is_active' => false,
-        ]);
+        ];
+        if (Schema::hasColumn('products', 'is_active')) {
+            $update['is_active'] = false;
+        }
+        if (Schema::hasColumn('products', 'reviewed_by')) {
+            $update['reviewed_by'] = auth('employee')->id();
+        }
+        if (Schema::hasColumn('products', 'reviewed_at')) {
+            $update['reviewed_at'] = now();
+        }
+        if (Schema::hasColumn('products', 'rejection_reason')) {
+            $update['rejection_reason'] = $payload['reason'] ?? null;
+        }
+        $product->update($update);
 
         AuditLog::log('support_trader_product_rejected', $product, null, $payload);
 

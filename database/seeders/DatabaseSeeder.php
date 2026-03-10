@@ -30,6 +30,11 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        // Add comprehensive demo data with variety for store, mart and gifts
+        $this->call([
+            VarietyDemoSeeder::class,
+        ]);
+
         if (app()->environment('local')) {
             $this->call([
                 DemoTraderSeeder::class,

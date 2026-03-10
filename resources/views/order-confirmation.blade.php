@@ -220,7 +220,7 @@
             </div>
             <div class="detail-row">
                 <span class="detail-label">المجموع الكلي:</span>
-                <span class="detail-value">${{ number_format($order->total, 2) }}</span>
+                <span class="detail-value">@money($order->total)</span>
             </div>
             @if($order->payment_method === 'cash')
             <div class="detail-row">
@@ -235,7 +235,7 @@
             @foreach($order->items as $item)
             <div class="product-item">
                 <span>{{ $item->product->name }} × {{ $item->quantity }}</span>
-                <span style="font-weight: 700;">${{ number_format($item->subtotal, 2) }}</span>
+                <span style="font-weight: 700;">@money($item->subtotal)</span>
             </div>
             @endforeach
         </div>

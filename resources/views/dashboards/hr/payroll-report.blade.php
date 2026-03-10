@@ -60,11 +60,11 @@
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">ملخص الراتب</h3>
         <div class="space-y-2 text-sm">
-            <div class="flex items-center justify-between"><span class="text-gray-600">الأساسي</span><span class="font-semibold text-gray-900">${{ number_format((float) ($summary['base_pay'] ?? 0), 2) }}</span></div>
-            <div class="flex items-center justify-between"><span class="text-gray-600">الإضافي</span><span class="font-semibold text-gray-900">${{ number_format((float) ($summary['overtime_pay'] ?? 0), 2) }}</span></div>
-            <div class="flex items-center justify-between"><span class="text-gray-600">الإجمالي</span><span class="font-semibold text-gray-900">${{ number_format((float) ($summary['gross_pay'] ?? 0), 2) }}</span></div>
-            <div class="flex items-center justify-between"><span class="text-gray-600">الخصومات</span><span class="font-semibold text-gray-900">${{ number_format((float) ($summary['deductions'] ?? 0), 2) }}</span></div>
-            <div class="border-t pt-2 flex items-center justify-between"><span class="text-gray-600">الصافي</span><span class="font-bold text-emerald-700 text-lg">${{ number_format((float) ($summary['net_pay'] ?? 0), 2) }}</span></div>
+            <div class="flex items-center justify-between"><span class="text-gray-600">الأساسي</span><span class="font-semibold text-gray-900">@money((float) ($summary['base_pay'] ?? 0))</span></div>
+            <div class="flex items-center justify-between"><span class="text-gray-600">الإضافي</span><span class="font-semibold text-gray-900">@money((float) ($summary['overtime_pay'] ?? 0))</span></div>
+            <div class="flex items-center justify-between"><span class="text-gray-600">الإجمالي</span><span class="font-semibold text-gray-900">@money((float) ($summary['gross_pay'] ?? 0))</span></div>
+            <div class="flex items-center justify-between"><span class="text-gray-600">الخصومات</span><span class="font-semibold text-gray-900">@money((float) ($summary['deductions'] ?? 0))</span></div>
+            <div class="border-t pt-2 flex items-center justify-between"><span class="text-gray-600">الصافي</span><span class="font-bold text-emerald-700 text-lg">@money((float) ($summary['net_pay'] ?? 0))</span></div>
         </div>
 
         <div class="mt-6">
@@ -81,4 +81,3 @@
     </div>
 </div>
 @endsection
-

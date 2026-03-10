@@ -1,0 +1,255 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5] [cursor=pointer]:
+          - generic [ref=e6]: 
+          - generic:
+            - generic [ref=e7]: 
+            - generic [ref=e8]: "0"
+            - generic [ref=e9]: المفضلة
+        - generic [ref=e10] [cursor=pointer]:
+          - generic [ref=e11]: 
+          - generic:
+            - generic [ref=e12]: 
+            - generic [ref=e13]: تسجيل الدخول
+        - generic [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]: 
+          - generic:
+            - generic [ref=e16]: 
+            - generic [ref=e17]: سلة التسوق
+        - generic [ref=e18] [cursor=pointer]:
+          - generic [ref=e19]: 
+          - generic:
+            - generic [ref=e20]: 
+            - generic [ref=e21]: هدايا توليب
+        - generic [ref=e22] [cursor=pointer]:
+          - generic [ref=e23]: 
+          - generic:
+            - generic [ref=e24]: 
+            - generic [ref=e25]: توليب مارت
+      - generic [ref=e27]:
+        - generic [ref=e28] [cursor=pointer]: 
+        - textbox "ابحث عن المنتج الذي تريده" [ref=e29]
+        - generic [ref=e30] [cursor=pointer]: 
+      - link "LIP U T" [ref=e31] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e32]: LIP
+        - img "U" [ref=e33]
+        - generic [ref=e34]: T
+  - generic [ref=e36]:
+    - generic [ref=e37]:
+      - generic [ref=e38]:
+        - img "أرسل ابتسامتك أينما كنت" [ref=e39]
+        - generic [ref=e40]:
+          - heading "أرسل ابتسامتك أينما كنت" [level=2] [ref=e41]
+          - paragraph [ref=e42]: تسوق معنا أفضل المنتجات والعروض
+      - generic [ref=e43]:
+        - img "هدايا توليب" [ref=e44]
+        - generic [ref=e45]:
+          - heading "هدايا توليب" [level=2] [ref=e46]
+          - paragraph [ref=e47]: لحظات استثنائية تستحق هدايا مميزة
+      - generic [ref=e48]:
+        - img "وصل حديثاً" [ref=e49]
+        - generic [ref=e50]:
+          - heading "وصل حديثاً" [level=2] [ref=e51]
+          - paragraph [ref=e52]: اكتشف أحدث المنتجات في متجرنا
+    - button "" [ref=e53] [cursor=pointer]:
+      - generic [ref=e54]: 
+    - button "" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: 
+    - generic [ref=e57]:
+      - button [ref=e58] [cursor=pointer]
+      - button [ref=e59] [cursor=pointer]
+      - button [ref=e60] [cursor=pointer]
+  - generic [ref=e62]:
+    - generic [ref=e63]:
+      - heading "تسوق حسب الفئة" [level=2] [ref=e64]
+      - link "عرض الكل " [ref=e65] [cursor=pointer]:
+        - /url: /categories
+        - text: عرض الكل
+        - generic [ref=e66]: 
+    - button "" [ref=e67] [cursor=pointer]:
+      - generic [ref=e68]: 
+    - button "" [ref=e69] [cursor=pointer]:
+      - generic [ref=e70]: 
+    - generic [ref=e73]:
+      - generic [ref=e74] [cursor=pointer]:
+        - generic [ref=e76]: 
+        - paragraph [ref=e77]: Bags
+      - generic [ref=e78] [cursor=pointer]:
+        - generic [ref=e80]: 
+        - paragraph [ref=e81]: Books
+      - generic [ref=e82] [cursor=pointer]:
+        - generic [ref=e84]: 
+        - paragraph [ref=e85]: Care
+      - generic [ref=e86] [cursor=pointer]:
+        - generic [ref=e88]: 
+        - paragraph [ref=e89]: Electronics
+      - generic [ref=e90] [cursor=pointer]:
+        - generic [ref=e92]: 
+        - paragraph [ref=e93]: Fashion
+      - generic [ref=e94] [cursor=pointer]:
+        - generic [ref=e96]: 
+        - paragraph [ref=e97]: Jewelry
+      - generic [ref=e98] [cursor=pointer]:
+        - generic [ref=e100]: 
+        - paragraph [ref=e101]: Kitchen
+      - generic [ref=e102] [cursor=pointer]:
+        - generic [ref=e104]: 
+        - paragraph [ref=e105]: Shoes
+      - generic [ref=e106] [cursor=pointer]:
+        - generic [ref=e108]: 
+        - paragraph [ref=e109]: Sports
+      - generic [ref=e110] [cursor=pointer]:
+        - generic [ref=e112]: 
+        - paragraph [ref=e113]: Toys
+      - generic [ref=e114] [cursor=pointer]:
+        - generic [ref=e116]: 
+        - paragraph [ref=e117]: الزهور الطازة
+      - generic [ref=e118] [cursor=pointer]:
+        - generic [ref=e120]: 
+        - paragraph [ref=e121]: هدايا فاخرة
+      - generic [ref=e122] [cursor=pointer]:
+        - generic [ref=e124]: 
+        - paragraph [ref=e125]: الهدايا والمفاجآت
+      - generic [ref=e126] [cursor=pointer]:
+        - generic [ref=e128]: 
+        - paragraph [ref=e129]: ورد وباقات
+      - generic [ref=e130] [cursor=pointer]:
+        - generic [ref=e132]: 
+        - paragraph [ref=e133]: الشوكولاتة والحلويات
+      - generic [ref=e134] [cursor=pointer]:
+        - generic [ref=e136]: 
+        - paragraph [ref=e137]: حلويات وشوكولاتة
+      - generic [ref=e138] [cursor=pointer]:
+        - generic [ref=e140]: 
+        - paragraph [ref=e141]: البالونات والديكور
+  - generic [ref=e143]:
+    - generic [ref=e144]:
+      - heading "مختارة خصيصاً لك" [level=2] [ref=e145]
+      - paragraph [ref=e146]: بناءً على اهتماماتك وتصفحك السابق
+    - generic [ref=e148] [cursor=pointer]:
+      - button "" [ref=e149]:
+        - generic [ref=e150]: 
+      - generic [ref=e151]: "متوفر: 49"
+      - img "yousef F alhalabi" [ref=e153]
+      - generic [ref=e154]:
+        - heading "yousef F alhalabi" [level=3] [ref=e155]
+        - generic [ref=e158]: $150.00
+      - button "" [ref=e160]:
+        - generic [ref=e161]: 
+  - generic [ref=e163]:
+    - generic [ref=e164]:
+      - heading "الأكثر رواجاً الآن" [level=2] [ref=e165]
+      - paragraph [ref=e166]: المنتجات الأكثر طلباً هذا الأسبوع
+    - generic [ref=e167]:
+      - generic [ref=e168] [cursor=pointer]:
+        - button "" [ref=e169]:
+          - generic [ref=e170]: 
+        - generic [ref=e171]: غير متوفر
+        - img "باقة الورود الحمراء الفاخرة" [ref=e173]
+        - generic [ref=e174]:
+          - heading "باقة الورود الحمراء الفاخرة" [level=3] [ref=e175]
+          - generic [ref=e178]: $299.99
+        - button "" [disabled] [ref=e180]:
+          - generic [ref=e181]: 
+      - generic [ref=e182] [cursor=pointer]:
+        - button "" [ref=e183]:
+          - generic [ref=e184]: 
+        - generic [ref=e185]: غير متوفر
+        - img "باقة الزهور المتعددة الألوان" [ref=e187]
+        - generic [ref=e188]:
+          - heading "باقة الزهور المتعددة الألوان" [level=3] [ref=e189]
+          - generic [ref=e191]:
+            - generic [ref=e192]: $149.99
+            - generic [ref=e193]: $199.99
+        - button "" [disabled] [ref=e195]:
+          - generic [ref=e196]: 
+      - generic [ref=e197] [cursor=pointer]:
+        - button "" [ref=e198]:
+          - generic [ref=e199]: 
+        - generic [ref=e200]: غير متوفر
+        - img "باقة الزنبق البيضاء" [ref=e202]
+        - generic [ref=e203]:
+          - heading "باقة الزنبق البيضاء" [level=3] [ref=e204]
+          - generic [ref=e207]: $249.99
+        - button "" [disabled] [ref=e209]:
+          - generic [ref=e210]: 
+      - generic [ref=e211] [cursor=pointer]:
+        - button "" [ref=e212]:
+          - generic [ref=e213]: 
+        - generic [ref=e214]: غير متوفر
+        - img "صندوق الهدايا الذهبي" [ref=e216]
+        - generic [ref=e217]:
+          - heading "صندوق الهدايا الذهبي" [level=3] [ref=e218]
+          - generic [ref=e221]: $149.99
+        - button "" [disabled] [ref=e223]:
+          - generic [ref=e224]: 
+      - generic [ref=e225] [cursor=pointer]:
+        - button "" [ref=e226]:
+          - generic [ref=e227]: 
+        - generic [ref=e228]: غير متوفر
+        - img "مجموعة الشموع العطرية" [ref=e230]
+        - generic [ref=e231]:
+          - heading "مجموعة الشموع العطرية" [level=3] [ref=e232]
+          - generic [ref=e234]:
+            - generic [ref=e235]: $79.99
+            - generic [ref=e236]: $99.99
+        - button "" [disabled] [ref=e238]:
+          - generic [ref=e239]: 
+  - generic [ref=e242]:
+    - heading "تسوق بثقة معنا" [level=2] [ref=e243]
+    - paragraph [ref=e244]: جودة عالية • توصيل سريع • خدمة عملاء متميزة
+    - link "بوابة التجار " [ref=e245] [cursor=pointer]:
+      - /url: /trader/login
+      - text: بوابة التجار
+      - generic [ref=e246]: 
+  - contentinfo [ref=e247]:
+    - img
+    - generic [ref=e248]:
+      - generic [ref=e249]:
+        - generic [ref=e250]:
+          - img [ref=e251]
+          - paragraph [ref=e252]: متجر فاخر للمنتجات المميزة. نساعدك في إرسال ابتسامتك لأحبائك أينما كانوا.
+          - generic [ref=e253]:
+            - link "" [ref=e254] [cursor=pointer]:
+              - /url: "#"
+              - generic [ref=e255]: 
+            - link "" [ref=e256] [cursor=pointer]:
+              - /url: "#"
+              - generic [ref=e257]: 
+        - generic [ref=e258]:
+          - heading "روابط سريعة" [level=2] [ref=e259]
+          - generic [ref=e260]:
+            - link "المتجر" [ref=e261] [cursor=pointer]:
+              - /url: /store
+            - link "من نحن؟" [ref=e262] [cursor=pointer]:
+              - /url: /about
+            - link "تواصل معنا" [ref=e263] [cursor=pointer]:
+              - /url: /contact
+        - generic [ref=e264]:
+          - heading "الدعم التقني" [level=2] [ref=e265]
+          - generic [ref=e266]:
+            - link "الأسئلة الشائعة" [ref=e267] [cursor=pointer]:
+              - /url: /faq
+            - link "سياسة الشحن" [ref=e268] [cursor=pointer]:
+              - /url: /shipping
+            - link "سياسة الإرجاع" [ref=e269] [cursor=pointer]:
+              - /url: /returns
+            - link "سياسة الخصوصية" [ref=e270] [cursor=pointer]:
+              - /url: /privacy
+        - generic [ref=e271]:
+          - heading "الأقسام الخاصة" [level=2] [ref=e272]
+          - link "توليب مارت" [ref=e274] [cursor=pointer]:
+            - /url: /mart
+      - generic [ref=e275]:
+        - paragraph [ref=e276]: © 2025 Tulip Store. جميع الحقوق محفوظة
+        - generic [ref=e277]:
+          - generic [ref=e278]: 
+          - generic [ref=e279]: 
+          - generic [ref=e280]: 
+```

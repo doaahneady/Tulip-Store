@@ -263,6 +263,7 @@ class StoreOwnerDashboardService
     public function getProducts(int $storeId, array $filters = []): LengthAwarePaginator
     {
         $query = Product::where('store_id', $storeId)
+            ->when(\Illuminate\Support\Facades\Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
             ->with('category');
 
         // Apply search filter
@@ -316,16 +317,18 @@ class StoreOwnerDashboardService
     {
         $start = $start ?? Carbon::now()->startOfMonth();
         $end = $end ?? Carbon::now()->endOfMonth();
+        $terminal = (array) config('order_statuses.terminal', ['delivered', 'done']);
 
         return Product::where('store_id', $storeId)
+            ->when(\Illuminate\Support\Facades\Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
             ->select('products.*')
             ->selectRaw('COALESCE(SUM(order_items.quantity), 0) as total_sold')
             ->selectRaw('COALESCE(SUM(order_items.quantity * order_items.price), 0) as total_revenue')
             ->leftJoin('order_items', 'order_items.product_id', '=', 'products.id')
-            ->leftJoin('orders', function ($join) use ($start, $end) {
+            ->leftJoin('orders', function ($join) use ($start, $end, $terminal) {
                 $join->on('orders.id', '=', 'order_items.order_id')
                     ->whereBetween('orders.created_at', [$start, $end])
-                    ->where('orders.status', 'completed');
+                    ->whereIn('orders.status', $terminal);
             })
             ->groupBy('products.id')
             ->orderByDesc('total_sold')

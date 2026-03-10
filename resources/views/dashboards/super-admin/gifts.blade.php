@@ -22,6 +22,10 @@
             <i class="fas fa-store"></i>
             <span>Tulip Mart</span>
         </a>
+        <a href="{{ route('dashboard.admin.gifts.creation') }}" class="inline-flex items-center gap-2 bg-rose-600 text-white px-4 py-2 rounded-xl hover:bg-rose-700 transition">
+            <i class="fas fa-hammer"></i>
+            <span>Gifts Creation Stuff</span>
+        </a>
         <a href="{{ route('dashboard.admin.attendance') }}" class="inline-flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-xl hover:bg-teal-700 transition">
             <i class="fas fa-user-clock"></i>
             <span>حضور الموظفين</span>
@@ -84,6 +88,251 @@
     </div>
 </div>
 
+@if(false)
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 mb-4">
+    <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-gray-900">Gifts Creation Stuff — أدوات إنشاء الهدايا</h2>
+        <div class="text-sm text-gray-500">Boxes • Bouquet Sizes • Fillers • Wrappings • Ribbons • Cards • Ready Gifts</div>
+    </div>
+    <div class="mt-4 flex flex-wrap gap-2">
+        <a href="#section-ready-gift" class="btn btn-secondary">إضافة هدية جاهزة</a>
+        <a href="#section-box" class="btn btn-secondary">إضافة صندوق</a>
+        <a href="#section-bouquet-size" class="btn btn-secondary">إضافة حجم باقة</a>
+        <a href="#section-filler" class="btn btn-secondary">إضافة عنصر</a>
+        <a href="#section-wrapping" class="btn btn-secondary">إضافة تغليف</a>
+        <a href="#section-ribbon" class="btn btn-secondary">إضافة شريط</a>
+        <a href="#section-card" class="btn btn-secondary">إضافة بطاقة</a>
+    </div>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6">
+
+<div id="gifts-creation-stuff" class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+    <div id="section-bouquet-size" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900">إضافة حجم باقة (Bouquet Size)</h3>
+        </div>
+        <form method="POST" action="{{ route('dashboard.admin.gifts.boxes.store') }}" enctype="multipart/form-data" class="space-y-3">
+            @csrf
+            <input type="hidden" name="context" value="bouquet">
+            <input name="name" class="form-input w-full" placeholder="اسم الحجم (مثال: Small/Medium/Large)" required>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="size" class="form-input w-full" placeholder="الرمز (small/medium/large/xl)" required>
+                <input name="max_items" type="number" min="1" class="form-input w-full" placeholder="عدد الزهور الموصى به" required>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <input name="price" type="number" step="0.01" min="0" class="form-input w-full" placeholder="السعر" required>
+                <input name="stock" type="number" min="0" class="form-input w-full" placeholder="المخزون" required>
+                <input name="sort_order" type="number" min="0" class="form-input w-full" placeholder="الترتيب">
+            </div>
+            <textarea name="description" class="form-textarea w-full" rows="2" placeholder="الوصف (اختياري)"></textarea>
+            <input name="image" type="file" class="form-input w-full" accept="image/*">
+            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" name="is_active" value="1" checked>
+                <span>نشط</span>
+            </label>
+            <button type="submit" class="btn btn-primary w-full">حفظ</button>
+        </form>
+    </div>
+
+    <div id="section-ready-gift" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900">إضافة هدية جاهزة</h3>
+        </div>
+        <form method="POST" action="{{ route('dashboard.admin.gifts.store') }}" enctype="multipart/form-data" class="space-y-3">
+            @csrf
+            <input name="name" class="form-input w-full" placeholder="الاسم" required>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="price" type="number" step="0.01" min="0" class="form-input w-full" placeholder="السعر" required>
+                <input name="stock_quantity" type="number" min="0" class="form-input w-full" placeholder="المخزون" required>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="category" class="form-input w-full" placeholder="التصنيف (مثال: birthday)">
+                <input name="occasion" class="form-input w-full" placeholder="المناسبة (اختياري)">
+            </div>
+            <textarea name="description" class="form-textarea w-full" rows="3" placeholder="الوصف"></textarea>
+            <input name="image" type="file" class="form-input w-full" accept="image/*" required>
+            <div class="flex items-center gap-4">
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <input type="checkbox" name="is_active" value="1" checked>
+                    <span>نشط</span>
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <input type="checkbox" name="is_featured" value="1">
+                    <span>مميز</span>
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary w-full">حفظ</button>
+        </form>
+    </div>
+
+    <div id="section-box" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900">إضافة صندوق (Box)</h3>
+        </div>
+        <form method="POST" action="{{ route('dashboard.admin.gifts.boxes.store') }}" enctype="multipart/form-data" class="space-y-3">
+            @csrf
+            <input name="name" class="form-input w-full" placeholder="الاسم" required>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="size" class="form-input w-full" placeholder="الحجم (مثال: small)" required>
+                <input name="max_items" type="number" min="1" class="form-input w-full" placeholder="حد العناصر" required>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <input name="price" type="number" step="0.01" min="0" class="form-input w-full" placeholder="السعر" required>
+                <input name="stock" type="number" min="0" class="form-input w-full" placeholder="المخزون" required>
+                <input name="sort_order" type="number" min="0" class="form-input w-full" placeholder="الترتيب">
+            </div>
+            <textarea name="description" class="form-textarea w-full" rows="2" placeholder="الوصف"></textarea>
+            <input name="image" type="file" class="form-input w-full" accept="image/*" required>
+            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" name="is_active" value="1" checked>
+                <span>نشط</span>
+            </label>
+            <button type="submit" class="btn btn-primary w-full">حفظ</button>
+        </form>
+    </div>
+
+    <div id="section-filler" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900">إضافة عنصر (Flowers/Chocolate/..)</h3>
+        </div>
+        <form method="POST" action="{{ route('dashboard.admin.gifts.fillers.store') }}" enctype="multipart/form-data" class="space-y-3">
+            @csrf
+            <input name="name" class="form-input w-full" placeholder="الاسم" required>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <select name="category" class="form-select w-full" required>
+                    <option value="" disabled selected>القسم</option>
+                    <option value="flower">Flowers</option>
+                    <option value="chocolate">Chocolate</option>
+                    <option value="perfume">Perfume</option>
+                    <option value="accessory">Accessory</option>
+                    <option value="candy">Candy</option>
+                    <option value="other">Other</option>
+                </select>
+                <input name="sort_order" type="number" min="0" class="form-input w-full" placeholder="الترتيب">
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="price" type="number" step="0.01" min="0" class="form-input w-full" placeholder="السعر" required>
+                <input name="stock" type="number" min="0" class="form-input w-full" placeholder="المخزون" required>
+            </div>
+            <textarea name="description" class="form-textarea w-full" rows="2" placeholder="الوصف"></textarea>
+            <input name="image" type="file" class="form-input w-full" accept="image/*" required>
+            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" name="is_active" value="1" checked>
+                <span>نشط</span>
+            </label>
+            <button type="submit" class="btn btn-primary w-full">حفظ</button>
+        </form>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6" id="gifts-creation-stuff-2">
+    <div id="section-wrapping" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900">إضافة تغليف</h3>
+        </div>
+        <form method="POST" action="{{ route('dashboard.admin.gifts.wrappings.store') }}" enctype="multipart/form-data" class="space-y-3">
+            @csrf
+            <input name="name" class="form-input w-full" placeholder="الاسم" required>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <input name="price" type="number" step="0.01" min="0" class="form-input w-full" placeholder="السعر" required>
+                <input name="color" class="form-input w-full" placeholder="اللون">
+                <input name="pattern" class="form-input w-full" placeholder="النقشة">
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="sort_order" type="number" min="0" class="form-input w-full" placeholder="الترتيب">
+                <input name="image" type="file" class="form-input w-full" accept="image/*">
+            </div>
+            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" name="is_active" value="1" checked>
+                <span>نشط</span>
+            </label>
+            <button type="submit" class="btn btn-primary w-full">حفظ</button>
+        </form>
+    </div>
+
+    <div id="section-ribbon" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900">إضافة شريط</h3>
+        </div>
+        <form method="POST" action="{{ route('dashboard.admin.gifts.ribbons.store') }}" enctype="multipart/form-data" class="space-y-3">
+            @csrf
+            <input name="name" class="form-input w-full" placeholder="الاسم" required>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <input name="price" type="number" step="0.01" min="0" class="form-input w-full" placeholder="السعر" required>
+                <input name="color" class="form-input w-full" placeholder="اللون">
+                <input name="sort_order" type="number" min="0" class="form-input w-full" placeholder="الترتيب">
+            </div>
+            <input name="image" type="file" class="form-input w-full" accept="image/*">
+            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" name="is_active" value="1" checked>
+                <span>نشط</span>
+            </label>
+            <button type="submit" class="btn btn-primary w-full">حفظ</button>
+        </form>
+    </div>
+
+    <div id="section-card" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900">إضافة بطاقة</h3>
+        </div>
+        <form method="POST" action="{{ route('dashboard.admin.gifts.cards.store') }}" enctype="multipart/form-data" class="space-y-3">
+            @csrf
+            <input name="name" class="form-input w-full" placeholder="الاسم" required>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <input name="price" type="number" step="0.01" min="0" class="form-input w-full" placeholder="السعر" required>
+                <input name="occasion" class="form-input w-full" placeholder="المناسبة">
+                <input name="sort_order" type="number" min="0" class="form-input w-full" placeholder="الترتيب">
+            </div>
+            <input name="image" type="file" class="form-input w-full" accept="image/*">
+            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" name="is_active" value="1" checked>
+                <span>نشط</span>
+            </label>
+            <button type="submit" class="btn btn-primary w-full">حفظ</button>
+        </form>
+    </div>
+</div>
+
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-gray-900">إنشاء هدية جاهزة من العناصر</h3>
+    </div>
+    <form method="POST" action="{{ route('dashboard.admin.gifts.assemble') }}" enctype="multipart/form-data" class="space-y-3">
+        @csrf
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input name="name" class="form-input w-full" placeholder="اسم الهدية" required>
+            <select name="box_id" class="form-select w-full" required>
+                <option value="" disabled selected>اختر الصندوق</option>
+                @foreach(($boxes ?? []) as $b)
+                    <option value="{{ $b->id }}">{{ $b->name }} — {{ number_format((float) $b->price, 2) }}</option>
+                @endforeach
+            </select>
+            <input name="image" type="file" class="form-input w-full" accept="image/*">
+        </div>
+        <div>
+            <label class="block text-sm text-gray-700 mb-2">اختر العناصر</label>
+            <select name="filler_ids[]" class="form-select w-full" multiple size="8" required>
+                @foreach(($fillers ?? []) as $f)
+                    <option value="{{ $f->id }}">{{ $f->name }} — {{ $f->category }} — {{ number_format((float) $f->price, 2) }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input name="category" class="form-input w-full" placeholder="التصنيف (اختياري)">
+            <input name="occasion" class="form-input w-full" placeholder="المناسبة (اختياري)">
+            <div class="flex items-center gap-4">
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <input type="checkbox" name="is_active" value="1" checked>
+                    <span>نشط</span>
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <input type="checkbox" name="is_featured" value="1">
+                    <span>مميز</span>
+                </label>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">إنشاء</button>
+    </form>
+@endif
 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6">
     <div class="p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">

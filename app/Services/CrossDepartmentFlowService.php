@@ -42,29 +42,16 @@ class CrossDepartmentFlowService
                 throw new Exception("Order {$orderId} is not in 'out_for_delivery' status");
             }
 
-            if ($order->payment_status !== 'paid') {
-                throw new Exception("Order {$orderId} payment is not completed");
-            }
-
             // 1. Update order status
             StatusTransitionService::transition($order, 'status', 'delivered', $userId);
+            $order = $order->fresh();
 
-            // 2. Create revenue transaction
-            $revenueTransaction = FinancialTransaction::create([
-                'transaction_id' => FinancialTransaction::generateTransactionId('payment'),
-                'order_id' => $order->id,
-                'store_id' => $order->store_id,
-                'user_id' => $order->user_id,
-                'type' => 'order_payment',
-                'status' => 'completed',
-                'amount' => $order->total,
-                'currency' => 'USD',
-                'description' => "Payment for order {$order->order_number}",
-                'is_locked' => true, // Revenue is immutable once completed
-                'locked_at' => now(),
-            ]);
+            // Cash orders are paid on delivery; card/credit should already be paid
+            if (($order->payment_method ?? null) === 'cash' && ($order->payment_status ?? null) !== 'paid') {
+                $order->update(['payment_status' => 'paid']);
+            }
 
-            // 3. Calculate and create commission transaction
+            // 2. Calculate and create commission transaction
             $commissionRate = $order->store->commission_rate ?? 0.05; // Default 5%
             $commissionAmount = $order->subtotal * $commissionRate;
 
@@ -95,22 +82,72 @@ class CrossDepartmentFlowService
             // This would be handled by a separate service or trigger
 
             // 6. Create notifications
-            Notification::create([
-                'user_id' => $order->user_id,
-                'type' => 'order_delivered',
-                'title' => 'Order Delivered',
-                'message' => "Your order {$order->order_number} has been delivered.",
-                'data' => ['order_id' => $order->id],
-            ]);
+            if (\Illuminate\Support\Facades\Schema::hasTable('notifications')) {
+                $cols = [
+                    'user_id' => \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'user_id'),
+                    'type' => \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'type'),
+                    'title' => \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'title'),
+                    'message' => \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'message'),
+                    'icon' => \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'icon'),
+                    'color' => \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'color'),
+                    'link' => \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'link'),
+                    'data' => \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'data'),
+                ];
+                if ($cols['user_id'] && $order->user_id) {
+                    $payload = [
+                        'user_id' => $order->user_id,
+                        'type' => $cols['type'] ? 'order_delivered' : null,
+                        'title' => $cols['title'] ? 'Order Delivered' : null,
+                        'message' => $cols['message'] ? "Your order {$order->order_number} has been delivered." : null,
+                        'icon' => $cols['icon'] ? 'fa-shopping-bag' : null,
+                        'color' => $cols['color'] ? 'green' : null,
+                        'link' => $cols['link'] ? '/profile' : null,
+                        'data' => $cols['data'] ? ['order_id' => $order->id] : null,
+                    ];
+                    $payload = array_filter($payload, fn ($v) => $v !== null);
+                    if ($cols['data'] && isset($payload['data']) && is_array($payload['data'])) {
+                        $payload['data'] = json_encode($payload['data']);
+                    }
+                    \Illuminate\Support\Facades\DB::table('notifications')->insert($payload + [
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
 
             if ($order->store && $order->store->owner_id) {
-                Notification::create([
-                    'user_id' => $order->store->owner_id,
-                    'type' => 'order_completed',
-                    'title' => 'Order Completed',
-                    'message' => "Order {$order->order_number} has been completed. Commission: {$commissionAmount}",
-                    'data' => ['order_id' => $order->id, 'commission' => $commissionAmount],
-                ]);
+                if (\Illuminate\Support\Facades\Schema::hasTable('notifications')) {
+                    $cols = [
+                        'user_id' => \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'user_id'),
+                        'type' => \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'type'),
+                        'title' => \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'title'),
+                        'message' => \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'message'),
+                        'icon' => \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'icon'),
+                        'color' => \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'color'),
+                        'link' => \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'link'),
+                        'data' => \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'data'),
+                    ];
+                    if ($cols['user_id']) {
+                        $payload = [
+                            'user_id' => $order->store->owner_id,
+                            'type' => $cols['type'] ? 'order_completed' : null,
+                            'title' => $cols['title'] ? 'Order Completed' : null,
+                            'message' => $cols['message'] ? "Order {$order->order_number} has been completed. Commission: {$commissionAmount}" : null,
+                            'icon' => $cols['icon'] ? 'fa-check-circle' : null,
+                            'color' => $cols['color'] ? 'blue' : null,
+                            'link' => $cols['link'] ? '/dashboard/vendor' : null,
+                            'data' => $cols['data'] ? ['order_id' => $order->id, 'commission' => $commissionAmount] : null,
+                        ];
+                        $payload = array_filter($payload, fn ($v) => $v !== null);
+                        if ($cols['data'] && isset($payload['data']) && is_array($payload['data'])) {
+                            $payload['data'] = json_encode($payload['data']);
+                        }
+                        \Illuminate\Support\Facades\DB::table('notifications')->insert($payload + [
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
             }
 
             // 7. Create audit log
@@ -122,7 +159,6 @@ class CrossDepartmentFlowService
                 'old_values' => ['status' => 'out_for_delivery'],
                 'new_values' => [
                     'status' => 'delivered',
-                    'revenue_transaction_id' => $revenueTransaction->id,
                     'commission_transaction_id' => $commissionTransaction->id,
                 ],
             ]);
@@ -132,7 +168,6 @@ class CrossDepartmentFlowService
 
             return [
                 'order' => $order->fresh(),
-                'revenue_transaction' => $revenueTransaction,
                 'commission_transaction' => $commissionTransaction,
             ];
         }, 'order_completion_flow', true, $userId);
@@ -313,7 +348,7 @@ class CrossDepartmentFlowService
             $driver = \App\Models\Driver::findOrFail($driverId);
 
             // Validate order can be assigned
-            if (! in_array($order->status, ['confirmed', 'processing'])) {
+            if (! in_array($order->status, ['pending', 'confirmed', 'processing'], true)) {
                 throw new Exception("Order {$orderId} cannot be assigned in current status: {$order->status}");
             }
 
@@ -322,42 +357,105 @@ class CrossDepartmentFlowService
                 throw new Exception("Driver {$driverId} is not available");
             }
 
+            // Normalize pending orders into confirmed before sending out for delivery
+            if ($order->status === 'pending') {
+                StatusTransitionService::transition($order, 'status', 'confirmed', $userId);
+                $order = $order->fresh();
+            }
+
             // Create delivery assignment
             $assignment = DeliveryAssignment::create([
                 'order_id' => $orderId,
                 'driver_id' => $driverId,
                 'status' => 'assigned',
                 'assigned_at' => now(),
+                'assigned_by' => $assignedBy ?? auth('employee')->id(),
             ]);
 
             // Update order status
             StatusTransitionService::transition($order, 'status', 'out_for_delivery', $userId);
+            $order = $order->fresh();
+
+            // Payment status rules
+            // - cash: stays pending/unpaid until delivered
+            // - card/credit: should be paid by the time it's out for delivery
+            $method = (string) ($order->payment_method ?? '');
+            if ($method !== '' && $method !== 'cash' && ($order->payment_status ?? null) !== 'paid') {
+                $order->update(['payment_status' => 'paid']);
+                $order = $order->fresh();
+            }
 
             // Update driver availability
             $driver->update(['availability' => 'busy']);
 
             // Notify driver
             if ($driver->user_id) {
-                Notification::create([
-                    'user_id' => $driver->user_id,
-                    'type' => 'order_assigned',
-                    'title' => 'New Delivery Assignment',
-                    'message' => "You have been assigned order {$order->order_number}",
-                    'data' => [
-                        'order_id' => $order->id,
-                        'assignment_id' => $assignment->id,
-                    ],
-                ]);
+                if (\Illuminate\Support\Facades\Schema::hasTable('notifications') && \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'user_id')) {
+                    $payload = [
+                        'user_id' => $driver->user_id,
+                    ];
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'type')) {
+                        $payload['type'] = 'order_assigned';
+                    }
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'title')) {
+                        $payload['title'] = 'New Delivery Assignment';
+                    }
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'message')) {
+                        $payload['message'] = "You have been assigned order {$order->order_number}";
+                    }
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'icon')) {
+                        $payload['icon'] = 'fa-truck';
+                    }
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'color')) {
+                        $payload['color'] = 'orange';
+                    }
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'link')) {
+                        $payload['link'] = '/dashboard/supervisor/order-assignment';
+                    }
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'data')) {
+                        $payload['data'] = json_encode([
+                            'order_id' => $order->id,
+                            'assignment_id' => $assignment->id,
+                        ]);
+                    }
+                    \Illuminate\Support\Facades\DB::table('notifications')->insert($payload + [
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
             }
 
             // Notify customer
-            Notification::create([
-                'user_id' => $order->user_id,
-                'type' => 'order_out_for_delivery',
-                'title' => 'Order Out for Delivery',
-                'message' => "Your order {$order->order_number} is out for delivery",
-                'data' => ['order_id' => $order->id],
-            ]);
+            if (\Illuminate\Support\Facades\Schema::hasTable('notifications') && \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'user_id') && $order->user_id) {
+                $payload = [
+                    'user_id' => $order->user_id,
+                ];
+                if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'type')) {
+                    $payload['type'] = 'order_out_for_delivery';
+                }
+                if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'title')) {
+                    $payload['title'] = 'Order Out for Delivery';
+                }
+                if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'message')) {
+                    $payload['message'] = "Your order {$order->order_number} is out for delivery";
+                }
+                if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'icon')) {
+                    $payload['icon'] = 'fa-truck';
+                }
+                if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'color')) {
+                    $payload['color'] = 'orange';
+                }
+                if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'link')) {
+                    $payload['link'] = '/profile';
+                }
+                if (\Illuminate\Support\Facades\Schema::hasColumn('notifications', 'data')) {
+                    $payload['data'] = json_encode(['order_id' => $order->id]);
+                }
+                \Illuminate\Support\Facades\DB::table('notifications')->insert($payload + [
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
 
             // Audit log
             AuditLog::create([

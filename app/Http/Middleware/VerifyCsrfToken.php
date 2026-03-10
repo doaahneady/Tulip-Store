@@ -27,5 +27,13 @@ class VerifyCsrfToken extends Middleware
                 'trader/logout',
             ])));
         }
+
+        if ($app->environment('testing')) {
+            $this->except = array_values(array_unique(array_merge($this->except, [
+                'login',
+                'logout',
+                'register',
+            ])));
+        }
     }
 }

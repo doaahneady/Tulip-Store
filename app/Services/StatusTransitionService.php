@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\Events\Dashboard\DashboardUpdated;
 use App\Models\AuditLog;
+use App\Models\Notification;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Status Transition Service
@@ -20,11 +23,16 @@ class StatusTransitionService
     private static $allowedTransitions = [
         'order' => [
             'pending' => ['confirmed', 'cancelled'],
-            'confirmed' => ['processing', 'cancelled'],
-            'processing' => ['out_for_delivery', 'cancelled'],
-            'out_for_delivery' => ['delivered', 'failed'],
-            'delivered' => ['refunded', 'returned'],
+            'confirmed' => ['processing', 'ready', 'shipped', 'out_for_delivery', 'delivered', 'done', 'cancelled'],
+            'processing' => ['ready', 'shipped', 'out_for_delivery', 'delivered', 'done', 'cancelled'],
+            'ready' => ['shipped', 'out_for_delivery', 'delivered', 'done', 'cancelled'],
+            'shipped' => ['out_for_delivery', 'delivered', 'done', 'failed', 'cancelled'],
+            'out_for_delivery' => ['delivered', 'done', 'failed', 'cancelled'],
+            // Delivered is an intermediate success state; CS can mark final completion (done)
+            'delivered' => ['done'],
+            'done' => [], // Terminal success state (finalized)
             'cancelled' => [], // Final state
+            'failed' => [], // Final state
             'refunded' => [], // Final state
             'returned' => [], // Final state
         ],
@@ -147,6 +155,7 @@ class StatusTransitionService
 
         // Create audit log
         self::logTransition($model, $statusField, $currentStatus, $newStatus, $userId, $adminOverride);
+        self::afterTransition($model, $statusField, $currentStatus, $newStatus, $userId);
 
         return true;
     }
@@ -175,6 +184,25 @@ class StatusTransitionService
     private static function logTransition($model, $statusField, $oldStatus, $newStatus, $userId, $adminOverride)
     {
         try {
+            $metadata = [
+                'transition' => [
+                    'entity_type' => self::getEntityType($model),
+                    'status_field' => $statusField,
+                    'from' => $oldStatus,
+                    'to' => $newStatus,
+                    'admin_override' => $adminOverride,
+                    'timestamp' => now(),
+                ],
+            ];
+            if (auth('employee')->check()) {
+                $employee = auth('employee')->user();
+                $metadata['actor'] = array_filter([
+                    'guard' => 'employee',
+                    'employee_id' => $employee?->id,
+                    'employee_email' => $employee?->email,
+                    'employee_code' => $employee?->employee_code,
+                ], fn ($v) => $v !== null && $v !== '');
+            }
             AuditLog::create([
                 'user_id' => $userId ?? auth()->id(),
                 'action' => 'status_transition',
@@ -185,6 +213,7 @@ class StatusTransitionService
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),
                 'session_id' => session()->getId(),
+                'metadata' => $metadata,
             ]);
         } catch (Exception $e) {
             // Log error but don't fail the transition
@@ -193,6 +222,64 @@ class StatusTransitionService
                 'model' => get_class($model),
                 'model_id' => $model->id,
             ]);
+        }
+    }
+
+    private static function afterTransition($model, string $statusField, $oldStatus, $newStatus, $userId): void
+    {
+        if ($statusField !== 'status') {
+            return;
+        }
+
+        if (! ($model instanceof \App\Models\Order)) {
+            return;
+        }
+
+        if ($oldStatus === $newStatus) {
+            return;
+        }
+
+        $order = $model->fresh();
+
+        if (! in_array($newStatus, ['out_for_delivery', 'delivered'], true) && Schema::hasTable('notifications') && Schema::hasColumn('notifications', 'user_id')) {
+            $orderUserId = $order->user_id ?? null;
+            if ($orderUserId) {
+                $title = 'Order Status Updated';
+                $message = "Your order {$order->order_number} status changed: {$oldStatus} → {$newStatus}";
+                $notification = [
+                    'user_id' => $orderUserId,
+                    'type' => 'order',
+                    'title' => $title,
+                    'message' => $message,
+                    'icon' => 'fa-shopping-bag',
+                    'color' => 'blue',
+                ];
+                if (Schema::hasColumn('notifications', 'link')) {
+                    $notification['link'] = '/profile';
+                }
+                Notification::create($notification);
+            }
+        }
+
+        if (class_exists(DashboardUpdated::class)) {
+            $payload = [
+                'type' => 'order_status_changed',
+                'order' => [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'status' => $order->status,
+                    'payment_status' => $order->payment_status,
+                    'total' => $order->total ?? ($order->total_amount ?? null),
+                    'updated_at' => optional($order->updated_at)->toIso8601String(),
+                ],
+                'from' => $oldStatus,
+                'to' => $newStatus,
+                'actor_employee_id' => $userId,
+            ];
+
+            foreach (['admin', 'it', 'finance', 'cs', 'hr', 'supervisor', 'vendor'] as $dash) {
+                event(new DashboardUpdated($dash, $payload));
+            }
         }
     }
 

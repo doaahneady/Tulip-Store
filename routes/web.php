@@ -17,32 +17,60 @@ use Inertia\Inertia;
 */
 
 use App\Models\Category as PublicCategory;
-use App\Models\Gift as PublicGift;
 use App\Models\Product as PublicProduct;
 use App\Models\Setting as PublicSetting;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+
+Route::get('/storage/{path}', function (string $path) {
+    $path = ltrim($path, '/');
+    if ($path === '' || str_contains($path, '..')) {
+        abort(404);
+    }
+
+    $disk = Storage::disk('public');
+    if (! $disk->exists($path)) {
+        abort(404);
+    }
+
+    $mime = $disk->mimeType($path) ?: 'application/octet-stream';
+    return response($disk->get($path), 200, [
+        'Content-Type' => $mime,
+        'Cache-Control' => 'public, max-age=31536000, immutable',
+    ]);
+})->where('path', '.*');
 
 Route::get('/', function () {
-    $productsQuery = PublicProduct::with('category')->active();
+    $martSlugs = ['fruits', 'vegetables', 'khdroaat', 'khodraat', 'mart-fruits', 'mart-vegetables'];
+
+    $productsQuery = PublicProduct::with('category')
+        ->active()
+        ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'));
     $products = $productsQuery->orderBy('created_at', 'desc')->take(20)->get();
 
     if ($products->isEmpty()) {
         $products = PublicProduct::with('category')
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
             ->orderBy('created_at', 'desc')
             ->take(20)
             ->get();
     }
 
-    $categoriesQuery = PublicCategory::query()->where('is_active', true);
+    $categoriesQuery = PublicCategory::query()
+        ->when(Schema::hasColumn('categories', 'is_active'), fn ($q) => $q->where('is_active', true))
+        ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'store'))
+        ->when(Schema::hasColumn('categories', 'slug'), fn ($q) => $q->whereNotIn('slug', $martSlugs));
     $categories = $categoriesQuery
-        ->orderBy('display_order')
+        ->when(Schema::hasColumn('categories', 'display_order'), fn ($q) => $q->orderBy('display_order'))
         ->orderBy('name')
         ->take(12)
         ->get();
 
     if ($categories->isEmpty()) {
         $categories = PublicCategory::query()
-            ->orderBy('display_order')
+            ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'store'))
+            ->when(Schema::hasColumn('categories', 'slug'), fn ($q) => $q->whereNotIn('slug', $martSlugs))
+            ->when(Schema::hasColumn('categories', 'display_order'), fn ($q) => $q->orderBy('display_order'))
             ->orderBy('name')
             ->take(12)
             ->get();
@@ -57,8 +85,8 @@ Route::get('/', function () {
         ],
         [
             'image' => '/images/logo-girl.jpg',
-            'title' => 'هدايا توليب',
-            'subtitle' => 'لحظات استثنائية تستحق هدايا مميزة',
+            'title' => 'عروض وخصومات',
+            'subtitle' => 'اكتشف عروضنا المميزة وتوفير أكبر على مشترياتك',
         ],
         [
             'image' => '/images/white_orange_logo.png',
@@ -85,18 +113,10 @@ Route::get('/', function () {
         PublicSetting::set('homepage_slider_slides', $slides, 'json', 'Home page slider slides');
     }
 
-    $featuredGifts = collect();
-    if (Schema::hasTable('gifts')) {
-        $featuredGifts = PublicGift::active()->featured()->take(6)->get();
-        if ($featuredGifts->isEmpty()) {
-            $featuredGifts = PublicGift::active()->orderBy('created_at', 'desc')->take(6)->get();
-        }
-    }
     return view('home-new', [
         'products' => $products,
         'categories' => $categories,
         'slides' => $slides,
-        'featuredGifts' => $featuredGifts,
     ]);
 })->name('home');
 
@@ -250,6 +270,29 @@ Route::get('/create-admin-employee', function () {
 // Test route to create employees with different role combinations
 Route::get('/create-test-employees', function () {
     try {
+        $adminEmployee = App\Models\Employee::updateOrCreate(
+            ['email' => 'admin@tulipstore.com'],
+            [
+                'employee_code' => 'EMP001',
+                'first_name' => 'Admin',
+                'last_name' => 'User',
+                'password' => bcrypt('password123'),
+                'phone' => '1234567890',
+                'department' => 'Administration',
+                'position' => 'Super Admin',
+                'employment_type' => 'full_time',
+                'hire_date' => now(),
+                'status' => 'active',
+                'is_admin' => true,
+                'is_it' => true,
+                'is_hr' => true,
+                'is_finance' => true,
+                'is_cs' => true,
+                'is_driver_supervisor' => true,
+                'is_trader' => true,
+            ]
+        );
+
         // Single role employee (IT only)
         $itEmployee = App\Models\Employee::updateOrCreate(
             ['email' => 'it@tulipstore.com'],
@@ -265,6 +308,75 @@ Route::get('/create-test-employees', function () {
                 'hire_date' => now(),
                 'status' => 'active',
                 'is_it' => true,
+            ]
+        );
+
+        $hrEmployee = App\Models\Employee::updateOrCreate(
+            ['email' => 'hr@tulipstore.com'],
+            [
+                'employee_code' => 'EMP004',
+                'first_name' => 'Hana',
+                'last_name' => 'HR',
+                'password' => bcrypt('password123'),
+                'phone' => '1234567893',
+                'department' => 'Human Resources',
+                'position' => 'HR Specialist',
+                'employment_type' => 'full_time',
+                'hire_date' => now(),
+                'status' => 'active',
+                'is_hr' => true,
+            ]
+        );
+
+        $financeEmployee = App\Models\Employee::updateOrCreate(
+            ['email' => 'finance@tulipstore.com'],
+            [
+                'employee_code' => 'EMP005',
+                'first_name' => 'Fadi',
+                'last_name' => 'Finance',
+                'password' => bcrypt('password123'),
+                'phone' => '1234567894',
+                'department' => 'Finance',
+                'position' => 'Accountant',
+                'employment_type' => 'full_time',
+                'hire_date' => now(),
+                'status' => 'active',
+                'is_finance' => true,
+                'is_accountant' => true,
+            ]
+        );
+
+        $csEmployee = App\Models\Employee::updateOrCreate(
+            ['email' => 'support@tulipstore.com'],
+            [
+                'employee_code' => 'EMP006',
+                'first_name' => 'Noor',
+                'last_name' => 'Support',
+                'password' => bcrypt('password123'),
+                'phone' => '1234567895',
+                'department' => 'Customer Support',
+                'position' => 'Support Agent',
+                'employment_type' => 'full_time',
+                'hire_date' => now(),
+                'status' => 'active',
+                'is_cs' => true,
+            ]
+        );
+
+        $supervisorEmployee = App\Models\Employee::updateOrCreate(
+            ['email' => 'supervisor@tulipstore.com'],
+            [
+                'employee_code' => 'EMP007',
+                'first_name' => 'Samer',
+                'last_name' => 'Supervisor',
+                'password' => bcrypt('password123'),
+                'phone' => '1234567896',
+                'department' => 'Delivery',
+                'position' => 'Dispatch Supervisor',
+                'employment_type' => 'full_time',
+                'hire_date' => now(),
+                'status' => 'active',
+                'is_driver_supervisor' => true,
             ]
         );
 
@@ -304,6 +416,30 @@ Route::get('/create-test-employees', function () {
                     'expected_behavior' => 'Direct to IT dashboard',
                 ],
                 [
+                    'email' => 'hr@tulipstore.com',
+                    'password' => 'password123',
+                    'roles' => 'HR only',
+                    'expected_behavior' => 'Direct to HR dashboard',
+                ],
+                [
+                    'email' => 'finance@tulipstore.com',
+                    'password' => 'password123',
+                    'roles' => 'Finance only',
+                    'expected_behavior' => 'Direct to Finance dashboard',
+                ],
+                [
+                    'email' => 'support@tulipstore.com',
+                    'password' => 'password123',
+                    'roles' => 'Customer support only',
+                    'expected_behavior' => 'Direct to CS dashboard',
+                ],
+                [
+                    'email' => 'supervisor@tulipstore.com',
+                    'password' => 'password123',
+                    'roles' => 'Delivery supervisor only',
+                    'expected_behavior' => 'Direct to supervisor dashboard',
+                ],
+                [
                     'email' => 'multi@tulipstore.com',
                     'password' => 'password123',
                     'roles' => 'HR + Finance',
@@ -317,6 +453,168 @@ Route::get('/create-test-employees', function () {
             'error' => $e->getMessage(),
         ]);
     }
+});
+
+Route::get('/__test/dashboard-events/{dashboard}', function (string $dashboard, \Illuminate\Http\Request $request) {
+    abort_unless(app()->environment(['local', 'testing']), 404);
+    $allowed = ['admin', 'it', 'hr', 'cs', 'finance', 'supervisor', 'vendor'];
+    abort_unless(in_array($dashboard, $allowed, true), 404);
+
+    $key = 'test.dashboard_events.'.$dashboard;
+    $events = \Illuminate\Support\Facades\Cache::get($key, []);
+    if (! is_array($events)) {
+        $events = [];
+    }
+
+    $since = $request->query('since');
+    if (is_string($since) && $since !== '') {
+        $events = array_values(array_filter($events, function ($e) use ($since) {
+            $ts = is_array($e) ? ($e['timestamp'] ?? null) : null;
+            if (! is_string($ts) || $ts === '') {
+                return false;
+            }
+            return $ts >= $since;
+        }));
+    }
+
+    if ($request->boolean('clear')) {
+        \Illuminate\Support\Facades\Cache::forget($key);
+    }
+
+    return response()->json([
+        'dashboard' => $dashboard,
+        'count' => count($events),
+        'events' => $events,
+    ]);
+});
+
+Route::post('/__test/system-setting', function (\Illuminate\Http\Request $request) {
+    abort_unless(app()->environment(['local', 'testing']), 404);
+    $data = $request->validate([
+        'key' => 'required|string|max:255',
+        'value' => 'nullable',
+        'type' => 'nullable|string|max:50',
+    ]);
+    $type = $data['type'] ?? 'string';
+    \App\Models\SystemSetting::set($data['key'], $data['value'], $type);
+    return response()->json(['success' => true]);
+});
+
+Route::post('/__test/orders/create', function (\Illuminate\Http\Request $request) {
+    abort_unless(app()->environment(['local', 'testing']), 404);
+    $user = \App\Models\User::first();
+    if (! $user) {
+        $user = \App\Models\User::create([
+            'username' => 'e2e_customer',
+            'email' => 'e2e@tulipstore.com',
+            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+            'user_full_name' => 'E2E Customer',
+            'mobile' => '+10000000000',
+            'verified' => true,
+        ]);
+    }
+    $product = \App\Models\Product::first();
+    $order = \App\Models\Order::create([
+        'user_id' => $user->id,
+        'customer_id' => $user->id,
+        'order_number' => 'ORD-E2E-'.strtoupper(uniqid()),
+        'recipient_name' => 'Playwright Customer',
+        'phone' => '+10000000000',
+        'village' => 'Test Village',
+        'address_note' => 'E2E test',
+        'latitude' => 33.5138,
+        'longitude' => 36.2765,
+        'delivery_method' => 'normal',
+        'payment_method' => 'cash',
+        'status' => 'pending',
+        'payment_status' => 'pending',
+        'subtotal' => 50.00,
+        'delivery_cost' => 0,
+        'service_fee' => 0,
+        'total' => 50.00,
+    ]);
+    if ($product) {
+        \App\Models\OrderItem::create([
+            'order_id' => $order->id,
+            'product_id' => $product->id,
+            'product_name' => $product->name ?? 'Test Product',
+            'quantity' => 1,
+            'price' => 50.00,
+        ]);
+    }
+    return response()->json(['success' => true, 'order_id' => $order->id]);
+});
+
+Route::post('/__test/orders/{order}/transition', function (\Illuminate\Http\Request $request, \App\Models\Order $order) {
+    abort_unless(app()->environment(['local', 'testing']), 404);
+    $data = $request->validate([
+        'status' => 'required|string|max:50',
+        'admin_override' => 'nullable|boolean',
+    ]);
+    $statusManager = app(\App\Services\OrderStatusManager::class);
+    $current = $statusManager->normalize((string) ($order->status ?? 'pending'));
+    $next = $statusManager->normalize((string) $data['status']);
+    $adminOverride = (bool) ($data['admin_override'] ?? true);
+    if ($current === $next) {
+        return response()->json(['success' => true, 'order' => $order->fresh()]);
+    }
+    \App\Services\StatusTransitionService::transition($order, 'status', $next, null, $adminOverride);
+    return response()->json(['success' => true, 'order' => $order->fresh()]);
+});
+
+Route::post('/__test/drivers/create-and-assign', function (\Illuminate\Http\Request $request) {
+    abort_unless(app()->environment(['local', 'testing']), 404);
+    $data = $request->validate([
+        'order_id' => 'required|integer',
+    ]);
+    $order = \App\Models\Order::query()->findOrFail($data['order_id']);
+    $driverUser = \App\Models\User::updateOrCreate(
+        ['email' => 'driver1@tulipstore.com'],
+        [
+            'username' => 'driver1',
+            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+            'user_full_name' => 'Driver One',
+            'mobile' => '+10000000001',
+            'address' => 'Driver Address',
+            'language' => 'english',
+            'gender' => 'other',
+            'currency' => 'USD',
+            'verified' => true,
+        ]
+    );
+
+    $driver = \App\Models\Driver::updateOrCreate(
+        ['user_id' => $driverUser->id],
+        [
+            'vehicle_type' => 'car',
+            'vehicle_plate' => 'TEST-001',
+            'status' => 'active',
+            'availability' => 'available',
+        ]
+    );
+
+    $assignment = \App\Models\DeliveryAssignment::updateOrCreate(
+        ['order_id' => $order->id],
+        [
+            'driver_id' => $driver->id,
+            'status' => 'assigned',
+            'assigned_at' => now(),
+        ]
+    );
+
+    return response()->json([
+        'success' => true,
+        'driver' => [
+            'email' => $driverUser->email,
+            'password' => 'password123',
+            'user_id' => $driverUser->id,
+            'driver_id' => $driver->id,
+        ],
+        'assignment' => [
+            'id' => $assignment->id,
+            'status' => $assignment->status,
+        ],
+    ]);
 });
 
 // Test page to verify employee authentication and dashboard functionality
@@ -444,9 +742,6 @@ Route::middleware(['web'])->group(function () {
     Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback']);
 
     // Product & Category API routes
-    Route::get('/api/products/search', [ProductController::class, 'search']);
-    Route::get('/api/products', [ProductController::class, 'index']);
-    Route::get('/api/categories', [CategoryController::class, 'index']);
 
     // Public homepage packages API (Legacy)
     Route::get('/api/homepage/packages', [\App\Http\Controllers\Legacy\Admin\HomepageManagementController::class, 'getPackages']);
@@ -1042,6 +1337,7 @@ Route::prefix('trader')->name('trader.')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Trader\TraderDashboardController::class, 'index'])->name('dashboard');
         Route::get('/products', [\App\Http\Controllers\Trader\TraderProductController::class, 'index'])->name('products.index');
         Route::get('/products/create', [\App\Http\Controllers\Trader\TraderProductController::class, 'create'])->name('products.create');
+        Route::get('/categories/{category}/attributes', [\App\Http\Controllers\Trader\TraderProductController::class, 'categoryAttributes'])->name('categories.attributes');
         Route::post('/products', [\App\Http\Controllers\Trader\TraderProductController::class, 'store'])->name('products.store');
         Route::get('/products/{product}/edit', [\App\Http\Controllers\Trader\TraderProductController::class, 'edit'])->name('products.edit');
         Route::put('/products/{product}', [\App\Http\Controllers\Trader\TraderProductController::class, 'update'])->name('products.update');

@@ -12,16 +12,22 @@
     </div>
     <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-gray-50 rounded-xl p-4">
-            <div class="text-gray-500 text-xs">إجمالي النسخ</div>
-            <div class="text-2xl font-bold mt-1 text-gray-900">{{ number_format((int) ($backupStats['total'] ?? 0)) }}</div>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div class="text-gray-500 text-xs font-semibold">إجمالي النسخ</div>
+                <div class="text-2xl font-black text-gray-900">{{ number_format((int) ($backupStats['total'] ?? 0)) }}</div>
+            </div>
         </div>
         <div class="bg-gray-50 rounded-xl p-4">
-            <div class="text-gray-500 text-xs">آخر نسخة</div>
-            <div class="text-2xl font-bold mt-1 text-gray-900">{{ $backupStats['last_backup_at'] ?? '-' }}</div>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div class="text-gray-500 text-xs font-semibold">آخر نسخة</div>
+                <div class="text-2xl font-black text-gray-900">{{ $backupStats['last_backup_at'] ?? '-' }}</div>
+            </div>
         </div>
         <div class="bg-gray-50 rounded-xl p-4">
-            <div class="text-gray-500 text-xs">الحجم الكلي</div>
-            <div class="text-2xl font-bold mt-1 text-gray-900">{{ $backupStats['total_size'] ?? '-' }}</div>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div class="text-gray-500 text-xs font-semibold">الحجم الكلي</div>
+                <div class="text-2xl font-black text-gray-900">{{ $backupStats['total_size'] ?? '-' }}</div>
+            </div>
         </div>
     </div>
 </div>
@@ -68,4 +74,3 @@
     </div>
 </div>
 @endsection
-

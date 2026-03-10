@@ -23,147 +23,288 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title><?php echo e($title ?? ($dashboardLocale === 'ar' ? 'لوحة التحكم' : 'Dashboard')); ?> - Tulip Store</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        * { font-family: 'El Messiri', sans-serif; }
-        .sidebar-link.active { background: linear-gradient(90deg, #8B5CF6 0%, #6366F1 100%); color: white; }
-        .sidebar-link:hover:not(.active) { background: #F3F4F6; }
-        .card-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .stat-card { transition: all 0.3s ease; }
-        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
-    </style>
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/css/dashboard-next.css']); ?>
+    <link rel="stylesheet" href="<?php echo e(asset('css/dashboard/tokens.css')); ?>">
+    
     <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
-<body class="bg-gray-100">
-    <div class="min-h-screen flex">
-        <!-- Sidebar -->
-        <div class="w-72 bg-white shadow-xl fixed h-full z-50">
-            <!-- Logo -->
-            <div class="p-6 border-b border-gray-100">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-store text-white text-xl"></i>
+<body class="db-next">
+    <a href="#mainContent" class="db4-skip"><?php echo e($dashboardLocale === 'ar' ? 'تخطي إلى المحتوى' : 'Skip to content'); ?></a>
+    <div id="sidebarOverlay" class="db4-overlay" hidden></div>
+
+    <div class="db4-shell">
+        <aside id="sidebar" class="db4-sidebar" aria-label="<?php echo e($dashboardLocale === 'ar' ? 'القائمة' : 'Navigation'); ?>">
+            <div class="flex items-start justify-between gap-3">
+                <a href="<?php echo e(route('dashboard.main')); ?>" class="db4-brand">
+                    <span class="db4-brand-mark" aria-hidden="true"><i class="fas fa-store"></i></span>
+                    <div class="min-w-0">
+                        <div class="db4-brand-title">Tulip Store</div>
+                        <div class="db4-brand-subtitle"><?php echo e($dashboardLocale === 'ar' ? 'لوحة التحكم' : 'Dashboard'); ?></div>
                     </div>
-                    <div>
-                        <h1 class="text-xl font-bold text-gray-800">Tulip Store</h1>
-                        <p class="text-xs text-gray-500">لوحة التحكم الإدارية</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Navigation -->
-            <nav class="p-4 space-y-2">
-                <p class="text-xs text-gray-400 uppercase tracking-wider mb-4 px-3"><?php echo e($dashboardLocale === 'ar' ? 'القائمة الرئيسية' : 'Main Menu'); ?></p>
-
-                <?php if(! $isTraderSession && $canAccess('dashboard.admin.index')): ?>
-                    <a href="<?php echo e(route('dashboard.admin.index')); ?>" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 <?php echo e(request()->routeIs('dashboard.admin.*') ? 'active' : ''); ?>">
-                        <i class="fas fa-chart-pie w-5"></i>
-                        <span><?php echo e($dashboardLocale === 'ar' ? 'لوحة الإدارة' : 'Admin'); ?></span>
-                    </a>
-                <?php endif; ?>
-
-                <?php if(! $isTraderSession && $canAccess('dashboard.cs.index')): ?>
-                    <a href="<?php echo e(route('dashboard.cs.index')); ?>" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 <?php echo e(request()->routeIs('dashboard.cs.*') ? 'active' : ''); ?>">
-                        <i class="fas fa-headset w-5"></i>
-                        <span><?php echo e($dashboardLocale === 'ar' ? 'خدمة العملاء' : 'Support'); ?></span>
-                    </a>
-                <?php endif; ?>
-
-                <?php if(! $isTraderSession && $canAccess('dashboard.finance.index')): ?>
-                    <a href="<?php echo e(route('dashboard.finance.index')); ?>" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 <?php echo e(request()->routeIs('dashboard.finance.*') ? 'active' : ''); ?>">
-                        <i class="fas fa-coins w-5"></i>
-                        <span><?php echo e($dashboardLocale === 'ar' ? 'المالية' : 'Finance'); ?></span>
-                    </a>
-                <?php endif; ?>
-
-                <?php if(! $isTraderSession && $canAccess('dashboard.hr.index')): ?>
-                    <a href="<?php echo e(route('dashboard.hr.index')); ?>" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 <?php echo e(request()->routeIs('dashboard.hr.*') ? 'active' : ''); ?>">
-                        <i class="fas fa-users-cog w-5"></i>
-                        <span><?php echo e($dashboardLocale === 'ar' ? 'الموارد البشرية' : 'HR'); ?></span>
-                    </a>
-                <?php endif; ?>
-
-                <?php if(! $isTraderSession && $canAccess('dashboard.it.index')): ?>
-                    <a href="<?php echo e(route('dashboard.it.index')); ?>" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 <?php echo e(request()->routeIs('dashboard.it.*') ? 'active' : ''); ?>">
-                        <i class="fas fa-server w-5"></i>
-                        <span><?php echo e($dashboardLocale === 'ar' ? 'تقنية المعلومات' : 'IT'); ?></span>
-                    </a>
-                <?php endif; ?>
-
-                <?php if(! $isTraderSession && $canAccess('dashboard.supervisor.index')): ?>
-                    <a href="<?php echo e(route('dashboard.supervisor.index')); ?>" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 <?php echo e(request()->routeIs('dashboard.supervisor.*') ? 'active' : ''); ?>">
-                        <i class="fas fa-truck w-5"></i>
-                        <span><?php echo e($dashboardLocale === 'ar' ? 'إدارة السائقين' : 'Driver Supervisor'); ?></span>
-                    </a>
-                <?php endif; ?>
-
-            </nav>
-            
-            <!-- User Info -->
-            <div class="absolute bottom-0 w-72 p-4 border-t border-gray-100 bg-gray-50">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
-                        <?php echo e(mb_substr($actorName ?? 'U', 0, 1)); ?>
-
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm font-semibold text-gray-800"><?php echo e($actorName); ?></p>
-                        <p class="text-xs text-gray-500"><?php echo e($actorEmail); ?></p>
-                    </div>
-                    <form action="<?php echo e($isTraderSession ? route('trader.logout') : route('employee.logout')); ?>" method="POST">
-                        <?php echo csrf_field(); ?>
-                        <button type="submit" class="w-8 h-8 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition">
-                            <i class="fas fa-sign-out-alt text-sm"></i>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="flex-1 mr-72">
-            <!-- Top Bar -->
-            <div class="bg-white shadow-sm px-8 py-4 flex items-center justify-between sticky top-0 z-40">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-800"><?php echo e($title ?? 'لوحة التحكم'); ?></h1>
-                    <p class="text-sm text-gray-500"><?php echo e($subtitle ?? 'مرحباً بك في لوحة التحكم'); ?></p>
-                </div>
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-gray-500"><?php echo e(now()->format('Y/m/d')); ?></span>
-                    <button class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200">
-                        <i class="fas fa-bell"></i>
+                </a>
+                <div class="db4-sidebar-actions lg:hidden">
+                    <button type="button" class="db4-icon-btn" aria-label="<?php echo e($dashboardLocale === 'ar' ? 'إغلاق القائمة' : 'Close navigation'); ?>" onclick="toggleSidebar(false)">
+                        <i class="fas fa-xmark"></i>
                     </button>
                 </div>
             </div>
-            
-            <!-- Page Content -->
-            <div class="p-8">
+
+            <nav class="db4-nav" aria-label="<?php echo e($dashboardLocale === 'ar' ? 'التنقل' : 'Navigation'); ?>">
+                <div class="db4-nav-section">
+                    <div class="db4-nav-title"><?php echo e($dashboardLocale === 'ar' ? 'لوحات التحكم' : 'Dashboards'); ?></div>
+
+                    <?php if(! $isTraderSession && $canAccess('dashboard.admin.index')): ?>
+                        <a href="<?php echo e(route('dashboard.admin.index')); ?>" class="db4-nav-link <?php echo e(request()->routeIs('dashboard.admin.*') ? 'is-active' : ''); ?>">
+                            <span class="db4-nav-icon" aria-hidden="true"><i class="fas fa-chart-pie"></i></span>
+                            <span class="db4-nav-meta">
+                                <span class="db4-nav-label"><?php echo e($dashboardLocale === 'ar' ? 'لوحة الإدارة' : 'Admin'); ?></span>
+                                <span class="db4-nav-hint"><?php echo e($dashboardLocale === 'ar' ? 'نظرة عامة وإدارة المنصة' : 'Overview and platform controls'); ?></span>
+                            </span>
+                        </a>
+                        <a href="<?php echo e(route('dashboard.admin.style-guide')); ?>" class="db4-nav-link <?php echo e(request()->routeIs('dashboard.admin.style-guide') ? 'is-active' : ''); ?>">
+                            <span class="db4-nav-icon" aria-hidden="true"><i class="fas fa-palette"></i></span>
+                            <span class="db4-nav-meta">
+                                <span class="db4-nav-label"><?php echo e($dashboardLocale === 'ar' ? 'دليل التصميم' : 'Style Guide'); ?></span>
+                                <span class="db4-nav-hint"><?php echo e($dashboardLocale === 'ar' ? 'مكونات وأنماط موحدة' : 'Tokens and components'); ?></span>
+                            </span>
+                        </a>
+                    <?php endif; ?>
+
+                    <?php if(! $isTraderSession && $canAccess('dashboard.cs.index')): ?>
+                        <a href="<?php echo e(route('dashboard.cs.index')); ?>" class="db4-nav-link <?php echo e(request()->routeIs('dashboard.cs.*') ? 'is-active' : ''); ?>">
+                            <span class="db4-nav-icon" aria-hidden="true"><i class="fas fa-headset"></i></span>
+                            <span class="db4-nav-meta">
+                                <span class="db4-nav-label"><?php echo e($dashboardLocale === 'ar' ? 'خدمة العملاء' : 'Support'); ?></span>
+                                <span class="db4-nav-hint"><?php echo e($dashboardLocale === 'ar' ? 'تذاكر ودعم العملاء' : 'Tickets and customer care'); ?></span>
+                            </span>
+                        </a>
+                    <?php endif; ?>
+
+                    <?php if(! $isTraderSession && $canAccess('dashboard.finance.index')): ?>
+                        <a href="<?php echo e(route('dashboard.finance.index')); ?>" class="db4-nav-link <?php echo e(request()->routeIs('dashboard.finance.*') ? 'is-active' : ''); ?>">
+                            <span class="db4-nav-icon" aria-hidden="true"><i class="fas fa-coins"></i></span>
+                            <span class="db4-nav-meta">
+                                <span class="db4-nav-label"><?php echo e($dashboardLocale === 'ar' ? 'المالية' : 'Finance'); ?></span>
+                                <span class="db4-nav-hint"><?php echo e($dashboardLocale === 'ar' ? 'معاملات وتقارير' : 'Transactions and reporting'); ?></span>
+                            </span>
+                        </a>
+                    <?php endif; ?>
+
+                    <?php if(! $isTraderSession && $canAccess('dashboard.hr.index')): ?>
+                        <a href="<?php echo e(route('dashboard.hr.index')); ?>" class="db4-nav-link <?php echo e(request()->routeIs('dashboard.hr.*') ? 'is-active' : ''); ?>">
+                            <span class="db4-nav-icon" aria-hidden="true"><i class="fas fa-users-cog"></i></span>
+                            <span class="db4-nav-meta">
+                                <span class="db4-nav-label"><?php echo e($dashboardLocale === 'ar' ? 'الموارد البشرية' : 'HR'); ?></span>
+                                <span class="db4-nav-hint"><?php echo e($dashboardLocale === 'ar' ? 'حضور وموارد بشرية' : 'Attendance and people ops'); ?></span>
+                            </span>
+                        </a>
+                    <?php endif; ?>
+
+                    <?php if(! $isTraderSession && $canAccess('dashboard.it.index')): ?>
+                        <a href="<?php echo e(route('dashboard.it.index')); ?>" class="db4-nav-link <?php echo e(request()->routeIs('dashboard.it.*') ? 'is-active' : ''); ?>">
+                            <span class="db4-nav-icon" aria-hidden="true"><i class="fas fa-server"></i></span>
+                            <span class="db4-nav-meta">
+                                <span class="db4-nav-label"><?php echo e($dashboardLocale === 'ar' ? 'تقنية المعلومات' : 'IT'); ?></span>
+                                <span class="db4-nav-hint"><?php echo e($dashboardLocale === 'ar' ? 'المراقبة والتشغيل' : 'Operations and tooling'); ?></span>
+                            </span>
+                        </a>
+                    <?php endif; ?>
+
+                    <?php if(! $isTraderSession && $canAccess('dashboard.supervisor.index')): ?>
+                        <a href="<?php echo e(route('dashboard.supervisor.index')); ?>" class="db4-nav-link <?php echo e(request()->routeIs('dashboard.supervisor.*') ? 'is-active' : ''); ?>">
+                            <span class="db4-nav-icon" aria-hidden="true"><i class="fas fa-truck"></i></span>
+                            <span class="db4-nav-meta">
+                                <span class="db4-nav-label"><?php echo e($dashboardLocale === 'ar' ? 'إدارة السائقين' : 'Drivers'); ?></span>
+                                <span class="db4-nav-hint"><?php echo e($dashboardLocale === 'ar' ? 'تتبع وتوزيع الطلبات' : 'Live tracking and dispatch'); ?></span>
+                            </span>
+                        </a>
+                    <?php endif; ?>
+
+                    <?php if($isTraderSession && $canAccess('dashboard.vendor.index')): ?>
+                        <a href="<?php echo e(route('dashboard.vendor.index')); ?>" class="db4-nav-link <?php echo e(request()->routeIs('dashboard.vendor.*') ? 'is-active' : ''); ?>">
+                            <span class="db4-nav-icon" aria-hidden="true"><i class="fas fa-store"></i></span>
+                            <span class="db4-nav-meta">
+                                <span class="db4-nav-label"><?php echo e($dashboardLocale === 'ar' ? 'إدارة المتجر' : 'Store'); ?></span>
+                                <span class="db4-nav-hint"><?php echo e($dashboardLocale === 'ar' ? 'منتجات وطلبات' : 'Products and orders'); ?></span>
+                            </span>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </nav>
+
+            <div class="db4-user">
+                <div class="db4-avatar" aria-hidden="true"><?php echo e(mb_substr($actorName ?? 'U', 0, 1)); ?></div>
+                <div class="min-w-0">
+                    <div class="db4-user-name"><?php echo e($actorName); ?></div>
+                    <div class="db4-user-email"><?php echo e($actorEmail); ?></div>
+                </div>
+                <form action="<?php echo e($isTraderSession ? route('trader.logout') : route('employee.logout')); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
+                    <button type="submit" class="db4-icon-btn" aria-label="<?php echo e($dashboardLocale === 'ar' ? 'تسجيل الخروج' : 'Logout'); ?>">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="db4-main">
+            <header class="db4-topbar">
+                <div class="db4-topbar-inner">
+                    <div class="min-w-0">
+                        <div class="flex items-start gap-3">
+                            <div class="min-w-0">
+                                <h1 class="db4-title"><?php echo e($title ?? ($dashboardLocale === 'ar' ? 'لوحة التحكم' : 'Dashboard')); ?></h1>
+                                <div class="db4-subtitle"><?php echo e($subtitle ?? ($dashboardLocale === 'ar' ? 'مرحباً بك في لوحة التحكم' : 'Welcome')); ?></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="db4-actions">
+                        <button type="button" class="db4-action-btn" aria-label="<?php echo e($dashboardLocale === 'ar' ? 'إظهار أو إخفاء القائمة' : 'Toggle sidebar'); ?>" onclick="toggleSidebarVisibility()">
+                            <i class="fas fa-bars-staggered" aria-hidden="true"></i>
+                            <span class="hidden md:inline"><?php echo e($dashboardLocale === 'ar' ? 'القائمة' : 'Sidebar'); ?></span>
+                        </button>
+                        <button type="button" class="db4-action-btn" aria-label="<?php echo e($dashboardLocale === 'ar' ? 'قائمة المستخدم' : 'User menu'); ?>" onclick="toggleUserMenu()">
+                            <span aria-hidden="true" class="inline-flex items-center justify-center w-8 h-8 rounded-xl" style="background: rgba(13, 70, 76, 0.10); color: var(--db4-primary); font-weight: 900;">
+                                <?php echo e(mb_substr($actorName ?? 'U', 0, 1)); ?>
+
+                            </span>
+                            <span class="hidden md:inline"><?php echo e($actorName); ?></span>
+                            <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="db4-container" id="mainContent" tabindex="-1">
                 <?php if(session('success')): ?>
-                    <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl">
-                        <?php echo e(session('success')); ?>
-
-                    </div>
+                    <div class="db4-alert db4-alert--success mb-6"><?php echo e(session('success')); ?></div>
                 <?php endif; ?>
-                
+
                 <?php if(session('error')): ?>
-                    <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl">
-                        <?php echo e(session('error')); ?>
-
-                    </div>
+                    <div class="db4-alert db4-alert--error mb-6"><?php echo e(session('error')); ?></div>
                 <?php endif; ?>
-                
+
                 <?php echo $__env->yieldContent('content'); ?>
             </div>
-            
-            <!-- Footer -->
-            <div style="background: #F9FAFB; padding: 20px 32px; text-align: center; border-top: 1px solid #E5E7EB;">
-                <p style="color: #6B7280; font-size: 14px;">© <?php echo e(date('Y')); ?> Tulip Store. جميع الحقوق محفوظة.</p>
-            </div>
-        </div>
+        </main>
     </div>
+
+    <div id="userMenu" class="db4-menu" hidden>
+        <a href="<?php echo e(route('dashboard.locale.set', ['locale' => $dashboardLocale === 'ar' ? 'en' : 'ar'])); ?>">
+            <i class="fas fa-language w-5" aria-hidden="true"></i>
+            <?php echo e($dashboardLocale === 'ar' ? 'English' : 'العربية'); ?>
+
+        </a>
+        <hr class="my-2" style="border-color: rgba(15, 23, 42, 0.10);">
+        <form method="POST" action="<?php echo e($isTraderSession ? route('trader.logout') : route('employee.logout')); ?>">
+            <?php echo csrf_field(); ?>
+            <button type="submit">
+                <i class="fas fa-sign-out-alt w-5" aria-hidden="true"></i>
+                <?php echo e($dashboardLocale === 'ar' ? 'تسجيل الخروج' : 'Logout'); ?>
+
+            </button>
+        </form>
+    </div>
+
+    <script>
+        function setSidebar(open) {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (!sidebar || !overlay) return;
+            if (open) {
+                sidebar.classList.add('is-open');
+                overlay.hidden = false;
+            } else {
+                sidebar.classList.remove('is-open');
+                overlay.hidden = true;
+            }
+        }
+
+        function toggleSidebar(open) {
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar) return;
+            const next = typeof open === 'boolean' ? open : !sidebar.classList.contains('is-open');
+            setSidebar(next);
+        }
+
+        function isDesktopLayout() {
+            return window.matchMedia('(min-width: 1024px)').matches;
+        }
+
+        function setSidebarCollapsed(collapsed) {
+            document.body.classList.toggle('sidebar-collapsed', collapsed);
+            try {
+                localStorage.setItem('dashboard.sidebarCollapsed', collapsed ? '1' : '0');
+            } catch (e) {}
+        }
+
+        function toggleSidebarVisibility() {
+            if (isDesktopLayout()) {
+                const collapsed = document.body.classList.contains('sidebar-collapsed');
+                setSidebarCollapsed(!collapsed);
+                setSidebar(false);
+                return;
+            }
+            toggleSidebar();
+        }
+
+        function toggleUserMenu(open) {
+            const menu = document.getElementById('userMenu');
+            if (!menu) return;
+            const next = typeof open === 'boolean' ? open : menu.hidden;
+            menu.hidden = !next;
+        }
+
+        (function () {
+            const overlay = document.getElementById('sidebarOverlay');
+            overlay?.addEventListener('click', () => setSidebar(false));
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key !== 'Escape') return;
+                setSidebar(false);
+                toggleUserMenu(false);
+            });
+
+            document.addEventListener('click', function (event) {
+                const menu = document.getElementById('userMenu');
+                const userButton = document.querySelector('[onclick="toggleUserMenu()"]');
+                if (!menu || !userButton) return;
+                if (!menu.contains(event.target) && !userButton.contains(event.target)) {
+                    toggleUserMenu(false);
+                }
+            });
+
+            try {
+                const saved = localStorage.getItem('dashboard.sidebarCollapsed') === '1';
+                if (saved && isDesktopLayout()) {
+                    setSidebarCollapsed(true);
+                }
+            } catch (e) {}
+
+            const mq = window.matchMedia('(min-width: 1024px)');
+            const onChange = function (e) {
+                if (e.matches) {
+                    setSidebar(false);
+                    try {
+                        setSidebarCollapsed(localStorage.getItem('dashboard.sidebarCollapsed') === '1');
+                    } catch (err) {}
+                } else {
+                    document.body.classList.remove('sidebar-collapsed');
+                }
+            };
+            if (typeof mq.addEventListener === 'function') {
+                mq.addEventListener('change', onChange);
+            } else if (typeof mq.addListener === 'function') {
+                mq.addListener(onChange);
+            }
+        })();
+    </script>
     <?php echo $__env->yieldPushContent('scripts'); ?>
     <?php
         $broadcastDriver = config('broadcasting.default');

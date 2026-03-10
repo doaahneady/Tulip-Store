@@ -93,6 +93,7 @@
             background: var(--bg-warm); border: 2px solid transparent; border-radius: 16px;
             padding: 1.2rem; cursor: pointer; transition: all 0.3s; text-align: center; position: relative;
         }
+        button.option-card { font-family: inherit; width: 100%; }
         .option-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(139,105,20,0.12); border-color: rgba(212,175,55,0.3); }
         .option-card.selected { border-color: var(--accent); background: linear-gradient(135deg, #fefbf3, #fdf8e8); }
         .option-card.selected::after {
@@ -100,22 +101,13 @@
             background: var(--gold-gradient); border-radius: 50%; color: #fff; display: flex;
             align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold;
         }
-        .option-visual { width: 80px; height: 80px; margin: 0 auto 0.8rem; border-radius: 14px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
+        .option-visual { width: 80px; height: 80px; margin: 0 auto 0.8rem; border-radius: 14px; background: #fff; overflow: hidden; }
+        .option-visual img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .option-name { font-weight: 600; color: var(--text-dark); font-size: 0.95rem; margin-bottom: 0.3rem; }
         .option-price { color: var(--primary); font-weight: 700; font-size: 0.9rem; }
         .option-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
 
-        .option-card .tooltip {
-            position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%) scale(0.9);
-            background: #fff; border-radius: 14px; padding: 0.8rem; box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-            opacity: 0; visibility: hidden; transition: all 0.3s; z-index: 1000; width: 180px; pointer-events: none;
-        }
-        .option-card:hover .tooltip { opacity: 1; visibility: visible; transform: translateX(-50%) scale(1); }
-        .tooltip-img { width: 100%; height: 110px; border-radius: 10px; overflow: hidden; margin-bottom: 0.5rem; background: #f5f5f5; }
-        .tooltip-img img { width: 100%; height: 100%; object-fit: cover; }
-        .tooltip-name { font-weight: 600; color: var(--text-dark); font-size: 0.9rem; text-align: center; }
-        .tooltip-price { color: var(--primary); font-weight: 700; font-size: 0.85rem; text-align: center; }
-        .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 10px solid transparent; border-top-color: #fff; }
+        .option-card .tooltip { display: none; }
     </style>
 
     <style>
@@ -249,76 +241,80 @@
         let currentStep = 1;
         let giftState = { box: null, fillers: [], storeProducts: [], wrapping: null, ribbon: null, card: null, message: '', recipientName: '' };
 
-        const boxes = [
-            { id: 1, name: 'صندوق صغير', emoji: '📦', price: 25, maxItems: 3, image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&h=200&fit=crop' },
-            { id: 2, name: 'صندوق متوسط', emoji: '🎁', price: 45, maxItems: 5, image: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=200&h=200&fit=crop' },
-            { id: 3, name: 'صندوق كبير', emoji: '🎀', price: 75, maxItems: 8, image: 'https://images.unsplash.com/photo-1607469256872-48074e807b0b?w=200&h=200&fit=crop' },
-            { id: 4, name: 'صندوق فاخر', emoji: '👑', price: 120, maxItems: 12, image: 'https://images.unsplash.com/photo-1512909006721-3d6018887383?w=200&h=200&fit=crop' },
-        ];
-
-        const fillers = [
-            { id: 1, name: 'شوكولاتة فيريرو', emoji: '🍫', price: 35, cat: 'chocolate', image: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=200&h=200&fit=crop' },
-            { id: 2, name: 'شوكولاتة جوديفا', emoji: '🍫', price: 55, cat: 'chocolate', image: 'https://images.unsplash.com/photo-1511381939415-e44015466834?w=200&h=200&fit=crop' },
-            { id: 3, name: 'باقة ورد أحمر', emoji: '🌹', price: 45, cat: 'flower', image: 'https://images.unsplash.com/photo-1518882605630-8eb738e98a02?w=200&h=200&fit=crop' },
-            { id: 4, name: 'زهور بيضاء', emoji: '🌸', price: 35, cat: 'flower', image: 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=200&h=200&fit=crop' },
-            { id: 5, name: 'عطر فاخر', emoji: '🌺', price: 150, cat: 'perfume', image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=200&h=200&fit=crop' },
-            { id: 6, name: 'عطر صغير', emoji: '💐', price: 75, cat: 'perfume', image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=200&h=200&fit=crop' },
-            { id: 7, name: 'سوار ذهبي', emoji: '💍', price: 85, cat: 'accessory', image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=200&h=200&fit=crop' },
-            { id: 8, name: 'قلادة فضية', emoji: '📿', price: 65, cat: 'accessory', image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=200&h=200&fit=crop' },
-            { id: 9, name: 'حلوى ملونة', emoji: '🍬', price: 20, cat: 'candy', image: 'https://images.unsplash.com/photo-1582058091505-f87a2e55a40f?w=200&h=200&fit=crop' },
-            { id: 10, name: 'دبدوب صغير', emoji: '🧸', price: 40, cat: 'toy', image: 'https://images.unsplash.com/photo-1558679908-541bcf1249ff?w=200&h=200&fit=crop' },
-            { id: 11, name: 'شمعة معطرة', emoji: '🕯️', price: 30, cat: 'other', image: 'https://images.unsplash.com/photo-1602607434774-8f0e0eb0e0b0?w=200&h=200&fit=crop' },
-        ];
-
-        const wrappings = [
-            { id: 1, name: 'تغليف كلاسيكي', emoji: '🎁', price: 0, image: 'https://images.unsplash.com/photo-1512909006721-3d6018887383?w=200&h=200&fit=crop' },
-            { id: 2, name: 'تغليف ذهبي', emoji: '✨', price: 15, image: 'https://images.unsplash.com/photo-1607469256872-48074e807b0b?w=200&h=200&fit=crop' },
-            { id: 3, name: 'تغليف وردي', emoji: '💝', price: 10, image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&h=200&fit=crop' },
-            { id: 4, name: 'تغليف أزرق', emoji: '💙', price: 10, image: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=200&h=200&fit=crop' },
-        ];
-
-        const ribbons = [
-            { id: 1, name: 'شريط ذهبي', emoji: '🎀', price: 5 },
-            { id: 2, name: 'شريط أحمر', emoji: '❤️', price: 5 },
-            { id: 3, name: 'شريط وردي', emoji: '💗', price: 5 },
-            { id: 4, name: 'شريط أبيض', emoji: '🤍', price: 5 },
-            { id: 5, name: 'بدون شريط', emoji: '➖', price: 0 },
-        ];
-
-        const cards = [
-            { id: 1, name: 'بطاقة عيد ميلاد', emoji: '🎂', price: 5 },
-            { id: 2, name: 'بطاقة حب', emoji: '💕', price: 5 },
-            { id: 3, name: 'بطاقة تهنئة', emoji: '🎉', price: 5 },
-            { id: 4, name: 'بطاقة شكر', emoji: '🙏', price: 5 },
-            { id: 5, name: 'بدون بطاقة', emoji: '➖', price: 0 },
-        ];
-
-        const categories = [
-            { id: 'all', name: 'الكل', emoji: '📦' },
-            { id: 'chocolate', name: 'شوكولاتة', emoji: '🍫' },
-            { id: 'flower', name: 'زهور', emoji: '🌸' },
-            { id: 'perfume', name: 'عطور', emoji: '🌺' },
-            { id: 'accessory', name: 'إكسسوارات', emoji: '💍' },
-            { id: 'candy', name: 'حلويات', emoji: '🍬' },
-            { id: 'tulip', name: 'منتجات Tulip', emoji: '🛍️' },
-        ];
+        let boxes = [];
+        let fillers = [];
+        let wrappings = [];
+        let ribbons = [];
+        let cards = [];
+        let categories = [];
 
         let storeProducts = [];
-        document.addEventListener('DOMContentLoaded', () => { loadBoxes(); loadCategories(); loadFillers(); loadWrappings(); loadRibbons(); loadCards(); setupMessage(); loadStoreProducts(); });
+
+        function resolveMediaUrl(path) {
+            const p = String(path || '').trim();
+            if (!p) return '/images/gift-placeholder.svg';
+            if (p.startsWith('http://') || p.startsWith('https://')) return p;
+            if (p.startsWith('/')) return `${window.location.origin}${p}`;
+            const cleaned = p.replace(/^storage\//, '');
+            return `${window.location.origin}/storage/${cleaned}`;
+        }
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadGiftOptions();
+            loadBoxes();
+            loadCategories();
+            loadFillers();
+            loadWrappings();
+            loadRibbons();
+            loadCards();
+            setupMessage();
+            loadStoreProducts();
+        });
+
+        async function loadGiftOptions() {
+            try {
+                const res = await fetch('/api/custom-gift/options');
+                const data = await res.json();
+                boxes = Array.isArray(data.boxes) ? data.boxes : [];
+                fillers = Array.isArray(data.fillers) ? data.fillers : [];
+                wrappings = Array.isArray(data.wrappings) ? data.wrappings : [];
+                ribbons = Array.isArray(data.ribbons) ? data.ribbons : [];
+                cards = Array.isArray(data.cards) ? data.cards : [];
+
+                const emojiByCategory = {
+                    chocolate: '🍫',
+                    flower: '🌸',
+                    perfume: '🌺',
+                    accessory: '💍',
+                    candy: '🍬',
+                    other: '✨',
+                };
+
+                const fillerCats = Array.from(new Set(fillers.map(f => f.category).filter(Boolean)));
+                categories = [{ id: 'all', name: 'الكل', emoji: '📦' }]
+                    .concat(fillerCats.map(id => ({ id, name: id, emoji: emojiByCategory[id] || '✨' })))
+                    .concat([{ id: 'tulip', name: 'منتجات Tulip', emoji: '🛍️' }]);
+            } catch (e) {
+                boxes = [];
+                fillers = [];
+                wrappings = [];
+                ribbons = [];
+                cards = [];
+                categories = [{ id: 'all', name: 'الكل', emoji: '📦' }, { id: 'tulip', name: 'منتجات Tulip', emoji: '🛍️' }];
+            }
+        }
 
         function loadBoxes() {
+            if (!boxes.length) {
+                document.getElementById('boxesGrid').innerHTML = '<div class="summary-empty">لا توجد صناديق متاحة</div>';
+                return;
+            }
             document.getElementById('boxesGrid').innerHTML = boxes.map(b => `
-                <div class="option-card ${giftState.box?.id === b.id ? 'selected' : ''}" onclick="selectBox(${b.id})">
-                    <div class="tooltip">
-                        <div class="tooltip-img"><img src="${b.image}" alt="${b.name}"></div>
-                        <div class="tooltip-name">${b.name}</div>
-                        <div class="tooltip-price">${b.price} ر.س</div>
-                    </div>
-                    <div class="option-visual">${b.emoji}</div>
+                <button type="button" class="option-card ${giftState.box?.id === b.id ? 'selected' : ''}" onclick="selectBox(${b.id})" aria-label="اختر ${b.name}">
+                    <div class="option-visual"><img src="${resolveMediaUrl(b.image)}" alt="${b.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
                     <div class="option-name">${b.name}</div>
                     <div class="option-price">${b.price} ر.س</div>
                     <div class="option-meta">حتى ${b.maxItems} عناصر</div>
-                </div>
+                </button>
             `).join('');
         }
 
@@ -332,31 +328,25 @@
             if (cat === 'tulip') {
                 const selectedIds = giftState.storeProducts.map(p => p.id);
                 document.getElementById('fillersGrid').innerHTML = storeProducts.length ? storeProducts.map(p => `
-                    <div class="option-card ${selectedIds.includes(p.id) ? 'selected' : ''}" onclick="toggleStoreProduct(${p.id})">
-                        <div class="tooltip">
-                            <div class="tooltip-img"><img src="${p.image || '/images/gift-placeholder.jpg'}" alt="${p.name}"></div>
-                            <div class="tooltip-name">${p.name}</div>
-                            <div class="tooltip-price">${p.price} ر.س</div>
-                        </div>
-                        <div class="option-visual"><i class="fas fa-box"></i></div>
+                    <button type="button" class="option-card ${selectedIds.includes(p.id) ? 'selected' : ''}" onclick="toggleStoreProduct(${p.id})" aria-label="أضف ${p.name}">
+                        <div class="option-visual"><img src="${resolveMediaUrl(p.image)}" alt="${p.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
                         <div class="option-name">${p.name}</div>
                         <div class="option-price">${p.price} ر.س</div>
-                    </div>
+                    </button>
                 `).join('') : '<div class="summary-empty">جاري تحميل منتجات Tulip...</div>';
                 return;
             }
-            const filtered = cat === 'all' ? fillers : fillers.filter(f => f.cat === cat);
+            const filtered = cat === 'all' ? fillers : fillers.filter(f => f.category === cat);
+            if (!filtered.length) {
+                document.getElementById('fillersGrid').innerHTML = '<div class="summary-empty">لا توجد عناصر متاحة</div>';
+                return;
+            }
             document.getElementById('fillersGrid').innerHTML = filtered.map(f => `
-                <div class="option-card ${giftState.fillers.includes(f.id) ? 'selected' : ''}" onclick="toggleFiller(${f.id})">
-                    <div class="tooltip">
-                        <div class="tooltip-img"><img src="${f.image}" alt="${f.name}"></div>
-                        <div class="tooltip-name">${f.name}</div>
-                        <div class="tooltip-price">${f.price} ر.س</div>
-                    </div>
-                    <div class="option-visual">${f.emoji}</div>
+                <button type="button" class="option-card ${giftState.fillers.includes(f.id) ? 'selected' : ''}" onclick="toggleFiller(${f.id})" aria-label="أضف ${f.name}">
+                    <div class="option-visual"><img src="${resolveMediaUrl(f.image)}" alt="${f.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
                     <div class="option-name">${f.name}</div>
                     <div class="option-price">${f.price} ر.س</div>
-                </div>
+                </button>
             `).join('');
         }
 
@@ -369,7 +359,7 @@
                     id: p.id,
                     name: p.name,
                     price: Number(p.discount_price ?? p.price),
-                    image: p.image ?? null
+                    image: p.primary_image_url ?? p.image ?? (Array.isArray(p.images) ? p.images[0] : null) ?? null
                 }));
                 if (document.querySelector('.filter-tab.active')?.dataset.cat === 'tulip') loadFillers('tulip');
             } catch (e) {
@@ -378,37 +368,44 @@
         }
 
         function loadWrappings() {
+            if (!wrappings.length) {
+                document.getElementById('wrappingsGrid').innerHTML = '<div class="summary-empty">لا توجد تغليفات متاحة</div>';
+                return;
+            }
             document.getElementById('wrappingsGrid').innerHTML = wrappings.map(w => `
-                <div class="option-card ${giftState.wrapping?.id === w.id ? 'selected' : ''}" onclick="selectWrapping(${w.id})">
-                    <div class="tooltip">
-                        <div class="tooltip-img"><img src="${w.image}" alt="${w.name}"></div>
-                        <div class="tooltip-name">${w.name}</div>
-                        <div class="tooltip-price">${w.price > 0 ? w.price + ' ر.س' : 'مجاني'}</div>
-                    </div>
-                    <div class="option-visual">${w.emoji}</div>
+                <button type="button" class="option-card ${giftState.wrapping?.id === w.id ? 'selected' : ''}" onclick="selectWrapping(${w.id})" aria-label="اختر ${w.name}">
+                    <div class="option-visual"><img src="${resolveMediaUrl(w.image)}" alt="${w.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
                     <div class="option-name">${w.name}</div>
                     <div class="option-price">${w.price > 0 ? w.price + ' ر.س' : 'مجاني'}</div>
-                </div>
+                </button>
             `).join('');
         }
 
         function loadRibbons() {
+            if (!ribbons.length) {
+                document.getElementById('ribbonsGrid').innerHTML = '<div class="summary-empty">لا توجد شرائط متاحة</div>';
+                return;
+            }
             document.getElementById('ribbonsGrid').innerHTML = ribbons.map(r => `
-                <div class="option-card ${giftState.ribbon?.id === r.id ? 'selected' : ''}" onclick="selectRibbon(${r.id})">
-                    <div class="option-visual">${r.emoji}</div>
+                <button type="button" class="option-card ${giftState.ribbon?.id === r.id ? 'selected' : ''}" onclick="selectRibbon(${r.id})" aria-label="اختر ${r.name}">
+                    <div class="option-visual"><img src="${resolveMediaUrl(r.image)}" alt="${r.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
                     <div class="option-name">${r.name}</div>
                     <div class="option-price">${r.price > 0 ? r.price + ' ر.س' : 'مجاني'}</div>
-                </div>
+                </button>
             `).join('');
         }
 
         function loadCards() {
+            if (!cards.length) {
+                document.getElementById('cardsGrid').innerHTML = '<div class="summary-empty">لا توجد بطاقات متاحة</div>';
+                return;
+            }
             document.getElementById('cardsGrid').innerHTML = cards.map(c => `
-                <div class="option-card ${giftState.card?.id === c.id ? 'selected' : ''}" onclick="selectCard(${c.id})">
-                    <div class="option-visual">${c.emoji}</div>
+                <button type="button" class="option-card ${giftState.card?.id === c.id ? 'selected' : ''}" onclick="selectCard(${c.id})" aria-label="اختر ${c.name}">
+                    <div class="option-visual"><img src="${resolveMediaUrl(c.image)}" alt="${c.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
                     <div class="option-name">${c.name}</div>
                     <div class="option-price">${c.price > 0 ? c.price + ' ر.س' : 'مجاني'}</div>
-                </div>
+                </button>
             `).join('');
         }
 

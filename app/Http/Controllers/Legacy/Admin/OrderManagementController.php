@@ -63,12 +63,29 @@ class OrderManagementController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled',
+            'status' => 'required|string',
         ]);
 
         $order = Order::findOrFail($id);
-        $order->status = $request->status;
-        $order->save();
+        $statusManager = app(\App\Services\OrderStatusManager::class);
+        $normalized = $statusManager->normalize((string) $request->status);
+        $canonical = (array) config('order_statuses.canonical', []);
+        if (! in_array($normalized, $canonical, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid status',
+            ], 422);
+        }
+
+        try {
+            $order->status = $normalized;
+            $order->save();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid order status transition',
+            ], 422);
+        }
 
         return response()->json([
             'success' => true,

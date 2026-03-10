@@ -88,9 +88,9 @@
                         <td class="px-6 py-4 text-gray-900 font-medium">
                             {{ optional($employee->user)->name ?? trim(($employee->first_name ?? '').' '.($employee->last_name ?? '')) ?? ('Employee #'.$employee->id) }}
                         </td>
-                        <td class="px-6 py-4 text-gray-700">{{ $employee->monthly_salary ? '$'.number_format($employee->monthly_salary, 2) : '-' }}</td>
-                        <td class="px-6 py-4 text-gray-700">{{ $employee->hourly_rate ? '$'.number_format($employee->hourly_rate, 2) : '-' }}</td>
-                        <td class="px-6 py-4 text-gray-700">{{ $rec?->net_pay ? '$'.number_format($rec->net_pay, 2) : '-' }}</td>
+                        <td class="px-6 py-4 text-gray-700">@if($employee->monthly_salary) @money($employee->monthly_salary) @else - @endif</td>
+                        <td class="px-6 py-4 text-gray-700">@if($employee->hourly_rate) @money($employee->hourly_rate) @else - @endif</td>
+                        <td class="px-6 py-4 text-gray-700">@if($rec?->net_pay) @money($rec->net_pay) @else - @endif</td>
                         <td class="px-6 py-4 text-gray-700">{{ $rec?->status ?? '-' }}</td>
                         <td class="px-6 py-4">
                             <a href="{{ route('dashboard.hr.payroll.report', [$employee->id, $reportPayPeriod ?? now()->format('Y-m')]) }}" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-1 rounded-lg hover:bg-indigo-700 transition text-sm">
@@ -130,7 +130,7 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-3 text-sm text-gray-800">{{ optional($rec->employee->user)->name ?? ('#'.$rec->employee_id) }}</td>
                         <td class="px-4 py-3 text-sm">{{ $rec->pay_period }}</td>
-                        <td class="px-4 py-3 text-sm">${{ number_format($rec->net_pay ?? 0, 2) }}</td>
+                        <td class="px-4 py-3 text-sm">@money($rec->net_pay ?? 0)</td>
                         <td class="px-4 py-3 text-sm">{{ $statusLabel }}</td>
                         <td class="px-4 py-3 text-xs text-gray-500">
                             @if($sent)

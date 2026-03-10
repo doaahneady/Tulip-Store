@@ -463,128 +463,6 @@
 }
 </style>
 
-<!-- GIFTS SECTION - TULIP GIFTS -->
-<section style="padding:2.5rem 1.5rem; background:linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); position:relative; overflow:hidden;">
-    <!-- Decorative Background -->
-    <div style="position:absolute; top:-50px; right:-50px; width:200px; height:200px; background:radial-gradient(circle, rgba(42,112,128,0.05) 0%, transparent 70%); border-radius:50%;"></div>
-    <div style="position:absolute; bottom:-30px; left:-30px; width:150px; height:150px; background:radial-gradient(circle, rgba(255,107,53,0.05) 0%, transparent 70%); border-radius:50%;"></div>
-    
-    <div style="max-width:1400px; margin:0 auto; position:relative;">
-        <!-- Header -->
-        <div style="text-align:center; margin-bottom:3rem;">
-            <div style="display:inline-flex; align-items:center; gap:1rem; background:white; padding:1rem 2rem; border-radius:50px; box-shadow:0 4px 20px rgba(0,0,0,0.1); margin-bottom:1.5rem;">
-                <i class="fas fa-gift" style="font-size:2rem; color:#ff6b35;"></i>
-                <h2 style="margin:0; font-size:2.5rem; font-weight:700; color:#2a7080;">هدايا توليب المميزة</h2>
-            </div>
-            <p style="font-size:1.2rem; color:#666; max-width:600px; margin:0 auto;">اختر من مجموعتنا الرائعة من الهدايا المصممة خصيصاً لكل مناسبة</p>
-        </div>
-
-        <!-- Featured Gifts Grid -->
-        <div id="featuredGifts" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:2rem; margin-bottom:2.5rem;">
-            @php
-                $featuredGiftsData = $featuredGifts ?? collect();
-            @endphp
-            @if($featuredGiftsData->isNotEmpty())
-                @foreach($featuredGiftsData as $gift)
-                    <div style="background:white; border-radius:20px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.1); transition:all 0.3s; cursor:pointer;" onclick="window.location.href='/gifts/{{ $gift->id }}'" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 30px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.1)'">
-                        <div style="height:200px; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); position:relative; overflow:hidden;">
-                            <img src="{{ $gift->main_image }}" alt="{{ $gift->name }}" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'; this.parentElement.innerHTML='<i class=\\'fas fa-gift fa-3x\\'></i>'">
-                            @if($gift->is_featured)
-                                <div style="position:absolute; top:1rem; right:1rem; background:#ff6b35; color:white; padding:0.5rem 1rem; border-radius:20px; font-size:0.8rem; font-weight:600;"><i class="fas fa-star"></i> مميز</div>
-                            @endif
-                        </div>
-                        <div style="padding:1.5rem;">
-                            <div style="display:inline-block; padding:0.25rem 0.75rem; background:#f5f5f5; border-radius:15px; font-size:0.8rem; font-weight:600; margin-bottom:0.75rem;">
-                                {{ $gift->occasion ?: ($gift->category ?: '') }}
-                            </div>
-                            <h3 style="margin:0 0 0.5rem 0; font-size:1.2rem; font-weight:700; color:#333; line-height:1.3;">{{ $gift->name }}</h3>
-                            <p style="color:#666; font-size:0.9rem; margin:0 0 1rem 0; line-height:1.5;">{{ \Illuminate\Support\Str::limit($gift->description ?? '', 80) }}</p>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-size:1.3rem; font-weight:700; color:#2a7080;">{{ $gift->formatted_price }}</span>
-                                <div style="display:flex; align-items:center; gap:0.3rem; color:#ffa500;">
-                                    <i class="fas fa-star"></i>
-                                    <span style="font-size:0.9rem;">{{ $gift->rating ?: '0.0' }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            @else
-                <div style="grid-column:1/-1; text-align:center; padding:3rem; color:#999;">
-                    <i class="fas fa-gift fa-3x" style="margin-bottom:1rem; opacity:0.3;"></i>
-                    <p>جاري تحميل الهدايا المميزة...</p>
-                </div>
-            @endif
-        </div>
-
-        <!-- View All Gifts Button -->
-        <div style="text-align:center;">
-            <a href="/gifts" style="display:inline-flex; align-items:center; gap:1rem; background:linear-gradient(135deg, #2a7080, #1a5060); color:white; padding:1.2rem 3rem; border-radius:50px; text-decoration:none; font-weight:600; font-size:1.1rem; transition:all 0.3s; box-shadow:0 4px 15px rgba(42,112,128,0.3);" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 25px rgba(42,112,128,0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(42,112,128,0.3)'">
-                <i class="fas fa-heart"></i>
-                <span>استكشف جميع الهدايا</span>
-                <i class="fas fa-arrow-left"></i>
-            </a>
-        </div>
-    </div>
-</section>
-
-@if(($featuredGifts ?? collect())->isEmpty())
-    <script>
-    async function loadFeaturedGifts() {
-        try {
-            let response = await fetch('/api/gifts/featured');
-            let data = await response.json();
-            if (!data.success || (data.data || []).length === 0) {
-                response = await fetch('/api/gifts?sort=featured&per_page=8');
-                data = await response.json();
-            }
-            if (data.success && (data.data || []).length > 0) {
-                const giftsGrid = document.getElementById('featuredGifts');
-                giftsGrid.innerHTML = data.data.map(gift => `
-                    <div style="background:white; border-radius:20px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.1); transition:all 0.3s; cursor:pointer;" onclick="window.location.href='/gifts/${gift.id}'" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 30px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.1)'">
-                        <div style="height:200px; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); position:relative; overflow:hidden;">
-                            <img src="${(gift.images && gift.images[0]) || gift.main_image || '/images/gift-placeholder.jpg'}" alt="${gift.name}" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center'; this.parentElement.innerHTML='<i class=\\'fas fa-gift fa-3x\\'></i>'">
-                            ${gift.is_featured ? '<div style="position:absolute; top:1rem; right:1rem; background:#ff6b35; color:white; padding:0.5rem 1rem; border-radius:20px; font-size:0.8rem; font-weight:600;"><i class="fas fa-star"></i> مميز</div>' : ''}
-                        </div>
-                        <div style="padding:1.5rem;">
-                            <div style="display:inline-block; padding:0.25rem 0.75rem; background:#f5f5f5; border-radius:15px; font-size:0.8rem; font-weight:600; margin-bottom:0.75rem;">
-                                ${(gift.occasion || gift.category || '')}
-                            </div>
-                            <h3 style="margin:0 0 0.5rem 0; font-size:1.2rem; font-weight:700; color:#333; line-height:1.3;">${gift.name}</h3>
-                            <p style="color:#666; font-size:0.9rem; margin:0 0 1rem 0; line-height:1.5;">${(gift.description || '').substring(0, 80)}...</p>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-size:1.3rem; font-weight:700; color:#2a7080;">${gift.formatted_price || (gift.price + ' ر.س')}</span>
-                                <div style="display:flex; align-items:center; gap:0.3rem; color:#ffa500;">
-                                    <i class="fas fa-star"></i>
-                                    <span style="font-size:0.9rem;">${gift.rating || '0.0'}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                const giftsGrid = document.getElementById('featuredGifts');
-                giftsGrid.innerHTML = `
-                    <div style="grid-column:1/-1; text-align:center; padding:3rem; color:#999;">
-                        <i class="fas fa-box-open fa-3x" style="margin-bottom:1rem; opacity:0.3;"></i>
-                        <p>لا توجد هدايا متاحة حالياً.</p>
-                    </div>
-                `;
-            }
-        } catch (error) {
-            document.getElementById('featuredGifts').innerHTML = `
-                <div style="grid-column:1/-1; text-align:center; padding:3rem; color:#e74c3c;">
-                    <i class="fas fa-exclamation-triangle fa-2x" style="margin-bottom:1rem;"></i>
-                    <p>حدث خطأ في تحميل الهدايا</p>
-                </div>
-            `;
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', loadFeaturedGifts);
-    </script>
-@endif
-
 <!-- PERSONALIZED FOR YOU - NO CIRCLE, SIMPLE DESIGN -->
 <section id="personalizedSection" style="padding:2.5rem 1.5rem; background:#fff;">
     <div style="max-width:1400px; margin:0 auto;">
@@ -616,25 +494,33 @@
                         {{ $stockLabel }}
                     </div>
                     <div class="product-image-wrapper">
-                        <img src="{{ $product->image ?? 'https://via.placeholder.com/250' }}" alt="{{ $product->name }}" class="product-img">
+                        @php
+                            $img = $product->primary_image_url ?: '/images/gift-placeholder.svg';
+                            $srcset = trim((string) ($product->primary_image_srcset ?? ''));
+                        @endphp
+                        <img src="{{ $img }}"
+                             @if($srcset !== '') srcset="{{ $srcset }}" sizes="(max-width: 768px) 50vw, 25vw" @endif
+                             alt="{{ $product->name }}"
+                             class="product-img"
+                             loading="lazy"
+                             width="320"
+                             height="320"
+                             onerror="this.src='/images/gift-placeholder.svg'">
                     </div>
                     <div class="product-info">
                         <h3 class="product-name">{{ $product->name }}</h3>
                         <div class="product-price-rating-wrapper">
                             <div class="product-price-wrapper">
-                                <span class="product-price">${{ number_format($price, 2) }}</span>
+                                <span class="product-price">@money($price)</span>
                                 @if(!empty($product->discount_price))
-                                    <span class="product-old-price">${{ number_format($oldPrice, 2) }}</span>
+                                    <span class="product-old-price">@money($oldPrice)</span>
                                 @endif
-                            </div>
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
                         </div>
                     </div>
                     <div class="product-card-actions">
-                        <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)" data-product-id="{{ $product->id }}" {{ $isOutOfStock ? 'disabled' : '' }} style="{{ $isOutOfStock ? 'opacity: 0.55; cursor: not-allowed;' : 'cursor: pointer;' }}">
-                            <i class="fas {{ $isOutOfStock ? 'fa-ban' : 'fa-shopping-cart' }}"></i>
+                        <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)" data-product-id="{{ $product->id }}" {{ $isOutOfStock ? 'disabled data-tooltip="لا يتوفر هذا المنتج في المخزن"' : '' }} style="{{ $isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : 'cursor: pointer;' }}">
+                            <i class="fas fa-shopping-cart"></i>
                         </button>
                     </div>
                 </div>
@@ -679,25 +565,33 @@
                         {{ $stockLabel }}
                     </div>
                     <div class="product-image-wrapper">
-                        <img src="{{ $product->image ?? 'https://via.placeholder.com/250' }}" alt="{{ $product->name }}" class="product-img">
+                        @php
+                            $img = $product->primary_image_url ?: '/images/gift-placeholder.svg';
+                            $srcset = trim((string) ($product->primary_image_srcset ?? ''));
+                        @endphp
+                        <img src="{{ $img }}"
+                             @if($srcset !== '') srcset="{{ $srcset }}" sizes="(max-width: 768px) 50vw, 25vw" @endif
+                             alt="{{ $product->name }}"
+                             class="product-img"
+                             loading="lazy"
+                             width="320"
+                             height="320"
+                             onerror="this.src='/images/gift-placeholder.svg'">
                     </div>
                     <div class="product-info">
                         <h3 class="product-name">{{ $product->name }}</h3>
                         <div class="product-price-rating-wrapper">
                             <div class="product-price-wrapper">
-                                <span class="product-price">${{ number_format($price, 2) }}</span>
+                                <span class="product-price">@money($price)</span>
                                 @if(!empty($product->discount_price))
-                                    <span class="product-old-price">${{ number_format($oldPrice, 2) }}</span>
+                                    <span class="product-old-price">@money($oldPrice)</span>
                                 @endif
-                            </div>
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
                         </div>
                     </div>
                     <div class="product-card-actions">
-                        <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)" data-product-id="{{ $product->id }}" {{ $isOutOfStock ? 'disabled' : '' }} style="{{ $isOutOfStock ? 'opacity: 0.55; cursor: not-allowed;' : 'cursor: pointer;' }}">
-                            <i class="fas {{ $isOutOfStock ? 'fa-ban' : 'fa-shopping-cart' }}"></i>
+                        <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)" data-product-id="{{ $product->id }}" {{ $isOutOfStock ? 'disabled data-tooltip="لا يتوفر هذا المنتج في المخزن"' : '' }} style="{{ $isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : 'cursor: pointer;' }}">
+                            <i class="fas fa-shopping-cart"></i>
                         </button>
                     </div>
                 </div>
@@ -801,7 +695,7 @@
             <div>
                 <img src="/images/white_orange_logo.png" style="height:130px;margin-bottom:0.8rem; display:block; margin-left:auto; margin-right:auto;">
                 <p style="color:rgba(255,255,255,0.7); line-height:1.8; font-size:1rem; margin-bottom:1rem; max-width:480px; margin-left:auto; margin-right:auto;">
-                    متجر فاخر للهدايا والمنتجات المميزة. نساعدك في إرسال ابتسامتك لأحبائك أينما كانوا.
+                    متجر فاخر للمنتجات المميزة. نساعدك في إرسال ابتسامتك لأحبائك أينما كانوا.
                 </p>
                 <div class="social-wrap" style="display:flex; gap:0.9rem; justify-content:center; margin-top:0.6rem;">
                     <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
@@ -836,7 +730,6 @@
                 <h2 style="color:#ff6b35; font-weight:800; margin-bottom:1rem;margin-top:1rem ">الأقسام الخاصة</h2>
                 <div style="display:flex; flex-direction:column; gap:1.1rem; align-items:center;">
                     <a href="/mart" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">توليب مارت</a>
-                    <a href="/gifts" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">توليب للتنسيق العطايا</a>
                 </div>
             </div>
         </div>

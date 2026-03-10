@@ -71,6 +71,10 @@ Route::prefix('cs')->name('cs.')->middleware('dashboard.role:cs')->group(functio
 
     Route::get('/orders', [SupportDashboardController::class, 'orders'])->name('orders');
     Route::get('/orders/{order}', [SupportDashboardController::class, 'showOrder'])->name('orders.show');
+    Route::get('/orders/{order}/route', [SupportDashboardController::class, 'orderRoute'])->name('orders.route');
+    Route::post('/orders/{order}/status', [SupportDashboardController::class, 'changeOrderStatus'])->name('orders.change-status');
+
+    Route::get('/payrolls', [SupportDashboardController::class, 'payrolls'])->name('payrolls');
 
     Route::get('/trader-products', [SupportDashboardController::class, 'traderProducts'])->name('trader-products');
     Route::post('/trader-products/{product}/approve', [SupportDashboardController::class, 'approveTraderProduct'])->name('trader-products.approve');
@@ -81,6 +85,9 @@ Route::prefix('admin')->name('admin.')->middleware('dashboard.role:admin')->grou
     Route::get('/', [SuperAdminController::class, 'index'])->name('index');
     Route::get('/portal', [AdminDashboardController::class, 'index'])->name('portal');
     Route::get('/metrics', [SuperAdminController::class, 'getMetrics'])->name('metrics');
+    Route::get('/style-guide', [SuperAdminController::class, 'styleGuide'])->name('style-guide');
+    Route::view('/prototypes/wireframes', 'dashboards.prototypes.wireframes')->name('prototypes.wireframes');
+    Route::view('/prototypes/mockups', 'dashboards.prototypes.mockups')->name('prototypes.mockups');
 
     Route::get('/cross-department-kpis', [SuperAdminController::class, 'crossDepartmentKPIs'])->name('cross-department-kpis');
 
@@ -130,6 +137,8 @@ Route::prefix('admin')->name('admin.')->middleware('dashboard.role:admin')->grou
     Route::put('/employees/{employee}/dashboards', [SuperAdminController::class, 'updateEmployeeDashboards'])->name('employees.dashboards.update');
 
     Route::get('/gifts', [SuperAdminController::class, 'gifts'])->name('gifts');
+    Route::get('/gifts/creation', [SuperAdminController::class, 'giftsCreation'])->name('gifts.creation');
+    Route::post('/gifts', [SuperAdminController::class, 'storeGift'])->name('gifts.store');
     Route::post('/gifts/{gift}/toggle-active', [SuperAdminController::class, 'toggleGiftActive'])->name('gifts.toggle-active');
     Route::post('/gifts/{gift}/toggle-featured', [SuperAdminController::class, 'toggleGiftFeatured'])->name('gifts.toggle-featured');
     Route::delete('/gifts/{gift}', [SuperAdminController::class, 'deleteGift'])->name('gifts.delete');
@@ -177,20 +186,27 @@ Route::prefix('admin')->name('admin.')->middleware('dashboard.role:admin')->grou
     });
 
     Route::prefix('gifts')->name('gifts.')->group(function () {
+        Route::post('/boxes', [SuperAdminController::class, 'storeGiftBox'])->name('boxes.store');
         Route::post('/boxes/{box}/toggle-active', [SuperAdminController::class, 'toggleGiftBoxActive'])->name('boxes.toggle-active');
         Route::delete('/boxes/{box}', [SuperAdminController::class, 'deleteGiftBox'])->name('boxes.delete');
 
+        Route::post('/wrappings', [SuperAdminController::class, 'storeGiftWrapping'])->name('wrappings.store');
         Route::post('/wrappings/{wrapping}/toggle-active', [SuperAdminController::class, 'toggleGiftWrappingActive'])->name('wrappings.toggle-active');
         Route::delete('/wrappings/{wrapping}', [SuperAdminController::class, 'deleteGiftWrapping'])->name('wrappings.delete');
 
+        Route::post('/ribbons', [SuperAdminController::class, 'storeGiftRibbon'])->name('ribbons.store');
         Route::post('/ribbons/{ribbon}/toggle-active', [SuperAdminController::class, 'toggleGiftRibbonActive'])->name('ribbons.toggle-active');
         Route::delete('/ribbons/{ribbon}', [SuperAdminController::class, 'deleteGiftRibbon'])->name('ribbons.delete');
 
+        Route::post('/cards', [SuperAdminController::class, 'storeGiftCard'])->name('cards.store');
         Route::post('/cards/{card}/toggle-active', [SuperAdminController::class, 'toggleGiftCardActive'])->name('cards.toggle-active');
         Route::delete('/cards/{card}', [SuperAdminController::class, 'deleteGiftCard'])->name('cards.delete');
 
+        Route::post('/fillers', [SuperAdminController::class, 'storeGiftFiller'])->name('fillers.store');
         Route::post('/fillers/{filler}/toggle-active', [SuperAdminController::class, 'toggleGiftFillerActive'])->name('fillers.toggle-active');
         Route::delete('/fillers/{filler}', [SuperAdminController::class, 'deleteGiftFiller'])->name('fillers.delete');
+
+        Route::post('/assemble', [SuperAdminController::class, 'storeAssembledGift'])->name('assemble');
     });
 });
 
@@ -296,7 +312,9 @@ Route::prefix('supervisor')->name('supervisor.')->middleware('dashboard.role:del
     Route::delete('/vehicles/{vehicle}', [DriverSupervisorController::class, 'deleteVehicle'])->name('vehicles.delete');
 
     Route::get('/order-assignment', [DriverSupervisorController::class, 'orderAssignment'])->name('order-assignment');
+    Route::get('/order-assignment/order/{order}', [DriverSupervisorController::class, 'getOrderDetails'])->name('order-assignment.details');
     Route::post('/assign-order', [DriverSupervisorController::class, 'assignOrder'])->name('assign-order');
+    Route::post('/orders/{order}/status', [DriverSupervisorController::class, 'changeOrderStatus'])->name('orders.change-status');
 
     Route::get('/route-optimization', [DriverSupervisorController::class, 'routeOptimization'])->name('route-optimization');
     Route::post('/optimize-routes', [DriverSupervisorController::class, 'optimizeRoutes'])->name('optimize-routes');

@@ -41,6 +41,45 @@
         <div class="text-xs text-gray-500">الحالة</div>
         <div class="text-lg font-semibold text-gray-900 mt-1">{{ $order->status ?? '-' }}</div>
         <div class="text-sm text-gray-600 mt-1">الدفع: {{ $order->payment_status ?? '-' }}</div>
+        @if(auth('employee')->check())
+            @php
+                $opts = $allowedNextStatuses ?? [];
+                if (! is_array($opts)) {
+                    $opts = [];
+                }
+                $statusLabels = [
+                    'pending' => 'قيد الانتظار',
+                    'confirmed' => 'مؤكد',
+                    'processing' => 'قيد التجهيز',
+                    'ready' => 'جاهز',
+                    'shipped' => 'تم الشحن',
+                    'out_for_delivery' => 'خرج للتوصيل',
+                    'delivered' => 'تم التسليم',
+                    'done' => 'مكتمل',
+                    'failed' => 'فشل',
+                    'cancelled' => 'ملغي',
+                    'refunded' => 'مسترجع',
+                    'returned' => 'مرتجع',
+                ];
+            @endphp
+            @if(count($opts))
+                <form class="mt-3" method="POST" action="{{ route('dashboard.cs.orders.change-status', $order) }}">
+                    @csrf
+                    <label class="text-xs text-gray-500 block mb-1">تغيير الحالة</label>
+                    <div class="flex items-center gap-2">
+                        <select name="status" class="px-3 py-2 rounded-xl border border-gray-200">
+                            @foreach($opts as $st)
+                                <option value="{{ $st }}">{{ $statusLabels[$st] ?? $st }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-2 rounded-xl hover:bg-indigo-700 transition">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>تحديث</span>
+                        </button>
+                    </div>
+                </form>
+            @endif
+        @endif
     </div>
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
         <div class="text-xs text-gray-500">الإجمالي</div>
@@ -106,7 +145,18 @@
             <div class="p-5 text-sm text-gray-700 space-y-2">
                 <div class="flex items-center justify-between">
                     <span class="text-gray-500">طريقة التوصيل</span>
-                    <span>{{ $order->delivery_method ?? '-' }}</span>
+                    @php
+                        $deliveryLabels = [
+                            'normal' => 'Normal',
+                            'express' => 'Express',
+                            'instant' => 'Instant',
+                        ];
+                    @endphp
+                    <span>{{ $deliveryLabels[$order->delivery_method ?? ''] ?? ($order->delivery_method ?? '-') }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-500">تاريخ التوصيل المتوقع</span>
+                    <span>{{ $order->estimated_delivery ? \Carbon\Carbon::parse($order->estimated_delivery)->format('Y-m-d') : '-' }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-gray-500">العنوان</span>
@@ -189,43 +239,95 @@
             return;
         }
 
-        const customerLat = @json($customerLat);
-        const customerLng = @json($customerLng);
-        const driverLat = @json($driverLat);
-        const driverLng = @json($driverLng);
-        const track = @json($driverTrack->map(fn ($p) => ['lat' => (float) $p->latitude, 'lng' => (float) $p->longitude, 't' => optional($p->recorded_at)->toIso8601String()])->values());
+        const routeUrl = @json(route('dashboard.cs.orders.route', $order));
+        const initialCustomerLat = @json($customerLat);
+        const initialCustomerLng = @json($customerLng);
+        const initialDriverLat = @json($driverLat);
+        const initialDriverLng = @json($driverLng);
+        const initialTrack = @json($driverTrack->map(fn ($p) => ['lat' => (float) $p->latitude, 'lng' => (float) $p->longitude, 't' => optional($p->recorded_at)->toIso8601String()])->values());
 
         const defaultCenter = [33.5138, 36.2765];
         const map = L.map('order-map').setView(defaultCenter, 12);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '' }).addTo(map);
         setTimeout(() => map.invalidateSize(), 200);
 
-        const bounds = [];
+        let customerMarker = null;
+        let driverMarker = null;
+        let polyline = null;
 
-        if (customerLat && customerLng) {
-            const m = L.marker([customerLat, customerLng]).addTo(map);
-            m.bindPopup('موقع العميل');
-            bounds.push([customerLat, customerLng]);
+        function applyRouteData(payload) {
+            const bounds = [];
+            const customerLat = payload?.customer?.lat ?? null;
+            const customerLng = payload?.customer?.lng ?? null;
+            const driverLat = payload?.driver?.lat ?? null;
+            const driverLng = payload?.driver?.lng ?? null;
+            const track = Array.isArray(payload?.track) ? payload.track : [];
+
+            if (customerLat && customerLng) {
+                const pos = [customerLat, customerLng];
+                if (!customerMarker) {
+                    customerMarker = L.marker(pos).addTo(map);
+                    customerMarker.bindPopup('موقع العميل');
+                } else {
+                    customerMarker.setLatLng(pos);
+                }
+                bounds.push(pos);
+            }
+
+            if (driverLat && driverLng) {
+                const pos = [driverLat, driverLng];
+                if (!driverMarker) {
+                    driverMarker = L.circleMarker(pos, { radius: 7, color: '#059669', fillColor: '#10b981', fillOpacity: 0.9 }).addTo(map);
+                    driverMarker.bindPopup('موقع السائق (آخر نقطة)');
+                } else {
+                    driverMarker.setLatLng(pos);
+                }
+                bounds.push(pos);
+            }
+
+            const pts = track.filter(p => p && p.lat && p.lng).map(p => [p.lat, p.lng]);
+            if (polyline) {
+                map.removeLayer(polyline);
+                polyline = null;
+            }
+            if (pts.length >= 2) {
+                polyline = L.polyline(pts, { color: '#4f46e5', weight: 4, opacity: 0.9 }).addTo(map);
+                bounds.push(...pts);
+            } else if (driverLat && driverLng && customerLat && customerLng) {
+                polyline = L.polyline([[driverLat, driverLng], [customerLat, customerLng]], { color: '#4f46e5', weight: 3, dashArray: '6,8' }).addTo(map);
+                bounds.push([driverLat, driverLng], [customerLat, customerLng]);
+            }
+
+            if (bounds.length) {
+                map.fitBounds(bounds, { padding: [20, 20] });
+            }
         }
 
-        if (driverLat && driverLng) {
-            const m = L.circleMarker([driverLat, driverLng], { radius: 7, color: '#059669', fillColor: '#10b981', fillOpacity: 0.9 }).addTo(map);
-            m.bindPopup('موقع السائق (آخر نقطة)');
-            bounds.push([driverLat, driverLng]);
+        applyRouteData({
+            customer: { lat: initialCustomerLat, lng: initialCustomerLng },
+            driver: { lat: initialDriverLat, lng: initialDriverLng },
+            track: initialTrack,
+        });
+
+        let lastPayload = null;
+        async function fetchRoute() {
+            try {
+                const res = await fetch(routeUrl, {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'same-origin',
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (!data || !data.success) return;
+                const serialized = JSON.stringify([data.customer, data.driver, data.track]);
+                if (serialized === lastPayload) return;
+                lastPayload = serialized;
+                applyRouteData(data);
+            } catch (e) {}
         }
 
-        if (Array.isArray(track) && track.length >= 2) {
-            const pts = track.map(p => [p.lat, p.lng]);
-            const poly = L.polyline(pts, { color: '#4f46e5', weight: 4, opacity: 0.9 }).addTo(map);
-            bounds.push(...pts);
-        } else if (driverLat && driverLng && customerLat && customerLng) {
-            const poly = L.polyline([[driverLat, driverLng], [customerLat, customerLng]], { color: '#4f46e5', weight: 3, dashArray: '6,8' }).addTo(map);
-            bounds.push([driverLat, driverLng], [customerLat, customerLng]);
-        }
-
-        if (bounds.length) {
-            map.fitBounds(bounds, { padding: [20, 20] });
-        }
+        fetchRoute();
+        setInterval(fetchRoute, 10000);
     })();
 </script>
 @endpush

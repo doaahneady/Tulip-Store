@@ -53,12 +53,13 @@ class StoreRepository implements StoreRepositoryInterface
 
     public function calculateRevenue(int $storeId, Carbon $start, Carbon $end): float
     {
+        $terminal = (array) config('order_statuses.terminal', ['delivered', 'done']);
         return (float) Order::query()
             ->whereHas('items.product', function ($q) use ($storeId) {
                 $q->where('store_id', $storeId);
             })
             ->whereBetween('created_at', [$start, $end])
-            ->where('status', 'completed')
+            ->whereIn('status', $terminal)
             ->when(true, function ($q) {
                 $sumColumn = Schema::hasColumn('orders', 'total_amount')
                     ? 'total_amount'
@@ -98,6 +99,7 @@ class StoreRepository implements StoreRepositoryInterface
         $start = $start ?? Carbon::now()->startOfMonth();
         $end = $end ?? Carbon::now()->endOfMonth();
         $ownerColumn = Schema::hasColumn('stores', 'owner_id') ? 'owner_id' : 'user_id';
+        $terminal = (array) config('order_statuses.terminal', ['delivered', 'done']);
 
         return $this->model->newQuery()
             ->select([
@@ -130,10 +132,10 @@ class StoreRepository implements StoreRepositoryInterface
             })())
             ->leftJoin('products', 'products.store_id', '=', 'stores.id')
             ->leftJoin('order_items', 'order_items.product_id', '=', 'products.id')
-            ->leftJoin('orders', function ($join) use ($start, $end) {
+            ->leftJoin('orders', function ($join) use ($start, $end, $terminal) {
                 $join->on('orders.id', '=', 'order_items.order_id')
                     ->whereBetween('orders.created_at', [$start, $end])
-                    ->where('orders.status', 'completed');
+                    ->whereIn('orders.status', $terminal);
             })
             ->groupBy([
                 'stores.id',

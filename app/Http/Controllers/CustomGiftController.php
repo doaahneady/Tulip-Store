@@ -2,75 +2,206 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GiftBox;
+use App\Models\GiftCard;
+use App\Models\GiftFiller;
+use App\Models\GiftRibbon;
+use App\Models\GiftWrapping;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CustomGiftController extends Controller
 {
+    private function resolvePublicImage(?string $path): string
+    {
+        $p = trim((string) $path);
+        if ($p === '') {
+            return '/images/gift-placeholder.svg';
+        }
+
+        if (Str::startsWith($p, ['http://', 'https://'])) {
+            return $p;
+        }
+
+        $p = preg_replace('#^(/storage/)+#', '/storage/', $p);
+
+        if (Str::startsWith($p, '/storage/')) {
+            $relative = ltrim(Str::after($p, '/storage/'), '/');
+            return $relative !== '' ? '/storage/'.$relative : '/images/gift-placeholder.svg';
+        }
+
+        if (Str::startsWith($p, '/images/')) {
+            return $p;
+        }
+        if (Str::startsWith($p, '/')) {
+            return $p;
+        }
+        if (Str::startsWith($p, 'images/')) {
+            return '/'.$p;
+        }
+        if (file_exists(public_path($p))) {
+            return '/'.$p;
+        }
+
+        $relative = ltrim(preg_replace('#^(public/|storage/)#', '', $p), '/');
+        if ($relative === '') {
+            return '/images/gift-placeholder.svg';
+        }
+
+        return Storage::disk('public')->url($relative);
+    }
+
     /**
      * Sample data - In production, this would come from database
      */
     private function getBoxes()
     {
-        return [
-            ['id' => 1, 'name' => 'صندوق صغير', 'emoji' => '📦', 'price' => 25, 'size' => 'small', 'maxItems' => 3],
-            ['id' => 2, 'name' => 'صندوق متوسط', 'emoji' => '🎁', 'price' => 45, 'size' => 'medium', 'maxItems' => 5],
-            ['id' => 3, 'name' => 'صندوق كبير', 'emoji' => '🎀', 'price' => 75, 'size' => 'large', 'maxItems' => 8],
-            ['id' => 4, 'name' => 'صندوق فاخر', 'emoji' => '👑', 'price' => 120, 'size' => 'xl', 'maxItems' => 12],
-        ];
+        if (Schema::hasTable('gift_boxes')) {
+            $boxesQuery = GiftBox::query()
+                ->when(Schema::hasColumn('gift_boxes', 'is_active'), fn ($q) => $q->where('is_active', true));
+            if (Schema::hasColumn('gift_boxes', 'sort_order')) {
+                $boxesQuery->orderBy('sort_order');
+            }
+            $boxes = $boxesQuery->orderBy('id')->get();
+
+            if ($boxes->isNotEmpty()) {
+                return $boxes->map(function ($b) {
+                    $size = (string) ($b->size ?? '');
+                    $emoji = match ($size) {
+                        'small' => '📦',
+                        'medium' => '🎁',
+                        'large' => '🎀',
+                        'xl' => '👑',
+                        default => '🎁',
+                    };
+
+                    return [
+                        'id' => (int) $b->id,
+                        'name' => (string) $b->name,
+                        'emoji' => $emoji,
+                        'price' => (float) ($b->price ?? 0),
+                        'size' => $size,
+                        'maxItems' => (int) ($b->max_items ?? 0),
+                        'image' => $this->resolvePublicImage($b->image),
+                    ];
+                })->values()->all();
+            }
+        }
+
+        return [];
     }
 
     private function getFillers()
     {
-        return [
-            ['id' => 1, 'name' => 'شوكولاتة فيريرو', 'emoji' => '🍫', 'price' => 35, 'category' => 'chocolate'],
-            ['id' => 2, 'name' => 'شوكولاتة جوديفا', 'emoji' => '🍫', 'price' => 55, 'category' => 'chocolate'],
-            ['id' => 3, 'name' => 'باقة ورد أحمر', 'emoji' => '🌹', 'price' => 45, 'category' => 'flower'],
-            ['id' => 4, 'name' => 'زهور بيضاء', 'emoji' => '🌸', 'price' => 35, 'category' => 'flower'],
-            ['id' => 5, 'name' => 'عطر فاخر', 'emoji' => '🌺', 'price' => 150, 'category' => 'perfume'],
-            ['id' => 6, 'name' => 'عطر صغير', 'emoji' => '💐', 'price' => 75, 'category' => 'perfume'],
-            ['id' => 7, 'name' => 'سوار ذهبي', 'emoji' => '💍', 'price' => 85, 'category' => 'accessory'],
-            ['id' => 8, 'name' => 'قلادة فضية', 'emoji' => '📿', 'price' => 65, 'category' => 'accessory'],
-            ['id' => 9, 'name' => 'حلوى ملونة', 'emoji' => '🍬', 'price' => 20, 'category' => 'candy'],
-            ['id' => 10, 'name' => 'مارشميلو', 'emoji' => '🍡', 'price' => 15, 'category' => 'candy'],
-            ['id' => 11, 'name' => 'دبدوب صغير', 'emoji' => '🧸', 'price' => 40, 'category' => 'toy'],
-            ['id' => 12, 'name' => 'شمعة معطرة', 'emoji' => '🕯️', 'price' => 30, 'category' => 'other'],
-        ];
+        if (Schema::hasTable('gift_fillers')) {
+            $fillersQuery = GiftFiller::query()
+                ->when(Schema::hasColumn('gift_fillers', 'is_active'), fn ($q) => $q->where('is_active', true));
+            if (Schema::hasColumn('gift_fillers', 'sort_order')) {
+                $fillersQuery->orderBy('sort_order');
+            }
+            $fillers = $fillersQuery->orderBy('id')->get();
+
+            if ($fillers->isNotEmpty()) {
+                return $fillers->map(function ($f) {
+                    $category = (string) ($f->category ?? 'other');
+                    $emoji = match ($category) {
+                        'chocolate' => '🍫',
+                        'flower' => '🌸',
+                        'perfume' => '🌺',
+                        'accessory' => '💍',
+                        'candy' => '🍬',
+                        default => '✨',
+                    };
+
+                    return [
+                        'id' => (int) $f->id,
+                        'name' => (string) $f->name,
+                        'emoji' => $emoji,
+                        'price' => (float) ($f->price ?? 0),
+                        'category' => $category,
+                        'image' => $this->resolvePublicImage($f->image),
+                    ];
+                })->values()->all();
+            }
+        }
+
+        return [];
     }
 
     private function getWrappings()
     {
-        return [
-            ['id' => 1, 'name' => 'تغليف كلاسيكي', 'emoji' => '🎁', 'price' => 0],
-            ['id' => 2, 'name' => 'تغليف ذهبي', 'emoji' => '✨', 'price' => 15],
-            ['id' => 3, 'name' => 'تغليف وردي', 'emoji' => '💝', 'price' => 10],
-            ['id' => 4, 'name' => 'تغليف أزرق', 'emoji' => '💙', 'price' => 10],
-        ];
+        if (! Schema::hasTable('gift_wrappings')) {
+            return [];
+        }
+
+        $wrappingsQuery = GiftWrapping::query()
+            ->when(Schema::hasColumn('gift_wrappings', 'is_active'), fn ($q) => $q->where('is_active', true));
+        if (Schema::hasColumn('gift_wrappings', 'sort_order')) {
+            $wrappingsQuery->orderBy('sort_order');
+        }
+        $wrappings = $wrappingsQuery->orderBy('id')->get();
+
+        return $wrappings->map(function ($w) {
+            return [
+                'id' => (int) $w->id,
+                'name' => (string) $w->name,
+                'emoji' => '🎁',
+                'price' => (float) ($w->price ?? 0),
+                'image' => $this->resolvePublicImage($w->image),
+            ];
+        })->values()->all();
     }
 
     private function getRibbons()
     {
-        return [
-            ['id' => 1, 'name' => 'شريط ذهبي', 'emoji' => '🎀', 'price' => 5],
-            ['id' => 2, 'name' => 'شريط أحمر', 'emoji' => '❤️', 'price' => 5],
-            ['id' => 3, 'name' => 'شريط وردي', 'emoji' => '💗', 'price' => 5],
-            ['id' => 4, 'name' => 'شريط أبيض', 'emoji' => '🤍', 'price' => 5],
-            ['id' => 5, 'name' => 'بدون شريط', 'emoji' => '➖', 'price' => 0],
-        ];
+        if (! Schema::hasTable('gift_ribbons')) {
+            return [];
+        }
+
+        $ribbonsQuery = GiftRibbon::query()
+            ->when(Schema::hasColumn('gift_ribbons', 'is_active'), fn ($q) => $q->where('is_active', true));
+        if (Schema::hasColumn('gift_ribbons', 'sort_order')) {
+            $ribbonsQuery->orderBy('sort_order');
+        }
+        $ribbons = $ribbonsQuery->orderBy('id')->get();
+
+        return $ribbons->map(function ($r) {
+            return [
+                'id' => (int) $r->id,
+                'name' => (string) $r->name,
+                'emoji' => '🎀',
+                'price' => (float) ($r->price ?? 0),
+                'image' => $this->resolvePublicImage($r->image),
+            ];
+        })->values()->all();
     }
 
     private function getCards()
     {
-        return [
-            ['id' => 1, 'name' => 'بطاقة عيد ميلاد', 'emoji' => '🎂', 'price' => 5],
-            ['id' => 2, 'name' => 'بطاقة حب', 'emoji' => '💕', 'price' => 5],
-            ['id' => 3, 'name' => 'بطاقة تهنئة', 'emoji' => '🎉', 'price' => 5],
-            ['id' => 4, 'name' => 'بطاقة شكر', 'emoji' => '🙏', 'price' => 5],
-            ['id' => 5, 'name' => 'بطاقة عيد', 'emoji' => '🌙', 'price' => 5],
-            ['id' => 6, 'name' => 'بدون بطاقة', 'emoji' => '➖', 'price' => 0],
-        ];
+        if (! Schema::hasTable('gift_cards')) {
+            return [];
+        }
+
+        $cardsQuery = GiftCard::query()
+            ->when(Schema::hasColumn('gift_cards', 'is_active'), fn ($q) => $q->where('is_active', true));
+        if (Schema::hasColumn('gift_cards', 'sort_order')) {
+            $cardsQuery->orderBy('sort_order');
+        }
+        $cards = $cardsQuery->orderBy('id')->get();
+
+        return $cards->map(function ($c) {
+            return [
+                'id' => (int) $c->id,
+                'name' => (string) $c->name,
+                'emoji' => '💌',
+                'price' => (float) ($c->price ?? 0),
+                'image' => $this->resolvePublicImage($c->image),
+            ];
+        })->values()->all();
     }
 
     /**
@@ -178,7 +309,10 @@ class CustomGiftController extends Controller
         $selectedStoreProducts = [];
         if ($request->store_products) {
             foreach ($request->store_products as $pData) {
-                $p = Product::query()->active()->find($pData['product_id'] ?? 0);
+                $p = Product::query()
+                    ->active()
+                    ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
+                    ->find($pData['product_id'] ?? 0);
                 if ($p && ($p->stock === null || $p->stock > 0)) {
                     $qty = max(1, (int) ($pData['qty'] ?? 1));
                     $price = (float) ($p->discount_price ?? $p->price);

@@ -644,7 +644,7 @@
 
         async function loadCart() {
             try {
-                const response = await fetch(`${API_BASE}/cart`);
+                const response = await fetch(`${API_BASE}/cart`, { credentials: 'same-origin' });
                 const data = await response.json();
                 
                 displayCart(data);
@@ -683,15 +683,28 @@
                 const oldPrice = item.product.discount_price ? parseFloat(item.product.price) : null;
                 const savings = oldPrice ? (oldPrice - price) * item.quantity : 0;
                 const itemTotal = price * item.quantity;
+                const placeholderImage = '/images/gift-placeholder.svg';
                 
                 // Check if this is a custom gift/bouquet (string ID)
                 const isCustom = typeof item.id === 'string' && (item.id.startsWith('custom_gift_') || item.id.startsWith('custom_bouquet_'));
-                const itemIdParam = isCustom ? `'${item.id}'` : item.id;
+                // Check if this is a mart product
+                const isMart = item.type === 'mart' || (typeof item.id === 'string' && item.id.startsWith('m'));
                 
-                // For custom items, show emoji preview instead of image
-                const imageContent = isCustom 
-                    ? `<div style="font-size:4rem;display:flex;align-items:center;justify-content:center;height:100%;">${item.id.startsWith('custom_bouquet_') ? '💐' : '🎁'}</div>`
-                    : `<img src="${item.product.image || 'https://via.placeholder.com/150'}" alt="${item.product.name}">`;
+                const itemIdParam = (isCustom || isMart) ? `'${item.id}'` : item.id;
+                
+                // For custom items or Mart items with emojis, show emoji/icon preview
+                let imageContent = '';
+                if (isCustom) {
+                    imageContent = `<div style="font-size:4rem;display:flex;align-items:center;justify-content:center;height:100%;">${item.id.startsWith('custom_bouquet_') ? '💐' : '🎁'}</div>`;
+                } else if (isMart && item.product.emoji) {
+                    imageContent = `<div style="font-size:4rem;display:flex;align-items:center;justify-content:center;height:100%;">${item.product.emoji}</div>`;
+                } else {
+                    let img = item.product.image || '';
+                    if (img && !img.startsWith('http') && !img.startsWith('/')) {
+                        img = '/storage/' + img.replace(/^storage\//, '');
+                    }
+                    imageContent = `<img src="${img || placeholderImage}" alt="${item.product.name}" onerror="this.src='${placeholderImage}'">`;
+                }
                 
                 // For custom items, hide quantity controls (quantity is always 1)
                 const quantityControls = isCustom 
@@ -703,9 +716,17 @@
                        </div>`;
                 
                 // Product ID display
-                const productIdDisplay = !isCustom 
-                    ? `<div class="cart-item-meta-item"><i class="fas fa-box"></i> رقم المنتج: #${item.product.id}</div>`
-                    : `<div class="cart-item-meta-item"><i class="fas fa-gift"></i> هدية مخصصة</div>`;
+                let productIdDisplay = '';
+                if (isCustom) {
+                    productIdDisplay = `<div class="cart-item-meta-item"><i class="fas fa-gift"></i> هدية مخصصة</div>`;
+                } else if (isMart) {
+                    productIdDisplay = `
+                        <div class="cart-item-meta-item"><i class="fas fa-store"></i> توليب مارت</div>
+                        <div class="cart-item-meta-item"><i class="fas fa-box"></i> رقم المنتج: #${item.id}</div>
+                    `;
+                } else {
+                    productIdDisplay = `<div class="cart-item-meta-item"><i class="fas fa-box"></i> رقم المنتج: #${item.product.id}</div>`;
+                }
                 
                 return `
                 <div class="cart-item" data-item-id="${item.id}">
@@ -792,7 +813,7 @@
 
         async function updateQuantity(itemId, newQuantity) {
             if (newQuantity < 1) {
-                removeItem(itemId);
+                showDeleteModal(itemId);
                 return;
             }
 
@@ -804,6 +825,7 @@
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                     },
+                    credentials: 'same-origin',
                     body: JSON.stringify({
                         item_id: itemId,
                         quantity: newQuantity
@@ -848,6 +870,7 @@
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                     },
+                    credentials: 'same-origin',
                     body: JSON.stringify({
                         item_id: itemToDelete
                     })
@@ -903,7 +926,7 @@
         // Load cart count
         async function loadCartCount() {
             try {
-                const response = await fetch(`${API_BASE}/cart`);
+                const response = await fetch(`${API_BASE}/cart`, { credentials: 'same-origin' });
                 const data = await response.json();
                 updateCartCount(data.count || 0);
             } catch (error) {

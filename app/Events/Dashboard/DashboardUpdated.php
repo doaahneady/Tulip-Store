@@ -7,6 +7,7 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardUpdated implements ShouldBroadcastNow
 {
@@ -29,10 +30,24 @@ class DashboardUpdated implements ShouldBroadcastNow
 
     public function broadcastWith(): array
     {
-        return [
+        $data = [
             'dashboard' => $this->dashboard,
             'payload' => $this->payload,
             'timestamp' => now()->toISOString(),
         ];
+        if (app()->environment(['local', 'testing'])) {
+            $key = 'test.dashboard_events.'.$this->dashboard;
+            $events = Cache::get($key, []);
+            if (! is_array($events)) {
+                $events = [];
+            }
+            $events[] = $data;
+            if (count($events) > 250) {
+                $events = array_slice($events, -250);
+            }
+            Cache::put($key, $events, now()->addMinutes(15));
+        }
+
+        return $data;
     }
 }

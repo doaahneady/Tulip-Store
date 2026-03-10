@@ -60,6 +60,11 @@ class SuperAdminController extends Controller
         return view('dashboards.super-admin.index', compact('metrics'));
     }
 
+    public function styleGuide()
+    {
+        return view('dashboards.super-admin.style-guide');
+    }
+
     /**
      * Cross-department KPIs
      */
@@ -92,7 +97,7 @@ class SuperAdminController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(25);
 
-        $statusOptions = ['pending', 'confirmed', 'processing', 'ready', 'shipped', 'delivered', 'cancelled', 'failed', 'refunded'];
+        $statusOptions = ['pending', 'confirmed', 'processing', 'ready', 'out_for_delivery', 'delivered', 'done', 'cancelled', 'failed', 'refunded'];
         $paymentOptions = ['unpaid', 'paid', 'refunded', 'failed'];
 
         return view('dashboards.super-admin.orders', compact('orders', 'statusOptions', 'paymentOptions'));
@@ -105,14 +110,29 @@ class SuperAdminController extends Controller
             'payment_status' => 'nullable|string',
         ]);
 
+        $statusManager = app(\App\Services\OrderStatusManager::class);
+        $current = $statusManager->normalize((string) ($order->status ?? 'pending'));
+        $next = $statusManager->normalize((string) $request->status);
+        $canonical = (array) config('order_statuses.canonical', []);
+        if (! in_array($next, $canonical, true)) {
+            return back()->with('error', 'Invalid status');
+        }
+        if ($current !== $next && ! \App\Services\StatusTransitionService::canTransition('order', $current, $next, true)) {
+            return back()->with('error', 'Invalid transition');
+        }
+
         $old = $order->only(['status', 'payment_status']);
-        $order->update([
-            'status' => $request->status,
-            'payment_status' => $request->payment_status ?? $order->payment_status,
-        ]);
+        if ($current !== $next) {
+            \App\Services\StatusTransitionService::transition($order, 'status', $next, auth('employee')->id(), true);
+        }
+        if ($request->payment_status !== null && $request->payment_status !== $order->payment_status) {
+            $order->update(['payment_status' => $request->payment_status]);
+        }
+
+        Cache::flush();
 
         AuditLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => auth('employee')->id(),
             'action' => 'order_status_update',
             'model_type' => 'Order',
             'model_id' => $order->id,
@@ -132,6 +152,8 @@ class SuperAdminController extends Controller
 
         $oldDriver = $order->assigned_driver_id;
         $order->update(['assigned_driver_id' => $request->driver_id]);
+
+        Cache::flush();
 
         AuditLog::create([
             'user_id' => auth()->id(),
@@ -162,6 +184,7 @@ class SuperAdminController extends Controller
     public function approveFinancialTransaction(FinancialTransaction $transaction)
     {
         $transaction->update(['status' => 'approved', 'approved_at' => now()]);
+        Cache::flush();
         AuditLog::create([
             'user_id' => auth()->id(),
             'action' => 'finance_transaction_approve',
@@ -177,6 +200,7 @@ class SuperAdminController extends Controller
     public function rejectFinancialTransaction(FinancialTransaction $transaction)
     {
         $transaction->update(['status' => 'rejected']);
+        Cache::flush();
         AuditLog::create([
             'user_id' => auth()->id(),
             'action' => 'finance_transaction_reject',
@@ -192,6 +216,7 @@ class SuperAdminController extends Controller
     public function approveLeave(\App\Models\LeaveRequest $leave)
     {
         $leave->update(['status' => 'approved', 'approved_at' => now()]);
+        Cache::flush();
         AuditLog::create([
             'user_id' => auth()->id(),
             'action' => 'hr_leave_approve',
@@ -207,6 +232,7 @@ class SuperAdminController extends Controller
     public function rejectLeave(\App\Models\LeaveRequest $leave)
     {
         $leave->update(['status' => 'rejected']);
+        Cache::flush();
         AuditLog::create([
             'user_id' => auth()->id(),
             'action' => 'hr_leave_reject',
@@ -255,6 +281,7 @@ class SuperAdminController extends Controller
         $request->validate(['driver_id' => 'required|integer']);
         $old = $order->assigned_driver_id;
         $order->update(['assigned_driver_id' => $request->driver_id]);
+        Cache::flush();
         AuditLog::create([
             'user_id' => auth()->id(),
             'action' => 'order_reassign_driver',
@@ -273,6 +300,7 @@ class SuperAdminController extends Controller
         $request->validate(['agent_id' => 'required|integer']);
         $old = $ticket->assigned_to;
         $ticket->update(['assigned_to' => $request->agent_id]);
+        Cache::flush();
         AuditLog::create([
             'user_id' => auth()->id(),
             'action' => 'ticket_reassign_agent',
@@ -329,6 +357,8 @@ class SuperAdminController extends Controller
         $old = $transaction->only(['amount', 'status', 'description']);
         $transaction->update(array_filter($validated, fn ($v) => $v !== null && $v !== ''));
 
+        Cache::flush();
+
         AuditLog::log('financial_override_update', $transaction, $old, $transaction->only(['amount', 'status', 'description']));
 
         return back()->with('success', 'Transaction updated');
@@ -352,6 +382,7 @@ class SuperAdminController extends Controller
             'content' => $request->content,
             'created_by' => auth()->id(),
         ]);
+        Cache::flush();
         AuditLog::create([
             'user_id' => auth()->id(),
             'action' => 'announcement_create',
@@ -436,8 +467,10 @@ class SuperAdminController extends Controller
                 // Order Metrics
                 'total_orders' => Order::count(),
                 'monthly_orders' => Order::whereMonth('created_at', now()->month)->count(),
-                'pending_orders' => Order::whereIn('status', ['pending', 'confirmed'])->count(),
-                'active_orders' => Order::whereIn('status', ['pending', 'confirmed', 'processing', 'ready', 'shipped'])->count(),
+                // Awaiting assignment: pending
+                'pending_orders' => Order::whereIn('status', ['pending'])->count(),
+                // Active lifecycle: pending → out_for_delivery → delivered (before CS marks done)
+                'active_orders' => Order::whereIn('status', ['pending', 'confirmed', 'processing', 'ready', 'out_for_delivery', 'delivered'])->count(),
                 'avg_order_value' => $this->avgOrderTotal(Order::where('payment_status', 'paid')),
 
                 // Product Metrics
@@ -652,6 +685,8 @@ class SuperAdminController extends Controller
 
             DB::commit();
 
+            Cache::flush();
+
             return redirect()->route('dashboard.admin.users')
                 ->with('success', 'User updated successfully!');
 
@@ -773,12 +808,15 @@ class SuperAdminController extends Controller
             }
         });
 
+        Cache::flush();
+
         return back()->with('success', 'Employee rules updated');
     }
 
     public function categories(Request $request)
     {
         $categories = Category::query()
+            ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'store'))
             ->when($request->search, function ($q, $search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('slug', 'like', "%{$search}%");
@@ -822,8 +860,13 @@ class SuperAdminController extends Controller
         if (Schema::hasColumn('categories', 'is_active')) {
             $data['is_active'] = (bool) ($validated['is_active'] ?? true);
         }
+        if (Schema::hasColumn('categories', 'market')) {
+            $data['market'] = 'store';
+        }
 
         $category = Category::create($data);
+
+        Cache::flush();
 
         AuditLog::create([
             'user_id' => auth('employee')->id(),
@@ -871,6 +914,8 @@ class SuperAdminController extends Controller
 
         $category->update($data);
 
+        Cache::flush();
+
         AuditLog::create([
             'user_id' => auth('employee')->id(),
             'action' => 'category_update',
@@ -888,6 +933,8 @@ class SuperAdminController extends Controller
     {
         $old = $category->toArray();
         $category->delete();
+
+        Cache::flush();
 
         AuditLog::create([
             'user_id' => auth('employee')->id(),
@@ -1041,18 +1088,305 @@ class SuperAdminController extends Controller
         return view('dashboards.super-admin.gifts', compact('gifts', 'boxes', 'wrappings', 'ribbons', 'cards', 'fillers'));
     }
 
+    public function storeGift(Request $request)
+    {
+        abort_unless(Schema::hasTable('gifts'), 404);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'category' => 'nullable|string|max:50',
+            'occasion' => 'nullable|string|max:50',
+            'price' => 'required|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
+            'is_featured' => 'nullable|boolean',
+            'is_active' => 'nullable|boolean',
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
+        ]);
+
+        $imagePath = Storage::disk('public')->putFile('gifts', $request->file('image'));
+
+        Gift::create([
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'category' => $validated['category'] ?? 'general',
+            'occasion' => $validated['occasion'] ?? null,
+            'price' => $validated['price'],
+            'stock_quantity' => $validated['stock_quantity'],
+            'is_featured' => (bool) ($validated['is_featured'] ?? false),
+            'is_active' => (bool) ($validated['is_active'] ?? true),
+            'images' => ['/storage/'.$imagePath],
+        ]);
+
+        return back()->with('success', 'Gift created');
+    }
+
+    public function storeGiftBox(Request $request)
+    {
+        abort_unless(Schema::hasTable('gift_boxes'), 404);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'size' => 'required|string|max:50',
+            'price' => 'required|numeric|min:0',
+            'max_items' => 'required|integer|min:1',
+            'stock' => 'required|integer|min:0',
+            'sort_order' => 'nullable|integer|min:0',
+            'is_active' => 'nullable|boolean',
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
+        ]);
+
+        $imagePath = Storage::disk('public')->putFile('gift-boxes', $request->file('image'));
+
+        GiftBox::create([
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'size' => $validated['size'],
+            'price' => $validated['price'],
+            'max_items' => $validated['max_items'],
+            'stock' => $validated['stock'],
+            'sort_order' => $validated['sort_order'] ?? 0,
+            'is_active' => (bool) ($validated['is_active'] ?? true),
+            'image' => '/storage/'.$imagePath,
+        ]);
+
+        return back()->with('success', 'Gift box created');
+    }
+
+    public function storeGiftFiller(Request $request)
+    {
+        abort_unless(Schema::hasTable('gift_fillers'), 404);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'category' => 'required|string|max:50',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'sort_order' => 'nullable|integer|min:0',
+            'is_active' => 'nullable|boolean',
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
+        ]);
+
+        $imagePath = Storage::disk('public')->putFile('gift-fillers', $request->file('image'));
+
+        GiftFiller::create([
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'category' => $validated['category'],
+            'price' => $validated['price'],
+            'stock' => $validated['stock'],
+            'sort_order' => $validated['sort_order'] ?? 0,
+            'is_active' => (bool) ($validated['is_active'] ?? true),
+            'image' => '/storage/'.$imagePath,
+        ]);
+
+        return back()->with('success', 'Gift item created');
+    }
+
+    public function giftsCreation(Request $request)
+    {
+        $gifts = null;
+        $boxes = null;
+        $wrappings = null;
+        $ribbons = null;
+        $cards = null;
+        $fillers = null;
+
+        if (Schema::hasTable('gifts')) {
+            $gifts = Gift::query()->orderBy('created_at', 'desc')->paginate(10);
+        }
+        if (Schema::hasTable('gift_boxes')) {
+            $boxes = GiftBox::query()->orderBy('sort_order')->orderBy('id')->get();
+        }
+        if (Schema::hasTable('gift_wrappings')) {
+            $wrappings = GiftWrapping::query()->orderBy('sort_order')->orderBy('id')->get();
+        }
+        if (Schema::hasTable('gift_ribbons')) {
+            $ribbons = GiftRibbon::query()->orderBy('sort_order')->orderBy('id')->get();
+        }
+        if (Schema::hasTable('gift_cards')) {
+            $cards = GiftCard::query()->orderBy('sort_order')->orderBy('id')->get();
+        }
+        if (Schema::hasTable('gift_fillers')) {
+            $fillers = GiftFiller::query()->orderBy('sort_order')->orderBy('id')->get();
+        }
+
+        return view('dashboards.super-admin.gifts-creation', compact('gifts', 'boxes', 'wrappings', 'ribbons', 'cards', 'fillers'));
+    }
+
+    public function storeGiftWrapping(Request $request)
+    {
+        abort_unless(Schema::hasTable('gift_wrappings'), 404);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'color' => 'nullable|string|max:50',
+            'pattern' => 'nullable|string|max:50',
+            'sort_order' => 'nullable|integer|min:0',
+            'is_active' => 'nullable|boolean',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+        ]);
+
+        $imagePath = $request->hasFile('image')
+            ? '/storage/'.Storage::disk('public')->putFile('gift-wrappings', $request->file('image'))
+            : null;
+
+        GiftWrapping::create([
+            'name' => $validated['name'],
+            'price' => $validated['price'],
+            'color' => $validated['color'] ?? null,
+            'pattern' => $validated['pattern'] ?? null,
+            'sort_order' => $validated['sort_order'] ?? 0,
+            'is_active' => (bool) ($validated['is_active'] ?? true),
+            'image' => $imagePath,
+        ]);
+
+        return back()->with('success', 'Wrapping created');
+    }
+
+    public function storeGiftRibbon(Request $request)
+    {
+        abort_unless(Schema::hasTable('gift_ribbons'), 404);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'color' => 'nullable|string|max:50',
+            'sort_order' => 'nullable|integer|min:0',
+            'is_active' => 'nullable|boolean',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+        ]);
+
+        $imagePath = $request->hasFile('image')
+            ? '/storage/'.Storage::disk('public')->putFile('gift-ribbons', $request->file('image'))
+            : null;
+
+        GiftRibbon::create([
+            'name' => $validated['name'],
+            'price' => $validated['price'],
+            'color' => $validated['color'] ?? null,
+            'sort_order' => $validated['sort_order'] ?? 0,
+            'is_active' => (bool) ($validated['is_active'] ?? true),
+            'image' => $imagePath,
+        ]);
+
+        return back()->with('success', 'Ribbon created');
+    }
+
+    public function storeGiftCard(Request $request)
+    {
+        abort_unless(Schema::hasTable('gift_cards'), 404);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'occasion' => 'nullable|string|max:50',
+            'price' => 'required|numeric|min:0',
+            'sort_order' => 'nullable|integer|min:0',
+            'is_active' => 'nullable|boolean',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+        ]);
+
+        $imagePath = $request->hasFile('image')
+            ? '/storage/'.Storage::disk('public')->putFile('gift-cards', $request->file('image'))
+            : null;
+
+        GiftCard::create([
+            'name' => $validated['name'],
+            'occasion' => $validated['occasion'] ?? null,
+            'price' => $validated['price'],
+            'sort_order' => $validated['sort_order'] ?? 0,
+            'is_active' => (bool) ($validated['is_active'] ?? true),
+            'image' => $imagePath,
+        ]);
+
+        return back()->with('success', 'Card created');
+    }
+
+    public function storeAssembledGift(Request $request)
+    {
+        abort_unless(Schema::hasTable('gifts'), 404);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'box_id' => 'required|integer|exists:gift_boxes,id',
+            'filler_ids' => 'required|array|min:1',
+            'filler_ids.*' => 'integer|exists:gift_fillers,id',
+            'is_featured' => 'nullable|boolean',
+            'is_active' => 'nullable|boolean',
+            'category' => 'nullable|string|max:50',
+            'occasion' => 'nullable|string|max:50',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+        ]);
+
+        $box = GiftBox::findOrFail($validated['box_id']);
+        $fillers = GiftFiller::whereIn('id', $validated['filler_ids'])->get();
+
+        $price = (float) ($box->price ?? 0);
+        foreach ($fillers as $f) {
+            $price += (float) ($f->price ?? 0);
+        }
+
+        $stocks = [(int) ($box->stock ?? 0)];
+        foreach ($fillers as $f) {
+            $stocks[] = (int) ($f->stock ?? 0);
+        }
+        $stockQty = min($stocks);
+
+        $images = [];
+        if ($request->hasFile('image')) {
+            $img = Storage::disk('public')->putFile('gifts', $request->file('image'));
+            $images[] = '/storage/'.$img;
+        } else {
+            if (! empty($box->image)) {
+                $images[] = $box->image;
+            }
+            foreach ($fillers as $f) {
+                if (! empty($f->image)) {
+                    $images[] = $f->image;
+                }
+            }
+        }
+
+        Gift::create([
+            'name' => $validated['name'],
+            'description' => null,
+            'category' => $validated['category'] ?? 'general',
+            'occasion' => $validated['occasion'] ?? null,
+            'price' => $price,
+            'stock_quantity' => $stockQty,
+            'is_featured' => (bool) ($validated['is_featured'] ?? false),
+            'is_active' => (bool) ($validated['is_active'] ?? true),
+            'images' => $images,
+            'is_customizable' => false,
+            'customization_options' => [
+                'box_id' => (int) $box->id,
+                'filler_ids' => $fillers->pluck('id')->map(fn ($id) => (int) $id)->all(),
+            ],
+        ]);
+
+        return back()->with('success', 'Assembled gift created');
+    }
+
     public function mart(Request $request)
     {
         $categories = null;
         $products = null;
 
         if (Schema::hasTable('categories')) {
-            $categories = Category::query()->orderBy('display_order')->orderBy('name')->get();
+            $categories = Category::query()
+                ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'mart'))
+                ->orderBy('display_order')
+                ->orderBy('name')
+                ->get();
         }
 
         if (Schema::hasTable('products')) {
             $products = Product::query()
                 ->with('category')
+                ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'mart'))
                 ->when($request->search, function ($q, $search) {
                     $q->where('name', 'like', "%{$search}%")
                         ->orWhere('sku', 'like', "%{$search}%")
@@ -1071,7 +1405,11 @@ class SuperAdminController extends Controller
     {
         abort_unless(Schema::hasTable('products'), 404);
         $categories = Schema::hasTable('categories')
-            ? Category::query()->orderBy('display_order')->orderBy('name')->get()
+            ? Category::query()
+                ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'mart'))
+                ->orderBy('display_order')
+                ->orderBy('name')
+                ->get()
             : collect();
         return view('dashboards.super-admin.mart-product-create', compact('categories'));
     }
@@ -1135,6 +1473,9 @@ class SuperAdminController extends Controller
                 $data[$col] = (bool) $validated[$col];
             }
         }
+        if (Schema::hasColumn('products', 'market')) {
+            $data['market'] = 'mart';
+        }
         if ($imagePath !== null) {
             $data['image'] = $imagePath;
         }
@@ -1156,7 +1497,11 @@ class SuperAdminController extends Controller
     {
         abort_unless(Schema::hasTable('products'), 404);
         $categories = Schema::hasTable('categories')
-            ? Category::query()->orderBy('display_order')->orderBy('name')->get()
+            ? Category::query()
+                ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'mart'))
+                ->orderBy('display_order')
+                ->orderBy('name')
+                ->get()
             : collect();
         $attrs = $product->attributes()->get()->pluck('value','name');
         return view('dashboards.super-admin.mart-product-edit', compact('product','categories','attrs'));
@@ -1284,6 +1629,9 @@ class SuperAdminController extends Controller
         if ($imagePath !== null && Schema::hasColumn('categories', 'image')) {
             $data['image'] = $imagePath;
         }
+        if (Schema::hasColumn('categories', 'market')) {
+            $data['market'] = 'mart';
+        }
 
         Category::create($data);
 
@@ -1334,8 +1682,14 @@ class SuperAdminController extends Controller
         if (Schema::hasColumn('categories', 'is_active')) {
             $updates['is_active'] = (bool) ($validated['is_active'] ?? ($category->is_active ?? true));
         }
+        if (Schema::hasColumn('categories', 'market')) {
+            $updates['market'] = 'store';
+        }
         if ($request->file('image') && Schema::hasColumn('categories', 'image')) {
             $updates['image'] = Storage::disk('public')->putFile('categories', $request->file('image'));
+        }
+        if (Schema::hasColumn('categories', 'market')) {
+            $updates['market'] = 'mart';
         }
 
         $category->update($updates);
@@ -1517,11 +1871,21 @@ class SuperAdminController extends Controller
     public function manageDailyPrices()
     {
         abort_unless(Schema::hasTable('products'), 404);
-        $categories = Schema::hasTable('categories')
-            ? Category::query()->orderBy('display_order')->orderBy('name')->get()
-            : collect();
+        $categories = collect();
+        $vegFruitSlugs = ['fruits', 'vegetables', 'khdroaat', 'khodraat', 'mart-fruits', 'mart-vegetables'];
+        if (Schema::hasTable('categories')) {
+            $categories = Category::query()
+                ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'mart'))
+                ->when(true, fn ($q) => $q->whereIn('slug', $vegFruitSlugs))
+                ->orderBy('display_order')
+                ->orderBy('name')
+                ->get();
+        }
+        $allowedIds = $categories->pluck('id')->all();
         $products = Product::query()
             ->with(['category', 'attributes'])
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'mart'))
+            ->when(!empty($allowedIds), fn ($q) => $q->whereIn('category_id', $allowedIds))
             ->orderByRaw('category_id is null, category_id')
             ->orderBy('name')
             ->get();
@@ -1562,6 +1926,9 @@ class SuperAdminController extends Controller
                 }
                 $product = Product::find($item['id']);
                 if (!$product) {
+                    continue;
+                }
+                if (Schema::hasColumn('products', 'market') && ($product->market ?? null) !== 'mart') {
                     continue;
                 }
                 $updates = [];

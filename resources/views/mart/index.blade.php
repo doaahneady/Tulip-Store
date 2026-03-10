@@ -716,12 +716,7 @@
         }
     </style>
 
-    <!-- Hero Banner -->
-    <section class="hero">
-        <div class="hero-card">
-            <img src="/images/banner-flower.jpg" alt="Tulip Banner" class="hero-card-img">
-        </div>
-    </section>
+    
 
     <div class="main-content">
         <!-- Categories Section -->
@@ -765,18 +760,30 @@
 
         <!-- Featured Products -->
         <section class="section">
-            <div class="section-header">
-                <h2 class="section-title">منتجات مميزة</h2>
-                <p class="section-subtitle">اكتشف أفضل المنتجات المختارة خصيصاً لك بأعلى جودة وأفضل الأسعار</p>
+            <div class="section-header" style="display:flex; align-items:center; gap:1rem;">
+                <div>
+                    <h2 class="section-title">منتجات مميزة</h2>
+                    <p class="section-subtitle">اكتشف أفضل المنتجات المختارة خصيصاً لك بأعلى جودة وأفضل الأسعار</p>
+                </div>
+                <a href="/mart/products" class="view-all-btn" style="margin-inline-start:auto; display:inline-flex; align-items:center; gap:.5rem;">
+                    <i class="fas fa-arrow-left"></i>
+                    عرض المزيد
+                </a>
             </div>
             <div class="products-grid" id="featuredProducts"></div>
         </section>
 
         <!-- Fresh Products -->
         <section class="section">
-            <div class="section-header">
-                <h2 class="section-title">طازج اليوم</h2>
-                <p class="section-subtitle">منتجات طازجة وصلت اليوم مباشرة من المزارع إلى مطبخك</p>
+            <div class="section-header" style="display:flex; align-items:center; gap:1rem;">
+                <div>
+                    <h2 class="section-title">طازج اليوم</h2>
+                    <p class="section-subtitle">منتجات طازجة وصلت اليوم مباشرة من المزارع إلى مطبخك</p>
+                </div>
+                <a href="/mart/products" class="view-all-btn" style="margin-inline-start:auto; display:inline-flex; align-items:center; gap:.5rem;">
+                    <i class="fas fa-arrow-left"></i>
+                    عرض المزيد
+                </a>
             </div>
             <div class="products-grid" id="freshProducts"></div>
         </section>
@@ -912,83 +919,104 @@
         </div>
     </footer>
     <script>
-        // Enhanced Product Data with more variety
-        const products = {
-            fruits: [
-                { id: 'm1', name: 'تفاح أحمر', emoji: '🍎', price: 8.5, oldPrice: 10, unit: 'كيلو', origin: 'تركيا', badge: 'sale', category: 'فواكه' },
-                { id: 'm2', name: 'موز', emoji: '🍌', price: 6, oldPrice: null, unit: 'كيلو', origin: 'الإكوادور', badge: 'fresh', category: 'فواكه' },
-                { id: 'm3', name: 'برتقال', emoji: '🍊', price: 5.5, oldPrice: 7, unit: 'كيلو', origin: 'مصر', badge: 'sale', category: 'فواكه' },
-                { id: 'm4', name: 'عنب أحمر', emoji: '🍇', price: 15, oldPrice: null, unit: 'كيلو', origin: 'تشيلي', badge: 'new', category: 'فواكه' },
-                { id: 'm5', name: 'مانجو', emoji: '🥭', price: 12, oldPrice: 14, unit: 'كيلو', origin: 'باكستان', badge: 'sale', category: 'فواكه' },
-                { id: 'm6', name: 'فراولة', emoji: '🍓', price: 18, oldPrice: null, unit: 'علبة', origin: 'محلي', badge: 'fresh', category: 'فواكه' },
-                { id: 'm27', name: 'كيوي', emoji: '🥝', price: 20, oldPrice: null, unit: 'كيلو', origin: 'نيوزيلندا', badge: 'new', category: 'فواكه' },
-                { id: 'm28', name: 'أناناس', emoji: '🍍', price: 25, oldPrice: 30, unit: 'حبة', origin: 'كوستاريكا', badge: 'sale', category: 'فواكه' },
-            ],
-            vegetables: [
-                { id: 'm7', name: 'طماطم', emoji: '🍅', price: 4, oldPrice: 5, unit: 'كيلو', origin: 'محلي', badge: 'sale', category: 'خضروات' },
-                { id: 'm8', name: 'خيار', emoji: '🥒', price: 3.5, oldPrice: null, unit: 'كيلو', origin: 'محلي', badge: 'fresh', category: 'خضروات' },
-                { id: 'm9', name: 'جزر', emoji: '🥕', price: 4.5, oldPrice: null, unit: 'كيلو', origin: 'محلي', badge: 'fresh', category: 'خضروات' },
-                { id: 'm10', name: 'بطاطس', emoji: '🥔', price: 3, oldPrice: 3.5, unit: 'كيلو', origin: 'محلي', badge: 'sale', category: 'خضروات' },
-                { id: 'm11', name: 'بصل', emoji: '🧅', price: 2.5, oldPrice: null, unit: 'كيلو', origin: 'محلي', badge: 'fresh', category: 'خضروات' },
-                { id: 'm12', name: 'فلفل ألوان', emoji: '🫑', price: 12, oldPrice: null, unit: 'كيلو', origin: 'هولندا', badge: 'new', category: 'خضروات' },
-                { id: 'm29', name: 'باذنجان', emoji: '🍆', price: 5, oldPrice: null, unit: 'كيلو', origin: 'محلي', badge: 'fresh', category: 'خضروات' },
-                { id: 'm30', name: 'كوسا', emoji: '🥒', price: 4, oldPrice: null, unit: 'كيلو', origin: 'محلي', badge: 'fresh', category: 'خضروات' },
-            ],
-            leafy: [
-                { id: 'm13', name: 'خس', emoji: '🥬', price: 3, oldPrice: null, unit: 'حبة', origin: 'محلي', badge: 'fresh', category: 'ورقيات' },
-                { id: 'm14', name: 'سبانخ', emoji: '🥬', price: 4, oldPrice: 5, unit: 'ربطة', origin: 'محلي', badge: 'sale', category: 'ورقيات' },
-                { id: 'm15', name: 'بقدونس', emoji: '🌿', price: 1.5, oldPrice: null, unit: 'ربطة', origin: 'محلي', badge: 'fresh', category: 'ورقيات' },
-                { id: 'm16', name: 'نعناع', emoji: '🌿', price: 2, oldPrice: null, unit: 'ربطة', origin: 'محلي', badge: 'fresh', category: 'ورقيات' },
-                { id: 'm31', name: 'جرجير', emoji: '🥬', price: 3.5, oldPrice: null, unit: 'ربطة', origin: 'محلي', badge: 'fresh', category: 'ورقيات' },
-                { id: 'm32', name: 'كزبرة', emoji: '🌿', price: 2, oldPrice: null, unit: 'ربطة', origin: 'محلي', badge: 'fresh', category: 'ورقيات' },
-            ],
-            dairy: [
-                { id: 'm17', name: 'حليب طازج', emoji: '🥛', price: 6, oldPrice: null, unit: 'لتر', origin: 'محلي', badge: 'fresh', category: 'ألبان' },
-                { id: 'm18', name: 'لبن', emoji: '🥛', price: 5, oldPrice: 5.5, unit: 'لتر', origin: 'محلي', badge: 'sale', category: 'ألبان' },
-                { id: 'm19', name: 'جبنة بيضاء', emoji: '🧀', price: 25, oldPrice: null, unit: 'كيلو', origin: 'محلي', badge: 'fresh', category: 'ألبان' },
-                { id: 'm20', name: 'بيض', emoji: '🥚', price: 18, oldPrice: 20, unit: 'طبق', origin: 'محلي', badge: 'sale', category: 'ألبان' },
-                { id: 'm33', name: 'زبدة', emoji: '🧈', price: 15, oldPrice: null, unit: 'علبة', origin: 'محلي', badge: 'fresh', category: 'ألبان' },
-                { id: 'm34', name: 'كريمة طبخ', emoji: '🥛', price: 8, oldPrice: null, unit: 'علبة', origin: 'محلي', badge: 'new', category: 'ألبان' },
-            ],
-            bakery: [
-                { id: 'm21', name: 'خبز عربي', emoji: '🫓', price: 2, oldPrice: null, unit: 'ربطة', origin: 'محلي', badge: 'fresh', category: 'مخبوزات' },
-                { id: 'm22', name: 'توست', emoji: '🍞', price: 5, oldPrice: null, unit: 'كيس', origin: 'محلي', badge: 'fresh', category: 'مخبوزات' },
-                { id: 'm23', name: 'كرواسون', emoji: '🥐', price: 3, oldPrice: null, unit: 'حبة', origin: 'محلي', badge: 'new', category: 'مخبوزات' },
-                { id: 'm35', name: 'كعك', emoji: '🧁', price: 4, oldPrice: null, unit: 'حبة', origin: 'محلي', badge: 'fresh', category: 'مخبوزات' },
-                { id: 'm36', name: 'دونات', emoji: '🍩', price: 6, oldPrice: null, unit: 'حبة', origin: 'محلي', badge: 'new', category: 'مخبوزات' },
-            ],
-            grocery: [
-                { id: 'm24', name: 'أرز بسمتي', emoji: '🍚', price: 35, oldPrice: 40, unit: '5 كيلو', origin: 'الهند', badge: 'sale', category: 'بقالة' },
-                { id: 'm25', name: 'زيت زيتون', emoji: '🫒', price: 45, oldPrice: null, unit: 'لتر', origin: 'سوريا', badge: 'fresh', category: 'بقالة' },
-                { id: 'm26', name: 'سكر', emoji: '🧂', price: 8, oldPrice: null, unit: 'كيلو', origin: 'محلي', badge: 'fresh', category: 'بقالة' },
-                { id: 'm37', name: 'ملح', emoji: '🧂', price: 3, oldPrice: null, unit: 'كيلو', origin: 'محلي', badge: 'fresh', category: 'بقالة' },
-                { id: 'm38', name: 'معكرونة', emoji: '🍝', price: 7, oldPrice: 8, unit: 'علبة', origin: 'إيطاليا', badge: 'sale', category: 'بقالة' },
-            ]
-        };
+        let products = {};
+        let categories = [];
+        let allProductsFlat = [];
+        const categoryImageBySlug = {};
 
-        const categoryImages = {
-            fruits: 'https://images.unsplash.com/photo-1543353071-873f17a7a5c0?auto=format&fit=crop&w=600&q=60',
-            vegetables: 'https://images.unsplash.com/photo-1510627498534-cf7e9002facc?auto=format&fit=crop&w=600&q=60',
-            leafy: 'https://images.unsplash.com/photo-1524594144026-4f37c3f0b8c2?auto=format&fit=crop&w=600&q=60',
-            dairy: 'https://images.unsplash.com/photo-1580910051073-7c7b48dde3b1?auto=format&fit=crop&w=600&q=60',
-            bakery: 'https://images.unsplash.com/photo-1509440159598-8b4c12f6990b?auto=format&fit=crop&w=600&q=60',
-            grocery: '/images/grocery.jpg'
-        };
-        const categories = [
-            { id: 'fruits', name: 'فواكه', image: categoryImages.fruits, color: '#f97316', gradient: 'linear-gradient(135deg, #f97316, #fb923c)' },
-            { id: 'vegetables', name: 'خضروات', image: categoryImages.vegetables, color: '#22c55e', gradient: 'linear-gradient(135deg, #22c55e, #16a34a)' },
-            { id: 'leafy', name: 'ورقيات', image: categoryImages.leafy, color: '#10b981', gradient: 'linear-gradient(135deg, #10b981, #059669)' },
-            { id: 'dairy', name: 'ألبان وبيض', image: categoryImages.dairy, color: '#3b82f6', gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)' },
-            { id: 'bakery', name: 'مخبوزات', image: categoryImages.bakery, color: '#d97706', gradient: 'linear-gradient(135deg, #d97706, #b45309)' },
-            { id: 'grocery', name: 'بقالة', image: categoryImages.grocery, color: '#7c3aed', gradient: 'linear-gradient(135deg, #7c3aed, #6d28d9)' },
-        ];
+        function resolvePublicImage(path) {
+            if (!path) return null;
+            const p = String(path);
+            if (p.startsWith('http://') || p.startsWith('https://')) return p;
+            if (p.startsWith('/')) return p;
+            return `/storage/${p}`;
+        }
 
-        // Store products globally for search
-        window.martProducts = products;
-        window.martCategories = categories;
+        function guessEmoji(slug, name) {
+            const s = String(slug || '').toLowerCase();
+            const n = String(name || '').toLowerCase();
+            if (s.includes('fruit') || n.includes('فواك')) return '🍎';
+            if (s.includes('veget') || n.includes('خض')) return '🥕';
+            if (s.includes('leaf') || n.includes('ورق')) return '🥬';
+            if (s.includes('dairy') || n.includes('لب')) return '🥛';
+            if (s.includes('baker') || n.includes('مخب')) return '🍞';
+            if (s.includes('groc') || n.includes('بقال')) return '🛒';
+            return '🛒';
+        }
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', () => {
+        function normalizeApiProduct(p) {
+            const categoryName = p.category?.name || '';
+            const categorySlug = p.category?.slug || 'uncategorized';
+            const price = parseFloat(p.discount_price || p.price || 0);
+            const oldPrice = p.discount_price ? parseFloat(p.price || 0) : null;
+
+            const attrs = Array.isArray(p.attributes) ? p.attributes : [];
+            const unit = (attrs.find(a => a.name === 'unit')?.value) || p.unit || 'حبة';
+            const origin = (attrs.find(a => a.name === 'origin')?.value) || p.origin || 'محلي';
+
+            let badge = '';
+            if (p.discount_price) badge = 'sale';
+            else if (String(origin).includes('محلي')) badge = 'fresh';
+            else if (p.is_featured) badge = 'new';
+
+            return {
+                id: p.id,
+                name: p.name || '',
+                emoji: guessEmoji(categorySlug, categoryName),
+                price,
+                oldPrice,
+                unit,
+                origin,
+                badge,
+                category: categoryName,
+                categorySlug,
+                imageUrl: resolvePublicImage(p.image) || (Array.isArray(p.images) && p.images[0]) || null,
+            };
+        }
+
+        async function loadMartData() {
+            const [categoriesRes, productsRes] = await Promise.all([
+                fetch('/api/categories?market=mart', { headers: { 'Accept': 'application/json' } }),
+                fetch('/api/products?market=mart&per_page=1000&sort_by=created_at&sort_order=desc', { headers: { 'Accept': 'application/json' } }),
+            ]);
+
+            const categoriesPayload = await categoriesRes.json().catch(() => ({ data: [] }));
+            const productsPayload = await productsRes.json().catch(() => ({ data: [] }));
+            const apiCategories = Array.isArray(categoriesPayload.data) ? categoriesPayload.data : [];
+            const apiProducts = Array.isArray(productsPayload.data) ? productsPayload.data : [];
+
+            const palette = [
+                { color: '#f97316', gradient: 'linear-gradient(135deg, #f97316, #fb923c)' },
+                { color: '#22c55e', gradient: 'linear-gradient(135deg, #22c55e, #16a34a)' },
+                { color: '#3b82f6', gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)' },
+                { color: '#7c3aed', gradient: 'linear-gradient(135deg, #7c3aed, #6d28d9)' },
+                { color: '#10b981', gradient: 'linear-gradient(135deg, #10b981, #059669)' },
+                { color: '#d97706', gradient: 'linear-gradient(135deg, #d97706, #b45309)' },
+            ];
+
+            categories = apiCategories
+                .map((c, i) => {
+                const p = palette[i % palette.length];
+                const slug = c.slug || String(c.id);
+                const image = resolvePublicImage(c.image) || '/images/grocery.jpg';
+                categoryImageBySlug[slug] = image;
+                return { id: slug, name: c.name || slug, image, color: p.color, gradient: p.gradient };
+            });
+
+            products = {};
+            allProductsFlat = apiProducts.map(normalizeApiProduct);
+            allProductsFlat.forEach((p) => {
+                const key = p.categorySlug || 'uncategorized';
+                if (!products[key]) products[key] = [];
+                products[key].push(p);
+            });
+
+            window.martProducts = products;
+            window.martCategories = categories;
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadMartData();
             loadTodayDate();
             loadCategories();
             loadSpecialPrices();
@@ -1024,10 +1052,12 @@
         }
 
         function loadSpecialPrices() {
-            // Load fruits special prices (top 4)
-            const fruitsSpecial = products.fruits.slice(0, 4);
+            const first = categories.find(c => c.id === 'fruits') || categories[0];
+            const second = categories.find(c => c.id === 'vegetables') || categories[1];
+
+            const fruitsSpecial = first ? (products[first.id] || []).slice(0, 4) : [];
             document.getElementById('fruitsSpecialPrices').innerHTML = fruitsSpecial.map(p => `
-                <div class="price-item" onclick="addToCart('${p.id}', event)" style="--category-color: #f97316;">
+                <div class="price-item" onclick="addToCart('${p.id}', event)" style="--category-color: ${first?.color || '#059669'};">
                     <img src="${getProductImage(p)}" alt="${p.name}" class="price-item-photo">
                     <div class="price-item-info">
                         <div class="price-item-name">${p.name}</div>
@@ -1036,10 +1066,9 @@
                 </div>
             `).join('');
 
-            // Load vegetables special prices (top 4)
-            const vegetablesSpecial = products.vegetables.slice(0, 4);
+            const vegetablesSpecial = second ? (products[second.id] || []).slice(0, 4) : [];
             document.getElementById('vegetablesSpecialPrices').innerHTML = vegetablesSpecial.map(p => `
-                <div class="price-item" onclick="addToCart('${p.id}', event)" style="--category-color: #22c55e;">
+                <div class="price-item" onclick="addToCart('${p.id}', event)" style="--category-color: ${second?.color || '#059669'};">
                     <img src="${getProductImage(p)}" alt="${p.name}" class="price-item-photo">
                     <div class="price-item-info">
                         <div class="price-item-name">${p.name}</div>
@@ -1050,12 +1079,15 @@
         }
 
         function loadFeaturedProducts() {
-            const featured = Object.values(products).flat().slice(0, 5);
+            const featured = allProductsFlat.filter(p => p.badge === 'new').slice(0, 5);
+            if (featured.length === 0) {
+                featured.push(...allProductsFlat.slice(0, 5));
+            }
             document.getElementById('featuredProducts').innerHTML = featured.map(p => createProductCard(p)).join('');
         }
 
         function loadFreshProducts() {
-            const fresh = Object.values(products).flat().filter(p => p.badge === 'fresh').slice(0, 5);
+            const fresh = allProductsFlat.filter(p => p.badge === 'fresh').slice(0, 5);
             document.getElementById('freshProducts').innerHTML = fresh.map(p => createProductCard(p)).join('');
         }
         function createProductCard(p) {
@@ -1095,16 +1127,8 @@
             `;
         }
         function getProductImage(p) {
-            const map = {
-                'فواكه': categoryImages.fruits,
-                'خضروات': categoryImages.vegetables,
-                'ورقيات': categoryImages.leafy,
-                'ألبان': categoryImages.dairy,
-                'ألبان وبيض': categoryImages.dairy,
-                'مخبوزات': categoryImages.bakery,
-                'بقالة': categoryImages.grocery
-            };
-            return map[p.category] || categoryImages.grocery;
+            if (p.imageUrl) return p.imageUrl;
+            return categoryImageBySlug[p.categorySlug] || '/images/grocery.jpg';
         }
 
         function toggleFavorite(productId, event) {
@@ -1123,7 +1147,7 @@
             const originalContent = btn.innerHTML;
             
             // Find product
-            const product = Object.values(products).flat().find(p => p.id === productId);
+            const product = Object.values(products).flat().find(p => String(p.id) === String(productId));
             if (!product) return;
             
             // Show loading
@@ -1145,7 +1169,8 @@
                         price: product.price,
                         quantity: 1,
                         image: getProductImage(product),
-                        unit: product.unit
+                        unit: product.unit,
+                        emoji: product.emoji
                     })
                 });
                 if (!response.ok) {
@@ -1172,6 +1197,10 @@
                 }
                 if (window.showToast) {
                     window.showToast('تمت إضافة ' + product.name + ' إلى السلة');
+                    // Mart delivery warning
+                    setTimeout(() => {
+                        window.showToast('تنبيه: منتجات Mart تتوفر للتوصيل فقط إلى (السويداء، عتيل، قنوات)', 4000);
+                    }, 1500);
                 }
                 
                 // Reset button after delay

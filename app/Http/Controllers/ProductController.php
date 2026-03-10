@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\OrderItem;
 use App\Models\Product;
-use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
@@ -24,6 +23,7 @@ class ProductController extends Controller
 
         $products = Product::with('category')
             ->active()
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
             ->where('name', 'LIKE', "%{$query}%")
             ->limit(10)
             ->get();
@@ -38,11 +38,15 @@ class ProductController extends Controller
     {
         $categorySlug = $request->input('category');
 
-        $baseQuery = Product::with('category');
+        $baseQuery = Product::with('category')
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'));
         $query = (clone $baseQuery)->active();
 
         if ($categorySlug) {
-            $category = Category::where('slug', $categorySlug)->first();
+            $category = Category::query()
+                ->where('slug', $categorySlug)
+                ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'store'))
+                ->first();
             if ($category) {
                 $query->where('category_id', $category->id);
                 $baseQuery->where('category_id', $category->id);
@@ -63,13 +67,28 @@ class ProductController extends Controller
      */
     public function byCategory(Request $request, $slug)
     {
-        $category = Category::where('slug', $slug)
-            ->where('is_active', true)
-            ->firstOrFail();
+        $baseCategoryQuery = Category::where('slug', $slug);
+        if (Schema::hasColumn('categories', 'is_active')) {
+            $baseCategoryQuery->where('is_active', true);
+        }
+
+        if (Schema::hasColumn('categories', 'market')) {
+            $category = (clone $baseCategoryQuery)->where('market', 'store')->first();
+            if (! $category) {
+                $martCategory = (clone $baseCategoryQuery)->where('market', 'mart')->first();
+                if ($martCategory) {
+                    return redirect('/mart/products?category='.$martCategory->slug);
+                }
+                $category = (clone $baseCategoryQuery)->where('market', 'store')->firstOrFail();
+            }
+        } else {
+            $category = $baseCategoryQuery->firstOrFail();
+        }
 
         $query = Product::with('category')
             ->where('category_id', $category->id)
-            ->active();
+            ->active()
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'));
 
         // Apply price filters
         if ($request->has('min_price')) {
@@ -81,11 +100,6 @@ class ProductController extends Controller
             $query->where(function ($q) use ($request) {
                 $q->whereRaw('COALESCE(discount_price, price) <= ?', [$request->max_price]);
             });
-        }
-
-        // Apply rating filter (Amazon-style: rating and up)
-        if ($request->has('rating')) {
-            $query->where('rating', '>=', $request->rating);
         }
 
         // Apply color filters
@@ -201,13 +215,15 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::with('category')
-            ->active()
-            ->findOrFail($id);
+        $with = ['category'];
+        if (Schema::hasTable('product_attributes')) {
+            $with[] = 'attributes';
+        }
 
-        $reviewsCount = Review::where('product_id', $product->id)->where('is_approved', true)->count();
-        $avgRating = (float) (Review::where('product_id', $product->id)->where('is_approved', true)->avg('rating') ?? 0);
-        $avgRating = $reviewsCount > 0 ? round($avgRating, 1) : 0.0;
+        $product = Product::with($with)
+            ->active()
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
+            ->findOrFail($id);
 
         $unitsSold = (int) OrderItem::query()
             ->where('product_id', $product->id)
@@ -218,6 +234,7 @@ class ProductController extends Controller
 
         $relatedProducts = Product::query()
             ->active()
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
             ->where('id', '!=', $product->id)
             ->when($product->category_id, fn ($q) => $q->where('category_id', $product->category_id))
             ->orderByDesc('created_at')
@@ -226,8 +243,6 @@ class ProductController extends Controller
 
         return view('products.show', [
             'product' => $product,
-            'reviewsCount' => $reviewsCount,
-            'avgRating' => $avgRating,
             'unitsSold' => $unitsSold,
             'relatedProducts' => $relatedProducts,
         ]);

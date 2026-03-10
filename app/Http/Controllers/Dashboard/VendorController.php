@@ -15,6 +15,9 @@ use App\Models\PurchaseOrderItem;
 use App\Models\SalesForecast;
 use App\Models\Store;
 use App\Models\AuditLog;
+use App\Models\DashboardNotification;
+use App\Models\Employee;
+use App\Models\Trader;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -54,29 +57,46 @@ class VendorController extends Controller
             return [];
         }
 
+        $storeOrdersBase = Order::query()
+            ->whereHas('items.product', function ($q) use ($store) {
+                $q->where('store_id', $store->id);
+            });
+
+        $terminal = (array) config('order_statuses.terminal', ['done']);
+        $aliases = (array) config('order_statuses.aliases', []);
+        foreach ($aliases as $from => $to) {
+            if (in_array($to, $terminal, true)) {
+                $terminal[] = $from;
+            }
+        }
+        $terminal = array_values(array_unique(array_map('strval', $terminal)));
+        $completedStatusesForDashboard = array_values(array_unique(array_merge(['delivered'], $terminal)));
+
+        $revenueService = app(\App\Services\RevenueMetricsService::class);
+
         return [
             // Sales Metrics - Real data
-            'total_orders' => Order::where('store_id', $store->id)->count(),
-            'monthly_orders' => Order::where('store_id', $store->id)
-                ->whereMonth('created_at', now()->month)->count(),
-            'pending_orders' => Order::where('store_id', $store->id)
-                ->whereIn('status', ['pending', 'confirmed'])->count(),
-            'completed_orders' => Order::where('store_id', $store->id)
-                ->where('status', 'delivered')->count(),
+            'total_orders' => (clone $storeOrdersBase)->count(),
+            'monthly_orders' => (clone $storeOrdersBase)
+                ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+                ->count(),
+            'pending_orders' => (clone $storeOrdersBase)
+                ->whereIn('status', ['pending', 'confirmed', 'processing'])
+                ->count(),
+            'completed_orders' => (clone $storeOrdersBase)
+                ->whereIn('status', $completedStatusesForDashboard)
+                ->count(),
 
             // Revenue Metrics - Real data
-            'total_revenue' => Order::where('store_id', $store->id)
-                ->where('payment_status', 'paid')->sum($this->orderTotalColumn()),
-            'monthly_revenue' => Order::where('store_id', $store->id)
-                ->where('payment_status', 'paid')
-                ->whereMonth('created_at', now()->month)->sum($this->orderTotalColumn()),
-            'available_balance' => FinancialTransaction::where('store_id', $store->id)
-                ->where('type', 'revenue')
-                ->where('status', 'completed')
-                ->sum('amount') - Payout::where('store_id', $store->id)
-                ->where('status', 'processed')->sum('amount'),
+            // Product-only revenue (excludes delivery cost)
+            'total_revenue' => $revenueService->sumProductRevenue(null, null, (int) $store->id),
+            'monthly_revenue' => $revenueService->sumProductRevenue(now()->startOfMonth(), now()->endOfMonth(), (int) $store->id),
+            'available_balance' => $revenueService->sumProductRevenue(null, null, (int) $store->id)
+                - Payout::where('store_id', $store->id)->where('status', 'processed')->sum('amount'),
             'pending_payout' => Payout::where('store_id', $store->id)
                 ->where('status', 'pending')->sum('amount'),
+            'earnings_ex_delivery_total' => $revenueService->sumProductRevenueForStatuses($completedStatusesForDashboard, null, null, (int) $store->id),
+            'earnings_ex_delivery_month' => $revenueService->sumProductRevenueForStatuses($completedStatusesForDashboard, now()->startOfMonth(), now()->endOfMonth(), (int) $store->id),
 
             // Product Metrics - Real data
             'total_products' => Product::where('store_id', $store->id)->count(),
@@ -108,8 +128,11 @@ class VendorController extends Controller
                 ->count(),
 
             // Performance Metrics - Real data
-            'avg_order_value' => Order::where('store_id', $store->id)
-                ->where('payment_status', 'paid')->avg($this->orderTotalColumn()) ?? 0,
+            'avg_order_value' => (function () use ($store) {
+                $total = app(\App\Services\RevenueMetricsService::class)->sumProductRevenue(now()->subDays(30)->startOfDay(), now()->endOfDay(), (int) $store->id);
+                $count = Order::where('store_id', $store->id)->whereIn('status', (array) config('order_statuses.terminal', ['delivered', 'done']))->count();
+                return $count > 0 ? ($total / $count) : 0;
+            })(),
             'conversion_rate' => $this->calculateConversionRate($store->id),
             'customer_satisfaction' => \App\Models\Review::where('is_approved', true)->whereHas('product', function ($q) use ($store) {
                 $q->where('store_id', $store->id);
@@ -178,6 +201,7 @@ class VendorController extends Controller
             }, function ($q) use ($store) {
                 $q->where('store_id', $store->id);
             })
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
             ->with(['category'])
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
@@ -210,7 +234,9 @@ class VendorController extends Controller
 
         $categories = Category::when(Schema::hasColumn('categories', 'is_active'), function ($q) {
             $q->where('is_active', true);
-        })->get();
+        })
+            ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'store'))
+            ->get();
 
         return view('dashboards.vendor.products', compact('products', 'categories', 'store'));
     }
@@ -244,6 +270,7 @@ class VendorController extends Controller
 
         $products = Product::query()
             ->where('store_id', $store->id)
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
             ->orderBy('name')
             ->get(['id', 'name']);
 
@@ -445,6 +472,14 @@ class VendorController extends Controller
 
         DB::beginTransaction();
         try {
+            $ownerUser = auth('trader')->user() ?? auth('employee')->user();
+            abort_unless($ownerUser && ($ownerUser->is_trader ?? false), 403);
+
+            $trader = Schema::hasTable('traders')
+                ? Trader::where('user_id', $ownerUser->id ?? $ownerUser->user_id)->first()
+                : null;
+            abort_unless($trader && ($trader->status ?? null) === Trader::STATUS_APPROVED, 403);
+
             $data = [
                 'store_id' => $store->id,
                 'name' => $request->name,
@@ -463,10 +498,25 @@ class VendorController extends Controller
                 $data['short_description'] = Str::limit($request->description, 200);
             }
             if (Schema::hasColumn('products', 'status')) {
-                $data['status'] = 'active';
+                $data['status'] = 'pending';
             }
             if (Schema::hasColumn('products', 'is_active')) {
-                $data['is_active'] = true;
+                $data['is_active'] = false;
+            }
+            if (Schema::hasColumn('products', 'trader_id')) {
+                $data['trader_id'] = $trader->id;
+            }
+            if (Schema::hasColumn('products', 'is_trader_product')) {
+                $data['is_trader_product'] = true;
+            }
+            if (Schema::hasColumn('products', 'reviewed_by')) {
+                $data['reviewed_by'] = null;
+            }
+            if (Schema::hasColumn('products', 'reviewed_at')) {
+                $data['reviewed_at'] = null;
+            }
+            if (Schema::hasColumn('products', 'rejection_reason')) {
+                $data['rejection_reason'] = null;
             }
 
             $product = Product::create($data);
@@ -481,10 +531,12 @@ class VendorController extends Controller
                 $product->update(['images' => $images]);
             }
 
+            $this->notifyCustomerSupportProductReview($product);
+
             DB::commit();
 
             return redirect()->route('dashboard.vendor.products')
-                ->with('success', 'Product created successfully!');
+                ->with('success', 'Product submitted. Waiting for support approval.');
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -516,13 +568,40 @@ class VendorController extends Controller
             'status' => 'required|in:draft,active,inactive,out_of_stock',
         ]);
 
-        $product->update($request->only([
+        $updates = $request->only([
             'name', 'description', 'category_id', 'price', 'cost_price',
-            'stock_quantity', 'low_stock_threshold', 'status',
-        ]));
+            'stock_quantity', 'low_stock_threshold',
+        ]);
+
+        $isTraderSession = auth('trader')->check();
+        if ($isTraderSession) {
+            if (Schema::hasColumn('products', 'status')) {
+                $updates['status'] = 'pending';
+            }
+            if (Schema::hasColumn('products', 'is_active')) {
+                $updates['is_active'] = false;
+            }
+            if (Schema::hasColumn('products', 'reviewed_by')) {
+                $updates['reviewed_by'] = null;
+            }
+            if (Schema::hasColumn('products', 'reviewed_at')) {
+                $updates['reviewed_at'] = null;
+            }
+            if (Schema::hasColumn('products', 'rejection_reason')) {
+                $updates['rejection_reason'] = null;
+            }
+        } else {
+            $updates['status'] = $request->status;
+        }
+
+        $product->update($updates);
+
+        if ($isTraderSession) {
+            $this->notifyCustomerSupportProductReview($product);
+        }
 
         return redirect()->route('dashboard.vendor.products')
-            ->with('success', 'Product updated successfully!');
+            ->with('success', $isTraderSession ? 'Changes submitted. Waiting for support approval.' : 'Product updated successfully!');
     }
 
     public function deleteProduct(Product $product)
@@ -687,7 +766,7 @@ class VendorController extends Controller
             'total' => (clone $storeScopeQuery)->toBase()->getCountForPagination(),
             'pending' => (clone $storeScopeQuery)->where('status', 'pending')->toBase()->getCountForPagination(),
             'processing' => (clone $storeScopeQuery)->where('status', 'processing')->toBase()->getCountForPagination(),
-            'delivered' => (clone $storeScopeQuery)->where('status', 'delivered')->toBase()->getCountForPagination(),
+            'delivered' => (clone $storeScopeQuery)->whereIn('status', (array) config('order_statuses.terminal', ['delivered', 'done']))->toBase()->getCountForPagination(),
         ];
 
         return view('dashboards.vendor.orders', compact('orders', 'orderStats', 'store', 'orderLogs', 'statusOptions', 'paymentOptions'));
@@ -705,11 +784,28 @@ class VendorController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:confirmed,processing,shipped,delivered,cancelled',
+            'status' => 'required|string',
         ]);
 
+        $statusManager = app(\App\Services\OrderStatusManager::class);
+        $from = $statusManager->normalize((string) $order->status);
+        $to = $statusManager->normalize((string) $request->status);
+        $canonical = (array) config('order_statuses.canonical', []);
+        if (! in_array($to, $canonical, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid status',
+            ], 422);
+        }
+        if (! in_array($to, $statusManager->allowedNext($from), true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid order status transition',
+            ], 422);
+        }
+
         $order->update([
-            'status' => $request->status,
+            'status' => $to,
             'admin_notes' => $request->notes,
         ]);
 
@@ -880,6 +976,44 @@ class VendorController extends Controller
     /**
      * Helper Methods
      */
+    private function notifyCustomerSupportProductReview(Product $product): void
+    {
+        if (! Schema::hasTable('dashboard_notifications') || ! Schema::hasTable('employees')) {
+            return;
+        }
+
+        $csEmployees = Employee::query()
+            ->when(Schema::hasColumn('employees', 'is_cs'), fn ($q) => $q->where('is_cs', true))
+            ->when(Schema::hasColumn('employees', 'status'), fn ($q) => $q->where('status', 'active'))
+            ->get(['id']);
+
+        if ($csEmployees->isEmpty()) {
+            return;
+        }
+
+        $actionUrl = null;
+        try {
+            $actionUrl = route('dashboard.cs.trader-products');
+        } catch (\Throwable $e) {
+            $actionUrl = '/dashboard/cs/trader-products';
+        }
+
+        foreach ($csEmployees as $emp) {
+            DashboardNotification::create([
+                'dashboard_type' => 'cs',
+                'user_type' => Employee::class,
+                'user_id' => $emp->id,
+                'type' => 'trader_product_review',
+                'title' => 'New trader product pending review',
+                'message' => 'A trader submitted "'.$product->name.'" for approval.',
+                'action_url' => $actionUrl,
+                'icon' => 'fa-box',
+                'color' => 'amber',
+                'is_read' => false,
+            ]);
+        }
+    }
+
     private function getUserStore()
     {
         $ownerId = null;

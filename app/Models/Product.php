@@ -5,10 +5,40 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
     use HasFactory;
+
+    protected static function booted()
+    {
+        static::creating(function (self $product) {
+            $isTraderProduct = (bool) ($product->trader_id !== null || $product->is_trader_product);
+            if (! $isTraderProduct) {
+                return;
+            }
+
+            if (Schema::hasColumn('products', 'is_trader_product')) {
+                $product->is_trader_product = true;
+            }
+            if (Schema::hasColumn('products', 'status')) {
+                $product->status = 'pending';
+            }
+            if (Schema::hasColumn('products', 'is_active')) {
+                $product->is_active = false;
+            }
+            if (Schema::hasColumn('products', 'reviewed_by')) {
+                $product->reviewed_by = null;
+            }
+            if (Schema::hasColumn('products', 'reviewed_at')) {
+                $product->reviewed_at = null;
+            }
+            if (Schema::hasColumn('products', 'rejection_reason')) {
+                $product->rejection_reason = null;
+            }
+        });
+    }
 
     protected $fillable = [
         'name',
@@ -33,6 +63,7 @@ class Product extends Model
         'is_active',
         'is_trader_product',
         'status',
+        'market',
     ];
 
     protected $casts = [
@@ -49,6 +80,63 @@ class Product extends Model
         'is_trader_product' => 'boolean',
         'images' => 'array',
     ];
+
+    protected $appends = [
+        'primary_image_url',
+        'primary_image_srcset',
+    ];
+
+    public function getPrimaryImageUrlAttribute(): string
+    {
+        $raw = null;
+        if (Schema::hasColumn('products', 'image')) {
+            $raw = $this->getAttribute('image');
+        }
+        if (! $raw && Schema::hasColumn('products', 'images')) {
+            $imgs = $this->getAttribute('images');
+            if (is_array($imgs) && count($imgs) > 0) {
+                $raw = $imgs[0];
+            }
+        }
+
+        $path = trim((string) ($raw ?? ''));
+        if ($path === '') {
+            return '/images/gift-placeholder.svg';
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+        if (str_starts_with($path, '/storage/')) {
+            return $path;
+        }
+        if (str_starts_with($path, '/images/')) {
+            return $path;
+        }
+        if (str_starts_with($path, '/')) {
+            return $path;
+        }
+        if (str_starts_with($path, 'images/')) {
+            return '/'.$path;
+        }
+        if (file_exists(public_path($path))) {
+            return '/'.$path;
+        }
+
+        $clean = preg_replace('#^storage/#', '', $path) ?? $path;
+        if ($clean !== '') {
+            $clean = ltrim($clean, '/');
+            return '/storage/'.$clean;
+        }
+
+        return '/images/gift-placeholder.svg';
+    }
+
+    public function getPrimaryImageSrcsetAttribute(): string
+    {
+        $url = $this->primary_image_url;
+        return "{$url} 1x, {$url} 2x";
+    }
 
     public function category()
     {
@@ -89,16 +177,22 @@ class Product extends Model
     {
         if (Schema::hasColumn('products', 'is_active')) {
             $query->where('is_active', true);
-
-            if (Schema::hasColumn('products', 'status')) {
-                $query->whereIn('status', ['approved', 'active']);
-            }
-
-            return $query;
         }
 
         if (Schema::hasColumn('products', 'status')) {
-            return $query->whereIn('status', ['approved', 'active']);
+            if (Schema::hasColumn('products', 'is_trader_product')) {
+                $query->where(function ($q) {
+                    $q->where(function ($q2) {
+                        $q2->where('is_trader_product', true)
+                            ->whereIn('status', ['approved', 'active']);
+                    })->orWhere(function ($q2) {
+                        $q2->whereNull('is_trader_product')
+                            ->orWhere('is_trader_product', false);
+                    });
+                });
+            } else {
+                $query->whereIn('status', ['approved', 'active']);
+            }
         }
 
         return $query;

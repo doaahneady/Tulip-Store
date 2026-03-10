@@ -14,6 +14,9 @@ use App\Repositories\Eloquent\FinancialTransactionRepository;
 use App\Repositories\Eloquent\OrderRepository;
 use App\Repositories\Eloquent\StoreRepository;
 use App\Repositories\Eloquent\UserRepository;
+use App\Services\CurrencyService;
+use App\Models\Order;
+use App\Observers\OrderObserver;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -40,5 +43,11 @@ class AppServiceProvider extends ServiceProvider
         // Register dashboard Blade components with 'dashboard.' prefix
         // This allows using <x-dashboard.alert>, <x-dashboard.form-errors>, etc.
         Blade::anonymousComponentPath(resource_path('views/dashboard/components'), 'dashboard');
+
+        Order::observe(OrderObserver::class);
+
+        Blade::directive('money', function ($expression) {
+            return "<?php echo app(" . CurrencyService::class . "::class)->formatUsd((float)($expression)); ?>";
+        });
     }
 }

@@ -378,14 +378,10 @@
 <body>
     @include('components.navbar')
 
-    <section class="hero">
-        <div class="hero-card">
-            <img src="/images/banner-flower.jpg" alt="Tulip Banner" class="hero-card-img">
-        </div>
-    </section>
+    
 
     <div class="gifts-container">
-        <!-- Premium Cards -->
+        <!-- Gifts Creation Section (dynamic images from DB) -->
         <div class="premium-cards">
             <!-- Custom Box Card -->
             <div class="premium-card box-card" onclick="window.location.href='/gifts/box-arrangement'">
@@ -393,7 +389,7 @@
                     <span class="card-floating">✨</span>
                     <span class="card-floating">🎀</span>
                     <span class="card-floating">💝</span>
-                        <img src="/images/mistery_box.jpg" alt="Gift Box" class="card-image">
+                    <img id="boxCardImage" src="/images/mistery_box.jpg" alt="Gift Box" class="card-image" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'">
                 </div>
                 <div class="card-content">
                     <span class="card-tag">الأكثر طلباً</span>
@@ -417,7 +413,7 @@
                     <span class="card-floating">🌸</span>
                     <span class="card-floating">🌺</span>
                     <span class="card-floating">🌷</span>
-                        <img src="/images/banner-flower.jpg" alt="Rose Bouquet" class="card-image">
+                    <img id="bouquetCardImage" src="/images/banner-flower.jpg" alt="Rose Bouquet" class="card-image" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'">
                 </div>
                 <div class="card-content">
                     <span class="card-tag">ورد طازج يومياً</span>
@@ -441,7 +437,7 @@
                     <span class="card-floating">⭐</span>
                     <span class="card-floating">🏆</span>
                     <span class="card-floating">💎</span>
-                        <img src="/images/gift-placeholder.jpg" alt="Ready Gifts" class="card-image">
+                    <img id="readyCardImage" src="/images/footer.jpg" alt="Ready Gifts" class="card-image" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'">
                 </div>
                 <div class="card-content">
                     <span class="card-tag">جاهزة للتوصيل</span>
@@ -459,12 +455,12 @@
                 </div>
             </div>
         </div>
+        
 
         <!-- Ready Made Gifts Section -->
         <section id="readyGifts">
             <div class="section-header">
                 <span class="section-label"><i class="fas fa-star"></i> مختارات توليب</span>
-                <h2 class="section-title">هدايا جاهزة للتوصيل</h2>
                 <p class="section-subtitle">اختر من مجموعتنا المنسقة بعناية واستمتع بتوصيل سريع في نفس اليوم</p>
             </div>
             
@@ -611,102 +607,106 @@
     </footer>
 
     <script>
-        // Sample ready-made gifts data
-        const readyGifts = [
-            { id: 1, name: 'صندوق هدية فاخر', image: '/images/mistery_box.jpg', price: 299, oldPrice: 350, badge: 'الأكثر مبيعاً', rating: 4.9, reviews: 128 },
-            { id: 2, name: 'باقة ورد رومانسية', image: '/images/banner-flower.jpg', price: 199, oldPrice: null, badge: null, rating: 4.8, reviews: 95 },
-            { id: 3, name: 'صندوق شوكولاتة فاخرة', image: '/images/gift-placeholder.jpg', price: 149, oldPrice: 180, badge: 'sale', badgeText: 'خصم 17%', rating: 4.7, reviews: 67 },
-            { id: 4, name: 'طقم عطور مميز', image: '/images/gift-placeholder.jpg', price: 399, oldPrice: null, badge: 'new', badgeText: 'جديد', rating: 5.0, reviews: 23 },
-            { id: 5, name: 'سلة فواكه طازجة', image: '/images/grocery.jpg', price: 179, oldPrice: 220, badge: 'sale', badgeText: 'خصم 19%', rating: 4.6, reviews: 54 },
-            { id: 6, name: 'صندوق هدية للأطفال', image: '/images/gift-placeholder.jpg', price: 129, oldPrice: null, badge: null, rating: 4.8, reviews: 89 },
-            { id: 7, name: 'باقة ورد مع شوكولاتة', image: '/images/banner-flower.jpg', price: 249, oldPrice: 299, badge: 'الأكثر مبيعاً', rating: 4.9, reviews: 156 },
-            { id: 8, name: 'طقم إكسسوارات نسائية', image: '/images/gift-placeholder.jpg', price: 349, oldPrice: null, badge: 'new', badgeText: 'جديد', rating: 4.7, reviews: 34 },
-        ];
-
-        // Load gifts
-        function loadGifts() {
-            const grid = document.getElementById('giftsGrid');
-            grid.innerHTML = readyGifts.map(gift => {
-                const stars = '★'.repeat(Math.floor(gift.rating)) + (gift.rating % 1 >= 0.5 ? '½' : '');
-                let badgeClass = '';
-                let badgeText = '';
-                if (gift.badge === 'الأكثر مبيعاً') { badgeClass = ''; badgeText = gift.badge; }
-                else if (gift.badge === 'new') { badgeClass = 'new'; badgeText = gift.badgeText; }
-                else if (gift.badge === 'sale') { badgeClass = 'sale'; badgeText = gift.badgeText; }
-                
-                return `
-                    <div class="gift-card" onclick="window.location.href='/product/${gift.id}'">
-                        <div class="gift-image">
-                            ${badgeText ? `<span class="gift-badge ${badgeClass}">${badgeText}</span>` : ''}
-                            <img src="${gift.image}" alt="${gift.name}">
-                        </div>
-                        <div class="gift-info">
-                            <h3 class="gift-name">${gift.name}</h3>
-                            <div class="gift-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star${gift.rating < 5 ? '-half-alt' : ''}"></i>
-                                <span>${gift.rating} (${gift.reviews})</span>
-                            </div>
-                            <div class="gift-price">
-                                <span class="price-current">${gift.price} ر.س</span>
-                                ${gift.oldPrice ? `<span class="price-old">${gift.oldPrice} ر.س</span>` : ''}
-                            </div>
-                            <button class="gift-add-btn" onclick="event.stopPropagation(); addToCart(${gift.id})">
-                                <i class="fas fa-cart-plus"></i>
-                                أضف للسلة
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+        function resolveMediaUrl(path) {
+            const p = String(path || '').trim();
+            if (!p) return '/images/gift-placeholder.svg';
+            if (p.startsWith('http://') || p.startsWith('https://')) return p;
+            if (p.startsWith('/')) return p;
+            const cleaned = p.replace(/^storage\//, '');
+            return `/storage/${cleaned}`;
         }
 
-        // Add to cart
-        async function addToCart(productId) {
-            const btn = event.target.closest('.gift-add-btn');
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-
+        async function hydrateGiftCreationSection() {
             try {
-                const response = await fetch('/api/cart/add', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-                    },
-                    body: JSON.stringify({ product_id: productId, quantity: 1 })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    btn.innerHTML = '<i class="fas fa-check"></i> تمت الإضافة';
-                    btn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
-                    if (typeof window.updateCartCount === 'function') {
-                        window.updateCartCount(data.cart_count);
-                    }
-                    if (typeof window.showToast === 'function') {
-                        window.showToast('تمت إضافة المنتج للسلة');
-                    }
-                    setTimeout(() => {
-                        btn.innerHTML = originalHTML;
-                        btn.style.background = '';
-                        btn.disabled = false;
-                    }, 2000);
-                } else {
-                    throw new Error();
-                }
-            } catch (error) {
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
+                const res = await fetch('/api/gifts/featured');
+                const payload = await res.json();
+                const gifts = Array.isArray(payload.data) ? payload.data : [];
+                const fallback = '/images/gift-placeholder.svg';
+                const img1 = document.getElementById('boxCardImage');
+                const img2 = document.getElementById('bouquetCardImage');
+                const img3 = document.getElementById('readyCardImage');
+                const getImg = (g) => resolveMediaUrl((g?.main_image || (g?.images && g.images[0]) || g?.image || '') || '') || fallback;
+                if (img1) img1.src = getImg(gifts[0]) || img1.src || fallback;
+                if (img2) img2.src = getImg(gifts[1] || gifts[0]) || img2.src || fallback;
+                if (img3) img3.src = getImg(gifts[2] || gifts[1] || gifts[0]) || img3.src || fallback;
+            } catch (e) {
+                // Leave placeholders if API not available
             }
         }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', loadGifts);
+        async function loadGifts() {
+            const grid = document.getElementById('giftsGrid');
+            if (!grid) return;
+
+            grid.innerHTML = `
+                <div style="text-align:center;color:#999;padding:2rem;grid-column:1/-1;">
+                    <i class="fas fa-spinner fa-spin" style="font-size:2rem;margin-bottom:1rem;opacity:0.6;"></i>
+                    <p>جاري تحميل الهدايا...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/api/gifts?sort=featured&per_page=24');
+                const data = await response.json();
+                const gifts = Array.isArray(data.data) ? data.data : [];
+
+                if (!gifts.length) {
+                    grid.innerHTML = `
+                        <div style="text-align:center;color:#999;padding:2rem;grid-column:1/-1;">
+                            <i class="fas fa-gift" style="font-size:2rem;margin-bottom:1rem;opacity:0.4;"></i>
+                            <p>لا توجد هدايا حالياً</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = gifts.map(gift => {
+                    const image = resolveMediaUrl(gift.main_image || (gift.images && gift.images[0]) || gift.image || '') || '/images/gift-placeholder.svg';
+                    const rating = Number(gift.rating ?? 0);
+                    const reviews = Number(gift.reviews_count ?? 0);
+                    const badgeText = gift.is_featured ? 'مميز' : '';
+                    const badgeClass = gift.is_featured ? 'new' : '';
+                    return `
+                        <div class="gift-card" onclick="window.location.href='/gifts/${gift.id}'">
+                            <div class="gift-image">
+                                ${badgeText ? `<span class="gift-badge ${badgeClass}">${badgeText}</span>` : ''}
+                                <img src="${image}" alt="${gift.name || ''}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'">
+                            </div>
+                            <div class="gift-info">
+                                <h3 class="gift-name">${gift.name || ''}</h3>
+                                <div class="gift-rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star${rating < 5 ? '-half-alt' : ''}"></i>
+                                    <span>${rating.toFixed(1)} (${reviews})</span>
+                                </div>
+                                <div class="gift-price">
+                                    <span class="price-current">${Number(gift.price || 0)} ر.س</span>
+                                </div>
+                                <button class="gift-add-btn" onclick="event.stopPropagation(); window.location.href='/gifts/${gift.id}'">
+                                    <i class="fas fa-eye"></i>
+                                    عرض
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                grid.innerHTML = `
+                    <div style="text-align:center;color:#999;padding:2rem;grid-column:1/-1;">
+                        <i class="fas fa-exclamation-triangle" style="font-size:2rem;margin-bottom:1rem;opacity:0.4;"></i>
+                        <p>تعذر تحميل الهدايا</p>
+                    </div>
+                `;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            hydrateGiftCreationSection();
+            loadGifts();
+        });
     </script>
 </body>
 </html>

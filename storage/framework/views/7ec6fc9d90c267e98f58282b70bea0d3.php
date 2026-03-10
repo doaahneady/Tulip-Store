@@ -40,15 +40,15 @@
       <div class="flex flex-col md:flex-row items-center justify-between gap-4">
         <p class="text-sm text-gray-400">&copy; 2024 Tulip Store. جميع الحقوق محفوظة.</p>
         <div class="flex items-center gap-6">
-          <div class="flex space-x-4">
-            <a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-facebook"></i></a>
-            <a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-instagram"></i></a>
-          </div>
-          <div class="flex items-center space-x-4">
-            <i class="fab fa-cc-visa text-white text-2xl" aria-label="Visa"></i>
-            <i class="fab fa-cc-mastercard text-white text-2xl" aria-label="Mastercard"></i>
-            <i class="fas fa-hand-holding-dollar text-white text-2xl" aria-label="الدفع نقداً"></i>
-          </div>
+          <ul class="flex gap-4">
+            <li><a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-facebook"></i></a></li>
+            <li><a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-instagram"></i></a></li>
+          </ul>
+          <ul class="flex items-center gap-4">
+            <li><i class="fab fa-cc-visa text-white text-2xl" aria-label="Visa"></i></li>
+            <li><i class="fab fa-cc-mastercard text-white text-2xl" aria-label="Mastercard"></i></li>
+            <li><i class="fas fa-hand-holding-dollar text-white text-2xl" aria-label="الدفع نقداً"></i></li>
+          </ul>
         </div>
       </div>
     </div>

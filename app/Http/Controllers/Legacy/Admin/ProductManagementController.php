@@ -6,13 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class ProductManagementController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with('category');
+        $query = Product::with('category')
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'));
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -66,7 +68,9 @@ class ProductManagementController extends Controller
         }
 
         $products = $query->paginate(20);
-        $categories = Category::where('is_active', true)->get();
+        $categories = Category::where('is_active', true)
+            ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'store'))
+            ->get();
 
         return view('admin.products.index', compact('products', 'categories'));
     }
@@ -79,7 +83,8 @@ class ProductManagementController extends Controller
             'ids.*' => 'exists:products,id',
         ]);
 
-        $products = Product::whereIn('id', $request->ids);
+        $products = Product::whereIn('id', $request->ids)
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'));
 
         switch ($request->action) {
             case 'delete':
@@ -109,7 +114,8 @@ class ProductManagementController extends Controller
 
     public function export(Request $request)
     {
-        $query = Product::with('category');
+        $query = Product::with('category')
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'));
 
         if ($request->filled('search')) {
             $query->where('name', 'like', '%'.$request->search.'%');

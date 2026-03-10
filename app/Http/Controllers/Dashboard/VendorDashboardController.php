@@ -8,18 +8,24 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class VendorDashboardController extends Controller
 {
     public function index()
     {
+        $productsBase = Product::query()
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'));
+        $categoriesBase = Category::query()
+            ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'store'));
+
         // Product Metrics
         $productMetrics = [
-            'total_products' => Product::count(),
-            'active_products' => Product::where('is_active', true)->count(),
-            'out_of_stock' => Product::where('stock_quantity', 0)->count(),
-            'low_stock' => Product::where('stock_quantity', '>', 0)->where('stock_quantity', '<', 10)->count(),
-            'total_categories' => Category::count(),
+            'total_products' => (clone $productsBase)->count(),
+            'active_products' => (clone $productsBase)->where('is_active', true)->count(),
+            'out_of_stock' => (clone $productsBase)->where('stock_quantity', 0)->count(),
+            'low_stock' => (clone $productsBase)->where('stock_quantity', '>', 0)->where('stock_quantity', '<', 10)->count(),
+            'total_categories' => (clone $categoriesBase)->count(),
         ];
 
         // Sales Metrics
@@ -33,7 +39,7 @@ class VendorDashboardController extends Controller
         ];
 
         // Top Selling Products
-        $topProducts = Product::withSum(['orderItems as total_sold' => function ($q) {
+        $topProducts = (clone $productsBase)->withSum(['orderItems as total_sold' => function ($q) {
             $q->whereHas('order', fn ($o) => $o->where('status', 'delivered'));
         }], 'quantity')
             ->withSum(['orderItems as total_revenue' => function ($q) {
@@ -42,12 +48,21 @@ class VendorDashboardController extends Controller
             ->orderBy('total_sold', 'desc')->take(10)->get();
 
         // Low Stock Products
-        $lowStockProducts = Product::where('stock_quantity', '<', 10)
+        $lowStockProducts = (clone $productsBase)->where('stock_quantity', '<', 10)
             ->orderBy('stock_quantity', 'asc')->take(10)->get();
 
         // Categories with Product Count
-        $categories = Category::withCount('products')
-            ->withSum(['products' => fn ($q) => $q->where('is_active', true)], 'stock_quantity')
+        $categories = (clone $categoriesBase)->withCount(['products' => function ($q) {
+            if (Schema::hasColumn('products', 'market')) {
+                $q->where('market', 'store');
+            }
+        }])
+            ->withSum(['products' => function ($q) {
+                $q->where('is_active', true);
+                if (Schema::hasColumn('products', 'market')) {
+                    $q->where('market', 'store');
+                }
+            }], 'stock_quantity')
             ->orderBy('products_count', 'desc')->get();
 
         // Recent Orders
@@ -66,7 +81,7 @@ class VendorDashboardController extends Controller
         }
 
         // All Products
-        $products = Product::with('category')->orderBy('created_at', 'desc')->paginate(20);
+        $products = (clone $productsBase)->with('category')->orderBy('created_at', 'desc')->paginate(20);
 
         return view('dashboards.vendor.index', compact('productMetrics', 'salesMetrics', 'topProducts', 'lowStockProducts', 'categories', 'recentOrders', 'dailySales', 'products'));
     }

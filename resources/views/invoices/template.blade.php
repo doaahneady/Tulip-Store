@@ -222,6 +222,7 @@
                             @case('card') بطاقة ائتمان @break
                             @case('syriatel') سيرياتيل كاش @break
                             @case('bank') تحويل بنكي @break
+                            @case('payroll') Payroll @break
                             @default {{ $order->payment_method }}
                         @endswitch
                     </span><br>
@@ -262,8 +263,8 @@
                 <tr>
                     <td>{{ $item->product->name ?? $item->product_name }}</td>
                     <td>{{ $item->quantity }}</td>
-                    <td>${{ number_format($item->price, 2) }}</td>
-                    <td>${{ number_format($item->subtotal, 2) }}</td>
+                    <td>@money($item->price)</td>
+                    <td>@money($item->subtotal)</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -272,19 +273,15 @@
         <table class="totals-table">
             <tr>
                 <td><strong>المجموع الفرعي:</strong></td>
-                <td>${{ number_format($order->subtotal, 2) }}</td>
+                <td>@money($order->subtotal)</td>
             </tr>
             <tr>
                 <td><strong>تكلفة التوصيل:</strong></td>
-                <td>${{ number_format($order->delivery_cost, 2) }}</td>
-            </tr>
-            <tr>
-                <td><strong>رسوم الخدمة:</strong></td>
-                <td>${{ number_format($order->service_fee, 2) }}</td>
+                <td>@money($order->delivery_cost)</td>
             </tr>
             <tr class="total-row">
                 <td>المجموع الكلي:</td>
-                <td>${{ number_format($order->total, 2) }}</td>
+                <td>@money($order->total)</td>
             </tr>
         </table>
 
@@ -306,7 +303,7 @@
                 </div>
                 <div class="signature-item">
                     <div class="signature-line"></div>
-                    <div class="signature-label">المبلغ المستلم: ${{ number_format($order->total, 2) }}</div>
+                    <div class="signature-label">المبلغ المستلم: @money($order->total)</div>
                 </div>
             </div>
         </div>

@@ -98,14 +98,15 @@
 
         /* Sidebar Filters */
         .filters-sidebar {
-            background: var(--card);
-            border-radius: 24px;
-            padding: 1.5rem;
+            background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+            border-radius: 22px;
+            padding: 1.25rem;
             height: fit-content;
             position: sticky;
             top: 100px;
-            border: 1px solid var(--border);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: 1px solid #eef2f7;
+            box-shadow: 0 10px 30px rgba(2, 6, 23, 0.08);
+            z-index: 1;
         }
         .filters-header {
             display: flex;
@@ -113,7 +114,7 @@
             justify-content: space-between;
             margin-bottom: 1.5rem;
             padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #eef2f7;
         }
         .filters-title {
             font-family: 'El Messiri', sans-serif;
@@ -124,15 +125,38 @@
             gap: 0.5rem;
         }
         .filters-title i { color: var(--teal); }
+        .filters-actions { display: flex; align-items: center; gap: 0.5rem; }
+        .filters-close {
+            width: 34px;
+            height: 34px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #eef2f7;
+            background: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            color: var(--muted);
+        }
+        .filters-close:hover { color: var(--teal); border-color: rgba(15,79,85,0.35); }
         .clear-filters {
             color: var(--red);
             font-size: 0.85rem;
             cursor: pointer;
-            text-decoration: none;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            padding: 0.25rem 0.4rem;
         }
         .clear-filters:hover { text-decoration: underline; }
 
-        .filter-group { margin-bottom: 1.5rem; }
+        .filter-group {
+            margin-bottom: 1rem;
+            padding: 0.9rem;
+            border: 1px solid #eef2f7;
+            border-radius: 16px;
+            background: #fff;
+        }
         .filter-group-title {
             font-weight: 600;
             color: var(--text);
@@ -147,15 +171,17 @@
         .filter-search input {
             width: 100%;
             padding: 0.8rem 1rem 0.8rem 2.5rem;
-            border: 2px solid var(--border);
-            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
             font-family: inherit;
             font-size: 0.9rem;
             transition: all 0.3s;
+            background: #fff;
         }
         .filter-search input:focus {
             outline: none;
-            border-color: var(--teal);
+            border-color: rgba(15,79,85,0.6);
+            box-shadow: 0 0 0 4px rgba(15,79,85,0.10);
         }
         .filter-search i {
             position: absolute;
@@ -172,15 +198,15 @@
             align-items: center;
             gap: 0.8rem;
             padding: 0.7rem 1rem;
-            border-radius: 10px;
+            border-radius: 14px;
             cursor: pointer;
             transition: all 0.3s;
-            border: 2px solid transparent;
+            border: 1px solid transparent;
         }
-        .category-item:hover { background: #f1f5f9; }
+        .category-item:hover { background: #f8fafc; border-color: #eef2f7; }
         .category-item.active {
             background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
-            border-color: var(--teal);
+            border-color: rgba(15,79,85,0.35);
             color: var(--teal-dark);
         }
         .category-item .emoji { font-size: 1.3rem; }
@@ -203,9 +229,12 @@
             display: flex;
             gap: 0.5rem;
             align-items: center;
+            max-width: 100%;
         }
         .price-input {
             flex: 1;
+            min-width: 0;
+            width: 0;
             padding: 0.6rem;
             border: 2px solid var(--border);
             border-radius: 8px;
@@ -215,6 +244,13 @@
         }
         .price-input:focus { outline: none; border-color: var(--teal); }
         .price-separator { color: var(--muted); }
+        .filters-sidebar,
+        .filters-sidebar * {
+            box-sizing: border-box;
+        }
+        .filters-sidebar {
+            overflow: hidden;
+        }
 
         /* Checkbox Filters */
         .checkbox-list { display: flex; flex-direction: column; gap: 0.6rem; }
@@ -344,6 +380,16 @@
             font-size: 4rem;
             position: relative;
         }
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .product-emoji {
+            font-size: 4rem;
+            line-height: 1;
+        }
         .products-grid.list-view .product-image { height: 100%; }
         .product-favorite {
             position: absolute;
@@ -363,6 +409,36 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .product-favorite:hover, .product-favorite.active { color: var(--red); }
+
+        /* Responsive layout fixes for sidebar overlap */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            .filters-sidebar {
+                position: static;
+                top: auto;
+                z-index: auto;
+                margin-bottom: 1rem;
+            }
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .price-range {
+                gap: .4rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .product-body { padding: 1rem; display: flex; flex-direction: column; min-height: 220px; }
         .product-body { padding: 1rem; display: flex; flex-direction: column; min-height: 220px; }
         .product-category {
             font-size: 0.75rem;
@@ -525,6 +601,7 @@
                 transition: right 0.3s;
             }
             .filters-sidebar.active { right: 0; }
+            .filters-close { display: inline-flex; }
             .mobile-filter-btn { display: flex; }
             .products-grid { grid-template-columns: repeat(2, 1fr); }
         }
@@ -547,7 +624,10 @@
         <aside class="filters-sidebar" id="filtersSidebar">
             <div class="filters-header">
                 <h3 class="filters-title"><i class="fas fa-sliders-h"></i> الفلاتر</h3>
-                <a href="#" class="clear-filters" onclick="clearAllFilters()">مسح الكل</a>
+                <div class="filters-actions">
+                    <button type="button" class="filters-close" onclick="toggleFilters()"><i class="fas fa-times"></i></button>
+                    <button type="button" class="clear-filters" onclick="clearAllFilters()">مسح الكل</button>
+                </div>
             </div>
 
             <!-- Search Filter -->
@@ -585,18 +665,18 @@
             <div class="filter-group">
                 <div class="filter-group-title">نوع المنتج</div>
                 <div class="checkbox-list">
-                    <label class="checkbox-item">
+                    <div class="checkbox-item">
                         <input type="checkbox" id="filterSale" onchange="applyFilters()">
                         <label for="filterSale">🏷️ عروض</label>
-                    </label>
-                    <label class="checkbox-item">
+                    </div>
+                    <div class="checkbox-item">
                         <input type="checkbox" id="filterNew" onchange="applyFilters()">
                         <label for="filterNew">✨ جديد</label>
-                    </label>
-                    <label class="checkbox-item">
+                    </div>
+                    <div class="checkbox-item">
                         <input type="checkbox" id="filterFresh" onchange="applyFilters()">
                         <label for="filterFresh">🌿 طازج</label>
-                    </label>
+                    </div>
                 </div>
             </div>
 
@@ -646,69 +726,139 @@
         </main>
     </div>
     <script>
-        // Product Data (same as main page)
-        const products = {
-            fruits: [
-                { id: 'm1', name: 'تفاح أحمر', emoji: '🍎', price: 8.5, oldPrice: 10, unit: 'كيلو', origin: 'تركيا', badge: 'sale', category: 'فواكه' },
-                { id: 'm2', name: 'موز', emoji: '🍌', price: 6, oldPrice: null, unit: 'كيلو', origin: 'الإكوادور', badge: 'fresh', category: 'فواكه' },
-                { id: 'm3', name: 'برتقال', emoji: '🍊', price: 5.5, oldPrice: 7, unit: 'كيلو', origin: 'مصر', badge: 'sale', category: 'فواكه' },
-                { id: 'm4', name: 'عنب أحمر', emoji: '🍇', price: 15, oldPrice: null, unit: 'كيلو', origin: 'تشيلي', badge: 'new', category: 'فواكه' },
-                { id: 'm5', name: 'مانجو', emoji: '🥭', price: 12, oldPrice: 14, unit: 'كيلو', origin: 'باكستان', badge: 'sale', category: 'فواكه' },
-                { id: 'm6', name: 'فراولة', emoji: '🍓', price: 18, oldPrice: null, unit: 'علبة', origin: 'محلي', badge: 'fresh', category: 'فواكه' },
-                { id: 'm27', name: 'كيوي', emoji: '🥝', price: 20, oldPrice: null, unit: 'كيلو', origin: 'نيوزيلندا', badge: 'new', category: 'فواكه' },
-                { id: 'm28', name: 'أناناس', emoji: '🍍', price: 25, oldPrice: 30, unit: 'حبة', origin: 'كوستاريكا', badge: 'sale', category: 'فواكه' },
-            ],
-            vegetables: [
-                { id: 'm7', name: 'طماطم', emoji: '🍅', price: 4, oldPrice: 5, unit: 'كيلو', origin: 'محلي', badge: 'sale', category: 'خضروات' },
-                { id: 'm8', name: 'خيار', emoji: '🥒', price: 3.5, oldPrice: null, unit: 'كيلو', origin: 'محلي', badge: 'fresh', category: 'خضروات' },
-                { id: 'm9', name: 'جزر', emoji: '🥕', price: 4.5, oldPrice: null, unit: 'كيلو', origin: 'محلي', badge: 'fresh', category: 'خضروات' },
-                { id: 'm10', name: 'بطاطس', emoji: '🥔', price: 3, oldPrice: 3.5, unit: 'كيلو', origin: 'محلي', badge: 'sale', category: 'خضروات' },
-                { id: 'm11', name: 'بصل', emoji: '🧅', price: 2.5, oldPrice: null, unit: 'كيلو', origin: 'محلي', badge: 'fresh', category: 'خضروات' },
-                { id: 'm12', name: 'فلفل ألوان', emoji: '🫑', price: 12, oldPrice: null, unit: 'كيلو', origin: 'هولندا', badge: 'new', category: 'خضروات' },
-                { id: 'm29', name: 'باذنجان', emoji: '🍆', price: 5, oldPrice: null, unit: 'كيلو', origin: 'محلي', badge: 'fresh', category: 'خضروات' },
-                { id: 'm30', name: 'كوسا', emoji: '🥒', price: 4, oldPrice: null, unit: 'كيلو', origin: 'محلي', badge: 'fresh', category: 'خضروات' },
-            ],
-            leafy: [
-                { id: 'm13', name: 'خس', emoji: '🥬', price: 3, oldPrice: null, unit: 'حبة', origin: 'محلي', badge: 'fresh', category: 'ورقيات' },
-                { id: 'm14', name: 'سبانخ', emoji: '🥬', price: 4, oldPrice: 5, unit: 'ربطة', origin: 'محلي', badge: 'sale', category: 'ورقيات' },
-                { id: 'm15', name: 'بقدونس', emoji: '🌿', price: 1.5, oldPrice: null, unit: 'ربطة', origin: 'محلي', badge: 'fresh', category: 'ورقيات' },
-                { id: 'm16', name: 'نعناع', emoji: '🌿', price: 2, oldPrice: null, unit: 'ربطة', origin: 'محلي', badge: 'fresh', category: 'ورقيات' },
-                { id: 'm31', name: 'جرجير', emoji: '🥬', price: 3.5, oldPrice: null, unit: 'ربطة', origin: 'محلي', badge: 'fresh', category: 'ورقيات' },
-                { id: 'm32', name: 'كزبرة', emoji: '🌿', price: 2, oldPrice: null, unit: 'ربطة', origin: 'محلي', badge: 'fresh', category: 'ورقيات' },
-            ],
-            dairy: [
-                { id: 'm17', name: 'حليب طازج', emoji: '🥛', price: 6, oldPrice: null, unit: 'لتر', origin: 'محلي', badge: 'fresh', category: 'ألبان' },
-                { id: 'm18', name: 'لبن', emoji: '🥛', price: 5, oldPrice: 5.5, unit: 'لتر', origin: 'محلي', badge: 'sale', category: 'ألبان' },
-                { id: 'm19', name: 'جبنة بيضاء', emoji: '🧀', price: 25, oldPrice: null, unit: 'كيلو', origin: 'محلي', badge: 'fresh', category: 'ألبان' },
-                { id: 'm20', name: 'بيض', emoji: '🥚', price: 18, oldPrice: 20, unit: 'طبق', origin: 'محلي', badge: 'sale', category: 'ألبان' },
-                { id: 'm33', name: 'زبدة', emoji: '🧈', price: 15, oldPrice: null, unit: 'علبة', origin: 'محلي', badge: 'fresh', category: 'ألبان' },
-                { id: 'm34', name: 'كريمة طبخ', emoji: '🥛', price: 8, oldPrice: null, unit: 'علبة', origin: 'محلي', badge: 'new', category: 'ألبان' },
-            ],
-            bakery: [
-                { id: 'm21', name: 'خبز عربي', emoji: '🫓', price: 2, oldPrice: null, unit: 'ربطة', origin: 'محلي', badge: 'fresh', category: 'مخبوزات' },
-                { id: 'm22', name: 'توست', emoji: '🍞', price: 5, oldPrice: null, unit: 'كيس', origin: 'محلي', badge: 'fresh', category: 'مخبوزات' },
-                { id: 'm23', name: 'كرواسون', emoji: '🥐', price: 3, oldPrice: null, unit: 'حبة', origin: 'محلي', badge: 'new', category: 'مخبوزات' },
-                { id: 'm35', name: 'كعك', emoji: '🧁', price: 4, oldPrice: null, unit: 'حبة', origin: 'محلي', badge: 'fresh', category: 'مخبوزات' },
-                { id: 'm36', name: 'دونات', emoji: '🍩', price: 6, oldPrice: null, unit: 'حبة', origin: 'محلي', badge: 'new', category: 'مخبوزات' },
-            ],
-            grocery: [
-                { id: 'm24', name: 'أرز بسمتي', emoji: '🍚', price: 35, oldPrice: 40, unit: '5 كيلو', origin: 'الهند', badge: 'sale', category: 'بقالة' },
-                { id: 'm25', name: 'زيت زيتون', emoji: '🫒', price: 45, oldPrice: null, unit: 'لتر', origin: 'سوريا', badge: 'fresh', category: 'بقالة' },
-                { id: 'm26', name: 'سكر', emoji: '🧂', price: 8, oldPrice: null, unit: 'كيلو', origin: 'محلي', badge: 'fresh', category: 'بقالة' },
-                { id: 'm37', name: 'ملح', emoji: '🧂', price: 3, oldPrice: null, unit: 'كيلو', origin: 'محلي', badge: 'fresh', category: 'بقالة' },
-                { id: 'm38', name: 'معكرونة', emoji: '🍝', price: 7, oldPrice: 8, unit: 'علبة', origin: 'إيطاليا', badge: 'sale', category: 'بقالة' },
-            ]
-        };
+        let products = {};
+        let categories = [{ id: 'all', name: 'الكل', emoji: '🛒' }];
+        const isAuthenticated = @json(auth()->check());
+        let favoriteIds = new Set();
 
-        const categories = [
-            { id: 'all', name: 'الكل', emoji: '🛒' },
-            { id: 'fruits', name: 'فواكه', emoji: '🍎' },
-            { id: 'vegetables', name: 'خضروات', emoji: '🥕' },
-            { id: 'leafy', name: 'ورقيات', emoji: '🥬' },
-            { id: 'dairy', name: 'ألبان وبيض', emoji: '🥛' },
-            { id: 'bakery', name: 'مخبوزات', emoji: '🍞' },
-            { id: 'grocery', name: 'بقالة', emoji: '🛒' },
-        ];
+        function guessEmoji(slug, name) {
+            const s = String(slug || '').toLowerCase();
+            const n = String(name || '').toLowerCase();
+            if (s.includes('fruit') || n.includes('فواك')) return '🍎';
+            if (s.includes('veget') || n.includes('خض')) return '🥕';
+            if (s.includes('leaf') || n.includes('ورق')) return '🥬';
+            if (s.includes('dairy') || n.includes('لب')) return '🥛';
+            if (s.includes('baker') || n.includes('مخب')) return '🍞';
+            if (s.includes('groc') || n.includes('بقال')) return '🛒';
+            return '🛒';
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function resolveProductImage(path) {
+            const p = String(path || '').trim();
+            if (!p) return null;
+            if (p.startsWith('http://') || p.startsWith('https://')) return p;
+            if (p.startsWith('/')) return `${window.location.origin}${p}`;
+            const cleaned = p.replace(/^storage\//, '');
+            return `${window.location.origin}/storage/${cleaned}`;
+        }
+
+        function martFallbackImage(categorySlug, categoryName) {
+            const slug = String(categorySlug || '').toLowerCase();
+            const name = String(categoryName || '').toLowerCase();
+            if (slug.includes('fruit') || slug.includes('veget') || name.includes('فوا') || name.includes('خضا') || name.includes('خضر')) return '/images/grocery.jpg';
+            if (slug.includes('dairy') || name.includes('ألبان') || name.includes('حليب')) return '/images/grocery.jpg';
+            if (slug.includes('bakery') || name.includes('مخب')) return '/images/grocery.jpg';
+            return '/images/grocery.jpg';
+        }
+
+        function updateFavoritesCount(count) {
+            const el = document.getElementById('favoritesCount');
+            if (!el) return;
+            const c = Number(count || 0);
+            el.textContent = c > 99 ? '+99' : String(c);
+        }
+
+        async function loadFavorites() {
+            favoriteIds = new Set();
+
+            if (isAuthenticated) {
+                try {
+                    const r = await fetch('/api/wishlist', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
+                    const d = await r.json();
+                    const items = Array.isArray(d.items) ? d.items : [];
+                    items.forEach((it) => favoriteIds.add(String(it.id)));
+                    updateFavoritesCount(d.count || items.length || 0);
+                    return;
+                } catch (e) {
+                    updateFavoritesCount(0);
+                }
+            }
+
+            const items = JSON.parse(localStorage.getItem('favorites') || '[]');
+            if (Array.isArray(items)) {
+                items.forEach((it) => {
+                    if (it && (it.id !== undefined && it.id !== null)) favoriteIds.add(String(it.id));
+                });
+            }
+            updateFavoritesCount(favoriteIds.size);
+        }
+
+        function normalizeApiProduct(p) {
+            const categoryName = p.category?.name || '';
+            const categorySlug = p.category?.slug || 'uncategorized';
+            const price = parseFloat(p.discount_price || p.price || 0);
+            const oldPrice = p.discount_price ? parseFloat(p.price || 0) : null;
+
+            const attrs = Array.isArray(p.attributes) ? p.attributes : [];
+            const unit = (attrs.find(a => a.name === 'unit')?.value) || p.unit || 'حبة';
+            const origin = (attrs.find(a => a.name === 'origin')?.value) || p.origin || 'محلي';
+            const image = resolveProductImage((p.images && p.images[0]) || p.image || p.photo || '') || martFallbackImage(categorySlug, categoryName);
+
+            let badge = '';
+            if (p.discount_price) badge = 'sale';
+            else if (String(origin).includes('محلي')) badge = 'fresh';
+            else if (p.is_featured) badge = 'new';
+
+            return {
+                id: p.id,
+                name: p.name || '',
+                emoji: guessEmoji(categorySlug, categoryName),
+                image,
+                price,
+                oldPrice,
+                unit,
+                origin,
+                badge,
+                category: categoryName,
+                categorySlug,
+            };
+        }
+
+        async function loadMartData() {
+            const [categoriesRes, productsRes] = await Promise.all([
+                fetch('/api/categories?market=mart', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' }),
+                fetch('/api/products?market=mart&per_page=1000&sort_by=created_at&sort_order=desc', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' }),
+            ]);
+
+            const categoriesPayload = await categoriesRes.json().catch(() => ({ data: [] }));
+            const productsPayload = await productsRes.json().catch(() => ({ data: [] }));
+            const apiCategories = Array.isArray(categoriesPayload.data) ? categoriesPayload.data : [];
+            const apiProducts = Array.isArray(productsPayload.data) ? productsPayload.data : [];
+
+            categories = [{ id: 'all', name: 'الكل', emoji: '🛒' }].concat(
+                apiCategories.map((c) => ({
+                    id: c.slug || String(c.id),
+                    name: c.name || (c.slug || String(c.id)),
+                    emoji: guessEmoji(c.slug, c.name),
+                }))
+            );
+
+            products = {};
+            apiProducts.map(normalizeApiProduct).forEach((p) => {
+                const key = p.categorySlug || 'uncategorized';
+                if (!products[key]) products[key] = [];
+                products[key].push(p);
+            });
+        }
 
         // State
         let currentView = 'grid';
@@ -718,10 +868,15 @@
         let allProducts = [];
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadMartData();
+            await loadFavorites();
             allProducts = Object.values(products).flat();
             filteredProducts = [...allProducts];
-            
+
+            window.martProducts = products;
+            window.martCategories = categories;
+
             loadCategories();
             loadOrigins();
             applyURLFilters();
@@ -874,6 +1029,7 @@
             displayPagination();
         }
         function createProductCard(p) {
+            const fav = favoriteIds.has(String(p.id));
             return `
                 <div class="product-card" data-id="${p.id}">
                     <div class="product-badges">
@@ -882,10 +1038,10 @@
                         ${p.badge === 'fresh' ? '<span class="badge badge-fresh">طازج</span>' : ''}
                     </div>
                     <div class="product-image">
-                        <button class="product-favorite" onclick="toggleFavorite('${p.id}', event)">
-                            <i class="far fa-heart"></i>
+                        <button class="product-favorite" onclick="toggleFavorite('${p.id}', this)">
+                            <i class="${fav ? 'fas' : 'far'} fa-heart"></i>
                         </button>
-                        ${p.emoji}
+                        <img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.src='/images/grocery.jpg';">
                     </div>
                     <div class="product-body">
                         <div class="product-category">${p.category}</div>
@@ -900,7 +1056,7 @@
                                 ${p.oldPrice ? `<span class="price-old">${p.oldPrice} ر.س</span>` : ''}
                                 <span class="price-unit">/ ${p.unit}</span>
                             </div>
-                            <button class="add-cart-btn" onclick="addToCart('${p.id}', event)" id="btn-${p.id}">
+                            <button class="add-cart-btn" onclick="addToCart('${p.id}', this)" id="btn-${p.id}">
                                 <i class="fas fa-plus"></i>
                                 أضف
                             </button>
@@ -1079,23 +1235,80 @@
             overlay.classList.toggle('active');
         }
 
-        function toggleFavorite(productId, event) {
-            event.stopPropagation();
-            const btn = event.target.closest('.product-favorite');
-            const icon = btn.querySelector('i');
-            btn.classList.toggle('active');
-            icon.classList.toggle('far');
-            icon.classList.toggle('fas');
+        function toggleFavorite(productId, source) {
+            const e = (source && source.preventDefault) ? source : (window.event || null);
+            if (e && e.stopPropagation) e.stopPropagation();
+            const id = String(productId);
+            const btn = (source && source.closest) ? source : (e && e.target ? e.target.closest('.product-favorite') : null);
+            const icon = btn ? btn.querySelector('i') : null;
+
+            const setIcon = (isFav) => {
+                if (!btn || !icon) return;
+                btn.classList.toggle('active', isFav);
+                icon.classList.toggle('far', !isFav);
+                icon.classList.toggle('fas', isFav);
+            };
+
+            const product = allProducts.find(p => String(p.id) === id) || null;
+
+            if (isAuthenticated) {
+                fetch('/api/wishlist/toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'Accept': 'application/json',
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ product_id: id }),
+                })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (!d || !d.success) {
+                            setIcon(favoriteIds.has(id));
+                            return;
+                        }
+                        if (d.action === 'added') favoriteIds.add(id);
+                        if (d.action === 'removed') favoriteIds.delete(id);
+                        updateFavoritesCount(d.count || favoriteIds.size);
+                        setIcon(favoriteIds.has(id));
+                        if (window.showToast && product) {
+                            window.showToast(d.action === 'added' ? `تمت إضافة ${product.name} للمفضلة` : `تمت إزالة ${product.name} من المفضلة`);
+                        }
+                    })
+                    .catch(() => setIcon(favoriteIds.has(id)));
+                return;
+            }
+
+            const items = JSON.parse(localStorage.getItem('favorites') || '[]');
+            const list = Array.isArray(items) ? items : [];
+            const idx = list.findIndex((x) => String(x?.id) === id);
+            if (idx >= 0) {
+                list.splice(idx, 1);
+                favoriteIds.delete(id);
+            } else {
+                list.unshift({
+                    id,
+                    name: product?.name || '',
+                    price: product?.price || 0,
+                    image: product?.image || null,
+                });
+                favoriteIds.add(id);
+            }
+            localStorage.setItem('favorites', JSON.stringify(list.slice(0, 200)));
+            updateFavoritesCount(favoriteIds.size);
+            setIcon(favoriteIds.has(id));
         }
 
-        async function addToCart(productId, event) {
-            if (event) event.stopPropagation();
+        async function addToCart(productId, source) {
+            const e = (source && source.preventDefault) ? source : (window.event || null);
+            if (e && e.stopPropagation) e.stopPropagation();
             
             const btn = document.getElementById(`btn-${productId}`);
             const originalContent = btn.innerHTML;
             
             // Find product
-            const product = allProducts.find(p => p.id === productId);
+            const product = allProducts.find(p => String(p.id) === String(productId));
             if (!product) return;
             
             // Show loading
@@ -1110,14 +1323,16 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
                         'Accept': 'application/json'
                     },
+                    credentials: 'same-origin',
                     body: JSON.stringify({
                         product_id: productId,
                         product_type: 'mart',
                         name: product.name,
                         price: product.price,
                         quantity: 1,
-                        image: product.emoji,
-                        unit: product.unit
+                        image: product.image,
+                        unit: product.unit,
+                        emoji: product.emoji
                     })
                 });
                 
@@ -1136,6 +1351,10 @@
                 }
                 if (window.showToast) {
                     window.showToast('تمت إضافة ' + product.name + ' إلى السلة');
+                    // Mart delivery warning
+                    setTimeout(() => {
+                        window.showToast('تنبيه: منتجات Mart تتوفر للتوصيل فقط إلى (السويداء، عتيل، قنوات)', 4000);
+                    }, 1500);
                 }
                 
                 // Reset button after delay

@@ -81,8 +81,8 @@ const FALLBACK_SLIDER_DATA = [
     },
     {
         image: '/images/logo-girl.jpg',
-        title: 'هدايا توليب',
-        subtitle: 'لحظات استثنائية تستحق هدايا مميزة'
+        title: 'عروض وخصومات',
+        subtitle: 'اكتشف عروضنا المميزة وتوفير أكبر على مشترياتك'
     },
     {
         image: '/images/white_orange_logo.png',
@@ -376,6 +376,15 @@ function escapeHtml(value) {
         .replace(/'/g, '&#039;');
 }
 
+function getProductImageUrl(p) {
+    const img = p?.primary_image_url || p?.image || (Array.isArray(p?.images) ? p.images[0] : null) || '';
+    const s = String(img || '').trim();
+    if (!s) return '/images/gift-placeholder.jpg';
+    if (s.startsWith('http://') || s.startsWith('https://')) return s;
+    if (s.startsWith('/')) return s;
+    return `/storage/${s.replace(/^storage\//, '')}`;
+}
+
 function createProductCard(p) {
     const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
     const isFavorite = favorites.some(x => x.id === p.id);
@@ -387,6 +396,7 @@ function createProductCard(p) {
     const price = parseFloat(p.discount_price || p.price || 0);
     const oldPrice = parseFloat(p.price || 0);
     const safeName = escapeHtml(p.name || '');
+    const imgUrl = getProductImageUrl(p);
 
     return `
         <div class="product-card" data-product-id="${p.id}" onclick="window.location.href='/products/${p.id}'">
@@ -397,7 +407,7 @@ function createProductCard(p) {
                 ${stockLabel}
             </div>
             <div class="product-image-wrapper">
-                <img src="${p.image || 'https://via.placeholder.com/250'}" alt="${safeName}" class="product-img">
+                <img src="${imgUrl}" alt="${safeName}" class="product-img" loading="lazy" onerror="this.src='/images/gift-placeholder.jpg'">
             </div>
             <div class="product-info">
                 <h3 class="product-name">${safeName}</h3>
@@ -406,14 +416,11 @@ function createProductCard(p) {
                         <span class="product-price">$${price.toFixed(2)}</span>
                         ${p.discount_price ? `<span class="product-old-price">$${oldPrice.toFixed(2)}</span>` : ''}
                     </div>
-                    <div class="product-rating">
-                        ${'<i class="fas fa-star"></i>'.repeat(5)}
-                    </div>
                 </div>
             </div>
             <div class="product-card-actions">
-                <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart(${p.id}, this)" data-product-id="${p.id}" ${isOutOfStock ? 'disabled' : ''} style="background: transparent; border: none; box-shadow: none; width: auto; height: auto; padding: 0; display: inline-flex; align-items: center; justify-content: center; ${isOutOfStock ? 'opacity: 0.55; cursor: not-allowed;' : 'cursor: pointer;'}">
-                    ${isOutOfStock ? '<i class="fas fa-ban" style="font-size: 1.35rem; color: #b91c1c;"></i>' : '<i class="fas fa-shopping-cart" style="font-size: 1.4rem; color: #ff6b35;"></i>'}
+                <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart(${p.id}, this)" data-product-id="${p.id}" ${isOutOfStock ? 'disabled data-tooltip="لا يتوفر هذا المنتج في المخزن"' : ''} style="background: transparent; border: none; box-shadow: none; width: auto; height: auto; padding: 0; display: inline-flex; align-items: center; justify-content: center; ${isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : 'cursor: pointer;'}">
+                    <i class="fas fa-shopping-cart" style="font-size: 1.4rem; color: #ff6b35;"></i>
                 </button>
             </div>
         </div>
@@ -820,6 +827,14 @@ async function addToCart(productId, buttonElement) {
         const data = await response.json();
         if (data.success && window.updateCartCount) {
             window.updateCartCount(data.cart_count || data.count || 0);
+            
+            // Mart delivery warning if applicable
+            const isMart = p && (p.store_id === 1 || (p.store && p.store.name && p.store.name.toLowerCase().includes('mart')));
+            if (isMart && window.showToast) {
+                setTimeout(() => {
+                    window.showToast('تنبيه: منتجات Mart تتوفر للتوصيل فقط إلى (السويداء، عتيل، قنوات)', 4000);
+                }, 1500);
+            }
         }
         
         // Reset button after 2 seconds with smooth transition
@@ -1056,6 +1071,7 @@ async function toggleProductFavorite(event, productId) {
                     'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                 },
+                credentials: 'same-origin',
                 body: JSON.stringify({ product_id: productId })
             });
             const data = await res.json();
@@ -1068,7 +1084,7 @@ async function toggleProductFavorite(event, productId) {
                         id: product.id,
                         name: product.name,
                         price: product.discount_price || product.price,
-                        image: product.image
+                        image: getProductImageUrl(product)
                     });
                 }
             } else if (data.action === 'removed') {
@@ -1091,7 +1107,7 @@ async function toggleProductFavorite(event, productId) {
                 id: product.id,
                 name: product.name,
                 price: product.discount_price || product.price,
-                image: product.image
+                image: getProductImageUrl(product)
             });
             btn.classList.add('active');
             icon.classList.remove('far');

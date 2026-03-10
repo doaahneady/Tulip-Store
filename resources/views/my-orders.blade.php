@@ -22,8 +22,14 @@ body{font-family:'El Messiri',sans-serif;background:#f5f5f5;margin:0;padding:0}
 .status-pending{background:#fff3cd;color:#856404}
 .status-confirmed{background:#d1ecf1;color:#0c5460}
 .status-processing{background:#cce5ff;color:#004085}
+.status-ready{background:#cce5ff;color:#004085}
 .status-shipped{background:#d4edda;color:#155724}
+.status-out_for_delivery{background:#d4edda;color:#155724}
 .status-delivered{background:#d4edda;color:#155724}
+.status-done{background:#d4edda;color:#155724}
+.status-failed{background:#f8d7da;color:#721c24}
+.status-refunded{background:#e2e3e5;color:#383d41}
+.status-returned{background:#e2e3e5;color:#383d41}
 .status-cancelled{background:#f8d7da;color:#721c24}
 .btn-details{background:#2a7080;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:8px;cursor:pointer;font-family:'El Messiri',sans-serif;font-weight:600;font-size:0.85rem;transition:all 0.3s}
 .btn-details:hover{background:#1a5060;transform:translateY(-2px);box-shadow:0 4px 12px rgba(42,112,128,0.3)}
@@ -83,19 +89,39 @@ body{font-family:'El Messiri',sans-serif;background:#f5f5f5;margin:0;padding:0}
 @case('processing')
 <i class="fas fa-cog fa-spin"></i> قيد التجهيز
 @break
+@case('ready')
+<i class="fas fa-box"></i> جاهز
+@break
 @case('shipped')
 <i class="fas fa-shipping-fast"></i> تم الشحن
+@break
+@case('out_for_delivery')
+<i class="fas fa-truck"></i> خارج للتوصيل
 @break
 @case('delivered')
 <i class="fas fa-check-double"></i> تم التوصيل
 @break
+@case('done')
+<i class="fas fa-check-double"></i> مكتمل
+@break
+@case('failed')
+<i class="fas fa-exclamation-triangle"></i> فشل
+@break
+@case('refunded')
+<i class="fas fa-undo"></i> مسترجع
+@break
+@case('returned')
+<i class="fas fa-reply"></i> مُعاد
+@break
 @case('cancelled')
 <i class="fas fa-times-circle"></i> ملغي
 @break
+@default
+{{ $order->status }}
 @endswitch
 </span>
 </td>
-<td><strong style="color:#2a7080;font-size:1.1rem">${{ number_format($order->total, 2) }}</strong></td>
+<td><strong style="color:#2a7080;font-size:1.1rem">${{ number_format($order->total_amount ?? $order->total ?? 0, 2) }}</strong></td>
 <td>
 @switch($order->payment_method)
 @case('cash')
@@ -110,6 +136,11 @@ body{font-family:'El Messiri',sans-serif;background:#f5f5f5;margin:0;padding:0}
 @case('bank')
 <i class="fas fa-university" style="color:#6c757d"></i> تحويل بنكي
 @break
+@case('payroll')
+<i class="fas fa-file-invoice-dollar" style="color:#0ea5e9"></i> Payroll
+@break
+@default
+{{ $order->payment_method }}
 @endswitch
 </td>
 <td>
@@ -141,7 +172,7 @@ $daysLeft = \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($order->esti
 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
 <button class="btn-details" onclick="showOrderDetails({{ $order->id }})"><i class="fas fa-eye"></i> التفاصيل</button>
 <a class="btn-details" style="background:#6f42c1;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem;" href="{{ route('order.invoice.download', $order->id) }}"><i class="fas fa-file-pdf"></i> تحميل الفاتورة</a>
-@if($order->status === 'delivered' && $order->customer_signature)
+@if(in_array($order->status, ['delivered', 'done'], true) && $order->customer_signature)
 <button class="btn-details" style="background:#28a745;" onclick="showDeliveryReceipt({{ $order->id }})"><i class="fas fa-file-signature"></i> الفاتورة</button>
 @endif
 </div>
@@ -188,43 +219,56 @@ $daysLeft = \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($order->esti
 
 <script>
 const ordersData=@json($orders->items());
-const statusNames={'pending':'قيد الانتظار','confirmed':'تم التأكيد','processing':'قيد التجهيز','shipped':'تم الشحن','delivered':'تم التوصيل','cancelled':'ملغي'};
-const paymentNames={'cash':'الدفع عند الاستلام','card':'بطاقة ائتمان','syriatel':'Syriatel Cash','bank':'تحويل بنكي'};
+const statusNames={'pending':'قيد الانتظار','confirmed':'تم التأكيد','processing':'قيد التجهيز','ready':'جاهز','shipped':'تم الشحن','out_for_delivery':'خارج للتوصيل','delivered':'تم التوصيل','done':'مكتمل','failed':'فشل','cancelled':'ملغي','refunded':'مسترجع','returned':'مُعاد'};
+const paymentNames={'cash':'الدفع عند الاستلام','card':'بطاقة ائتمان','syriatel':'Syriatel Cash','bank':'تحويل بنكي','payroll':'Payroll'};
 const deliveryNames={'normal':'توصيل عادي (7 أيام)','express':'توصيل مستعجل (3 أيام)','instant':'توصيل فوري (24 ساعة)'};
 const paymentStatusNames={'pending':'قيد الانتظار','paid':'تم الدفع','failed':'فشل'};
+
+function n(v){const x=Number(v);return Number.isFinite(x)?x:0;}
+function money(v){return window.formatMoney?window.formatMoney(n(v)):('$'+n(v).toFixed(2));}
+function safeText(v,fallback='—'){return (v===null||v===undefined||String(v).trim()==='')?fallback:String(v);}
+
 function showOrderDetails(orderId){
 const order=ordersData.find(o=>o.id===orderId);
 if(!order)return;
+const effectiveDelivery = n(order.delivery_cost ?? order.shipping_cost ?? 0);
+const effectiveSubtotal = n(order.subtotal ?? 0);
+const effectiveTotal = n(order.total ?? order.total_amount ?? (effectiveSubtotal + effectiveDelivery));
 let html='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-bottom:2rem">';
 html+='<div style="background:#f8f9fa;padding:1.5rem;border-radius:12px;border-right:4px solid #2a7080"><h4 style="margin:0 0 1rem 0;color:#2a7080;font-size:1.1rem"><i class="fas fa-truck"></i> معلومات التوصيل</h4>';
-html+='<p style="margin:0 0 0.5rem 0;font-size:0.9rem;color:#555"><strong>المستلم:</strong> '+order.recipient_name+'</p>';
-html+='<p style="margin:0 0 0.5rem 0;font-size:0.9rem;color:#555"><strong>الهاتف:</strong> '+order.phone+'</p>';
-html+='<p style="margin:0 0 0.5rem 0;font-size:0.9rem;color:#555"><strong>القرية:</strong> '+order.village+'</p>';
-if(order.address_note)html+='<p style="margin:0 0 0.5rem 0;font-size:0.9rem;color:#555"><strong>ملاحظة:</strong> '+order.address_note+'</p>';
-html+='<p style="margin:0;font-size:0.9rem;color:#555"><strong>نوع التوصيل:</strong> '+deliveryNames[order.delivery_method]+'</p></div>';
+html+='<p style="margin:0 0 0.5rem 0;font-size:0.9rem;color:#555"><strong>المستلم:</strong> '+safeText(order.recipient_name)+'</p>';
+html+='<p style="margin:0 0 0.5rem 0;font-size:0.9rem;color:#555"><strong>الهاتف:</strong> '+safeText(order.phone)+'</p>';
+html+='<p style="margin:0 0 0.5rem 0;font-size:0.9rem;color:#555"><strong>القرية:</strong> '+safeText(order.village)+'</p>';
+if(order.address_note)html+='<p style="margin:0 0 0.5rem 0;font-size:0.9rem;color:#555"><strong>ملاحظة:</strong> '+safeText(order.address_note,'')+'</p>';
+html+='<p style="margin:0 0 0.5rem 0;font-size:0.9rem;color:#555"><strong>نوع التوصيل:</strong> '+safeText(deliveryNames[order.delivery_method], safeText(order.delivery_method))+'</p>';
+html+='<p style="margin:0;font-size:0.9rem;color:#555"><strong>تاريخ التوصيل المتوقع:</strong> '+(order.estimated_delivery?new Date(order.estimated_delivery).toLocaleDateString('ar-SA',{year:'numeric',month:'long',day:'numeric'}):'—')+'</p></div>';
 html+='<div style="background:#f8f9fa;padding:1.5rem;border-radius:12px;border-right:4px solid #ff6b35"><h4 style="margin:0 0 1rem 0;color:#ff6b35;font-size:1.1rem"><i class="fas fa-credit-card"></i> معلومات الدفع</h4>';
-html+='<p style="margin:0 0 0.5rem 0;font-size:0.9rem;color:#555"><strong>طريقة الدفع:</strong> '+paymentNames[order.payment_method]+'</p>';
+html+='<p style="margin:0 0 0.5rem 0;font-size:0.9rem;color:#555"><strong>طريقة الدفع:</strong> '+safeText(paymentNames[order.payment_method], safeText(order.payment_method))+'</p>';
 html+='<p style="margin:0 0 0.5rem 0;font-size:0.9rem"><strong>حالة الدفع:</strong> <span style="display:inline-block;padding:0.3rem 0.6rem;border-radius:12px;font-size:0.8rem;font-weight:700;background:'+(order.payment_status==='paid'?'#d4edda':order.payment_status==='failed'?'#f8d7da':'#fff3e6')+';color:'+(order.payment_status==='paid'?'#28a745':order.payment_status==='failed'?'#dc3545':'#ff6b35')+'">'+paymentStatusNames[order.payment_status]+'</span></p>';
-html+='<p style="margin:0;font-size:0.9rem;color:#555"><strong>المبلغ الإجمالي:</strong> <span style="color:#ff6b35;font-weight:700;font-size:1.2rem">$'+parseFloat(order.total).toFixed(2)+'</span></p>';
+html+='<p style="margin:0;font-size:0.9rem;color:#555"><strong>المبلغ الإجمالي:</strong> <span style="color:#ff6b35;font-weight:700;font-size:1.2rem">'+money(effectiveTotal)+'</span></p>';
 if(order.payment_method==='bank'&&order.payment_status==='pending'){
 html+='<div style="margin-top:1rem;padding:1rem;background:#fff3cd;border-radius:8px;border-right:3px solid #ffc107"><p style="margin:0 0 0.5rem 0;font-size:0.85rem;color:#856404;font-weight:600"><i class="fas fa-info-circle"></i> يرجى تحويل المبلغ وإرفاق إيصال الدفع</p><button onclick="uploadReceipt('+order.id+')" style="background:#28a745;color:#fff;border:none;padding:0.6rem 1rem;border-radius:8px;font-family:\'El Messiri\',sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer;transition:all 0.3s;width:100%"><i class="fas fa-upload" style="margin-left:0.5rem"></i> رفع إيصال الدفع</button></div>';
 }
 html+='</div></div>';
 html+='<div style="background:#f8f9fa;padding:1.5rem;border-radius:12px;margin-bottom:1.5rem"><h4 style="margin:0 0 1rem 0;color:#1a1a1a;font-size:1.1rem"><i class="fas fa-box-open"></i> المنتجات ('+order.items.length+')</h4><div style="display:grid;gap:1rem">';
 order.items.forEach(item=>{
+const p = item.product || null;
+const img = p?.image || p?.primary_image || p?.image_path || null;
+const name = item.product_name || p?.name || 'منتج';
+const unit = (item.price ?? item.unit_price ?? 0);
+const sub = (item.subtotal ?? item.total_price ?? (n(unit) * n(item.quantity)));
 html+='<div style="display:flex;align-items:center;gap:1rem;background:#fff;padding:1rem;border-radius:10px">';
-if(item.product.image)html+='<img src="/storage/'+item.product.image+'" alt="'+item.product.name+'" style="width:70px;height:70px;object-fit:cover;border-radius:8px">';
+if(img)html+='<img src="'+(String(img).startsWith('http')?img:'/storage/'+img)+'" alt="'+name+'" style="width:70px;height:70px;object-fit:cover;border-radius:8px" onerror="this.src=\'/images/gift-placeholder.svg\'">';
 else html+='<div style="width:70px;height:70px;background:#e0e0e0;border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="fas fa-image" style="color:#999;font-size:1.5rem"></i></div>';
-html+='<div style="flex:1"><p style="margin:0 0 0.3rem 0;font-weight:700;color:#1a1a1a;font-size:1rem">'+item.product.name+'</p>';
-html+='<p style="margin:0;font-size:0.85rem;color:#666">الكمية: '+item.quantity+' × $'+parseFloat(item.price).toFixed(2)+'</p></div>';
-html+='<div style="text-align:left"><p style="margin:0;font-weight:700;color:#2a7080;font-size:1.1rem">$'+parseFloat(item.subtotal).toFixed(2)+'</p></div></div>';
+html+='<div style="flex:1"><p style="margin:0 0 0.3rem 0;font-weight:700;color:#1a1a1a;font-size:1rem">'+name+'</p>';
+html+='<p style="margin:0;font-size:0.85rem;color:#666">الكمية: '+safeText(item.quantity,'0')+' × '+money(unit)+'</p></div>';
+html+='<div style="text-align:left"><p style="margin:0;font-weight:700;color:#2a7080;font-size:1.1rem">'+money(sub)+'</p></div></div>';
 });
 html+='</div></div>';
 html+='<div style="background:linear-gradient(135deg,#2a7080 0%,#1a5060 100%);padding:1.5rem;border-radius:12px;color:#fff">';
-html+='<div style="display:flex;justify-content:space-between;margin-bottom:0.6rem"><span>المجموع الفرعي:</span><span style="font-weight:700">$'+parseFloat(order.subtotal).toFixed(2)+'</span></div>';
-html+='<div style="display:flex;justify-content:space-between;margin-bottom:0.6rem"><span>تكلفة التوصيل:</span><span style="font-weight:700">$'+parseFloat(order.delivery_cost).toFixed(2)+'</span></div>';
-html+='<div style="display:flex;justify-content:space-between;margin-bottom:0.6rem"><span>رسوم الخدمة (5%):</span><span style="font-weight:700">$'+parseFloat(order.service_fee).toFixed(2)+'</span></div>';
-html+='<div style="display:flex;justify-content:space-between;padding-top:0.6rem;border-top:2px solid rgba(255,255,255,0.3);font-size:1.2rem"><span style="font-weight:700">المجموع الكلي:</span><span style="font-weight:700;color:#ffd700">$'+parseFloat(order.total).toFixed(2)+'</span></div></div>';
+html+='<div style="display:flex;justify-content:space-between;margin-bottom:0.6rem"><span>المجموع الفرعي:</span><span style="font-weight:700">'+money(effectiveSubtotal)+'</span></div>';
+html+='<div style="display:flex;justify-content:space-between;margin-bottom:0.6rem"><span>تكلفة التوصيل:</span><span style="font-weight:700">'+money(effectiveDelivery)+'</span></div>';
+html+='<div style="display:flex;justify-content:space-between;padding-top:0.6rem;border-top:2px solid rgba(255,255,255,0.3);font-size:1.2rem"><span style="font-weight:700">المجموع الكلي:</span><span style="font-weight:700;color:#ffd700">'+money(effectiveTotal)+'</span></div></div>';
 document.getElementById('modalBody').innerHTML=html;
 document.getElementById('orderModal').classList.add('show');
 }
@@ -234,6 +278,9 @@ document.getElementById('orderModal').addEventListener('click',function(e){if(e.
 function showDeliveryReceipt(orderId){
 const order=ordersData.find(o=>o.id===orderId);
 if(!order)return;
+const effectiveDelivery = n(order.delivery_cost ?? order.shipping_cost ?? 0);
+const effectiveSubtotal = n(order.subtotal ?? 0);
+const effectiveTotal = n(order.total ?? order.total_amount ?? (effectiveSubtotal + effectiveDelivery));
 
 const confirmedDate = order.confirmed_at ? new Date(order.confirmed_at).toLocaleDateString('ar-SA', {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}) : 'غير محدد';
 
@@ -279,9 +326,9 @@ let html = `
             <tbody>
                 ${order.items.map(item => `
                     <tr>
-                        <td style="padding:0.8rem;border-bottom:1px solid #eee;">${item.product?.name || item.product_name || 'منتج'}</td>
+                        <td style="padding:0.8rem;border-bottom:1px solid #eee;">${item.product_name || item.product?.name || 'منتج'}</td>
                         <td style="padding:0.8rem;text-align:center;border-bottom:1px solid #eee;">${item.quantity}</td>
-                        <td style="padding:0.8rem;text-align:left;border-bottom:1px solid #eee;">$${parseFloat(item.subtotal).toFixed(2)}</td>
+                        <td style="padding:0.8rem;text-align:left;border-bottom:1px solid #eee;">${window.formatMoney ? window.formatMoney(item.subtotal ?? item.total_price ?? 0) : ('$' + parseFloat(item.subtotal ?? item.total_price ?? 0).toFixed(2))}</td>
                     </tr>
                 `).join('')}
             </tbody>
@@ -292,19 +339,15 @@ let html = `
     <div style="background:#f8f9fa;padding:1rem;border-radius:8px;margin-bottom:1.5rem;">
         <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
             <span>المجموع الفرعي:</span>
-            <span>$${parseFloat(order.subtotal).toFixed(2)}</span>
+            <span>${window.formatMoney ? window.formatMoney(effectiveSubtotal) : ('$' + parseFloat(effectiveSubtotal).toFixed(2))}</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
             <span>تكلفة التوصيل:</span>
-            <span>$${parseFloat(order.delivery_cost).toFixed(2)}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
-            <span>رسوم الخدمة:</span>
-            <span>$${parseFloat(order.service_fee).toFixed(2)}</span>
+            <span>${window.formatMoney ? window.formatMoney(effectiveDelivery) : ('$' + parseFloat(effectiveDelivery).toFixed(2))}</span>
         </div>
         <div style="display:flex;justify-content:space-between;padding-top:0.8rem;border-top:2px solid #28a745;font-size:1.2rem;font-weight:700;color:#28a745;">
             <span>المجموع الكلي:</span>
-            <span>$${parseFloat(order.total).toFixed(2)}</span>
+            <span>${window.formatMoney ? window.formatMoney(effectiveTotal) : ('$' + parseFloat(effectiveTotal).toFixed(2))}</span>
         </div>
     </div>
     

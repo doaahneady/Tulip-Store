@@ -145,6 +145,27 @@ class DashboardTestEmployeesSeeder extends Seeder
                 // Roles
                 'is_trader' => true,
             ],
+            // Customer Support Employee
+            [
+                'employee_code' => 'CS001',
+                'first_name' => 'نور',
+                'last_name' => 'الدعم',
+                'email' => 'support@tulipstore.com',
+                'password' => Hash::make('password123'),
+                'phone' => '+963-11-7890123',
+                'department' => 'خدمة العملاء',
+                'position' => 'موظف دعم',
+                'employment_type' => 'full_time',
+                'hire_date' => '2021-07-01',
+                'status' => 'active',
+                'salary' => 90000.00,
+                'city' => 'دمشق',
+                'country' => 'سوريا',
+                'gender' => 'female',
+                'email_verified_at' => now(),
+                // Roles
+                'is_cs' => true,
+            ],
         ];
 
         $this->command->info('Creating test employees for dashboards...');

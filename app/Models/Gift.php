@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Gift extends Model
 {
@@ -37,6 +39,10 @@ class Gift extends Model
         'is_active' => 'boolean',
     ];
 
+    protected $appends = [
+        'main_image',
+    ];
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -66,7 +72,43 @@ class Gift extends Model
     {
         $images = $this->images ?? [];
 
-        return ! empty($images) ? $images[0] : '/images/gift-placeholder.jpg';
+        $candidate = ! empty($images) ? (string) $images[0] : '';
+        $candidate = trim($candidate);
+
+        if ($candidate === '') {
+            return '/images/gift-placeholder.svg';
+        }
+
+        if (Str::startsWith($candidate, ['http://', 'https://'])) {
+            return $candidate;
+        }
+
+        $candidate = preg_replace('#^(/storage/)+#', '/storage/', $candidate);
+
+        if (Str::startsWith($candidate, '/storage/')) {
+            $relative = ltrim(Str::after($candidate, '/storage/'), '/');
+            return $relative !== '' ? '/storage/'.$relative : '/images/gift-placeholder.svg';
+        }
+
+        if (Str::startsWith($candidate, '/images/')) {
+            return $candidate;
+        }
+        if (Str::startsWith($candidate, '/')) {
+            return $candidate;
+        }
+        if (Str::startsWith($candidate, 'images/')) {
+            return '/'.$candidate;
+        }
+        if (file_exists(public_path($candidate))) {
+            return '/'.$candidate;
+        }
+
+        $relative = ltrim(preg_replace('#^(public/|storage/)#', '', $candidate), '/');
+        if ($relative === '') {
+            return '/images/gift-placeholder.svg';
+        }
+
+        return Storage::disk('public')->url($relative);
     }
 
     public function getIsInStockAttribute()

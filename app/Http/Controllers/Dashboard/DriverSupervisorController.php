@@ -71,11 +71,11 @@ class DriverSupervisorController extends Controller
                 ->whereDate('created_at', today())->count();
 
             // Order Metrics - Real data
-            $ordersAwaitingAssignment = Order::whereIn('status', ['confirmed', 'processing'])
+            $ordersAwaitingAssignment = Order::where('status', 'pending')
                 ->whereNull('assigned_driver_id')->count();
-            $ordersInTransit = Order::whereIn('status', ['shipped'])
+            $ordersInTransit = Order::whereIn('status', ['out_for_delivery'])
                 ->whereNotNull('assigned_driver_id')->count();
-            $ordersAwaitingAssignmentToday = Order::whereIn('status', ['confirmed', 'processing'])
+            $ordersAwaitingAssignmentToday = Order::where('status', 'pending')
                 ->whereNull('assigned_driver_id')
                 ->whereDate('created_at', today())
                 ->count();
@@ -150,7 +150,7 @@ class DriverSupervisorController extends Controller
                     ->limit(8)
                     ->get(),
                 'unassigned_orders_sample' => Order::select(['id', 'order_number', 'recipient_name', 'address_note', 'created_at'])
-                    ->whereIn('status', ['confirmed', 'processing'])
+                    ->where('status', 'pending')
                     ->whereDoesntHave('deliveryAssignment')
                     ->orderBy('created_at', 'desc')
                     ->limit(8)
@@ -273,7 +273,7 @@ class DriverSupervisorController extends Controller
      */
     public function drivers(Request $request)
     {
-        $drivers = Driver::with(['user', 'employee'])
+        $drivers = Driver::with(['user'])
             ->when($request->search, function ($query, $search) {
                 $query->whereHas('user', function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -464,37 +464,51 @@ class DriverSupervisorController extends Controller
             'availability' => 'required|in:available,busy,offline,on_break',
         ]);
 
-        return DB::transaction(function () use ($validated) {
-            $base = Str::slug(Str::before($validated['email'], '@'), '_');
-            $base = $base !== '' ? $base : 'user';
-            $username = $base;
-            $i = 0;
-            while (User::where('username', $username)->exists() && $i < 50) {
-                $username = $base.'_'.random_int(1000, 9999);
-                $i++;
-            }
+        try {
+            return DB::transaction(function () use ($validated) {
+                $base = Str::slug(Str::before($validated['email'], '@'), '_');
+                $base = $base !== '' ? $base : 'user';
+                $username = $base;
+                if (Schema::hasColumn('users', 'username')) {
+                    $i = 0;
+                    while (User::where('username', $username)->exists() && $i < 50) {
+                        $username = $base.'_'.random_int(1000, 9999);
+                        $i++;
+                    }
+                }
 
-            $user = User::create([
-                'name' => $validated['name'],
-                'username' => $username,
-                'email' => $validated['email'],
-                'phone' => $validated['phone'] ?? null,
-                'password' => Hash::make($validated['password']),
-                'verified' => true,
-            ]);
+                $userData = [
+                    'name' => $validated['name'],
+                    'email' => $validated['email'],
+                    'phone' => $validated['phone'] ?? null,
+                    'password' => Hash::make($validated['password']),
+                    'verified' => true,
+                ];
+                if (Schema::hasColumn('users', 'username')) {
+                    $userData['username'] = $username;
+                }
 
-            Driver::create([
-                'user_id' => $user->id,
-                'license_number' => $validated['license_number'],
-                'license_expiry' => $validated['license_expiry'],
-                'vehicle_type' => $validated['vehicle_type'],
-                'vehicle_plate' => $validated['vehicle_plate'],
-                'status' => $validated['status'],
-                'availability' => $validated['availability'],
-            ]);
+                $user = User::create($userData);
 
-            return redirect()->route('dashboard.supervisor.drivers')->with('success', 'Driver created successfully');
-        });
+                Driver::create([
+                    'user_id' => $user->id,
+                    'license_number' => $validated['license_number'],
+                    'license_expiry' => $validated['license_expiry'],
+                    'vehicle_type' => $validated['vehicle_type'],
+                    'vehicle_plate' => $validated['vehicle_plate'],
+                    'status' => $validated['status'],
+                    'availability' => $validated['availability'],
+                ]);
+
+                return redirect()->route('dashboard.supervisor.drivers')->with('success', 'Driver created successfully');
+            });
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['general' => 'Failed to create driver: '.$e->getMessage()]);
+        }
     }
 
     public function editDriver(Driver $driver)
@@ -568,12 +582,46 @@ class DriverSupervisorController extends Controller
     }
 
     /**
+     * Change order status (supervisor actions)
+     *
+     * Allowed in our lifecycle:
+     * - out_for_delivery -> delivered
+     */
+    public function changeOrderStatus(Request $request, Order $order)
+    {
+        $request->validate([
+            'status' => 'required|string|max:50',
+        ]);
+
+        $next = strtolower(trim((string) $request->input('status')));
+        if ($next !== 'delivered') {
+            return back()->with('error', 'Status not allowed');
+        }
+
+        $order->loadMissing(['deliveryAssignments']);
+        $assignment = $order->deliveryAssignments->sortByDesc('created_at')->first() ?? $order->deliveryAssignment;
+        if (! $assignment) {
+            return back()->with('error', 'No delivery assignment found for this order');
+        }
+
+        // Do not wrap this in a DB transaction; handleOrderCompletion manages its own financial transaction.
+        if ($assignment->status !== 'delivered') {
+            $assignment->updateStatus('delivered');
+        }
+
+        // Mark order delivered + cash payment paid on delivery
+        CrossDepartmentFlowService::handleOrderCompletion($order->id, auth('employee')->id());
+
+        return back()->with('success', 'Order marked as delivered');
+    }
+
+    /**
      * Order Assignment Management
      */
     public function orderAssignment()
     {
-        $pendingOrders = Order::with(['customer', 'store'])
-            ->where('status', 'confirmed')
+        $pendingOrders = Order::with(['customer', 'store', 'items.product'])
+            ->whereIn('status', ['pending', 'confirmed', 'processing'])
             ->whereDoesntHave('deliveryAssignment')
             ->orderBy('created_at', 'asc')
             ->get();
@@ -594,6 +642,15 @@ class DriverSupervisorController extends Controller
     }
 
     /**
+     * Get order details for assignment modal (JSON)
+     */
+    public function getOrderDetails(Order $order)
+    {
+        $order->load(['customer', 'store', 'items.product']);
+        return response()->json($order);
+    }
+
+    /**
      * Assign order to driver
      */
     public function assignOrder(Request $request)
@@ -601,7 +658,7 @@ class DriverSupervisorController extends Controller
         $request->validate([
             'order_id' => 'required|exists:orders,id',
             'driver_id' => 'required|exists:drivers,id',
-            'delivery_fee' => 'required|numeric|min:0',
+            'delivery_fee' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string',
         ]);
 
@@ -641,8 +698,11 @@ class DriverSupervisorController extends Controller
 
             DB::commit();
 
-            // Broadcast assignment to driver
-            broadcast(new \App\Events\DeliveryAssigned($assignment));
+            // Broadcast assignment to driver (if event exists)
+            $eventClass = 'App\Events\DeliveryAssigned';
+            if (class_exists($eventClass)) {
+                broadcast(new $eventClass($assignment));
+            }
 
             return response()->json([
                 'success' => true,

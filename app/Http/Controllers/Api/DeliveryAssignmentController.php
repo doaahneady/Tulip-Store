@@ -10,6 +10,7 @@ use App\Models\Notification;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketReply;
 use App\Services\CrossDepartmentFlowService;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -36,7 +37,55 @@ class DeliveryAssignmentController extends Controller
 
         $assignment = DeliveryAssignment::findOrFail($id);
         $this->authorizeAssignment($assignment);
+        if ($assignment->status === 'picked_up') {
+            return response()->json([
+                'success' => true,
+                'assignment' => $assignment->fresh(),
+            ]);
+        }
         $assignment->updateStatus('picked_up', $validated['notes'] ?? null);
+        if (Schema::hasTable('notifications') && Schema::hasColumn('notifications', 'user_id')) {
+            $order = $assignment->order ?? $assignment->loadMissing('order')->order;
+            if ($order?->user_id) {
+                $payload = [
+                    'user_id' => $order->user_id,
+                ];
+                if (Schema::hasColumn('notifications', 'type')) {
+                    $payload['type'] = 'order_picked_up';
+                }
+                if (Schema::hasColumn('notifications', 'title')) {
+                    $payload['title'] = 'Order Picked Up';
+                }
+                if (Schema::hasColumn('notifications', 'message')) {
+                    $payload['message'] = 'Your order '.$order->order_number.' has been picked up';
+                }
+                if (Schema::hasColumn('notifications', 'icon')) {
+                    $payload['icon'] = 'fa-box';
+                }
+                if (Schema::hasColumn('notifications', 'color')) {
+                    $payload['color'] = 'blue';
+                }
+                if (Schema::hasColumn('notifications', 'link')) {
+                    $payload['link'] = '/profile';
+                }
+                if (Schema::hasColumn('notifications', 'data')) {
+                    $payload['data'] = json_encode(['order_id' => $order->id, 'assignment_id' => $assignment->id]);
+                }
+                \DB::table('notifications')->insert($payload + ['created_at' => now(), 'updated_at' => now()]);
+            }
+        }
+        if (class_exists(\App\Events\Dashboard\DashboardUpdated::class)) {
+            $orderId = $assignment->order_id;
+            foreach (['admin', 'it', 'finance', 'cs', 'hr', 'supervisor', 'vendor'] as $dash) {
+                event(new \App\Events\Dashboard\DashboardUpdated($dash, [
+                    'type' => 'delivery_assignment_status_changed',
+                    'order_id' => $orderId,
+                    'assignment_id' => $assignment->id,
+                    'status' => 'picked_up',
+                    'timestamp' => now()->toIso8601String(),
+                ]));
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -48,7 +97,55 @@ class DeliveryAssignmentController extends Controller
     {
         $assignment = DeliveryAssignment::findOrFail($id);
         $this->authorizeAssignment($assignment);
+        if ($assignment->status === 'in_transit') {
+            return response()->json([
+                'success' => true,
+                'assignment' => $assignment->fresh(),
+            ]);
+        }
         $assignment->updateStatus('in_transit');
+        if (Schema::hasTable('notifications') && Schema::hasColumn('notifications', 'user_id')) {
+            $order = $assignment->order ?? $assignment->loadMissing('order')->order;
+            if ($order?->user_id) {
+                $payload = [
+                    'user_id' => $order->user_id,
+                ];
+                if (Schema::hasColumn('notifications', 'type')) {
+                    $payload['type'] = 'order_in_transit';
+                }
+                if (Schema::hasColumn('notifications', 'title')) {
+                    $payload['title'] = 'Order In Transit';
+                }
+                if (Schema::hasColumn('notifications', 'message')) {
+                    $payload['message'] = 'Your order '.$order->order_number.' is in transit';
+                }
+                if (Schema::hasColumn('notifications', 'icon')) {
+                    $payload['icon'] = 'fa-truck';
+                }
+                if (Schema::hasColumn('notifications', 'color')) {
+                    $payload['color'] = 'blue';
+                }
+                if (Schema::hasColumn('notifications', 'link')) {
+                    $payload['link'] = '/profile';
+                }
+                if (Schema::hasColumn('notifications', 'data')) {
+                    $payload['data'] = json_encode(['order_id' => $order->id, 'assignment_id' => $assignment->id]);
+                }
+                \DB::table('notifications')->insert($payload + ['created_at' => now(), 'updated_at' => now()]);
+            }
+        }
+        if (class_exists(\App\Events\Dashboard\DashboardUpdated::class)) {
+            $orderId = $assignment->order_id;
+            foreach (['admin', 'it', 'finance', 'cs', 'hr', 'supervisor', 'vendor'] as $dash) {
+                event(new \App\Events\Dashboard\DashboardUpdated($dash, [
+                    'type' => 'delivery_assignment_status_changed',
+                    'order_id' => $orderId,
+                    'assignment_id' => $assignment->id,
+                    'status' => 'in_transit',
+                    'timestamp' => now()->toIso8601String(),
+                ]));
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -65,6 +162,13 @@ class DeliveryAssignmentController extends Controller
 
         $assignment = DeliveryAssignment::with('order')->findOrFail($id);
         $this->authorizeAssignment($assignment);
+        if ($assignment->status === 'delivered') {
+            return response()->json([
+                'success' => true,
+                'assignment' => $assignment->fresh(),
+                'order' => $assignment->order?->fresh(),
+            ]);
+        }
 
         $assignment->updateStatus('delivered', $validated['notes'] ?? null, $validated['signature'] ?? null);
 
@@ -74,14 +178,6 @@ class DeliveryAssignmentController extends Controller
         }
 
         CrossDepartmentFlowService::handleOrderCompletion($order->id, Auth::id());
-
-        Notification::create([
-            'user_id' => $order->user_id,
-            'type' => 'order_delivered',
-            'title' => 'Order Delivered',
-            'message' => 'Your order '.$order->order_number.' has been delivered',
-            'data' => ['order_id' => $order->id],
-        ]);
 
         return response()->json([
             'success' => true,

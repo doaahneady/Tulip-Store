@@ -50,8 +50,15 @@ class TulipStoreSeeder extends Seeder
             );
         }
 
-        // Create products
+        // Create products with robust category mapping and market flag
         $storeId = Store::where('slug', 'sample-store')->value('id');
+        $categoryOrder = [
+            1 => 'fresh-flowers',
+            2 => 'gifts',
+            3 => 'chocolates',
+            4 => 'balloons',
+        ];
+        $slugToId = Category::whereIn('slug', array_values($categoryOrder))->pluck('id', 'slug');
         $products = [
             // Fresh Flowers
             [
@@ -179,11 +186,18 @@ class TulipStoreSeeder extends Seeder
 
         foreach ($products as $productData) {
             $data = $productData;
+            // Map numeric category placeholders to actual IDs by slug
+            $placeholder = (int) ($data['category_id'] ?? 0);
+            if ($placeholder >= 1 && $placeholder <= 4) {
+                $slug = $categoryOrder[$placeholder];
+                $data['category_id'] = $slugToId[$slug] ?? $data['category_id'];
+            }
             if (isset($data['image'])) {
                 $data['images'] = [$data['image']];
                 unset($data['image']);
             }
             $data['sku'] = strtoupper(substr($data['slug'], 0, 3)).'-'.str_pad(random_int(1, 999), 3, '0', STR_PAD_LEFT);
+            $data['market'] = 'store';
             if ($storeId) {
                 $data['store_id'] = $storeId;
             }

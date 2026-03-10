@@ -3,6 +3,7 @@
 namespace App\Services\Dashboard;
 
 use App\Models\FinancialTransaction;
+use App\Models\Order;
 use App\Models\Payout;
 use App\Models\User;
 use App\Repositories\Contracts\FinancialTransactionRepositoryInterface;
@@ -62,6 +63,16 @@ class FinanceDashboardService
         $previousMonthRevenue = $this->orderRepository->getTotalRevenue($previousMonthStart, $previousMonthEnd);
         $monthlyGrowth = $this->metricsService->calculateGrowthPercentage($monthlyRevenue, $previousMonthRevenue);
 
+        // Delivery collected (delivery fees) when order is delivered/done
+        $terminal = (array) config('order_statuses.terminal', ['done']);
+        $deliveryStatuses = array_values(array_unique(array_merge(['delivered'], $terminal)));
+        $dailyDelivery = \Illuminate\Support\Facades\Schema::hasColumn('orders', 'delivery_cost')
+            ? (float) Order::whereIn('status', $deliveryStatuses)->whereBetween('updated_at', [$today->copy()->startOfDay(), $today->copy()->endOfDay()])->sum('delivery_cost')
+            : 0.0;
+        $monthlyDelivery = \Illuminate\Support\Facades\Schema::hasColumn('orders', 'delivery_cost')
+            ? (float) Order::whereIn('status', $deliveryStatuses)->whereBetween('updated_at', [$currentMonthStart, $currentMonthEnd])->sum('delivery_cost')
+            : 0.0;
+
         // Pending payouts
         $pendingPayouts = Payout::pending()->sum('amount');
         $pendingPayoutsCount = Payout::pending()->count();
@@ -88,11 +99,19 @@ class FinanceDashboardService
                 'previous' => $yesterdayRevenue,
                 'growth' => $this->metricsService->formatPercentage($dailyGrowth),
             ],
+            'daily_delivery' => [
+                'value' => $dailyDelivery,
+                'formatted' => $this->metricsService->formatCurrency($dailyDelivery),
+            ],
             'monthly_revenue' => [
                 'value' => $monthlyRevenue,
                 'formatted' => $this->metricsService->formatCurrency($monthlyRevenue),
                 'previous' => $previousMonthRevenue,
                 'growth' => $this->metricsService->formatPercentage($monthlyGrowth),
+            ],
+            'monthly_delivery' => [
+                'value' => $monthlyDelivery,
+                'formatted' => $this->metricsService->formatCurrency($monthlyDelivery),
             ],
             'vip_revenue' => [
                 'value' => $vipRevenue,

@@ -1,0 +1,501 @@
+:root {
+    --db3-bg: #f6f7fb;
+    --db3-surface: #ffffff;
+    --db3-surface-2: #fbfcfe;
+    --db3-border: rgba(15, 23, 42, 0.10);
+    --db3-shadow: 0 10px 30px rgba(2, 6, 23, 0.08);
+    --db3-shadow-sm: 0 6px 16px rgba(2, 6, 23, 0.08);
+    --db3-radius: 20px;
+    --db3-radius-sm: 14px;
+
+    --db3-primary: #0f766e;
+    --db3-primary-ink: #0b3d39;
+    --db3-accent: #7c3aed;
+    --db3-danger: #e11d48;
+    --db3-warning: #d97706;
+    --db3-success: #16a34a;
+
+    --db3-text: #0f172a;
+    --db3-text-muted: rgba(15, 23, 42, 0.62);
+    --db3-focus: rgba(124, 58, 237, 0.35);
+    --db3-sidebar-bg: linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
+    --db3-sidebar-border: rgba(148, 163, 184, 0.18);
+    --db3-sidebar-text: rgba(248, 250, 252, 0.92);
+    --db3-sidebar-muted: rgba(226, 232, 240, 0.64);
+    --db3-sidebar-hover: rgba(255, 255, 255, 0.06);
+    --db3-sidebar-active: rgba(124, 58, 237, 0.18);
+}
+
+.db-v3 {
+    background: var(--db3-bg);
+    color: var(--db3-text);
+    font-family: var(--font-sans);
+}
+
+html[dir="rtl"] .db-v3 {
+    font-family: var(--font-arabic);
+}
+
+.db-v3 :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px var(--db3-focus);
+    border-radius: 14px;
+}
+
+.db3-skip {
+    position: absolute;
+    inset-inline-start: 1rem;
+    top: 1rem;
+    transform: translateY(-140%);
+    background: var(--db3-surface);
+    color: var(--db3-text);
+    border: 1px solid var(--db3-border);
+    border-radius: 999px;
+    padding: 0.65rem 1rem;
+    box-shadow: var(--db3-shadow-sm);
+    z-index: 80;
+    text-decoration: none;
+    font-weight: 800;
+}
+
+.db3-skip:focus {
+    transform: translateY(0);
+}
+
+.db3-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.46);
+    z-index: 40;
+}
+
+.db3-overlay[hidden] {
+    display: none;
+}
+
+.db3-shell {
+    min-height: 100vh;
+    display: flex;
+}
+
+.db3-sidebar {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 300px;
+    background: var(--db3-sidebar-bg);
+    color: var(--db3-sidebar-text);
+    border-inline-end: 1px solid var(--db3-sidebar-border);
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 180ms ease;
+    display: flex;
+    flex-direction: column;
+}
+
+html[dir="rtl"] .db3-sidebar {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+    border-inline-end: none;
+    border-inline-start: 1px solid var(--db3-sidebar-border);
+    transform: translateX(100%);
+}
+
+.db3-sidebar.is-open {
+    transform: translateX(0);
+}
+
+@media (min-width: 768px) {
+    .db3-sidebar {
+        transform: translateX(0);
+    }
+}
+
+.db3-sidebar-header {
+    padding: 1.25rem 1.25rem 1rem;
+    border-bottom: 1px solid var(--db3-sidebar-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.db3-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+    text-decoration: none;
+    color: inherit;
+}
+
+.db3-brand-mark {
+    width: 44px;
+    height: 44px;
+    border-radius: 16px;
+    background: radial-gradient(circle at 30% 30%, rgba(124, 58, 237, 0.9), rgba(15, 118, 110, 0.9));
+    box-shadow: 0 10px 22px rgba(2, 6, 23, 0.35);
+    display: grid;
+    place-items: center;
+    color: white;
+}
+
+.db3-brand-title {
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.db3-brand-subtitle {
+    font-size: 0.75rem;
+    color: var(--db3-sidebar-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.db3-icon-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--db3-sidebar-text);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.db3-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.22);
+    transform: translateY(-1px);
+}
+
+.db3-sidebar-body {
+    padding: 1rem;
+    overflow: auto;
+    flex: 1;
+}
+
+.db3-nav-title {
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: var(--db3-sidebar-muted);
+    padding: 0 0.75rem;
+    margin: 0 0 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.db3-nav {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.db3-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.85rem;
+    border-radius: 16px;
+    text-decoration: none;
+    color: var(--db3-sidebar-text);
+    font-weight: 700;
+    font-size: 0.92rem;
+    border: 1px solid transparent;
+    background: transparent;
+    transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.db3-nav-link:hover {
+    background: var(--db3-sidebar-hover);
+}
+
+.db3-nav-link.is-active {
+    background: var(--db3-sidebar-active);
+    border-color: rgba(124, 58, 237, 0.28);
+}
+
+.db3-nav-icon {
+    width: 20px;
+    text-align: center;
+    color: rgba(226, 232, 240, 0.85);
+}
+
+.db3-sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid var(--db3-sidebar-border);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.db3-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.db3-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    color: white;
+}
+
+.db3-user-meta {
+    min-width: 0;
+    flex: 1;
+}
+
+.db3-user-name {
+    font-weight: 900;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.db3-user-email {
+    font-size: 0.78rem;
+    color: var(--db3-sidebar-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.db3-main {
+    flex: 1;
+    padding-inline-start: 0;
+}
+
+@media (min-width: 768px) {
+    .db3-main {
+        padding-inline-start: 300px;
+    }
+    html[dir="rtl"] .db3-main {
+        padding-inline-start: 0;
+        padding-inline-end: 300px;
+    }
+}
+
+.db3-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: rgba(255, 255, 255, 0.76);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--db3-border);
+}
+
+.db3-topbar-inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 1.05rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.db3-page-title {
+    font-weight: 950;
+    font-size: 1.15rem;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+@media (min-width: 640px) {
+    .db3-page-title {
+        font-size: 1.35rem;
+    }
+}
+
+.db3-page-subtitle {
+    margin-top: 0.15rem;
+    font-size: 0.82rem;
+    color: var(--db3-text-muted);
+    font-weight: 600;
+}
+
+.db3-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.db3-action-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 16px;
+    border: 1px solid var(--db3-border);
+    background: var(--db3-surface);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.db3-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--db3-shadow-sm);
+    border-color: rgba(124, 58, 237, 0.28);
+}
+
+.db3-user-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--db3-border);
+    background: var(--db3-surface);
+    cursor: pointer;
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.db3-user-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--db3-shadow-sm);
+    border-color: rgba(124, 58, 237, 0.28);
+}
+
+.db3-user-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.95), rgba(15, 118, 110, 0.9));
+    color: white;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+}
+
+.db3-user-btn-meta {
+    display: none;
+    min-width: 0;
+}
+
+@media (min-width: 640px) {
+    .db3-user-btn-meta {
+        display: block;
+    }
+}
+
+.db3-user-btn-name {
+    font-weight: 900;
+    font-size: 0.92rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
+.db3-user-btn-role {
+    font-size: 0.75rem;
+    color: var(--db3-text-muted);
+    font-weight: 700;
+}
+
+.db3-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 1.25rem;
+}
+
+@media (min-width: 640px) {
+    .db3-container {
+        padding: 1.5rem;
+    }
+}
+
+.db3-surface {
+    background: var(--db3-surface);
+    border: 1px solid var(--db3-border);
+    border-radius: var(--db3-radius);
+    box-shadow: var(--db3-shadow-sm);
+}
+
+.db3-alert {
+    padding: 0.9rem 1.05rem;
+    border-radius: var(--db3-radius-sm);
+    border: 1px solid var(--db3-border);
+    background: var(--db3-surface);
+    font-weight: 800;
+}
+
+.db3-alert--success {
+    border-color: rgba(22, 163, 74, 0.28);
+    background: rgba(22, 163, 74, 0.08);
+    color: #065f46;
+}
+
+.db3-alert--error {
+    border-color: rgba(225, 29, 72, 0.28);
+    background: rgba(225, 29, 72, 0.08);
+    color: #9f1239;
+}
+
+.db3-menu {
+    position: fixed;
+    inset-inline-end: 1.25rem;
+    top: 5rem;
+    min-width: 260px;
+    background: var(--db3-surface);
+    border: 1px solid var(--db3-border);
+    border-radius: var(--db3-radius);
+    box-shadow: var(--db3-shadow);
+    z-index: 60;
+    padding: 0.5rem;
+}
+
+.db3-menu[hidden] {
+    display: none;
+}
+
+.db3-menu a,
+.db3-menu button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.85rem;
+    border-radius: 16px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--db3-text);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 160ms ease;
+}
+
+.db3-menu a:hover {
+    background: rgba(2, 6, 23, 0.04);
+}
+
+.db3-menu button {
+    color: var(--db3-danger);
+}
+
+.db3-menu button:hover {
+    background: rgba(225, 29, 72, 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .db3-sidebar,
+    .db3-icon-btn,
+    .db3-nav-link,
+    .db3-action-btn,
+    .db3-user-btn {
+        transition: none;
+    }
+}

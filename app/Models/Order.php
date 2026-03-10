@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 
 class Order extends Model
 {
@@ -47,6 +48,16 @@ class Order extends Model
             }
             if (! $order->user_id && $order->customer_id) {
                 $order->user_id = $order->customer_id;
+            }
+            if (Schema::hasColumn('orders', 'shipping_cost') && Schema::hasColumn('orders', 'delivery_cost')) {
+                $shipping = $order->shipping_cost;
+                $delivery = $order->delivery_cost;
+                if (($delivery === null || (float) $delivery == 0.0) && $shipping !== null && (float) $shipping > 0.0) {
+                    $order->delivery_cost = $shipping;
+                }
+                if (($shipping === null || (float) $shipping == 0.0) && $delivery !== null && (float) $delivery > 0.0) {
+                    $order->shipping_cost = $delivery;
+                }
             }
         });
     }

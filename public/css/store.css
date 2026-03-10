@@ -560,7 +560,6 @@ h6 {
 .product-card {
   background-color: #f30707;
   border-radius: 12px;
-  overflow: hidden;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
 }
 
@@ -1117,10 +1116,17 @@ h6 {
 .product-card {
   background: white;
   border-radius: 20px;
-  overflow: hidden;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   position: relative;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.product-card:hover {
+  transform: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  z-index: 1;
 }
 
 .product-image-wrapper {
@@ -1143,6 +1149,7 @@ h6 {
 .product-info {
   padding: 0.8rem;
   text-align: center;
+  overflow: visible !important;
 }
 
 .product-name {
@@ -1198,6 +1205,7 @@ h6 {
   display: flex;
   gap: 0.4rem;
   padding: 0 0.7rem 0.7rem;
+  overflow: visible !important;
 }
 
 .product-card-btn {
@@ -1348,11 +1356,11 @@ body.dark-mode .product-close-btn:hover {
 /* Responsive */
 @media (max-width: 768px) {
   .product-card:hover {
-    transform: scale(1.02);
+    transform: none;
   }
 
   .product-card:hover .product-image-wrapper {
-    height: 300px;
+    height: 200px;
   }
 
   .product-actions {
@@ -1365,7 +1373,7 @@ body.dark-mode .product-close-btn:hover {
   }
 
   .product-card:hover .product-name {
-    font-size: 1.1rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -1373,7 +1381,7 @@ body.dark-mode .product-close-btn:hover {
 
 /* Reset hover effects */
 .product-card {
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 
 /* No hover effects on product cards */
@@ -1697,7 +1705,7 @@ body.dark-mode .floating-view-details {
 }
 
 .product-card:hover {
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 .product-card > * {
@@ -1842,8 +1850,62 @@ body.dark-mode .floating-view-details {
   }
 }
 
-.product-card {
-  position: relative;
+/* Custom Tooltip Styles */
+[data-tooltip] {
+  position: relative !important;
+}
+
+[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  padding: 6px 12px;
+  background: rgba(42, 112, 128, 0.98);
+  color: #fff;
+  font-family: 'El Messiri', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 8px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 9999999 !important;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+
+[data-tooltip]::after {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(42, 112, 128, 0.98) transparent transparent transparent;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  z-index: 9999999 !important;
+  pointer-events: none;
+}
+
+[data-tooltip]:hover::before,
+[data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Ensure parents don't clip */
+.product-card, 
+.product-info, 
+.product-card-actions {
+  overflow: visible !important;
 }
 
 /* ===== RESPONSIVE NAVBAR ===== */

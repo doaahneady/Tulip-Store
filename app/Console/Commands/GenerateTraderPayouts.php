@@ -12,7 +12,7 @@ class GenerateTraderPayouts extends Command
 {
     protected $signature = 'trader:payouts:generate {--from=} {--to=}';
 
-    protected $description = 'Generate trader payouts for delivered orders in the given period';
+    protected $description = 'Generate trader payouts for terminal orders in the given period';
 
     public function handle(): int
     {
@@ -27,12 +27,13 @@ class GenerateTraderPayouts extends Command
             $to = now()->subMonth()->endOfMonth();
         }
 
+        $terminal = (array) config('order_statuses.terminal', ['delivered', 'done']);
         $rows = OrderItem::query()
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->join('products', 'products.id', '=', 'order_items.product_id')
             ->whereNotNull('products.trader_id')
             ->whereBetween('orders.created_at', [$from, $to])
-            ->whereIn('orders.status', ['delivered', 'completed'])
+            ->whereIn('orders.status', $terminal)
             ->select('products.trader_id', DB::raw('SUM(order_items.total_price) as total_sales'))
             ->groupBy('products.trader_id')
             ->get();

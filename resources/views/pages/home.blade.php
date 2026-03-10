@@ -57,7 +57,7 @@
             <div class="text-primary text-4xl mb-4"><i class="fas fa-box"></i></div>
             <h3 class="text-lg font-bold text-gray-900 mb-2">${cat.name}</h3>
             <p class="text-gray-600 text-sm mb-4">${cat.description || 'Browse our collection'}</p>
-            <a href="/category/${cat.slug}" class="text-primary hover:text-pink-600 transition font-semibold">
+            <a href="/category/${encodeURIComponent(cat.slug)}" class="text-primary hover:text-pink-600 transition font-semibold">
               View Products →
             </a>
           </div>

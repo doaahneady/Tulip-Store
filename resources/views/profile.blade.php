@@ -76,6 +76,24 @@
             font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;
         }
         .btn-save:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(15,79,85,0.3); }
+
+        .currency-toggle { display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap; }
+        .currency-btn {
+            border: 2px solid #0f4f55;
+            background: #fff;
+            color: #0f4f55;
+            padding: 0.7rem 1rem;
+            border-radius: 10px;
+            font-family: "El Messiri", sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .currency-btn.active { background:#0f4f55; color:#fff; }
+        .currency-btn:focus { outline: none; box-shadow: 0 0 0 3px rgba(15,79,85,0.15); }
         
         .order-card {
             background: #f8f9fa; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;
@@ -199,9 +217,6 @@
                 <div class="profile-nav-item" onclick="showSection('security')">
                     <i class="fas fa-lock"></i><span>الأمان</span>
                 </div>
-                <div class="profile-nav-item" onclick="showSection('orders')">
-                    <i class="fas fa-shopping-bag"></i><span>طلباتي</span>
-                </div>
                 <div class="profile-nav-item" onclick="showSection('notifications')">
                     <i class="fas fa-bell"></i><span>الإشعارات</span>
                     <span id="notifBadge" style="display:none;background:#ff6b35;color:white;padding:0.2rem 0.6rem;border-radius:10px;font-size:0.75rem;margin-right:auto;"></span>
@@ -232,6 +247,20 @@
                         <div class="form-group">
                             <label class="form-label">العنوان</label>
                             <input type="text" class="form-input" id="address" value="{{ Auth::user()->address ?? '' }}" placeholder="المدينة، الحي، الشارع">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="grid-column:1/-1;">
+                            <label class="form-label">العملة المفضلة</label>
+                            <input type="hidden" id="currencyPref" value="{{ strtoupper((string) (Auth::user()->currency ?? (session('currency') ?? 'USD'))) }}">
+                            <div class="currency-toggle">
+                                <button type="button" class="currency-btn" id="currencyBtnUSD" onclick="setCurrencyPreferenceUI('USD')">
+                                    <span>USD</span><span>($)</span>
+                                </button>
+                                <button type="button" class="currency-btn" id="currencyBtnSYP" onclick="setCurrencyPreferenceUI('SYP')">
+                                    <span>SYP</span><span>(Syrian Pound)</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <button type="submit" class="btn-save"><i class="fas fa-save"></i> حفظ التغييرات</button>
@@ -290,17 +319,6 @@
                 </form>
             </div>
             
-            <!-- Orders Section -->
-            <div class="content-section" id="section-orders">
-                <h2 class="section-title"><i class="fas fa-shopping-bag"></i> طلباتي</h2>
-                <div id="ordersList">
-                    <div class="empty-state">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>جاري تحميل الطلبات...</p>
-                    </div>
-                </div>
-            </div>
-            
             <!-- Notifications Section -->
             <div class="content-section" id="section-notifications">
                 <h2 class="section-title"><i class="fas fa-bell"></i> الإشعارات</h2>
@@ -331,6 +349,20 @@
         const API_BASE = window.location.origin;
         const CURRENT_EMAIL = "{{ Auth::user()->email ?? '' }}";
         let ordersData = [];
+
+        function setCurrencyPreferenceUI(currency) {
+            const cur = (String(currency || '').toUpperCase() === 'SYP') ? 'SYP' : 'USD';
+            const prefInput = document.getElementById('currencyPref');
+            if (prefInput) prefInput.value = cur;
+            document.getElementById('currencyBtnUSD')?.classList.toggle('active', cur === 'USD');
+            document.getElementById('currencyBtnSYP')?.classList.toggle('active', cur === 'SYP');
+            if (window.setCurrencyPreference) window.setCurrencyPreference(cur);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const initial = (window.getCurrencyPreference ? window.getCurrencyPreference() : (document.getElementById('currencyPref')?.value || 'USD'));
+            setCurrencyPreferenceUI(initial);
+        });
         
         function showSection(section) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
@@ -339,7 +371,6 @@
             event.currentTarget.classList.add('active');
             
             if (section === 'addresses') loadAddresses();
-            if (section === 'orders') loadOrders();
             if (section === 'notifications') loadNotifications();
         }
         
@@ -355,7 +386,8 @@
                     name: document.getElementById('fullName').value,
                     email: document.getElementById('email').value,
                     phone: document.getElementById('phone').value,
-                    address: document.getElementById('address').value
+                    address: document.getElementById('address').value,
+                    currency: (document.getElementById('currencyPref')?.value || (window.getCurrencyPreference ? window.getCurrencyPreference() : 'USD'))
                 };
 
                 // If email changed, request verification and redirect to code page
@@ -395,7 +427,8 @@
                     body: JSON.stringify({
                         name: payload.name,
                         phone: payload.phone,
-                        address: payload.address
+                        address: payload.address,
+                        currency: payload.currency
                     })
                 });
                 if (!response.ok) {
@@ -446,7 +479,7 @@
                             </div>
                             <div style="display:flex;justify-content:space-between;align-items:center;">
                                 <span>${order.items_count || 0} منتجات</span>
-                                <span class="order-total">${parseFloat(order.total).toFixed(2)} $</span>
+                                <span class="order-total">${window.formatMoney ? window.formatMoney(order.total) : (parseFloat(order.total).toFixed(2) + ' $')}</span>
                             </div>
                         </div>
                     `).join('');
@@ -490,28 +523,28 @@
                 ${order.items && order.items.length > 0 ? order.items.map(item => `
                     <div class="order-item">
                         <div class="order-item-img">
-                            ${item.product_image ? `<img src="${item.product_image}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">` : '📦'}
+                            ${item.product_image ? `<img src="${item.product_image}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.src='/images/gift-placeholder.svg'">` : '📦'}
                         </div>
                         <div class="order-item-info">
                             <div class="order-item-name">${item.product_name}</div>
                             <div class="order-item-qty">الكمية: ${item.quantity}</div>
                         </div>
-                        <div class="order-item-price">${parseFloat(item.subtotal).toFixed(2)} $</div>
+                        <div class="order-item-price">${window.formatMoney ? window.formatMoney(item.subtotal) : (parseFloat(item.subtotal).toFixed(2) + ' $')}</div>
                     </div>
                 `).join('') : '<p style="color:#888;text-align:center;padding:1rem;">لا توجد تفاصيل للمنتجات</p>'}
                 
                 <div style="margin-top:1.5rem;padding-top:1rem;border-top:2px solid #f0f0f0;">
                     <div class="order-detail-row">
                         <span class="detail-label">المجموع الفرعي</span>
-                        <span class="detail-value">${parseFloat(order.subtotal || order.total).toFixed(2)} $</span>
+                        <span class="detail-value">${window.formatMoney ? window.formatMoney(order.subtotal || order.total) : (parseFloat(order.subtotal || order.total).toFixed(2) + ' $')}</span>
                     </div>
                     <div class="order-detail-row">
                         <span class="detail-label">التوصيل</span>
-                        <span class="detail-value">${parseFloat(order.delivery_cost || 0).toFixed(2)} $</span>
+                        <span class="detail-value">${window.formatMoney ? window.formatMoney(order.delivery_cost || 0) : (parseFloat(order.delivery_cost || 0).toFixed(2) + ' $')}</span>
                     </div>
                     <div class="order-detail-row" style="font-size:1.2rem;">
                         <span class="detail-label" style="font-weight:700;">الإجمالي</span>
-                        <span class="detail-value" style="color:#ff6b35;font-weight:700;">${parseFloat(order.total).toFixed(2)} $</span>
+                        <span class="detail-value" style="color:#ff6b35;font-weight:700;">${window.formatMoney ? window.formatMoney(order.total) : (parseFloat(order.total).toFixed(2) + ' $')}</span>
                     </div>
                 </div>
             `;
@@ -528,18 +561,25 @@
             const methods = {
                 'cash': 'الدفع عند الاستلام',
                 'card': 'بطاقة ائتمان',
-                'credit_card': 'بطاقة ائتمان'
+                'credit_card': 'بطاقة ائتمان',
+                'payroll': 'Payroll'
             };
-            return methods[method] || method || 'غير محدد';
+            return methods[method] || 'Unknown';
         }
         
         function getStatusText(status) {
             const statuses = {
                 'pending': 'قيد الانتظار',
+                'confirmed': 'مؤكد',
                 'processing': 'قيد المعالجة',
-                'shipped': 'تم الشحن',
-                'delivered': 'تم التوصيل',
-                'cancelled': 'ملغي'
+                'ready': 'جاهز',
+                'out_for_delivery': 'خرج للتوصيل',
+                'delivered': 'تم التسليم',
+                'done': 'مكتمل',
+                'cancelled': 'ملغي',
+                'failed': 'فشل',
+                'refunded': 'مسترجع',
+                'returned': 'مرتجع'
             };
             return statuses[status] || status;
         }

@@ -594,25 +594,22 @@
                                     ${stockLabel}
                                 </div>
                                 <div class="product-image-wrapper" onclick='openFloatingView(${JSON.stringify(product)})'>
-                                    <img src="${product.image || 'https://via.placeholder.com/250'}" alt="${product.name}" class="product-img">
+                                    <img src="${product.primary_image_url || product.image || '/images/gift-placeholder.svg'}" srcset="${product.primary_image_srcset || ''}" sizes="(max-width: 768px) 50vw, 25vw" alt="${product.name}" class="product-img" loading="lazy" width="320" height="320" onerror="this.src='/images/gift-placeholder.svg'">
                                 </div>
                                 <div class="product-info">
                                     <h3 class="product-name">${product.name}</h3>
                                     <div class="product-price-rating-wrapper">
                                         <div class="product-price-wrapper">
-                                            <span class="product-price">$${parseFloat(product.discount_price || product.price).toFixed(2)}</span>
+                                            <span class="product-price">${window.formatMoney ? window.formatMoney(product.discount_price || product.price) : ('$' + parseFloat(product.discount_price || product.price).toFixed(2))}</span>
                                             ${product.discount_price ? 
-                                                `<span class="product-old-price">$${parseFloat(product.price).toFixed(2)}</span>` : ''
+                                                `<span class="product-old-price">${window.formatMoney ? window.formatMoney(product.price) : ('$' + parseFloat(product.price).toFixed(2))}</span>` : ''
                                             }
-                                        </div>
-                                        <div class="product-rating">
-                                            ${'<i class="fas fa-star"></i>'.repeat(5)}
                                         </div>
                                     </div>
                                 </div>
                                 <div class="product-card-actions">
-                                <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart(event, ${product.id})" data-product-id="${product.id}" ${isOutOfStock ? 'disabled' : ''} style="background: transparent; border: none; box-shadow: none; width: auto; height: auto; padding: 0; display: inline-flex; align-items: center; justify-content: center; ${isOutOfStock ? 'opacity: 0.55; cursor: not-allowed;' : 'cursor: pointer;'}">
-                                        ${isOutOfStock ? '<i class="fas fa-ban" style="font-size: 1.35rem; color: #b91c1c;"></i>' : '<i class="fas fa-shopping-cart" style="font-size: 1.4rem; color: #ff6b35;"></i>'}
+                                <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart(event, ${product.id})" data-product-id="${product.id}" ${isOutOfStock ? 'disabled data-tooltip="لا يتوفر هذا المنتج في المخزن"' : ''} style="background: transparent; border: none; box-shadow: none; width: auto; height: auto; padding: 0; display: inline-flex; align-items: center; justify-content: center; ${isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : 'cursor: pointer;'}">
+                                        <i class="fas fa-shopping-cart" style="font-size: 1.4rem; color: #ff6b35;"></i>
                                     </button>
                                 </div>
                             </div>
@@ -635,7 +632,7 @@
             currentProductId = product.id;
             
             // Set product data
-            document.getElementById('floatingImage').src = product.image || 'https://via.placeholder.com/400';
+            document.getElementById('floatingImage').src = product.primary_image_url || product.image || '/images/gift-placeholder.svg';
             document.getElementById('floatingName').textContent = product.name;
             document.getElementById('floatingDescription').textContent = product.description || 'منتج رائع من Tulip Store';
             
@@ -644,12 +641,12 @@
             const oldPriceEl = document.getElementById('floatingOldPrice');
             
             if (product.discount_price) {
-                oldPriceEl.textContent = '$' + parseFloat(product.price).toFixed(2);
+                oldPriceEl.textContent = window.formatMoney ? window.formatMoney(product.price) : ('$' + parseFloat(product.price).toFixed(2));
                 oldPriceEl.style.display = 'inline';
-                priceEl.textContent = '$' + parseFloat(product.discount_price).toFixed(2);
+                priceEl.textContent = window.formatMoney ? window.formatMoney(product.discount_price) : ('$' + parseFloat(product.discount_price).toFixed(2));
             } else {
                 oldPriceEl.style.display = 'none';
-                priceEl.textContent = '$' + parseFloat(product.price).toFixed(2);
+                priceEl.textContent = window.formatMoney ? window.formatMoney(product.price) : ('$' + parseFloat(product.price).toFixed(2));
             }
             
             // Set rating
@@ -774,6 +771,15 @@
                         window.updateCartCount(data.cart_count || data.count || 0);
                     }
                     
+                    // Mart delivery warning if applicable
+                    const product = window.__productsById ? window.__productsById[productId] : null;
+                    const isMart = product && (product.store_id === 1 || (product.store && product.store.name && product.store.name.toLowerCase().includes('mart')));
+                    if (isMart && window.showToast) {
+                        setTimeout(() => {
+                            window.showToast('تنبيه: منتجات Mart تتوفر للتوصيل فقط إلى (السويداء، عتيل، قنوات)', 4000);
+                        }, 1500);
+                    }
+                    
                     // Revert back to cart icon after 2 seconds
                     setTimeout(() => {
                         btn.classList.remove('added');
@@ -848,6 +854,14 @@
                     // Update cart count using global function
                     if (window.updateCartCount) {
                         window.updateCartCount(data.cart_count || data.count || 0);
+                    }
+                    
+                    // Mart delivery warning
+                    const isMart = product && (product.store_id === 1 || (product.store && product.store.name && product.store.name.toLowerCase().includes('mart')));
+                    if (isMart && window.showToast) {
+                        setTimeout(() => {
+                            window.showToast('تنبيه: منتجات Mart تتوفر للتوصيل فقط إلى (السويداء، عتيل، قنوات)', 4000);
+                        }, 1500);
                     }
                     
                     setTimeout(() => {
@@ -1137,8 +1151,9 @@
                 searchCategories.innerHTML = '<div style="padding:0.5rem 0; text-align:center; font-size:0.8rem; color:#888;">جاري تحميل الأقسام...</div>';
                 try {
                     const res = await fetch(`${API_BASE}/categories`);
-                    const cats = await res.json();
-                    searchCategories.innerHTML = cats.map(c => `
+                    const payload = await res.json();
+                    const cats = Array.isArray(payload) ? payload : (payload.data || []);
+                    searchCategories.innerHTML = (Array.isArray(cats) ? cats : []).map(c => `
                         <div class="category-item">${c.name}</div>
                     `).join('');
                     searchCategories.dataset.loaded = '1';

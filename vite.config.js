@@ -8,7 +8,7 @@ export default defineConfig({
             input: [
                 'resources/js/app.js',
                 'resources/css/app.css',
-                'resources/css/dashboard-system.css'
+                'resources/css/dashboard-next.css'
             ],
             refresh: true,
         }),

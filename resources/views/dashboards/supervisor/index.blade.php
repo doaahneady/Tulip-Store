@@ -43,7 +43,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 mb-4">
     <x-dashboard.stat-card title="إجمالي السائقين" :value="number_format($metrics['total_drivers'] ?? 0)" icon="fas fa-truck" color="teal" />
     <x-dashboard.stat-card title="سائقون نشطون" :value="number_format($metrics['active_drivers'] ?? 0)" icon="fas fa-user-check" color="green" />
     <x-dashboard.stat-card title="سائقون على توصيل" :value="number_format($metrics['drivers_on_delivery'] ?? 0)" icon="fas fa-route" color="indigo" />
@@ -52,56 +52,55 @@
     <x-dashboard.stat-card title="مكتمل اليوم" :value="number_format($metrics['completed_today'] ?? 0)" icon="fas fa-check-double" color="purple" />
 </div>
 
-<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-4 mb-4">
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 xl:col-span-7">
     <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-gray-800">خريطة تتبع مباشر</h3>
+        <h3 class="text-base font-black text-gray-800">خريطة تتبع مباشر</h3>
         <a href="{{ route('dashboard.supervisor.live-tracking') }}" class="text-sm text-indigo-600">تفاصيل</a>
     </div>
-    <div id="overview-map" class="w-full h-64 rounded-xl border border-gray-200"></div>
+    <div id="overview-map" class="w-full h-[240px] rounded-xl border border-gray-200"></div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <x-dashboard.stat-card title="متاحون" :value="number_format($metrics['available_drivers'] ?? 0)" icon="fas fa-check-circle" color="emerald" />
-    <x-dashboard.stat-card title="غير متصلين" :value="number_format($metrics['offline_drivers'] ?? 0)" icon="fas fa-power-off" color="gray" />
-    <x-dashboard.stat-card title="في استراحة" :value="number_format($metrics['on_break_drivers'] ?? 0)" icon="fas fa-coffee" color="yellow" />
-    <x-dashboard.stat-card title="تقييم السائقين" :value="number_format($metrics['avg_driver_rating'] ?? 0, 1)" icon="fas fa-star" color="amber" />
-    </div>
+<div class="xl:col-span-5 space-y-4">
+    <x-dashboard.collapsible title="حالة التشغيل" icon="fas fa-gauge-high" subtitle="السائقون والتوصيلات والمركبات">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <x-dashboard.stat-card title="متاحون" :value="number_format($metrics['available_drivers'] ?? 0)" icon="fas fa-check-circle" color="emerald" />
+            <x-dashboard.stat-card title="غير متصلين" :value="number_format($metrics['offline_drivers'] ?? 0)" icon="fas fa-power-off" color="gray" />
+            <x-dashboard.stat-card title="في استراحة" :value="number_format($metrics['on_break_drivers'] ?? 0)" icon="fas fa-coffee" color="yellow" />
+            <x-dashboard.stat-card title="تقييم السائقين" :value="number_format($metrics['avg_driver_rating'] ?? 0, 1)" icon="fas fa-star" color="amber" />
+            <x-dashboard.stat-card title="تعيينات معلقة" :value="number_format($metrics['pending_assignments'] ?? 0)" icon="fas fa-hourglass-half" color="pink" />
+            <x-dashboard.stat-card title="توصيلات نشطة" :value="number_format($metrics['active_deliveries'] ?? 0)" icon="fas fa-truck-loading" color="orange" />
+            <x-dashboard.stat-card title="فشل اليوم" :value="number_format($metrics['failed_deliveries'] ?? 0)" icon="fas fa-times-circle" color="red" />
+            <x-dashboard.stat-card title="مركبات في الصيانة" :value="number_format($metrics['vehicles_in_maintenance'] ?? 0)" icon="fas fa-tools" color="purple" />
+        </div>
+    </x-dashboard.collapsible>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <x-dashboard.stat-card title="تعيينات معلقة" :value="number_format($metrics['pending_assignments'] ?? 0)" icon="fas fa-hourglass-half" color="pink" />
-    <x-dashboard.stat-card title="توصيلات نشطة" :value="number_format($metrics['active_deliveries'] ?? 0)" icon="fas fa-truck-loading" color="orange" />
-    <x-dashboard.stat-card title="فشل اليوم" :value="number_format($metrics['failed_deliveries'] ?? 0)" icon="fas fa-times-circle" color="red" />
-    <x-dashboard.stat-card title="مركبات في الصيانة" :value="number_format($metrics['vehicles_in_maintenance'] ?? 0)" icon="fas fa-tools" color="purple" />
+    <x-dashboard.collapsible title="توصيلات اليوم" icon="fas fa-truck-fast" subtitle="نظرة عامة سريعة" :open="true">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="p-3 border rounded-xl bg-white">
+                <div class="text-xs text-gray-500 font-semibold">إجمالي</div>
+                <div class="mt-1 text-2xl font-black text-gray-900">{{ number_format($metrics['deliveries_today_total'] ?? 0) }}</div>
+            </div>
+            <div class="p-3 border rounded-xl bg-white">
+                <div class="text-xs text-gray-500 font-semibold">قيد التنفيذ</div>
+                <div class="mt-1 text-2xl font-black text-blue-600">{{ number_format($metrics['in_progress_today'] ?? 0) }}</div>
+            </div>
+            <div class="p-3 border rounded-xl bg-white">
+                <div class="text-xs text-gray-500 font-semibold">مكتمل</div>
+                <div class="mt-1 text-2xl font-black text-green-600">{{ number_format($metrics['completed_today'] ?? 0) }}</div>
+            </div>
+            <div class="p-3 border rounded-xl bg-white">
+                <div class="text-xs text-gray-500 font-semibold">قيد التعيين</div>
+                <div class="mt-1 text-2xl font-black text-orange-600">{{ number_format($metrics['pending_today'] ?? 0) }}</div>
+            </div>
+        </div>
+    </x-dashboard.collapsible>
+</div>
 </div>
 
-<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-    <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-gray-800">توصيلات اليوم</h3>
-        <div class="text-sm text-gray-500">نظرة عامة سريعة</div>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="p-4 border rounded-xl">
-            <div class="text-sm text-gray-500">إجمالي</div>
-            <div class="mt-2 text-3xl font-bold text-gray-900">{{ number_format($metrics['deliveries_today_total'] ?? 0) }}</div>
-        </div>
-        <div class="p-4 border rounded-xl">
-            <div class="text-sm text-gray-500">قيد التنفيذ</div>
-            <div class="mt-2 text-3xl font-bold text-blue-600">{{ number_format($metrics['in_progress_today'] ?? 0) }}</div>
-        </div>
-        <div class="p-4 border rounded-xl">
-            <div class="text-sm text-gray-500">مكتمل</div>
-            <div class="mt-2 text-3xl font-bold text-green-600">{{ number_format($metrics['completed_today'] ?? 0) }}</div>
-        </div>
-        <div class="p-4 border rounded-xl">
-            <div class="text-sm text-gray-500">قيد التعيين</div>
-            <div class="mt-2 text-3xl font-bold text-orange-600">{{ number_format($metrics['pending_today'] ?? 0) }}</div>
-        </div>
-    </div>
-</div>
-
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">مؤشرات الأداء</h3>
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-4 mb-4">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 xl:col-span-4">
+        <h3 class="text-base font-black text-gray-800 mb-3">مؤشرات الأداء</h3>
         <div class="space-y-4">
             <div class="flex justify-between">
                 <span class="text-sm text-gray-600">نسبة التسليم في الوقت</span>
@@ -122,12 +121,12 @@
             </a>
         </div>
     </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 lg:col-span-2">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 xl:col-span-8">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-800">قائمة السائقين</h3>
+            <h3 class="text-base font-black text-gray-800">قائمة السائقين</h3>
             <a href="{{ route('dashboard.supervisor.drivers') }}" class="text-sm text-indigo-600 hover:text-indigo-800">عرض الكل</a>
         </div>
-        <div class="overflow-x-auto">
+        <div class="overflow-auto max-h-[380px]">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr>
@@ -175,13 +174,13 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 xl:col-span-7">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-800">طلبات غير معينة</h3>
+            <h3 class="text-base font-black text-gray-800">طلبات غير معينة</h3>
             <a href="{{ route('dashboard.supervisor.order-assignment') }}" class="text-sm text-indigo-600 hover:text-indigo-800">تعيين</a>
         </div>
-        <div class="overflow-x-auto">
+        <div class="overflow-auto max-h-[360px]">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr>
@@ -212,12 +211,12 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 xl:col-span-5">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-800">مسارات نشطة</h3>
+            <h3 class="text-base font-black text-gray-800">مسارات نشطة</h3>
             <a href="{{ route('dashboard.supervisor.route-optimization') }}" class="text-sm text-indigo-600 hover:text-indigo-800">عرض</a>
         </div>
-        <ul class="divide-y divide-gray-200">
+        <ul class="divide-y divide-gray-200 max-h-[360px] overflow-auto">
             @foreach(($metrics['active_routes'] ?? []) as $route)
                 <li class="py-3">
                     <div class="flex items-center justify-between">

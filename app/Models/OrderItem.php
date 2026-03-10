@@ -35,4 +35,14 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function getPriceAttribute()
+    {
+        return $this->unit_price;
+    }
+
+    public function getSubtotalAttribute()
+    {
+        return $this->total_price;
+    }
 }

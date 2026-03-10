@@ -2,7 +2,7 @@
 @php $title = 'لوحة تحكم التاجر'; @endphp
 @section('content')
 
-        <div class="grid grid-4" style="margin-bottom:1rem">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <div class="card kpi">
                 <div class="icon indigo"><i class="fas fa-boxes"></i></div>
                 <div class="meta">
@@ -31,9 +31,6 @@
                     <div class="value">{{ number_format($metrics['monthly_earnings'], 2) }}</div>
                 </div>
             </div>
-        </div>
-
-        <div class="grid grid-4" style="margin-bottom:1rem">
             <div class="card kpi">
                 <div class="icon green"><i class="fas fa-sack-dollar"></i></div>
                 <div class="meta">
@@ -64,7 +61,7 @@
             </div>
         </div>
 
-        <div class="grid grid-2" style="margin-bottom:1rem">
+        <div class="grid grid-cols-1 lg:grid-cols-2" style="margin-top:1rem">
             <div class="card">
                 <div class="section-title">أفضل المنتجات (هذا الشهر)</div>
                 <table class="table">

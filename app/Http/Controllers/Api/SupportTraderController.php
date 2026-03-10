@@ -166,7 +166,7 @@ class SupportTraderController extends Controller
     {
         $p = Product::whereNotNull('trader_id')->findOrFail($id);
         $p->update([
-            'status' => 'approved',
+            'status' => 'active',
             'is_active' => true,
         ]);
         $this->incrementDailyMetric($p->trader_id, 'products_approved', 1);

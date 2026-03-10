@@ -8,6 +8,13 @@
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .container-custom { max-width: 1200px; margin: 0 auto; }
+        @media (max-width: 768px) {
+            .container-custom { padding: 2rem 1rem !important; }
+        }
+    </style>
 </head>
 <body style="margin:0; font-family:'El Messiri',sans-serif; background:#f9fafb; min-height:100vh; display:flex; flex-direction:column;">
 
@@ -44,7 +51,7 @@
 <script>
     async function loadCategories() {
         try {
-            const response = await fetch('/api/categories');
+            const response = await fetch('/api/categories?market=store', { headers: { 'Accept': 'application/json' } });
             if (!response.ok) throw new Error('Failed to load categories');
 
             const categories = await response.json();
@@ -52,7 +59,7 @@
 
             if (categories.data && categories.data.length > 0) {
                 container.innerHTML = categories.data.map(cat => `
-                    <a href="/category/${cat.slug}" style="
+                    <a href="/category/${encodeURIComponent(cat.slug)}" style="
                         background:#fff;
                         border-radius:18px;
                         overflow:hidden;

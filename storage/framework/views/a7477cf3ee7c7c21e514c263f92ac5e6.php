@@ -45,6 +45,10 @@
             <i class="fas fa-clipboard-check"></i>
             <span>مراجعة المنتجات</span>
         </a>
+        <a href="<?php echo e(route('dashboard.cs.payrolls')); ?>" class="inline-flex items-center gap-2 bg-sky-600 text-white px-4 py-2 rounded-xl hover:bg-sky-700 transition">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Payrolls</span>
+        </a>
         <a href="<?php echo e(route('dashboard.administrative-approvals.index')); ?>" class="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition">
             <i class="fas fa-clipboard-check"></i>
             <span>الموافقات الإدارية</span>
@@ -56,35 +60,45 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-    <div class="stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <p class="text-gray-500 text-xs">التذاكر المفتوحة</p>
-        <h3 class="text-xl font-bold text-gray-900 mt-1"><?php echo e(number_format($kpi['open_tickets']['value'] ?? 0)); ?></h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 mb-4">
+    <div class="stat-card bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div class="flex items-start justify-between gap-3">
+            <p class="text-gray-500 text-xs font-semibold">التذاكر المفتوحة</p>
+            <h3 class="text-xl font-black text-gray-900 leading-tight"><?php echo e(number_format($kpi['open_tickets']['value'] ?? 0)); ?></h3>
+        </div>
     </div>
-    <div class="stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <p class="text-gray-500 text-xs">قيد المعالجة</p>
-        <h3 class="text-xl font-bold text-gray-900 mt-1"><?php echo e(number_format($kpi['pending_tickets']['value'] ?? 0)); ?></h3>
+    <div class="stat-card bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div class="flex items-start justify-between gap-3">
+            <p class="text-gray-500 text-xs font-semibold">قيد المعالجة</p>
+            <h3 class="text-xl font-black text-gray-900 leading-tight"><?php echo e(number_format($kpi['pending_tickets']['value'] ?? 0)); ?></h3>
+        </div>
     </div>
-    <div class="stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <p class="text-gray-500 text-xs">تم الحل اليوم</p>
-        <h3 class="text-xl font-bold text-gray-900 mt-1"><?php echo e(number_format($kpi['resolved_today']['value'] ?? 0)); ?></h3>
+    <div class="stat-card bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div class="flex items-start justify-between gap-3">
+            <p class="text-gray-500 text-xs font-semibold">تم الحل اليوم</p>
+            <h3 class="text-xl font-black text-gray-900 leading-tight"><?php echo e(number_format($kpi['resolved_today']['value'] ?? 0)); ?></h3>
+        </div>
         <p class="text-xs text-gray-500 mt-1"><?php echo e($resolvedGrowth ?? ''); ?></p>
     </div>
-    <div class="stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <p class="text-gray-500 text-xs">متوسط وقت الاستجابة</p>
-        <h3 class="text-xl font-bold text-gray-900 mt-1"><?php echo e($avgFormatted ?? 'N/A'); ?></h3>
+    <div class="stat-card bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div class="flex items-start justify-between gap-3">
+            <p class="text-gray-500 text-xs font-semibold">متوسط وقت الاستجابة</p>
+            <h3 class="text-xl font-black text-gray-900 leading-tight"><?php echo e($avgFormatted ?? 'N/A'); ?></h3>
+        </div>
     </div>
-    <div class="stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <p class="text-gray-500 text-xs">تذاكر هذا الشهر</p>
-        <h3 class="text-xl font-bold text-gray-900 mt-1"><?php echo e(number_format($kpi['tickets_this_month']['value'] ?? 0)); ?></h3>
+    <div class="stat-card bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div class="flex items-start justify-between gap-3">
+            <p class="text-gray-500 text-xs font-semibold">تذاكر هذا الشهر</p>
+            <h3 class="text-xl font-black text-gray-900 leading-tight"><?php echo e(number_format($kpi['tickets_this_month']['value'] ?? 0)); ?></h3>
+        </div>
         <p class="text-xs text-gray-500 mt-1"><?php echo e($ticketsGrowth ?? ''); ?></p>
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-900 mb-4"><i class="fas fa-bolt text-red-600 ml-2"></i>تذاكر عاجلة</h3>
-        <div class="space-y-2 max-h-72 overflow-y-auto">
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-4 mb-4">
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 xl:col-span-6">
+        <h3 class="text-base font-black text-gray-900 mb-3"><i class="fas fa-bolt text-red-600 ml-2"></i>تذاكر عاجلة</h3>
+        <div class="space-y-2 max-h-[340px] overflow-y-auto">
             <?php $__empty_1 = true; $__currentLoopData = $urgentTickets; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <?php
                     $ticketSubject = $t->subject ?? '';
@@ -113,14 +127,14 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-900 mb-4"><i class="fas fa-layer-group text-indigo-600 ml-2"></i>حسب الأولوية</h3>
-        <canvas id="priorityChart" height="220"></canvas>
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 xl:col-span-3">
+        <h3 class="text-base font-black text-gray-900 mb-3"><i class="fas fa-layer-group text-indigo-600 ml-2"></i>حسب الأولوية</h3>
+        <canvas id="priorityChart" height="170"></canvas>
     </div>
 
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-900 mb-4"><i class="fas fa-chart-pie text-purple-600 ml-2"></i>حسب الحالة</h3>
-        <canvas id="statusChart" height="220"></canvas>
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 xl:col-span-3">
+        <h3 class="text-base font-black text-gray-900 mb-3"><i class="fas fa-chart-pie text-purple-600 ml-2"></i>حسب الحالة</h3>
+        <canvas id="statusChart" height="170"></canvas>
     </div>
 </div>
 

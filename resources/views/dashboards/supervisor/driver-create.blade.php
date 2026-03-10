@@ -3,6 +3,15 @@
 @php $title = 'إضافة سائق'; $subtitle = 'إنشاء سائق جديد وربطه بحساب مستخدم'; @endphp
 
 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 max-w-3xl">
+    @if($errors->any())
+        <div class="mb-4 p-4 rounded-xl bg-red-50 border border-red-200">
+            <ul class="text-sm text-red-700 space-y-1">
+                @foreach($errors->all() as $err)
+                    <li>{{ $err }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <form method="POST" action="{{ route('dashboard.supervisor.drivers.store') }}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         @csrf
 
@@ -54,9 +63,9 @@
         <div>
             <label class="text-sm text-gray-600">التوفر</label>
             <select name="availability" class="w-full mt-1 border rounded-xl px-4 py-2" required>
-                <option value="available" @selected(old('availability','offline')==='available')>متاح</option>
+                <option value="available" @selected(old('availability','available')==='available')>متاح</option>
                 <option value="busy" @selected(old('availability')==='busy')>مشغول</option>
-                <option value="offline" @selected(old('availability','offline')==='offline')>غير متصل</option>
+                <option value="offline" @selected(old('availability','available')==='offline')>غير متصل</option>
                 <option value="on_break" @selected(old('availability')==='on_break')>في استراحة</option>
             </select>
         </div>

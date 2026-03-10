@@ -361,10 +361,6 @@
                         <span style="font-family:'El Messiri',sans-serif; font-size:0.9rem;">التوصيل:</span>
                         <span id="shippingAmount" style="font-family:'El Messiri',sans-serif; font-weight:700; font-size:0.9rem;">0</span>
                     </div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem;">
-                        <span style="font-family:'El Messiri',sans-serif; font-size:0.9rem;">رسوم الخدمة (5%):</span>
-                        <span id="serviceFeeAmount" style="font-family:'El Messiri',sans-serif; font-weight:700; font-size:0.9rem;">0</span>
-                    </div>
                     <div style="display:flex; justify-content:space-between; padding-top:0.6rem; border-top:2px solid rgba(255,255,255,0.3);">
                         <span style="font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700;">المجموع الكلي:</span>
                         <span id="totalAmount" style="font-family:'El Messiri',sans-serif; font-size:1.3rem; font-weight:700; color:#ffd700;">0</span>
@@ -447,44 +443,44 @@
                 <div style="background:#e8f4f8; padding:1.5rem; border-radius:12px; margin-bottom:2rem;">
                     
                     <!-- Option 1: توصيل عادي -->
-                    <div onclick="selectDelivery('normal')" class="delivery-option" data-type="normal" style="background:#fff; padding:1.7rem; border-radius:14px; margin-bottom:1rem; cursor:pointer; border:3px solid #ff6b35; transition:all 0.3s; display:flex; align-items:center; gap:1.2rem;">
+                    <div onclick="selectDelivery('normal')" class="delivery-option" data-type="normal" style="background:#fff; padding:2.2rem; border-radius:14px; margin-bottom:1.2rem; cursor:pointer; border:3px solid #ff6b35; transition:all 0.3s; display:flex; align-items:center; gap:1.5rem;">
                         <div style="flex-shrink:0;">
-                            <img src="/images/shipping/truck-tulip.png" alt="توصيل عادي" class="delivery-main-icon" style="width:78px; height:78px; object-fit:contain;" onerror="this.style.display='none';">
+                            <img src="/images/shipping/truck-tulip.png" alt="توصيل عادي" class="delivery-main-icon" style="width:100px; height:100px; object-fit:contain;" onerror="this.style.display='none';">
                         </div>
                         <div style="flex:1;">
-                            <h3 style="font-family:'El Messiri',sans-serif; font-size:1.2rem; font-weight:700; color:#1a1a1a; margin:0 0 0.3rem 0;">توصيل عادي</h3>
-                            <p style="font-family:'El Messiri',sans-serif; font-size:0.95rem; color:#666; margin:0;">خلال مدة أقصاها أسبوع</p>
+                            <h3 style="font-family:'El Messiri',sans-serif; font-size:1.4rem; font-weight:700; color:#1a1a1a; margin:0 0 0.4rem 0;">توصيل عادي</h3>
+                            <p style="font-family:'El Messiri',sans-serif; font-size:1.1rem; color:#666; margin:0;">خلال مدة أقصاها أسبوع</p>
                         </div>
                         <div style="flex-shrink:0;">
-                            <i class="fas fa-check-circle delivery-status-icon" style="font-size:1.5rem; color:#ff6b35;"></i>
+                            <i class="fas fa-check-circle delivery-status-icon" style="font-size:1.8rem; color:#ff6b35;"></i>
                         </div>
                     </div>
                     
                     <!-- Option 2: توصيل مستعجل -->
-                    <div onclick="selectDelivery('express')" class="delivery-option" data-type="express" style="background:#fff; padding:1.7rem; border-radius:14px; margin-bottom:1rem; cursor:pointer; border:3px solid #e0e0e0; transition:all 0.3s; display:flex; align-items:center; gap:1.2rem;">
+                    <div onclick="selectDelivery('express')" class="delivery-option" data-type="express" style="background:#fff; padding:2.2rem; border-radius:14px; margin-bottom:1.2rem; cursor:pointer; border:3px solid #e0e0e0; transition:all 0.3s; display:flex; align-items:center; gap:1.5rem;">
                         <div style="flex-shrink:0;">
-                            <img src="/images/shipping/scooter-24h.png" alt="توصيل مستعجل" class="delivery-main-icon" style="width:78px; height:78px; object-fit:contain;" onerror="this.style.display='none';">
+                            <img src="/images/shipping/scooter-24h.png" alt="توصيل مستعجل" class="delivery-main-icon" style="width:100px; height:100px; object-fit:contain;" onerror="this.style.display='none';">
                         </div>
                         <div style="flex:1;">
-                            <h3 style="font-family:'El Messiri',sans-serif; font-size:1.2rem; font-weight:700; color:#1a1a1a; margin:0 0 0.3rem 0;">توصيل مستعجل</h3>
-                            <p style="font-family:'El Messiri',sans-serif; font-size:0.95rem; color:#666; margin:0;">خلال 24 ساعة</p>
+                            <h3 style="font-family:'El Messiri',sans-serif; font-size:1.4rem; font-weight:700; color:#1a1a1a; margin:0 0 0.4rem 0;">توصيل مستعجل</h3>
+                            <p style="font-family:'El Messiri',sans-serif; font-size:1.1rem; color:#666; margin:0;">خلال 24 ساعة</p>
                         </div>
                         <div style="flex-shrink:0;">
-                            <i class="far fa-circle delivery-status-icon" style="font-size:1.5rem; color:#ccc;"></i>
+                            <i class="far fa-circle delivery-status-icon" style="font-size:1.8rem; color:#ccc;"></i>
                         </div>
                     </div>
                     
                     <!-- Option 3: توصيل فوري -->
-                    <div onclick="selectDelivery('instant')" class="delivery-option" data-type="instant" style="background:#fff; padding:1.7rem; border-radius:14px; cursor:pointer; border:3px solid #e0e0e0; transition:all 0.3s; display:flex; align-items:center; gap:1.2rem;">
+                    <div onclick="selectDelivery('instant')" class="delivery-option" data-type="instant" style="background:#fff; padding:2.2rem; border-radius:14px; cursor:pointer; border:3px solid #e0e0e0; transition:all 0.3s; display:flex; align-items:center; gap:1.5rem;">
                         <div style="flex-shrink:0;">
-                            <img src="/images/shipping/phone-2h.png" alt="توصيل فوري" class="delivery-main-icon" style="width:78px; height:78px; object-fit:contain;" onerror="this.style.display='none';">
+                            <img src="/images/shipping/phone-2h.png" alt="توصيل فوري" class="delivery-main-icon" style="width:100px; height:100px; object-fit:contain;" onerror="this.style.display='none';">
                         </div>
                         <div style="flex:1;">
-                            <h3 style="font-family:'El Messiri',sans-serif; font-size:1.2rem; font-weight:700; color:#1a1a1a; margin:0 0 0.3rem 0;">توصيل فوري</h3>
-                            <p style="font-family:'El Messiri',sans-serif; font-size:0.95rem; color:#666; margin:0;">مسافة الطريق</p>
+                            <h3 style="font-family:'El Messiri',sans-serif; font-size:1.4rem; font-weight:700; color:#1a1a1a; margin:0 0 0.4rem 0;">توصيل فوري</h3>
+                            <p style="font-family:'El Messiri',sans-serif; font-size:1.1rem; color:#666; margin:0;">مسافة الطريق</p>
                         </div>
                         <div style="flex-shrink:0;">
-                            <i class="far fa-circle delivery-status-icon" style="font-size:1.5rem; color:#ccc;"></i>
+                            <i class="far fa-circle delivery-status-icon" style="font-size:1.8rem; color:#ccc;"></i>
                         </div>
                     </div>
                 </div>

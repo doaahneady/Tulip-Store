@@ -42,7 +42,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 mb-4">
     <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal457ade557f73eaa008f851091260abe1 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dashboard.stat-card','data' => ['title' => 'إجمالي السائقين','value' => number_format($metrics['total_drivers'] ?? 0),'icon' => 'fas fa-truck','color' => 'teal']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -165,16 +165,28 @@
 <?php endif; ?>
 </div>
 
-<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-4 mb-4">
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 xl:col-span-7">
     <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-gray-800">خريطة تتبع مباشر</h3>
+        <h3 class="text-base font-black text-gray-800">خريطة تتبع مباشر</h3>
         <a href="<?php echo e(route('dashboard.supervisor.live-tracking')); ?>" class="text-sm text-indigo-600">تفاصيل</a>
     </div>
-    <div id="overview-map" class="w-full h-64 rounded-xl border border-gray-200"></div>
+    <div id="overview-map" class="w-full h-[240px] rounded-xl border border-gray-200"></div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
+<div class="xl:col-span-5 space-y-4">
+    <?php if (isset($component)) { $__componentOriginalfb9c5c13bff6398d517f1ca6cc1b6f9d = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalfb9c5c13bff6398d517f1ca6cc1b6f9d = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dashboard.collapsible','data' => ['title' => 'حالة التشغيل','icon' => 'fas fa-gauge-high','subtitle' => 'السائقون والتوصيلات والمركبات']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('dashboard.collapsible'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['title' => 'حالة التشغيل','icon' => 'fas fa-gauge-high','subtitle' => 'السائقون والتوصيلات والمركبات']); ?>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal457ade557f73eaa008f851091260abe1 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dashboard.stat-card','data' => ['title' => 'متاحون','value' => number_format($metrics['available_drivers'] ?? 0),'icon' => 'fas fa-check-circle','color' => 'emerald']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('dashboard.stat-card'); ?>
@@ -194,7 +206,7 @@
 <?php $component = $__componentOriginal457ade557f73eaa008f851091260abe1; ?>
 <?php unset($__componentOriginal457ade557f73eaa008f851091260abe1); ?>
 <?php endif; ?>
-    <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal457ade557f73eaa008f851091260abe1 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dashboard.stat-card','data' => ['title' => 'غير متصلين','value' => number_format($metrics['offline_drivers'] ?? 0),'icon' => 'fas fa-power-off','color' => 'gray']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('dashboard.stat-card'); ?>
@@ -214,7 +226,7 @@
 <?php $component = $__componentOriginal457ade557f73eaa008f851091260abe1; ?>
 <?php unset($__componentOriginal457ade557f73eaa008f851091260abe1); ?>
 <?php endif; ?>
-    <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal457ade557f73eaa008f851091260abe1 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dashboard.stat-card','data' => ['title' => 'في استراحة','value' => number_format($metrics['on_break_drivers'] ?? 0),'icon' => 'fas fa-coffee','color' => 'yellow']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('dashboard.stat-card'); ?>
@@ -234,7 +246,7 @@
 <?php $component = $__componentOriginal457ade557f73eaa008f851091260abe1; ?>
 <?php unset($__componentOriginal457ade557f73eaa008f851091260abe1); ?>
 <?php endif; ?>
-    <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal457ade557f73eaa008f851091260abe1 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dashboard.stat-card','data' => ['title' => 'تقييم السائقين','value' => number_format($metrics['avg_driver_rating'] ?? 0, 1),'icon' => 'fas fa-star','color' => 'amber']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('dashboard.stat-card'); ?>
@@ -254,10 +266,7 @@
 <?php $component = $__componentOriginal457ade557f73eaa008f851091260abe1; ?>
 <?php unset($__componentOriginal457ade557f73eaa008f851091260abe1); ?>
 <?php endif; ?>
-    </div>
-
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal457ade557f73eaa008f851091260abe1 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dashboard.stat-card','data' => ['title' => 'تعيينات معلقة','value' => number_format($metrics['pending_assignments'] ?? 0),'icon' => 'fas fa-hourglass-half','color' => 'pink']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('dashboard.stat-card'); ?>
@@ -277,7 +286,7 @@
 <?php $component = $__componentOriginal457ade557f73eaa008f851091260abe1; ?>
 <?php unset($__componentOriginal457ade557f73eaa008f851091260abe1); ?>
 <?php endif; ?>
-    <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal457ade557f73eaa008f851091260abe1 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dashboard.stat-card','data' => ['title' => 'توصيلات نشطة','value' => number_format($metrics['active_deliveries'] ?? 0),'icon' => 'fas fa-truck-loading','color' => 'orange']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('dashboard.stat-card'); ?>
@@ -297,7 +306,7 @@
 <?php $component = $__componentOriginal457ade557f73eaa008f851091260abe1; ?>
 <?php unset($__componentOriginal457ade557f73eaa008f851091260abe1); ?>
 <?php endif; ?>
-    <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal457ade557f73eaa008f851091260abe1 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dashboard.stat-card','data' => ['title' => 'فشل اليوم','value' => number_format($metrics['failed_deliveries'] ?? 0),'icon' => 'fas fa-times-circle','color' => 'red']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('dashboard.stat-card'); ?>
@@ -317,7 +326,7 @@
 <?php $component = $__componentOriginal457ade557f73eaa008f851091260abe1; ?>
 <?php unset($__componentOriginal457ade557f73eaa008f851091260abe1); ?>
 <?php endif; ?>
-    <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginal457ade557f73eaa008f851091260abe1 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal457ade557f73eaa008f851091260abe1 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dashboard.stat-card','data' => ['title' => 'مركبات في الصيانة','value' => number_format($metrics['vehicles_in_maintenance'] ?? 0),'icon' => 'fas fa-tools','color' => 'purple']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('dashboard.stat-card'); ?>
@@ -337,36 +346,62 @@
 <?php $component = $__componentOriginal457ade557f73eaa008f851091260abe1; ?>
 <?php unset($__componentOriginal457ade557f73eaa008f851091260abe1); ?>
 <?php endif; ?>
+        </div>
+     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalfb9c5c13bff6398d517f1ca6cc1b6f9d)): ?>
+<?php $attributes = $__attributesOriginalfb9c5c13bff6398d517f1ca6cc1b6f9d; ?>
+<?php unset($__attributesOriginalfb9c5c13bff6398d517f1ca6cc1b6f9d); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalfb9c5c13bff6398d517f1ca6cc1b6f9d)): ?>
+<?php $component = $__componentOriginalfb9c5c13bff6398d517f1ca6cc1b6f9d; ?>
+<?php unset($__componentOriginalfb9c5c13bff6398d517f1ca6cc1b6f9d); ?>
+<?php endif; ?>
+
+    <?php if (isset($component)) { $__componentOriginalfb9c5c13bff6398d517f1ca6cc1b6f9d = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalfb9c5c13bff6398d517f1ca6cc1b6f9d = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dashboard.collapsible','data' => ['title' => 'توصيلات اليوم','icon' => 'fas fa-truck-fast','subtitle' => 'نظرة عامة سريعة','open' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('dashboard.collapsible'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['title' => 'توصيلات اليوم','icon' => 'fas fa-truck-fast','subtitle' => 'نظرة عامة سريعة','open' => true]); ?>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="p-3 border rounded-xl bg-white">
+                <div class="text-xs text-gray-500 font-semibold">إجمالي</div>
+                <div class="mt-1 text-2xl font-black text-gray-900"><?php echo e(number_format($metrics['deliveries_today_total'] ?? 0)); ?></div>
+            </div>
+            <div class="p-3 border rounded-xl bg-white">
+                <div class="text-xs text-gray-500 font-semibold">قيد التنفيذ</div>
+                <div class="mt-1 text-2xl font-black text-blue-600"><?php echo e(number_format($metrics['in_progress_today'] ?? 0)); ?></div>
+            </div>
+            <div class="p-3 border rounded-xl bg-white">
+                <div class="text-xs text-gray-500 font-semibold">مكتمل</div>
+                <div class="mt-1 text-2xl font-black text-green-600"><?php echo e(number_format($metrics['completed_today'] ?? 0)); ?></div>
+            </div>
+            <div class="p-3 border rounded-xl bg-white">
+                <div class="text-xs text-gray-500 font-semibold">قيد التعيين</div>
+                <div class="mt-1 text-2xl font-black text-orange-600"><?php echo e(number_format($metrics['pending_today'] ?? 0)); ?></div>
+            </div>
+        </div>
+     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalfb9c5c13bff6398d517f1ca6cc1b6f9d)): ?>
+<?php $attributes = $__attributesOriginalfb9c5c13bff6398d517f1ca6cc1b6f9d; ?>
+<?php unset($__attributesOriginalfb9c5c13bff6398d517f1ca6cc1b6f9d); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalfb9c5c13bff6398d517f1ca6cc1b6f9d)): ?>
+<?php $component = $__componentOriginalfb9c5c13bff6398d517f1ca6cc1b6f9d; ?>
+<?php unset($__componentOriginalfb9c5c13bff6398d517f1ca6cc1b6f9d); ?>
+<?php endif; ?>
+</div>
 </div>
 
-<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-    <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-gray-800">توصيلات اليوم</h3>
-        <div class="text-sm text-gray-500">نظرة عامة سريعة</div>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="p-4 border rounded-xl">
-            <div class="text-sm text-gray-500">إجمالي</div>
-            <div class="mt-2 text-3xl font-bold text-gray-900"><?php echo e(number_format($metrics['deliveries_today_total'] ?? 0)); ?></div>
-        </div>
-        <div class="p-4 border rounded-xl">
-            <div class="text-sm text-gray-500">قيد التنفيذ</div>
-            <div class="mt-2 text-3xl font-bold text-blue-600"><?php echo e(number_format($metrics['in_progress_today'] ?? 0)); ?></div>
-        </div>
-        <div class="p-4 border rounded-xl">
-            <div class="text-sm text-gray-500">مكتمل</div>
-            <div class="mt-2 text-3xl font-bold text-green-600"><?php echo e(number_format($metrics['completed_today'] ?? 0)); ?></div>
-        </div>
-        <div class="p-4 border rounded-xl">
-            <div class="text-sm text-gray-500">قيد التعيين</div>
-            <div class="mt-2 text-3xl font-bold text-orange-600"><?php echo e(number_format($metrics['pending_today'] ?? 0)); ?></div>
-        </div>
-    </div>
-</div>
-
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">مؤشرات الأداء</h3>
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-4 mb-4">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 xl:col-span-4">
+        <h3 class="text-base font-black text-gray-800 mb-3">مؤشرات الأداء</h3>
         <div class="space-y-4">
             <div class="flex justify-between">
                 <span class="text-sm text-gray-600">نسبة التسليم في الوقت</span>
@@ -387,12 +422,12 @@
             </a>
         </div>
     </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 lg:col-span-2">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 xl:col-span-8">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-800">قائمة السائقين</h3>
+            <h3 class="text-base font-black text-gray-800">قائمة السائقين</h3>
             <a href="<?php echo e(route('dashboard.supervisor.drivers')); ?>" class="text-sm text-indigo-600 hover:text-indigo-800">عرض الكل</a>
         </div>
-        <div class="overflow-x-auto">
+        <div class="overflow-auto max-h-[380px]">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr>
@@ -442,13 +477,13 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 xl:col-span-7">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-800">طلبات غير معينة</h3>
+            <h3 class="text-base font-black text-gray-800">طلبات غير معينة</h3>
             <a href="<?php echo e(route('dashboard.supervisor.order-assignment')); ?>" class="text-sm text-indigo-600 hover:text-indigo-800">تعيين</a>
         </div>
-        <div class="overflow-x-auto">
+        <div class="overflow-auto max-h-[360px]">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr>
@@ -479,12 +514,12 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 xl:col-span-5">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-800">مسارات نشطة</h3>
+            <h3 class="text-base font-black text-gray-800">مسارات نشطة</h3>
             <a href="<?php echo e(route('dashboard.supervisor.route-optimization')); ?>" class="text-sm text-indigo-600 hover:text-indigo-800">عرض</a>
         </div>
-        <ul class="divide-y divide-gray-200">
+        <ul class="divide-y divide-gray-200 max-h-[360px] overflow-auto">
             <?php $__currentLoopData = ($metrics['active_routes'] ?? []); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $route): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <li class="py-3">
                     <div class="flex items-center justify-between">

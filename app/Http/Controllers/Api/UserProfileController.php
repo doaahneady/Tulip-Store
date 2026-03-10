@@ -22,7 +22,7 @@ class UserProfileController extends Controller
         $user = Auth::user();
 
         if (! $user) {
-            return response()->json(['orders' => []], 200);
+            return response()->json(['orders' => []], 200, [], JSON_UNESCAPED_UNICODE);
         }
 
         $orders = Order::where('user_id', $user->id)
@@ -30,24 +30,27 @@ class UserProfileController extends Controller
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($order) {
+                $deliveryCost = $order->delivery_cost ?? $order->shipping_cost ?? 0;
                 return [
                     'id' => $order->id,
                     'order_number' => $order->order_number,
                     'status' => $order->status ?? 'pending',
                     'payment_status' => $order->payment_status,
                     'payment_method' => $order->payment_method,
-                    'total' => $order->total,
+                    'total' => $order->total ?? $order->total_amount ?? 0,
                     'subtotal' => $order->subtotal,
-                    'delivery_cost' => $order->delivery_cost,
+                    'delivery_cost' => $deliveryCost,
                     'items_count' => $order->items->count(),
                     'items' => $order->items->map(function ($item) {
+                        $unitPrice = $item->unit_price ?? $item->price ?? 0;
+                        $subtotal = $item->total_price ?? $item->subtotal ?? ((float) $unitPrice * (int) ($item->quantity ?? 0));
                         return [
                             'id' => $item->id,
-                            'product_name' => $item->product->name ?? 'منتج',
-                            'product_image' => $item->product->image ?? null,
+                            'product_name' => $item->product_name ?? $item->product?->name ?? 'منتج',
+                            'product_image' => $item->product?->image ?? $item->product?->primary_image ?? $item->product?->image_path ?? null,
                             'quantity' => $item->quantity,
-                            'price' => $item->price,
-                            'subtotal' => $item->subtotal,
+                            'price' => $unitPrice,
+                            'subtotal' => $subtotal,
                         ];
                     }),
                     'recipient_name' => $order->recipient_name,
@@ -57,7 +60,7 @@ class UserProfileController extends Controller
                 ];
             });
 
-        return response()->json(['orders' => $orders], 200);
+        return response()->json(['orders' => $orders], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -158,6 +161,7 @@ class UserProfileController extends Controller
             'email' => 'sometimes|nullable|email|max:255',
             'phone' => 'sometimes|nullable|string|max:20',
             'address' => 'sometimes|nullable|string|max:500',
+            'currency' => 'sometimes|nullable|in:USD,SYP',
         ]);
 
         $requiresVerification = false;
@@ -178,6 +182,10 @@ class UserProfileController extends Controller
         if (array_key_exists('address', $validated)) {
             $updates['address'] = is_string($validated['address']) ? trim($validated['address']) : $validated['address'];
         }
+        if (array_key_exists('currency', $validated) && \Illuminate\Support\Facades\Schema::hasColumn('users', 'currency')) {
+            $updates['currency'] = strtoupper((string) $validated['currency']);
+            session(['currency' => $updates['currency']]);
+        }
         // Remove keys with null or empty string
         $updates = collect($updates)->filter(function ($v) {
             return ! (is_null($v) || (is_string($v) && trim($v) === ''));
@@ -196,6 +204,7 @@ class UserProfileController extends Controller
                 'email' => $user->email,
                 'phone' => $user->phone ?? $user->mobile,
                 'address' => $user->address,
+                'currency' => $user->currency ?? session('currency') ?? 'USD',
             ],
         ], 200);
     }
@@ -289,7 +298,7 @@ class UserProfileController extends Controller
         $user = Auth::user();
 
         if (! $user) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['error' => 'Unauthorized'], 401, [], JSON_UNESCAPED_UNICODE);
         }
 
         $order = Order::where('user_id', $user->id)
@@ -298,10 +307,41 @@ class UserProfileController extends Controller
             ->first();
 
         if (! $order) {
-            return response()->json(['error' => 'Order not found'], 404);
+            return response()->json(['error' => 'Order not found'], 404, [], JSON_UNESCAPED_UNICODE);
         }
 
-        return response()->json(['order' => $order], 200);
+        $deliveryCost = $order->delivery_cost ?? $order->shipping_cost ?? 0;
+        $payload = [
+            'id' => $order->id,
+            'order_number' => $order->order_number,
+            'status' => $order->status ?? 'pending',
+            'payment_status' => $order->payment_status,
+            'payment_method' => $order->payment_method,
+            'subtotal' => $order->subtotal,
+            'delivery_cost' => $deliveryCost,
+            'total' => $order->total ?? $order->total_amount ?? 0,
+            'recipient_name' => $order->recipient_name,
+            'phone' => $order->phone,
+            'village' => $order->village,
+            'address_note' => $order->address_note,
+            'estimated_delivery' => $order->estimated_delivery,
+            'created_at' => $order->created_at,
+            'items' => $order->items->map(function ($item) {
+                $unitPrice = $item->unit_price ?? $item->price ?? 0;
+                $subtotal = $item->total_price ?? $item->subtotal ?? ((float) $unitPrice * (int) ($item->quantity ?? 0));
+                return [
+                    'id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'product_name' => $item->product_name ?? $item->product?->name ?? 'منتج',
+                    'product_image' => $item->product?->image ?? $item->product?->primary_image ?? $item->product?->image_path ?? null,
+                    'quantity' => $item->quantity,
+                    'price' => $unitPrice,
+                    'subtotal' => $subtotal,
+                ];
+            })->values(),
+        ];
+
+        return response()->json(['order' => $payload], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
     public function addresses(Request $request)

@@ -31,7 +31,7 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            @if($order->status === 'delivered') bg-green-100 text-green-800
+                            @if(in_array($order->status, (array) config('order_statuses.terminal', ['delivered', 'done']), true)) bg-green-100 text-green-800
                             @elseif($order->status === 'confirmed') bg-blue-100 text-blue-800
                             @elseif($order->status === 'cancelled') bg-red-100 text-red-800
                             @else bg-yellow-100 text-yellow-800

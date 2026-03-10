@@ -9,133 +9,92 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Styles -->
-    @vite(['resources/css/app.css', 'resources/css/dashboard-system.css'])
+    @vite(['resources/css/app.css', 'resources/css/dashboard-next.css'])
     @stack('styles')
-    
-    <style>
-        /* RTL Adjustments */
-        [dir="rtl"] .dashboard-sidebar {
-            right: 0;
-            left: auto;
-            border-right: none;
-            border-left: 1px solid var(--gray-200);
-        }
-        
-        [dir="rtl"] .dashboard-main {
-            margin-right: 280px;
-            margin-left: 0;
-        }
-        
-        [dir="rtl"] .topbar-search input {
-            padding: var(--space-2) var(--space-10) var(--space-2) var(--space-3);
-        }
-        
-        [dir="rtl"] .topbar-search-icon {
-            right: var(--space-3);
-            left: auto;
-        }
-        
-        [dir="rtl"] .notification-badge {
-            left: 0;
-            right: auto;
-        }
-        
-        @media (max-width: 1024px) {
-            [dir="rtl"] .dashboard-sidebar {
-                transform: translateX(100%);
-            }
-            
-            [dir="rtl"] .dashboard-sidebar.open {
-                transform: translateX(0);
-            }
-            
-            [dir="rtl"] .dashboard-main {
-                margin-right: 0;
-            }
-        }
-    </style>
 </head>
-<body>
-    <div class="dashboard-layout">
-        <!-- Sidebar -->
-        <aside class="dashboard-sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <a href="{{ route('dashboard') }}" class="sidebar-logo">
-                    <i class="fas fa-store text-primary-500"></i>
-                    <span>{{ config('app.name') }}</span>
+<body class="db-next">
+    <a href="#mainContent" class="db4-skip">تخطي إلى المحتوى</a>
+    <div id="sidebarOverlay" class="db4-overlay" hidden></div>
+
+    <div class="db4-shell">
+        <aside id="sidebar" class="db4-sidebar" aria-label="القائمة">
+            <div class="flex items-start justify-between gap-3">
+                <a href="{{ route('dashboard') }}" class="db4-brand">
+                    <span class="db4-brand-mark" aria-hidden="true"><i class="fas fa-store"></i></span>
+                    <div class="min-w-0">
+                        <div class="db4-brand-title">{{ config('app.name') }}</div>
+                        <div class="db4-brand-subtitle">Dashboard</div>
+                    </div>
                 </a>
+                <div class="db4-sidebar-actions lg:hidden">
+                    <button type="button" class="db4-icon-btn" aria-label="إغلاق القائمة" onclick="toggleSidebar(false)">
+                        <i class="fas fa-xmark"></i>
+                    </button>
+                </div>
             </div>
-            
-            <nav class="sidebar-nav">
+
+            <nav class="db4-nav" aria-label="التنقل">
                 @yield('sidebar-menu')
             </nav>
+
+            <div class="db4-user">
+                @php
+                    $userName = is_array(data_get(auth()->user(),'name')) ? json_encode(data_get(auth()->user(),'name')) : (data_get(auth()->user(),'name') ?? '');
+                @endphp
+                <div class="db4-avatar" aria-hidden="true">{{ mb_substr($userName ?: 'U', 0, 1) }}</div>
+                <div class="min-w-0">
+                    <div class="db4-user-name">{{ $userName }}</div>
+                    <div class="db4-user-email">@yield('user-role', 'مستخدم')</div>
+                </div>
+                <button type="button" class="db4-icon-btn" aria-label="قائمة المستخدم" onclick="toggleUserMenu()">
+                    <i class="fas fa-ellipsis-vertical" aria-hidden="true"></i>
+                </button>
+            </div>
         </aside>
         
-        <!-- Main Content -->
-        <main class="dashboard-main">
-            <!-- Topbar -->
-            <header class="dashboard-topbar">
-                <div class="topbar-left">
-                    <button class="lg:hidden p-2 rounded-md hover:bg-gray-100" onclick="toggleSidebar()">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <div>
-                        <h1 class="topbar-title">@yield('page-title', 'لوحة التحكم')</h1>
-                        @hasSection('breadcrumb')
-                        <div class="topbar-breadcrumb">
-                            @yield('breadcrumb')
+        <main class="db4-main">
+            <header class="db4-topbar">
+                <div class="db4-topbar-inner">
+                    <div class="min-w-0">
+                        <div class="flex items-start gap-3">
+                            <div class="min-w-0">
+                                <h1 class="db4-title">@yield('page-title', 'لوحة التحكم')</h1>
+                                @hasSection('breadcrumb')
+                                    <div class="db4-subtitle">@yield('breadcrumb')</div>
+                                @else
+                                    <div class="db4-subtitle">@yield('page-subtitle', ' ') </div>
+                                @endif
+                            </div>
                         </div>
-                        @endif
                     </div>
-                </div>
-                
-                <div class="topbar-right">
-                    <!-- Search -->
-                    <div class="topbar-search">
-                        <i class="fas fa-search topbar-search-icon"></i>
-                        <input type="text" placeholder="البحث...">
-                    </div>
-                    
-                    <!-- Notifications -->
-                    <div class="topbar-notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge"></span>
-                    </div>
-                    
-                    <!-- User Menu -->
-                    <div class="topbar-user" onclick="toggleUserMenu()">
-                        <div class="user-avatar">
-                            {{ substr(is_array(data_get(auth()->user(),'name')) ? json_encode(data_get(auth()->user(),'name')) : (data_get(auth()->user(),'name') ?? ''), 0, 1) }}
-                        </div>
-                        <div class="user-info">
-                            <div class="user-name">{{ is_array(data_get(auth()->user(),'name')) ? json_encode(data_get(auth()->user(),'name')) : data_get(auth()->user(),'name') }}</div>
-                            <div class="user-role">@yield('user-role', 'مستخدم')</div>
-                        </div>
-                        <i class="fas fa-chevron-down text-xs"></i>
+
+                    <div class="db4-actions">
+                        <button type="button" class="db4-action-btn" aria-label="إظهار أو إخفاء القائمة" onclick="toggleSidebarVisibility()">
+                            <i class="fas fa-bars-staggered" aria-hidden="true"></i>
+                            <span class="hidden md:inline">القائمة</span>
+                        </button>
+                        <button type="button" class="db4-action-btn" aria-label="قائمة المستخدم" onclick="toggleUserMenu()">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                            <span class="hidden md:inline">الحساب</span>
+                            <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                        </button>
                     </div>
                 </div>
             </header>
             
-            <!-- Content -->
-            <div class="dashboard-content">
+            <div class="db4-container" id="mainContent" tabindex="-1">
                 @if(session('success'))
-                <div class="mb-6 p-4 bg-success-50 border border-success-200 rounded-lg text-success-700">
-                    <i class="fas fa-check-circle mr-2"></i>
-                    {{ session('success') }}
-                </div>
+                    <div class="db4-alert db4-alert--success mb-6">{{ session('success') }}</div>
                 @endif
                 
                 @if(session('error'))
-                <div class="mb-6 p-4 bg-error-50 border border-error-200 rounded-lg text-error-700">
-                    <i class="fas fa-exclamation-circle mr-2"></i>
-                    {{ session('error') }}
-                </div>
+                    <div class="db4-alert db4-alert--error mb-6">{{ session('error') }}</div>
                 @endif
                 
                 @yield('content')
@@ -144,19 +103,19 @@
     </div>
     
     <!-- User Menu Dropdown -->
-    <div id="userMenu" class="fixed top-16 right-6 bg-white rounded-lg shadow-xl border border-gray-200 py-2 min-w-48 z-50 hidden">
-        <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+    <div id="userMenu" class="db4-menu" hidden>
+        <a href="{{ route('profile.edit') }}">
             <i class="fas fa-user"></i>
             الملف الشخصي
         </a>
-        <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+        <a href="{{ route('dashboard') }}">
             <i class="fas fa-th-large"></i>
             جميع اللوحات
         </a>
-        <hr class="my-2">
+        <hr class="my-2" style="border-color: rgba(15, 23, 42, 0.10);">
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+            <button type="submit">
                 <i class="fas fa-sign-out-alt"></i>
                 تسجيل الخروج
             </button>
@@ -165,25 +124,97 @@
     
     <!-- Scripts -->
     <script>
-        function toggleSidebar() {
+        function setSidebar(open) {
             const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('open');
-        }
-        
-        function toggleUserMenu() {
-            const menu = document.getElementById('userMenu');
-            menu.classList.toggle('hidden');
-        }
-        
-        // Close user menu when clicking outside
-        document.addEventListener('click', function(event) {
-            const menu = document.getElementById('userMenu');
-            const userButton = document.querySelector('.topbar-user');
-            
-            if (!menu.contains(event.target) && !userButton.contains(event.target)) {
-                menu.classList.add('hidden');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (!sidebar || !overlay) return;
+            if (open) {
+                sidebar.classList.add('is-open');
+                overlay.hidden = false;
+            } else {
+                sidebar.classList.remove('is-open');
+                overlay.hidden = true;
             }
-        });
+        }
+
+        function toggleSidebar(open) {
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar) return;
+            const next = typeof open === 'boolean' ? open : !sidebar.classList.contains('is-open');
+            setSidebar(next);
+        }
+
+        function isDesktopLayout() {
+            return window.matchMedia('(min-width: 1024px)').matches;
+        }
+
+        function setSidebarCollapsed(collapsed) {
+            document.body.classList.toggle('sidebar-collapsed', collapsed);
+            try {
+                localStorage.setItem('dashboard.sidebarCollapsed', collapsed ? '1' : '0');
+            } catch (e) {}
+        }
+
+        function toggleSidebarVisibility() {
+            if (isDesktopLayout()) {
+                const collapsed = document.body.classList.contains('sidebar-collapsed');
+                setSidebarCollapsed(!collapsed);
+                setSidebar(false);
+                return;
+            }
+            toggleSidebar();
+        }
+        
+        function toggleUserMenu(open) {
+            const menu = document.getElementById('userMenu');
+            if (!menu) return;
+            const next = typeof open === 'boolean' ? open : menu.hidden;
+            menu.hidden = !next;
+        }
+        
+        (function () {
+            const overlay = document.getElementById('sidebarOverlay');
+            overlay?.addEventListener('click', () => setSidebar(false));
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key !== 'Escape') return;
+                setSidebar(false);
+                toggleUserMenu(false);
+            });
+
+            document.addEventListener('click', function(event) {
+                const menu = document.getElementById('userMenu');
+                const userButton = document.querySelector('[onclick="toggleUserMenu()"]');
+                if (!menu || !userButton) return;
+                if (!menu.contains(event.target) && !userButton.contains(event.target)) {
+                    toggleUserMenu(false);
+                }
+            });
+
+            try {
+                const saved = localStorage.getItem('dashboard.sidebarCollapsed') === '1';
+                if (saved && isDesktopLayout()) {
+                    setSidebarCollapsed(true);
+                }
+            } catch (e) {}
+
+            const mq = window.matchMedia('(min-width: 1024px)');
+            const onChange = function (e) {
+                if (e.matches) {
+                    setSidebar(false);
+                    try {
+                        setSidebarCollapsed(localStorage.getItem('dashboard.sidebarCollapsed') === '1');
+                    } catch (err) {}
+                } else {
+                    document.body.classList.remove('sidebar-collapsed');
+                }
+            };
+            if (typeof mq.addEventListener === 'function') {
+                mq.addEventListener('change', onChange);
+            } else if (typeof mq.addListener === 'function') {
+                mq.addListener(onChange);
+            }
+        })();
         
         // Auto-hide alerts
         setTimeout(() => {

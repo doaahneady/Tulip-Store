@@ -48,7 +48,8 @@ class Driver extends Model
 
     public function employee()
     {
-        return $this->hasOne(Employee::class);
+        // Link via user_id: employees.user_id = drivers.user_id (employees table has no driver_id)
+        return $this->hasOne(Employee::class, 'user_id', 'user_id');
     }
 
     public function currentLocation()

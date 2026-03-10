@@ -54,75 +54,81 @@ class FinanceController extends Controller
 
         $seriesDays = min(366, max(1, $startDate->diffInDays($endDate) + 1));
 
-        // Order total expression (schema-aware)
-        $sumColumn = Schema::hasColumn('orders', 'total_amount')
-            ? 'total_amount'
-            : (Schema::hasColumn('orders', 'total') ? 'total' : null);
-        $sumExpr = $sumColumn ? $sumColumn : implode(' + ', array_filter([
-            Schema::hasColumn('orders', 'subtotal') ? 'subtotal' : null,
-            Schema::hasColumn('orders', 'delivery_cost') ? 'delivery_cost' : null,
-            Schema::hasColumn('orders', 'service_fee') ? 'service_fee' : null,
-        ]));
+        $revenueService = app(\App\Services\RevenueMetricsService::class);
 
-        // Revenue breakdowns
-        $revenueByStore = Store::select(['stores.id', 'stores.name'])
-            ->leftJoin('orders', 'orders.store_id', '=', 'stores.id')
-            ->where('orders.payment_status', 'paid')
-            ->whereBetween('orders.created_at', [$startDate, $endDate])
-            ->when($sumExpr, function ($q) use ($sumExpr) {
-                $q->selectRaw('COALESCE(SUM('.$sumExpr.'), 0) as total_revenue');
-            })
-            ->groupBy('stores.id', 'stores.name')
-            ->orderByDesc('total_revenue')
-            ->take(10)
-            ->get();
+        $revenueByStore = $revenueService->revenueByStore($startDate, $endDate)->map(function ($r) {
+            return (object) [
+                'id' => $r->store_id,
+                'name' => $r->store_name,
+                'total_revenue' => $r->revenue_total,
+            ];
+        });
 
-        $userFk = Schema::hasColumn('orders', 'customer_id')
-            ? 'customer_id'
-            : (Schema::hasColumn('orders', 'user_id') ? 'user_id' : null);
         $revenueByUser = collect();
-        if ($userFk) {
-            $revenueByUser = User::select(['users.id', 'users.name', 'users.email'])
-                ->leftJoin('orders', 'orders.'.$userFk, '=', 'users.id')
-                ->where('orders.payment_status', 'paid')
-                ->whereBetween('orders.created_at', [$startDate, $endDate])
-                ->when($sumExpr, function ($q) use ($sumExpr) {
-                    $q->selectRaw('COALESCE(SUM('.$sumExpr.'), 0) as total_spent');
-                })
-                ->groupBy('users.id', 'users.name', 'users.email')
+        if (Schema::hasTable('financial_transactions') && Schema::hasColumn('financial_transactions', 'user_id')) {
+            $txnRows = \App\Models\FinancialTransaction::query()
+                ->where('status', 'completed')
+                ->whereIn('type', ['order_payment', 'payment'])
+                ->whereNotNull('user_id')
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->selectRaw('user_id, SUM(amount) as total_spent')
+                ->groupBy('user_id')
                 ->orderByDesc('total_spent')
                 ->take(10)
-                ->get();
+                ->get()
+                ->keyBy('user_id');
+
+            $users = User::query()
+                ->select(['id', 'name', 'email'])
+                ->whereIn('id', $txnRows->keys())
+                ->get()
+                ->keyBy('id');
+
+            $revenueByUser = $txnRows->map(function ($row) use ($users) {
+                $u = $users->get($row->user_id);
+                return (object) [
+                    'id' => $u?->id ?? (int) $row->user_id,
+                    'name' => $u?->name,
+                    'email' => $u?->email,
+                    'total_spent' => (float) $row->total_spent,
+                ];
+            })->values();
         }
 
-        $revenueByDriverQuery = Driver::query()
-            ->select('drivers.id')
-            ->leftJoin('orders', 'orders.assigned_driver_id', '=', 'drivers.id')
-            ->where('orders.payment_status', 'paid')
-            ->whereBetween('orders.created_at', [$startDate, $endDate]);
+        $revenueByDriver = collect();
+        if (Schema::hasTable('financial_transactions') && Schema::hasTable('orders') && Schema::hasColumn('financial_transactions', 'order_id') && Schema::hasColumn('orders', 'assigned_driver_id')) {
+            $driverRows = \App\Models\FinancialTransaction::query()
+                ->where('financial_transactions.status', 'completed')
+                ->whereIn('financial_transactions.type', ['order_payment', 'payment'])
+                ->whereBetween('financial_transactions.created_at', [$startDate, $endDate])
+                ->join('orders', 'orders.id', '=', 'financial_transactions.order_id')
+                ->whereNotNull('orders.assigned_driver_id')
+                ->selectRaw('orders.assigned_driver_id as driver_id, SUM(financial_transactions.amount) as total_delivered_value')
+                ->groupBy('orders.assigned_driver_id')
+                ->orderByDesc('total_delivered_value')
+                ->take(10)
+                ->get()
+                ->keyBy('driver_id');
 
-        if (Schema::hasColumn('drivers', 'name')) {
-            $revenueByDriverQuery->addSelect('drivers.name as driver_name')
-                ->groupBy('drivers.id', 'drivers.name');
-        } elseif (Schema::hasColumn('drivers', 'user_id') && Schema::hasColumn('users', 'name')) {
-            $revenueByDriverQuery
-                ->leftJoin('users', 'users.id', '=', 'drivers.user_id')
-                ->addSelect('users.name as driver_name')
-                ->groupBy('drivers.id', 'users.name');
-        } else {
-            $revenueByDriverQuery
-                ->selectRaw("CONCAT('Driver #', drivers.id) as driver_name")
-                ->groupBy('drivers.id');
+            $drivers = Driver::query()->whereIn('id', $driverRows->keys())->get()->keyBy('id');
+            $revenueByDriver = $driverRows->map(function ($row) use ($drivers) {
+                $d = $drivers->get($row->driver_id);
+                $driverName = null;
+                if ($d && isset($d->name)) {
+                    $driverName = $d->name;
+                } elseif ($d && isset($d->user_id)) {
+                    $driverName = $d->user?->name;
+                }
+                if (! $driverName) {
+                    $driverName = 'Driver #'.(int) $row->driver_id;
+                }
+                return (object) [
+                    'id' => (int) $row->driver_id,
+                    'driver_name' => $driverName,
+                    'total_delivered_value' => (float) $row->total_delivered_value,
+                ];
+            })->values();
         }
-
-        if ($sumExpr) {
-            $revenueByDriverQuery->selectRaw('COALESCE(SUM('.$sumExpr.'), 0) as total_delivered_value');
-        }
-
-        $revenueByDriver = $revenueByDriverQuery
-            ->orderByDesc('total_delivered_value')
-            ->take(10)
-            ->get();
 
         $payPeriod = now()->format('Y-m');
         $moneyByEmployee = Employee::select(['employees.id', 'employees.first_name', 'employees.last_name'])
@@ -135,15 +141,14 @@ class FinanceController extends Controller
             ->take(10)
             ->get();
 
+        $revenueSeriesMap = $revenueService->revenueSeriesByDay($startDate, $endDate);
         $revenueSeries = [];
         $expenseSeries = [];
         for ($i = 0; $i < $seriesDays; $i++) {
             $d = (clone $startDate)->addDays($i)->format('Y-m-d');
             $revenueSeries[] = [
                 'date' => $d,
-                'revenue' => $this->sumOrderTotal(
-                    Order::where('payment_status', 'paid')->whereDate('created_at', $d)
-                ),
+                'revenue' => (float) ($revenueSeriesMap[$d] ?? 0),
             ];
             $expenseSeries[] = [
                 'date' => $d,
@@ -174,12 +179,38 @@ class FinanceController extends Controller
             ->take(10)
             ->get();
 
+        $revenueService = app(\App\Services\RevenueMetricsService::class);
+        $todayStart = now()->startOfDay();
+        $todayEnd = now()->endOfDay();
+        $monthStart = now()->startOfMonth();
+        $monthEnd = now()->endOfMonth();
+        $terminalStatuses = (array) config('order_statuses.terminal', ['done']);
+        // Delivery fee is effectively collected when the order becomes delivered (before CS marks done).
+        $deliveryStatuses = array_values(array_unique(array_merge(['delivered'], $terminalStatuses)));
+        $deliverySumCol = Schema::hasColumn('orders', 'delivery_cost') ? 'delivery_cost' : null;
+        $deliveryCollectedToday = 0.0;
+        $deliveryCollectedMonth = 0.0;
+        $deliveryCollectedTotal = 0.0;
+        if ($deliverySumCol) {
+            $deliveryCollectedToday = (float) Order::whereIn('status', $deliveryStatuses)
+                ->whereBetween('updated_at', [$todayStart, $todayEnd])
+                ->sum($deliverySumCol);
+            $deliveryCollectedMonth = (float) Order::whereIn('status', $deliveryStatuses)
+                ->whereBetween('updated_at', [$monthStart, $monthEnd])
+                ->sum($deliverySumCol);
+            $deliveryCollectedTotal = (float) Order::whereIn('status', $deliveryStatuses)->sum($deliverySumCol);
+        }
+
         return [
-            'todays_revenue' => $this->sumOrderTotal(Order::where('payment_status', 'paid')->whereDate('created_at', today())),
+            'todays_revenue' => $revenueService->sumRevenue($todayStart, $todayEnd),
             // Revenue Metrics - Real data
-            'total_revenue' => $this->sumOrderTotal(Order::where('payment_status', 'paid')),
+            'total_revenue' => $revenueService->sumRevenue(),
             'monthly_revenue' => $this->getMonthlyRevenue(),
             'revenue_growth' => $this->getRevenueGrowth(),
+            // Delivery revenue (delivery fees collected)
+            'todays_delivery' => $deliveryCollectedToday,
+            'monthly_delivery' => $deliveryCollectedMonth,
+            'total_delivery' => $deliveryCollectedTotal,
 
             // Transaction Metrics - Real data
             'transactions' => FinancialTransaction::count(),
@@ -221,13 +252,7 @@ class FinanceController extends Controller
                 ->latest()
                 ->take(5)
                 ->get(),
-            'top_earning_stores' => Store::withSum(['orders' => function ($query) {
-                $query->where('payment_status', 'paid')
-                    ->whereMonth('created_at', now()->month);
-            }], Schema::hasColumn('orders', 'total_amount') ? 'total_amount' : 'total')
-                ->orderBy(Schema::hasColumn('orders', 'total_amount') ? 'orders_sum_total_amount' : 'orders_sum_total', 'desc')
-                ->take(5)
-                ->get(),
+            'top_earning_stores' => $revenueService->revenueByStore($monthStart, $monthEnd)->take(5),
             // New breakdowns
             'revenue_by_store' => $revenueByStore,
             'revenue_by_user' => $revenueByUser,
@@ -1851,6 +1876,6 @@ class FinanceController extends Controller
      */
     public function getDashboardMetrics()
     {
-        return response()->json($this->getFinanceMetrics());
+        return response()->json($this->getFinanceMetrics(request()));
     }
 }

@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Legacy\DriverSupervisor;
 use App\Http\Controllers\Controller;
 use App\Models\Driver;
 use App\Models\Order;
+use App\Models\DeliveryAssignment;
+use App\Services\CrossDepartmentFlowService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -23,8 +26,10 @@ class OrderManagementController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Get all active drivers with their locations
-        $drivers = Driver::where('status', 'active')->get();
+        // Get all active and available drivers
+        $drivers = Driver::where('status', 'active')
+            ->where('availability', 'available')
+            ->get();
 
         // Get drivers as JSON for map
         $driversJson = $drivers->map(function ($driver) {
@@ -61,30 +66,51 @@ class OrderManagementController extends Controller
                 ], 404);
             }
 
+            // Do not allow assigning if driver is not available or already has active assignments
+            $hasActiveAssignments = $driver->activeAssignments()->exists();
+            if ($driver->availability !== 'available' || $hasActiveAssignments) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'لا يمكن تعيين طلب لسائق غير متاح أو لديه طلبات قيد التنفيذ',
+                ], 422);
+            }
+
             $order = Order::findOrFail($orderId);
+
+            DB::beginTransaction();
 
             // Generate confirmation token
             $token = Str::random(32);
 
-            // Disable foreign key checks temporarily
-            \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            if ($order->status === 'pending') {
+                $order->update(['status' => 'confirmed']);
+            }
 
-            // Update order (use 'shipped' status as it's available in the enum)
-            \DB::table('orders')->where('id', $orderId)->update([
-                'assigned_driver_id' => $request->driver_id,
+            // Create delivery assignment through the central flow service so that
+            // all dashboards and status pipelines stay in sync.
+            $flowResult = CrossDepartmentFlowService::handleDriverAssignment(
+                $order->id,
+                $driver->id,
+                auth('employee')->id() ?? auth()->id(),
+                auth('employee')->id() ?? auth()->id()
+            );
+
+            /** @var DeliveryAssignment $assignment */
+            $assignment = $flowResult['assignment'] ?? null;
+
+            $order->update([
+                'assigned_driver_id' => $driver->id,
                 'assigned_at' => now(),
                 'assigned_by' => auth()->check() ? auth()->id() : null,
                 'status' => 'shipped',
                 'confirmation_token' => $token,
                 'delivery_notes' => $request->delivery_notes ?? '',
-                'updated_at' => now(),
             ]);
 
-            // Re-enable foreign key checks
-            \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            // Update driver availability to busy (cannot take more orders)
+            $driver->update(['availability' => 'busy']);
 
-            // Update driver status to busy
-            $driver->update(['status' => 'busy']);
+            DB::commit();
 
             // Generate confirmation link
             $confirmationLink = url("/order/confirm/{$order->id}/{$token}");
@@ -93,8 +119,10 @@ class OrderManagementController extends Controller
                 'success' => true,
                 'message' => 'تم تعيين السائق بنجاح',
                 'confirmation_link' => $confirmationLink,
+                'assignment_id' => $assignment?->id,
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'حدث خطأ: '.$e->getMessage(),

@@ -101,7 +101,7 @@ class CartController extends Controller
                         'product' => [
                             'id' => $product->id,
                             'name' => $product->name,
-                            'image' => $product->image,
+                            'image' => $product->primary_image_url,
                             'price' => $product->price,
                             'discount_price' => $product->discount_price,
                             'brand' => $product->brand ?? null,
@@ -150,6 +150,7 @@ class CartController extends Controller
                         'discount_price' => null,
                         'brand' => 'توليب مارت',
                         'unit' => $product['unit'] ?? 'قطعة',
+                        'emoji' => $product['emoji'] ?? null,
                     ],
                     'quantity' => (int) ($product['quantity'] ?? 0),
                     'subtotal' => $itemSubtotal,
@@ -187,7 +188,7 @@ class CartController extends Controller
                     'product' => [
                         'id' => $product->id,
                         'name' => $product->name,
-                        'image' => $product->image,
+                        'image' => $product->primary_image_url,
                         'price' => $product->price,
                         'discount_price' => $product->discount_price,
                         'brand' => $product->brand,
@@ -292,6 +293,7 @@ class CartController extends Controller
                     'image' => $request->image,
                     'unit' => $request->unit ?? 'قطعة',
                     'type' => 'mart',
+                    'emoji' => $request->emoji,
                 ];
             }
 
@@ -331,9 +333,16 @@ class CartController extends Controller
             if ($product->track_inventory) {
                 $available = (int) ($product->stock_quantity ?? 0);
                 if ($newQty > $available) {
+                    if ($available <= 0) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'لا يوجد مخزون من '.$product->name,
+                            'available' => 0,
+                        ], 422);
+                    }
                     return response()->json([
                         'success' => false,
-                        'message' => 'Insufficient stock',
+                        'message' => 'الكمية المطلوبة غير متوفرة',
                         'available' => $available,
                     ], 422);
                 }
@@ -357,9 +366,16 @@ class CartController extends Controller
             if ($product->track_inventory) {
                 $available = (int) ($product->stock_quantity ?? 0);
                 if ($newQty > $available) {
+                    if ($available <= 0) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'لا يوجد مخزون من '.$product->name,
+                            'available' => 0,
+                        ], 422);
+                    }
                     return response()->json([
                         'success' => false,
-                        'message' => 'Insufficient stock',
+                        'message' => 'الكمية المطلوبة غير متوفرة',
                         'available' => $available,
                     ], 422);
                 }
@@ -404,7 +420,7 @@ class CartController extends Controller
             if ($product && $product->track_inventory && $qty > (int) ($product->stock_quantity ?? 0)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Insufficient stock',
+                    'message' => 'الكمية المطلوبة غير متوفرة',
                     'available' => (int) ($product->stock_quantity ?? 0),
                 ], 422);
             }
@@ -443,7 +459,7 @@ class CartController extends Controller
             if ($product && $product->track_inventory && (int) $request->quantity > (int) ($product->stock_quantity ?? 0)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Insufficient stock',
+                    'message' => 'الكمية المطلوبة غير متوفرة',
                     'available' => (int) ($product->stock_quantity ?? 0),
                 ], 422);
             }
@@ -486,19 +502,34 @@ class CartController extends Controller
             Session::put('custom_gifts', $customGifts);
         }
         // Check if it's a mart product
-        elseif (is_string($itemId) && str_starts_with($itemId, 'm')) {
+        else {
             $martProducts = Session::get('mart_products', []);
-            unset($martProducts[$itemId]);
-            Session::put('mart_products', $martProducts);
-        } else {
-            if (Auth::check() && $this->canUseDatabaseCart() && is_numeric($itemId)) {
-                $this->mergeSessionCartIntoDatabaseCart();
-                $dbCart = $this->getOrCreateDatabaseCart();
-                CartItem::where('cart_id', $dbCart->id)->where('product_id', (int) $itemId)->delete();
+            $martKeyCandidates = array_values(array_unique([
+                (string) $itemId,
+                is_numeric($itemId) ? (string) (int) $itemId : null,
+                is_string($itemId) ? ltrim($itemId, 'm') : null,
+            ]));
+            $martKeyCandidates = array_values(array_filter($martKeyCandidates, fn ($v) => $v !== null && $v !== ''));
+
+            $removedFromMart = false;
+            foreach ($martKeyCandidates as $key) {
+                if (array_key_exists($key, $martProducts)) {
+                    unset($martProducts[$key]);
+                    $removedFromMart = true;
+                }
+            }
+            if ($removedFromMart) {
+                Session::put('mart_products', $martProducts);
             } else {
-                $cart = Session::get('cart', []);
-                unset($cart[$itemId]);
-                Session::put('cart', $cart);
+                if (Auth::check() && $this->canUseDatabaseCart() && is_numeric($itemId)) {
+                    $this->mergeSessionCartIntoDatabaseCart();
+                    $dbCart = $this->getOrCreateDatabaseCart();
+                    CartItem::where('cart_id', $dbCart->id)->where('product_id', (int) $itemId)->delete();
+                } else {
+                    $cart = Session::get('cart', []);
+                    unset($cart[$itemId]);
+                    Session::put('cart', $cart);
+                }
             }
         }
 
@@ -566,7 +597,7 @@ class CartController extends Controller
                         'product' => [
                             'id' => $item->product->id,
                             'name' => $item->product->name,
-                            'image' => $item->product->image,
+                            'image' => $item->product->primary_image_url,
                             'price' => $item->product->price,
                             'discount_price' => $item->product->discount_price,
                         ],
@@ -588,7 +619,7 @@ class CartController extends Controller
                     'product' => [
                         'id' => $product->id,
                         'name' => $product->name,
-                        'image' => $product->image,
+                        'image' => $product->primary_image_url,
                         'price' => $product->price,
                         'discount_price' => $product->discount_price,
                     ],

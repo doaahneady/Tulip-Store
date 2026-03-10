@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $gift->name }} - هدايا توليب</title>
+    <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css'])
+    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -16,7 +16,7 @@
         }
 
         body {
-            font-family: 'El Messiri', sans-serif;
+            font-family: 'Tajawal', sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
         }
@@ -96,6 +96,10 @@
 
         .stars {
             color: #ffa500;
+        }
+        
+        .stars .star-off {
+            color: rgba(0, 0, 0, 0.18);
         }
 
         .gift-price {
@@ -336,7 +340,7 @@
             <div class="gift-detail-content">
                 <!-- Images -->
                 <div class="gift-images">
-                    <img src="{{ $gift->main_image }}" alt="{{ $gift->name }}" class="main-image">
+                    <img src="{{ $gift->main_image }}" alt="{{ $gift->name }}" class="main-image" loading="eager" width="900" height="500" onerror="this.src='/images/gift-placeholder.svg'">
                 </div>
 
                 <!-- Info -->
@@ -350,7 +354,7 @@
                     <div class="gift-rating">
                         <div class="stars">
                             @for($i = 1; $i <= 5; $i++)
-                                <i class="fas fa-star {{ $i <= $gift->rating ? '' : 'text-gray-300' }}"></i>
+                                <i class="fas fa-star {{ $i <= $gift->rating ? '' : 'star-off' }}"></i>
                             @endfor
                         </div>
                         <span>({{ $gift->reviews_count }} تقييم)</span>
@@ -431,7 +435,7 @@
                 <div class="related-grid">
                     @foreach($relatedGifts as $relatedGift)
                         <div class="related-card" onclick="window.location.href='{{ route('gifts.show', $relatedGift) }}'">
-                            <img src="{{ $relatedGift->main_image }}" alt="{{ $relatedGift->name }}" class="related-image">
+                            <img src="{{ $relatedGift->main_image }}" alt="{{ $relatedGift->name }}" class="related-image" loading="lazy" width="320" height="200" onerror="this.src='/images/gift-placeholder.svg'">
                             <div class="related-content">
                                 <div class="related-name">{{ $relatedGift->name }}</div>
                                 <div class="related-price">{{ $relatedGift->formatted_price }}</div>
@@ -442,6 +446,8 @@
             </div>
         @endif
     </div>
+
+    @include('components.footer')
 
     <script>
         function changeQuantity(change) {
@@ -469,13 +475,6 @@
             const quantity = document.getElementById('quantity').value;
             const selectedOptions = Array.from(document.querySelectorAll('.custom-option.selected')).map(opt => opt.textContent);
             
-            // Here you would typically make an AJAX request to add to cart
-            console.log('Adding to cart:', {
-                gift_id: {{ $gift->id }},
-                quantity: quantity,
-                customizations: selectedOptions
-            });
-            
             // Show success message
             if (window.showToast) {
                 window.showToast('تم إضافة الهدية إلى السلة بنجاح!');
@@ -488,9 +487,6 @@
         }
 
         function addToWishlist() {
-            // Here you would typically make an AJAX request to add to wishlist
-            console.log('Adding to wishlist:', {{ $gift->id }});
-            
             // Show success message
             if (window.showToast) {
                 window.showToast('تم إضافة الهدية إلى المفضلة!');

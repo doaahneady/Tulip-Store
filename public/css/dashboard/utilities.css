@@ -13,6 +13,14 @@
 .d-inline-flex { display: inline-flex !important; }
 .d-grid { display: grid !important; }
 
+.hidden { display: none !important; }
+.block { display: block !important; }
+.inline { display: inline !important; }
+.inline-block { display: inline-block !important; }
+.flex { display: flex !important; }
+.inline-flex { display: inline-flex !important; }
+.grid { display: grid !important; }
+
 /* ========================================
    FLEXBOX UTILITIES
    ======================================== */

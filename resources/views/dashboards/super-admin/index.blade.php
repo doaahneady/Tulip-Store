@@ -36,6 +36,10 @@
             <i class="fas fa-gift"></i>
             <span>Tulip Gifts</span>
         </a>
+        <a href="{{ route('dashboard.admin.gifts.creation') }}" class="inline-flex items-center gap-2 bg-rose-600 text-white px-4 py-2 rounded-xl hover:bg-rose-700 transition">
+            <i class="fas fa-hammer"></i>
+            <span>Gifts Creation Stuff</span>
+        </a>
         <a href="{{ route('dashboard.admin.mart') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">
             <i class="fas fa-store"></i>
             <span>Tulip Mart</span>
@@ -55,54 +59,66 @@
     </a>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
-    <div class="stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <p class="text-gray-500 text-xs">إيرادات اليوم</p>
-        <h3 id="kpiRevenueToday" class="text-xl font-bold text-gray-900 mt-1">{{ number_format($metrics['revenue_today'] ?? 0, 2) }}</h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 mb-4">
+    <div class="stat-card bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div class="flex items-start justify-between gap-3">
+            <p class="text-gray-500 text-xs font-semibold">إيرادات اليوم</p>
+            <h3 id="kpiRevenueToday" class="text-xl font-black text-gray-900 leading-tight">{{ number_format($metrics['revenue_today'] ?? 0, 2) }}</h3>
+        </div>
         <p class="text-xs text-gray-500 mt-1">هذا الشهر: <span id="kpiRevenueMonth">{{ number_format($metrics['monthly_revenue'] ?? 0, 2) }}</span></p>
     </div>
-    <div class="stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <p class="text-gray-500 text-xs">طلبات نشطة</p>
-        <h3 id="kpiActiveOrders" class="text-xl font-bold text-gray-900 mt-1">{{ number_format($metrics['active_orders'] ?? 0) }}</h3>
+    <div class="stat-card bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div class="flex items-start justify-between gap-3">
+            <p class="text-gray-500 text-xs font-semibold">طلبات نشطة</p>
+            <h3 id="kpiActiveOrders" class="text-xl font-black text-gray-900 leading-tight">{{ number_format($metrics['active_orders'] ?? 0) }}</h3>
+        </div>
         <p class="text-xs text-gray-500 mt-1">معلّقة: <span id="kpiPendingOrders">{{ number_format($metrics['pending_orders'] ?? 0) }}</span></p>
     </div>
-    <div class="stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <p class="text-gray-500 text-xs">المنتجات</p>
-        <h3 id="kpiTotalProducts" class="text-xl font-bold text-gray-900 mt-1">{{ number_format($metrics['total_products'] ?? 0) }}</h3>
+    <div class="stat-card bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div class="flex items-start justify-between gap-3">
+            <p class="text-gray-500 text-xs font-semibold">المنتجات</p>
+            <h3 id="kpiTotalProducts" class="text-xl font-black text-gray-900 leading-tight">{{ number_format($metrics['total_products'] ?? 0) }}</h3>
+        </div>
         <p class="text-xs text-gray-500 mt-1">نشطة: <span id="kpiActiveProducts">{{ number_format($metrics['active_products'] ?? 0) }}</span></p>
     </div>
-    <div class="stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <p class="text-gray-500 text-xs">العملاء</p>
-        <h3 id="kpiTotalUsers" class="text-xl font-bold text-gray-900 mt-1">{{ number_format($metrics['total_users'] ?? 0) }}</h3>
+    <div class="stat-card bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div class="flex items-start justify-between gap-3">
+            <p class="text-gray-500 text-xs font-semibold">العملاء</p>
+            <h3 id="kpiTotalUsers" class="text-xl font-black text-gray-900 leading-tight">{{ number_format($metrics['total_users'] ?? 0) }}</h3>
+        </div>
         <p class="text-xs text-gray-500 mt-1">نشطون: <span id="kpiActiveUsers">{{ number_format($metrics['active_users'] ?? 0) }}</span></p>
     </div>
-    <div class="stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <p class="text-gray-500 text-xs">تنبيهات نقص المخزون</p>
-        <h3 id="kpiLowStock" class="text-xl font-bold text-gray-900 mt-1">{{ number_format($metrics['low_stock_alerts'] ?? 0) }}</h3>
+    <div class="stat-card bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div class="flex items-start justify-between gap-3">
+            <p class="text-gray-500 text-xs font-semibold">تنبيهات نقص المخزون</p>
+            <h3 id="kpiLowStock" class="text-xl font-black text-gray-900 leading-tight">{{ number_format($metrics['low_stock_alerts'] ?? 0) }}</h3>
+        </div>
         <p class="text-xs text-gray-500 mt-1"><a class="text-indigo-600 hover:underline" href="{{ route('dashboard.admin.inventory.alerts') }}">عرض التفاصيل</a></p>
     </div>
-    <div class="stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <p class="text-gray-500 text-xs">تذاكر الدعم المعلّقة</p>
-        <h3 id="kpiPendingTickets" class="text-xl font-bold text-gray-900 mt-1">{{ number_format($metrics['pending_support_tickets'] ?? 0) }}</h3>
+    <div class="stat-card bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div class="flex items-start justify-between gap-3">
+            <p class="text-gray-500 text-xs font-semibold">تذاكر الدعم المعلّقة</p>
+            <h3 id="kpiPendingTickets" class="text-xl font-black text-gray-900 leading-tight">{{ number_format($metrics['pending_support_tickets'] ?? 0) }}</h3>
+        </div>
         <p class="text-xs text-gray-500 mt-1"><a class="text-indigo-600 hover:underline" href="{{ route('dashboard.cs.tickets') }}">فتح الدعم</a></p>
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-900 mb-4"><i class="fas fa-chart-line text-indigo-600 ml-2"></i>الإيرادات (آخر 30 يوم)</h3>
-        <canvas id="revenueChart" height="160"></canvas>
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-4 mb-4">
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 xl:col-span-8">
+        <h3 class="text-base font-black text-gray-900 mb-3"><i class="fas fa-chart-line text-indigo-600 ml-2"></i>الإيرادات (آخر 30 يوم)</h3>
+        <canvas id="revenueChart" height="130"></canvas>
     </div>
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-900 mb-4"><i class="fas fa-chart-pie text-purple-600 ml-2"></i>توزيع حالات الطلبات (آخر 30 يوم)</h3>
-        <canvas id="orderStatusChart" height="160"></canvas>
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 xl:col-span-4">
+        <h3 class="text-base font-black text-gray-900 mb-3"><i class="fas fa-chart-pie text-purple-600 ml-2"></i>توزيع حالات الطلبات (آخر 30 يوم)</h3>
+        <canvas id="orderStatusChart" height="130"></canvas>
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-900 mb-4"><i class="fas fa-trophy text-amber-600 ml-2"></i>أفضل المنتجات (آخر 30 يوم)</h3>
-        <div class="overflow-x-auto">
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-4 mb-4">
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 xl:col-span-4">
+        <h3 class="text-base font-black text-gray-900 mb-3"><i class="fas fa-trophy text-amber-600 ml-2"></i>أفضل المنتجات (آخر 30 يوم)</h3>
+        <div class="overflow-auto max-h-[320px]">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="text-gray-500">
@@ -126,9 +142,9 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-900 mb-4"><i class="fas fa-list text-indigo-600 ml-2"></i>آخر النشاطات</h3>
-        <div class="space-y-2 max-h-72 overflow-y-auto">
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 xl:col-span-4">
+        <h3 class="text-base font-black text-gray-900 mb-3"><i class="fas fa-list text-indigo-600 ml-2"></i>آخر النشاطات</h3>
+        <div class="space-y-2 max-h-[320px] overflow-y-auto">
             @forelse(($metrics['recent_activities'] ?? []) as $activity)
                 <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
                     <div class="w-9 h-9 rounded-xl bg-white border border-gray-100 flex items-center justify-center">
@@ -149,12 +165,12 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-900 mb-4"><i class="fas fa-map-marked-alt text-emerald-600 ml-2"></i>توزيع الطلبات جغرافياً (آخر 30 يوم)</h3>
-        <canvas id="geoChart" height="220"></canvas>
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 xl:col-span-4">
+        <h3 class="text-base font-black text-gray-900 mb-3"><i class="fas fa-map-marked-alt text-emerald-600 ml-2"></i>توزيع الطلبات جغرافياً (آخر 30 يوم)</h3>
+        <canvas id="geoChart" height="180"></canvas>
         <div class="mt-4">
-            <h4 class="text-sm font-semibold text-gray-900 mb-2">تنبيهات المخزون (الأقل)</h4>
-            <div class="space-y-2 max-h-32 overflow-y-auto">
+            <h4 class="text-sm font-black text-gray-900 mb-2">تنبيهات المخزون (الأقل)</h4>
+            <div class="space-y-2 max-h-28 overflow-y-auto">
                 @forelse(($metrics['low_stock_products'] ?? []) as $p)
                     <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-sm">
                         <span class="text-gray-800">{{ $p->name ?? 'منتج' }}</span>
@@ -168,42 +184,42 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-900 mb-4"><i class="fas fa-chart-line text-blue-600 ml-2"></i>نمو النظام</h3>
-        <div class="grid grid-cols-3 gap-4">
-            <div class="p-4 bg-blue-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-blue-600">{{ number_format($metrics['user_growth'] ?? 0, 1) }}%</p>
-                <p class="text-xs text-gray-500">نمو المستخدمين</p>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100" role="region" aria-labelledby="growthHeading">
+        <h3 id="growthHeading" class="text-base font-black text-gray-900 mb-3"><i class="fas fa-chart-line text-blue-600 ml-2" aria-hidden="true"></i>نمو النظام</h3>
+        <div class="grid grid-cols-3 gap-3">
+            <div class="p-4 rounded-2xl text-center border border-blue-100 bg-gradient-to-b from-blue-50 to-white" aria-label="نمو المستخدمين">
+                <p class="text-2xl font-extrabold text-blue-700 leading-none"><span dir="ltr">{{ number_format($metrics['user_growth'] ?? 0, 1) }}%</span></p>
+                <p class="text-xs text-gray-600 mt-1">نمو المستخدمين</p>
             </div>
-            <div class="p-4 bg-green-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-green-600">{{ number_format($metrics['revenue_growth'] ?? 0, 1) }}%</p>
-                <p class="text-xs text-gray-500">نمو الإيرادات</p>
+            <div class="p-4 rounded-2xl text-center border border-emerald-100 bg-gradient-to-b from-emerald-50 to-white" aria-label="نمو الإيرادات">
+                <p class="text-2xl font-extrabold text-emerald-700 leading-none"><span dir="ltr">{{ number_format($metrics['revenue_growth'] ?? 0, 1) }}%</span></p>
+                <p class="text-xs text-gray-600 mt-1">نمو الإيرادات</p>
             </div>
-            <div class="p-4 bg-orange-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-orange-600">{{ number_format($metrics['order_growth'] ?? 0, 1) }}%</p>
-                <p class="text-xs text-gray-500">نمو الطلبات</p>
+            <div class="p-4 rounded-2xl text-center border border-orange-100 bg-gradient-to-b from-orange-50 to-white" aria-label="نمو الطلبات">
+                <p class="text-2xl font-extrabold text-orange-700 leading-none"><span dir="ltr">{{ number_format($metrics['order_growth'] ?? 0, 1) }}%</span></p>
+                <p class="text-xs text-gray-600 mt-1">نمو الطلبات</p>
             </div>
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-900 mb-4"><i class="fas fa-bell text-red-600 ml-2"></i>التنبيهات</h3>
-        <div class="grid grid-cols-2 gap-4">
-            <div class="p-4 bg-red-50 rounded-xl text-center">
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <h3 class="text-base font-black text-gray-900 mb-3"><i class="fas fa-bell text-red-600 ml-2"></i>التنبيهات</h3>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="p-3 bg-red-50 rounded-xl text-center">
                 <p class="text-2xl font-bold text-red-600">{{ number_format($metrics['system_alerts'] ?? 0) }}</p>
                 <p class="text-xs text-gray-500">تنبيهات النظام</p>
             </div>
-            <div class="p-4 bg-purple-50 rounded-xl text-center">
+            <div class="p-3 bg-purple-50 rounded-xl text-center">
                 <p class="text-2xl font-bold text-purple-600">{{ number_format($metrics['avg_order_value'] ?? 0, 2) }}</p>
                 <p class="text-xs text-gray-500">متوسط قيمة الطلب</p>
             </div>
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-900 mb-4"><i class="fas fa-store text-indigo-600 ml-2"></i>أفضل المتاجر</h3>
-        <div class="space-y-2 max-h-64 overflow-y-auto">
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <h3 class="text-base font-black text-gray-900 mb-3"><i class="fas fa-store text-indigo-600 ml-2"></i>أفضل المتاجر</h3>
+        <div class="space-y-2 max-h-[280px] overflow-y-auto">
             @forelse(($metrics['top_performing_stores'] ?? []) as $store)
                 <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-sm">
                     @php $storeName = is_array($store->name ?? null) ? json_encode($store->name) : ($store->name ?? 'متجر'); @endphp

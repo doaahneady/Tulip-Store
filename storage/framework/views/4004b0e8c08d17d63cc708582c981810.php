@@ -30,6 +30,11 @@
             <span>الملف الشخصي</span>
           </div>
 
+          <div class="dropdown-item" onclick="window.location.href='/my-orders'">
+            <i class="fas fa-shopping-bag"></i>
+            <span>طلباتي</span>
+          </div>
+
           <div class="dropdown-item logout-item" onclick="handleLogout()">
             <i class="fas fa-sign-out-alt"></i>
             <span>تسجيل خروج</span>
@@ -118,6 +123,61 @@
 
 
 <script>
+(function () {
+  const USD_TO_SYP = 117;
+  const serverCurrency = <?php echo json_encode(auth()->check() ? (strtoupper((string) (auth()->user()->currency ?: 'USD'))) : (strtoupper((string) (session('currency') ?: 'USD'))), 15, 512) ?>;
+  const safeServerCurrency = (serverCurrency === 'SYP' || serverCurrency === 'USD') ? serverCurrency : 'USD';
+  let preferred = safeServerCurrency;
+
+  try {
+    const stored = (localStorage.getItem('tulip_currency') || '').toUpperCase();
+    if (stored === 'USD' || stored === 'SYP') preferred = stored;
+  } catch (_) {}
+
+  window.TULIP_USD_TO_SYP = USD_TO_SYP;
+  window.getCurrencyPreference = function () {
+    return preferred;
+  };
+
+  window.setCurrencyPreference = async function (currency) {
+    const cur = (String(currency || '').toUpperCase() === 'SYP') ? 'SYP' : 'USD';
+    preferred = cur;
+    try { localStorage.setItem('tulip_currency', cur); } catch (_) {}
+
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    if (csrf && <?php echo json_encode(auth()->check(), 15, 512) ?>) {
+      try {
+        await fetch('/profile/update', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrf,
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ currency: cur })
+        });
+      } catch (_) {}
+    }
+  };
+
+  window.formatMoney = function (amountUsd) {
+    const n = Number(amountUsd || 0);
+    if (preferred === 'SYP') {
+      const syp = Math.round(n * USD_TO_SYP);
+      return syp.toLocaleString() + ' SYP';
+    }
+    return '$' + n.toFixed(2);
+  };
+
+  window.formatDualMoney = function (amountUsd) {
+    const n = Number(amountUsd || 0);
+    const usd = '$' + n.toFixed(2);
+    const syp = Math.round(n * USD_TO_SYP).toLocaleString() + ' SYP';
+    return `${usd} • ${syp}`;
+  };
+})();
+
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const searchDropdown = document.getElementById('searchDropdown');
@@ -161,14 +221,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 300);
     });
 
+    const isMart = window.location.pathname.startsWith('/mart');
+    const market = isMart ? 'mart' : 'store';
+    const searchRedirectBase = isMart ? '/mart/products' : '/store';
+
     // Search on Enter key
     searchInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
             const query = this.value.trim();
             if (query.length >= 2) {
-                // Redirect to store page with search query
-                window.location.href = '/store?search=' + encodeURIComponent(query);
+                window.location.href = searchRedirectBase + '?search=' + encodeURIComponent(query);
             }
         }
     });
@@ -180,8 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
         searchIcon.addEventListener('click', function() {
             const query = searchInput.value.trim();
             if (query.length >= 2) {
-                // Redirect to store page with search query
-                window.location.href = '/store?search=' + encodeURIComponent(query);
+                window.location.href = searchRedirectBase + '?search=' + encodeURIComponent(query);
             }
         });
     }
@@ -246,13 +308,18 @@ document.addEventListener('DOMContentLoaded', function() {
             return 'fa-folder';
         }
 
-        fetch('/api/categories')
+        fetch(`/api/categories?market=${encodeURIComponent(market)}`, { headers: { 'Accept': 'application/json' } })
             .then(res => res.json())
-            .then(categories => {
+            .then(payload => {
+                const categories = Array.isArray(payload) ? payload : (payload.data || []);
+                if (!Array.isArray(categories) || categories.length === 0) {
+                    searchResults.innerHTML = '<div style="text-align:center;color:#999;">لا توجد أقسام</div>';
+                    return;
+                }
                 searchResults.innerHTML = categories.map(cat => {
                     const icon = getCategoryIcon(cat.name, cat.slug || '');
                     return `
-                        <div class="search-result-item" onclick="window.location.href='/category/${cat.slug}'">
+                        <div class="search-result-item" onclick="window.location.href='/category/' + encodeURIComponent(cat.slug)">
                             <i class="fas ${icon} search-result-icon"></i>
                             <div class="search-result-info">
                                 <div class="search-result-name">${cat.name}</div>
@@ -261,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     `;
                 }).join('');
             })
-            .catch(err => {
+            .catch(() => {
                 searchResults.innerHTML = '<div style="text-align:center;color:#e74c3c;">حدث خطأ</div>';
             });
     }
@@ -272,10 +339,11 @@ document.addEventListener('DOMContentLoaded', function() {
         searchResults.style.display = 'flex';
         searchResults.innerHTML = '<div style="text-align:center;color:#999;">جاري البحث...</div>';
 
-        fetch(`/api/products/search?q=${encodeURIComponent(query)}`)
+        fetch(`/api/products/search?market=${encodeURIComponent(market)}&q=${encodeURIComponent(query)}`)
             .then(res => res.json())
             .then(data => {
-                const products = data.data || [];
+                const raw = Array.isArray(data.data) ? data.data : [];
+                const products = Array.from(new Map(raw.map(p => [String(p?.id ?? ''), p])).values()).filter(p => p && p.id);
                 
                 if (products.length === 0) {
                     searchResults.innerHTML = '<div style="text-align:center;color:#999;">لا توجد نتائج</div>';
@@ -283,13 +351,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 searchResults.innerHTML = products.map(product => `
-                    <div class="search-result-item" onclick="window.location.href='/product/${product.id}'">
+                    <div class="search-result-item" onclick="window.location.href='/products/${product.id}'">
                         <i class="fas fa-search search-result-icon"></i>
                         <div class="search-result-info">
                             <div class="search-result-name">${product.name}</div>
                             <div class="search-result-price">${product.price} ر.س</div>
                         </div>
-                        <img src="${product.image || '/images/placeholder.jpg'}" class="search-result-img" alt="${product.name}">
+                        <img src="${product.primary_image_url || product.image || (Array.isArray(product.images) ? product.images[0] : null) || '/images/gift-placeholder.svg'}" class="search-result-img" alt="${product.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'">
                     </div>
                 `).join('');
             })
@@ -614,7 +682,6 @@ window.showToast = function(message, duration = 2500) {
         font-family: 'El Messiri', sans-serif;
     `;
     toast.innerHTML = `
-        <i class="fas fa-check-circle" style="font-size: 1.2rem; color: #4CAF50;"></i>
         <span>${message}</span>
     `;
     document.body.appendChild(toast);

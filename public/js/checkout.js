@@ -5,11 +5,42 @@ console.log('✅ Checkout.js loaded');
 let currentStep = 1;
 let selectedDelivery = 'normal';
 let selectedPayment = 'cash';
-let selectedCurrency = 'USD'; // Default currency
+let selectedCurrency = (window.getCurrencyPreference ? window.getCurrencyPreference() : 'USD'); // Default currency
 let map = null;
 let marker = null;
 let storeMarker = null;
 let selectedLocation = null;
+window.hasMartItems = false;
+
+function isMartCartItem(item) {
+    if (!item) return false;
+    if (item.type === 'mart') return true;
+    const p = item.product || {};
+    if (p.market === 'mart') return true;
+    if (p.store_id === 1) return true;
+    const storeName = (p.store && p.store.name ? String(p.store.name) : '').toLowerCase();
+    if (storeName.includes('mart')) return true;
+    const brand = (p.brand ? String(p.brand) : '').toLowerCase();
+    if (brand.includes('mart') || brand.includes('مارت')) return true;
+    return false;
+}
+
+async function refreshHasMartItems() {
+    try {
+        const response = await fetch('/api/cart/items');
+        if (!response.ok) {
+            window.hasMartItems = false;
+            return false;
+        }
+        const cart = await response.json();
+        const has = Array.isArray(cart) ? cart.some(isMartCartItem) : false;
+        window.hasMartItems = has;
+        return has;
+    } catch (e) {
+        window.hasMartItems = false;
+        return false;
+    }
+}
 
 // Multiple storage locations in Sweida
 const storageLocations = [
@@ -21,7 +52,7 @@ const storageLocations = [
 let nearestStorage = null;
 let deliveryDistance = 0;
 let deliveryCost = 0;
-let usdToSyp = 13000; // Default rate, will be updated from API
+let usdToSyp = (window.TULIP_USD_TO_SYP || 117);
 
 // All villages and cities in Sweida governorate (accurate coordinates)
 const allVillages = [
@@ -168,7 +199,11 @@ function initMap() {
         // Click event to place marker and calculate route
         map.on('click', function(e) {
             console.log('📍 Map clicked at:', e.latlng.lat, e.latlng.lng);
-            placeMarker({ lat: e.latlng.lat, lng: e.latlng.lng });
+            if (typeof window.placeMarkerLeaflet === 'function') {
+                window.placeMarkerLeaflet(e.latlng);
+            } else {
+                placeMarker({ lat: e.latlng.lat, lng: e.latlng.lng });
+            }
         });
         
         console.log('✅ Map click handler attached - Map is ready!');
@@ -235,7 +270,11 @@ function searchAddress(query) {
         if (results && results.length > 0) {
             const result = results[0];
             map.setView(result.center, 16);
-            placeMarker(result.center);
+            if (typeof window.placeMarkerLeaflet === 'function') {
+                window.placeMarkerLeaflet(result.center);
+            } else {
+                placeMarker(result.center);
+            }
             console.log('📍 Found:', result.name);
         } else {
             showAlert('لم يتم العثور على العنوان', 'error');
@@ -246,51 +285,12 @@ function searchAddress(query) {
 
 // Place marker on Google Map and calculate route
 function placeMarker(latlng) {
-    const lat = latlng.lat;
-    const lng = latlng.lng;
-    
-    console.log('📍 Placing marker at:', lat, lng);
-    
-    // Remove old marker if exists
-    if (marker) {
-        marker.setMap(null);
+    const lat = latlng?.lat;
+    const lng = latlng?.lng;
+    if (typeof window.placeMarkerLeaflet === 'function' && typeof L !== 'undefined') {
+        window.placeMarkerLeaflet(L.latLng(lat, lng));
+        return;
     }
-    
-    // Create delivery location marker
-    marker = new google.maps.Marker({
-        position: { lat, lng },
-        map: map,
-        title: 'موقع التوصيل',
-        icon: {
-            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                <svg width="40" height="50" viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M20 0C11.716 0 5 6.716 5 15c0 8.284 15 35 15 35s15-26.716 15-35c0-8.284-6.716-15-15-15z" fill="#ff6b35"/>
-                    <circle cx="20" cy="15" r="8" fill="#fff"/>
-                    <path d="M20 10l2 4h4l-3 3 1 4-4-2-4 2 1-4-3-3h4z" fill="#ff6b35"/>
-                </svg>
-            `),
-            scaledSize: new google.maps.Size(40, 50),
-            anchor: new google.maps.Point(20, 50)
-        },
-        animation: google.maps.Animation.DROP
-    });
-    
-    // Save location
-    selectedLocation = { lat, lng };
-    
-    // Find nearest storage
-    findNearestStorage(lat, lng);
-    
-    // Calculate route using Google Directions API
-    calculateRoute({ lat, lng });
-    
-    // Auto-select nearest village
-    autoSelectNearestVillage(lat, lng);
-    
-    console.log('✅ Location saved:', selectedLocation);
-    console.log('📦 Nearest storage:', nearestStorage.name);
-    
-    document.getElementById('mapInstructions').style.opacity = '0.5';
 }
 
 // Calculate route using Google Directions API
@@ -352,75 +352,119 @@ function calculateRoute(destination) {
     });
 }
 
-// Auto-select village using advanced reverse geocoding (100% accurate)
+// Auto-select village using advanced reverse geocoding (more resilient)
 function autoSelectNearestVillage(lat, lng) {
     const villageInput = document.getElementById('village');
     const villageCoordsInput = document.getElementById('villageCoords');
     
     if (!villageInput) return;
+
+    window.__reverseGeocodeSeq = (window.__reverseGeocodeSeq || 0) + 1;
+    const seq = window.__reverseGeocodeSeq;
+    const lastStableText = villageInput.getAttribute('data-last-location') || '';
     
     // Show loading state
-    villageInput.value = 'جاري تحديد المنطقة بدقة...';
+    villageInput.value = lastStableText || 'جاري تحديد المنطقة بدقة...';
     villageInput.style.background = '#f0f8ff';
     
-    // Use multiple zoom levels for maximum accuracy
-    const geocodePromises = [
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=ar`),
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=16&addressdetails=1&accept-language=ar`),
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14&addressdetails=1&accept-language=ar`)
-    ];
-    
-    Promise.all(geocodePromises)
-        .then(responses => Promise.all(responses.map(r => r.json())))
-        .then(results => {
-            console.log('🌍 Multiple geocoding results:', results);
-            
-            // Extract all possible location names
-            let possibleNames = [];
-            results.forEach(data => {
-                if (data.address) {
-                    if (data.address.village) possibleNames.push(data.address.village);
-                    if (data.address.town) possibleNames.push(data.address.town);
-                    if (data.address.city) possibleNames.push(data.address.city);
-                    if (data.address.suburb) possibleNames.push(data.address.suburb);
-                    if (data.address.neighbourhood) possibleNames.push(data.address.neighbourhood);
-                }
+    const reverseUrl = (zoom) => `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=${zoom}&addressdetails=1&accept-language=ar`;
+
+    const fetchReverse = async (zoom) => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 4500);
+        try {
+            const res = await fetch(reverseUrl(zoom), {
+                signal: controller.signal,
+                headers: {
+                    'Accept': 'application/json',
+                    'Accept-Language': 'ar'
+                },
             });
-            
-            // Remove duplicates
-            possibleNames = [...new Set(possibleNames)];
-            console.log('📍 Possible location names:', possibleNames);
-            
-            // Try to match with our village database using advanced matching
-            let bestMatch = findBestVillageMatch(possibleNames, lat, lng);
-            
-            if (bestMatch) {
-                villageInput.value = bestMatch.name;
-                villageInput.style.background = '#d4edda'; // Green tint for perfect match
-                villageInput.style.borderColor = '#28a745';
-                villageCoordsInput.value = `${bestMatch.lat},${bestMatch.lng}`;
-                
-                console.log('✅ Perfect match found:', bestMatch.name, 'Confidence:', bestMatch.confidence);
-                showAlert(`تم تحديد المنطقة بدقة: ${bestMatch.name}`, 'success');
-            } else if (possibleNames.length > 0) {
-                // Use the most specific geocoded name
-                const locationName = possibleNames[0];
-                villageInput.value = locationName;
-                villageInput.style.background = '#e8f4f8';
-                villageInput.style.borderColor = '#2a7080';
-                villageCoordsInput.value = `${lat},${lng}`;
-                
-                console.log('ℹ️ Using geocoded location:', locationName);
-                showAlert(`تم تحديد المنطقة: ${locationName}`, 'success');
-            } else {
-                // Fallback to nearest village
-                fallbackToNearestVillage(lat, lng);
+            if (!res.ok) {
+                return null;
             }
-        })
-        .catch(error => {
-            console.error('❌ Reverse geocoding error:', error);
+            return await res.json();
+        } catch (e) {
+            return null;
+        } finally {
+            clearTimeout(timeout);
+        }
+    };
+
+    (async () => {
+        const results = [];
+        for (const zoom of [18, 16, 14]) {
+            if (seq !== window.__reverseGeocodeSeq) return;
+            const data = await fetchReverse(zoom);
+            if (data) {
+                results.push(data);
+                if (data.display_name || (data.address && Object.keys(data.address).length)) {
+                    break;
+                }
+            }
+        }
+
+        if (seq !== window.__reverseGeocodeSeq) return;
+
+        if (results.length === 0) {
+            if (lastStableText) {
+                villageInput.value = lastStableText;
+                villageInput.style.background = '#fff3cd';
+                villageInput.style.borderColor = '#ffc107';
+                if (villageCoordsInput) villageCoordsInput.value = `${lat},${lng}`;
+                return;
+            }
             fallbackToNearestVillage(lat, lng);
+            return;
+        }
+
+        console.log('🌍 Geocoding results:', results);
+
+        const addrs = results.map(r => r && r.address ? r.address : {}).filter(Boolean);
+        const governorate = (addrs.find(a => a.state) || {}).state || (addrs.find(a => a.province) || {}).province || (addrs.find(a => a.county) || {}).county || '';
+        const country = (addrs.find(a => a.country) || {}).country || '';
+        const fullAddress = (results[0] && results[0].display_name) ? results[0].display_name : '';
+
+        let possibleNames = [];
+        results.forEach(data => {
+            if (data && data.address) {
+                if (data.address.village) possibleNames.push(data.address.village);
+                if (data.address.town) possibleNames.push(data.address.town);
+                if (data.address.city) possibleNames.push(data.address.city);
+                if (data.address.suburb) possibleNames.push(data.address.suburb);
+                if (data.address.neighbourhood) possibleNames.push(data.address.neighbourhood);
+            }
         });
+        possibleNames = [...new Set(possibleNames)];
+
+        const bestMatch = findBestVillageMatch(possibleNames, lat, lng);
+        let display = fullAddress || (bestMatch ? bestMatch.name : (possibleNames[0] || ''));
+        // Prefer concise "city/village - governorate" when available
+        if ((bestMatch || possibleNames[0] || '').length && (governorate || country)) {
+            const locality = (bestMatch ? bestMatch.name : possibleNames[0]);
+            const region = governorate || country;
+            display = `${locality} - ${region}`;
+        }
+
+        if (display) {
+            villageInput.value = display;
+            villageInput.setAttribute('data-last-location', display);
+            villageInput.style.background = bestMatch ? '#d4edda' : '#e8f4f8';
+            villageInput.style.borderColor = bestMatch ? '#28a745' : '#2a7080';
+            if (villageCoordsInput) villageCoordsInput.value = `${lat},${lng}`;
+            return;
+        }
+
+        if (lastStableText) {
+            villageInput.value = lastStableText;
+            villageInput.style.background = '#fff3cd';
+            villageInput.style.borderColor = '#ffc107';
+            if (villageCoordsInput) villageCoordsInput.value = `${lat},${lng}`;
+            return;
+        }
+
+        fallbackToNearestVillage(lat, lng);
+    })();
 }
 
 // Advanced matching algorithm for 100% accuracy
@@ -501,7 +545,7 @@ function fallbackToNearestVillage(lat, lng) {
         villageInput.style.borderColor = '#ffc107';
         
         if (villageCoordsInput) {
-            villageCoordsInput.value = `${nearestVillage.lat},${nearestVillage.lng}`;
+            villageCoordsInput.value = `${lat},${lng}`;
         }
         
         console.log('🏘️ Fallback: nearest village:', nearestVillage.name, '(', minDistance.toFixed(2), 'km away)');
@@ -649,13 +693,25 @@ function validateStep(step) {
             showAlert('الرجاء إدخال رقم الهاتف', 'error');
             return false;
         }
-        if (!document.getElementById('village').value.trim()) {
+        const village = document.getElementById('village').value.trim();
+        if (!village) {
             showAlert('الرجاء تحديد الموقع على الخريطة', 'error');
             return false;
         }
         if (!selectedLocation) {
             showAlert('الرجاء تحديد موقع التوصيل على الخريطة', 'error');
             return false;
+        }
+
+        if (window.hasMartItems) {
+            const supportedVillages = ['السويداء', 'عتيل', 'قنوات', 'Sweida', 'Atil', 'Kanawat'];
+            const isSupported = supportedVillages.some(v => village.includes(v));
+
+            if (!isSupported) {
+                showAlert('عذراً، لا يمكن توصيل منتجات Mart إلى موقعك المختار. يرجى اختيار موقع ضمن السويداء، عتيل، أو قنوات والمحاولة مرة أخرى.', 'error');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return false;
+            }
         }
     }
     return true;
@@ -749,6 +805,7 @@ async function loadCartSummary() {
         // Calculate subtotal (convert USD to SYP)
         let subtotal = 0;
         let itemsHtml = '';
+        let hasMartItems = false;
         
         if (cart && cart.length > 0) {
             cart.forEach(item => {
@@ -756,11 +813,22 @@ async function loadCartSummary() {
                 const itemTotal = priceUSD * item.quantity;
                 subtotal += itemTotal;
                 
+                const isMart = isMartCartItem(item);
+                if (isMart) hasMartItems = true;
+
+                let img = item.product.image || '';
+                if (img && !img.startsWith('http') && !img.startsWith('/')) {
+                    img = '/storage/' + img.replace(/^storage\//, '');
+                }
+
                 itemsHtml += `
-                    <div style="display:flex; gap:1rem; padding:1rem; background:#f8f9fa; border-radius:10px; margin-bottom:0.8rem;">
-                        <img src="${item.product.image || '/images/placeholder.jpg'}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;">
+                    <div style="display:flex; gap:1rem; padding:1rem; background:${isMart ? '#fff9f0' : '#f8f9fa'}; border-radius:10px; margin-bottom:0.8rem; border-right:4px solid ${isMart ? '#ff6b35' : 'transparent'};">
+                        <img src="${img || '/images/gift-placeholder.svg'}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;" onerror="this.src='/images/gift-placeholder.svg'">
                         <div style="flex:1;">
-                            <h5 style="font-family:'El Messiri',sans-serif; font-size:0.95rem; font-weight:700; color:#1a1a1a; margin:0 0 0.3rem 0;">${item.product.name}</h5>
+                            <h5 style="font-family:'El Messiri',sans-serif; font-size:0.95rem; font-weight:700; color:#1a1a1a; margin:0 0 0.3rem 0;">
+                                ${item.product.name}
+                                ${isMart ? '<span style="font-size:0.7rem; background:#ff6b35; color:#fff; padding:2px 6px; border-radius:4px; margin-right:5px;">Mart</span>' : ''}
+                            </h5>
                             <p style="font-family:'El Messiri',sans-serif; font-size:0.85rem; color:#666; margin:0;">الكمية: ${item.quantity} × ${formatPrice(priceUSD)}</p>
                         </div>
                         <div style="text-align:left;">
@@ -774,6 +842,23 @@ async function loadCartSummary() {
         }
         
         cartItemsList.innerHTML = itemsHtml;
+        window.hasMartItems = hasMartItems; // Store globally for validation
+
+        // Show mart delivery message if needed
+        if (hasMartItems) {
+            const martMsg = document.getElementById('martDeliveryMsg');
+            if (martMsg) {
+                martMsg.style.display = 'block';
+            } else {
+                // Inject message if not exists
+                const container = document.getElementById('mainContainer');
+                const msgDiv = document.createElement('div');
+                msgDiv.id = 'martDeliveryMsg';
+                msgDiv.style = "grid-column: 1 / -1; background: #fff3cd; color: #856404; padding: 1rem 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; border-right: 5px solid #ffc107; font-weight: 600; animation: slideDown 0.4s ease;";
+                msgDiv.innerHTML = '<i class="fas fa-exclamation-triangle" style="margin-left:10px;"></i> تنبيه: منتجات Mart تتوفر للتوصيل فقط إلى (السويداء، عتيل، قنوات)';
+                container.parentNode.insertBefore(msgDiv, container);
+            }
+        }
         
         // Calculate delivery cost
         deliveryCost = calculateDeliveryCost();
@@ -793,14 +878,10 @@ async function loadCartSummary() {
         const deliveryCostUSD = deliveryCost / usdToSyp;
         document.getElementById('deliveryCost').textContent = formatPrice(deliveryCostUSD);
         
-        // Calculate 5% service fee
-        const serviceFee = subtotal * 0.05;
-        
-        // Update totals (subtotal + delivery + 5% service fee)
-        const total = subtotal + deliveryCostUSD + serviceFee;
+        // Update totals (subtotal + delivery)
+        const total = subtotal + deliveryCostUSD;
         document.getElementById('subtotalAmount').textContent = formatPrice(subtotal);
         document.getElementById('shippingAmount').textContent = formatPrice(deliveryCostUSD);
-        document.getElementById('serviceFeeAmount').textContent = formatPrice(serviceFee);
         document.getElementById('totalAmount').textContent = formatPrice(total);
         
     } catch (error) {
@@ -811,6 +892,7 @@ async function loadCartSummary() {
 // Update progress steps (LEFT TO RIGHT - Professional Style)
 function updateProgressSteps() {
     const progressLine = document.getElementById('progressLine');
+    if (!progressLine) return;
     
     // Get steps by ID (they are in reverse order in HTML: 4,3,2,1)
     const step1 = document.getElementById('step1');
@@ -821,8 +903,10 @@ function updateProgressSteps() {
     const stepsArray = [step1, step2, step3, step4];
     
     stepsArray.forEach((step, index) => {
+        if (!step) return;
         const stepNum = index + 1; // 1, 2, 3, 4
         const circle = step.querySelector('div');
+        if (!circle) return;
         const icon = circle.querySelector('i');
         const text = step.querySelector('p');
         const badge = circle.querySelector('span');
@@ -833,40 +917,58 @@ function updateProgressSteps() {
             circle.style.borderColor = '#28a745';
             circle.style.boxShadow = '0 4px 20px rgba(40,167,69,0.3)';
             circle.style.transform = 'scale(1)';
-            icon.className = 'fas fa-check';
-            icon.style.color = '#fff';
-            icon.style.fontSize = '1.6rem';
-            text.style.color = '#28a745';
-            text.style.fontWeight = '700';
-            badge.style.background = '#28a745';
-            badge.style.color = '#fff';
-            badge.style.boxShadow = '0 2px 8px rgba(40,167,69,0.3)';
+            if (icon) {
+                icon.className = 'fas fa-check';
+                icon.style.color = '#fff';
+                icon.style.fontSize = '1.6rem';
+            }
+            if (text) {
+                text.style.color = '#28a745';
+                text.style.fontWeight = '700';
+            }
+            if (badge) {
+                badge.style.background = '#28a745';
+                badge.style.color = '#fff';
+                badge.style.boxShadow = '0 2px 8px rgba(40,167,69,0.3)';
+            }
         } else if (stepNum === currentStep) {
             // Current step - orange/active
             circle.style.background = '#fff';
             circle.style.borderColor = '#ff6b35';
             circle.style.boxShadow = '0 4px 20px rgba(255,107,53,0.25)';
             circle.style.transform = 'scale(1.05)';
-            icon.style.color = '#ff6b35';
-            icon.style.fontSize = '1.4rem';
-            text.style.color = '#2a7080';
-            text.style.fontWeight = '700';
-            badge.style.background = '#ff6b35';
-            badge.style.color = '#fff';
-            badge.style.boxShadow = '0 2px 8px rgba(255,107,53,0.3)';
+            if (icon) {
+                icon.style.color = '#ff6b35';
+                icon.style.fontSize = '1.4rem';
+            }
+            if (text) {
+                text.style.color = '#2a7080';
+                text.style.fontWeight = '700';
+            }
+            if (badge) {
+                badge.style.background = '#ff6b35';
+                badge.style.color = '#fff';
+                badge.style.boxShadow = '0 2px 8px rgba(255,107,53,0.3)';
+            }
         } else {
             // Future steps - light gray/inactive
             circle.style.background = '#e8f4f8';
             circle.style.borderColor = '#e8f4f8';
             circle.style.boxShadow = 'none';
             circle.style.transform = 'scale(1)';
-            icon.style.color = '#99c2cc';
-            icon.style.fontSize = '1.4rem';
-            text.style.color = '#99c2cc';
-            text.style.fontWeight = '600';
-            badge.style.background = '#e8f4f8';
-            badge.style.color = '#99c2cc';
-            badge.style.boxShadow = 'none';
+            if (icon) {
+                icon.style.color = '#99c2cc';
+                icon.style.fontSize = '1.4rem';
+            }
+            if (text) {
+                text.style.color = '#99c2cc';
+                text.style.fontWeight = '600';
+            }
+            if (badge) {
+                badge.style.background = '#e8f4f8';
+                badge.style.color = '#99c2cc';
+                badge.style.boxShadow = 'none';
+            }
         }
     });
     
@@ -875,6 +977,44 @@ function updateProgressSteps() {
     progressLine.style.width = progress + '%';
     progressLine.style.right = (85 - progress) + '%';
 }
+
+// Back to payment options
+window.backToPaymentOptions = function() {
+    console.log('🔙 backToPaymentOptions called');
+    
+    // Hide all payment detail forms with animation
+    const creditCardDetails = document.getElementById('creditCardDetails');
+    const syriatelDetails = document.getElementById('syriatelDetails');
+    const paymentOptions = document.getElementById('paymentOptions');
+    
+    if (creditCardDetails) {
+        creditCardDetails.classList.remove('active');
+        creditCardDetails.classList.add('hiding');
+    }
+    
+    if (syriatelDetails) {
+        syriatelDetails.classList.remove('active');
+        syriatelDetails.classList.add('hiding');
+    }
+    
+    setTimeout(() => {
+        if (creditCardDetails) {
+            creditCardDetails.style.display = 'none';
+            creditCardDetails.classList.remove('hiding');
+        }
+        if (syriatelDetails) {
+            syriatelDetails.style.display = 'none';
+            syriatelDetails.classList.remove('hiding');
+        }
+        
+        // Show payment options with animation
+        if (paymentOptions) {
+            paymentOptions.style.display = 'block';
+            paymentOptions.classList.remove('hiding');
+            setTimeout(() => paymentOptions.classList.add('active'), 50);
+        }
+    }, 300);
+};
 
 // Select delivery
 function selectDelivery(type) {
@@ -887,14 +1027,20 @@ function selectDelivery(type) {
         
         if (optionType === type) {
             option.style.borderColor = '#ff6b35';
-            if (mainIcon) mainIcon.style.filter = 'drop-shadow(0 2px 6px rgba(255,107,53,0.35))';
+            if (mainIcon) {
+                mainIcon.style.filter = 'drop-shadow(0 2px 6px rgba(255,107,53,0.35))';
+                mainIcon.style.transform = 'scale(1.1)';
+            }
             if (statusIcon) {
                 statusIcon.className = 'fas fa-check-circle delivery-status-icon';
                 statusIcon.style.color = '#ff6b35';
             }
         } else {
             option.style.borderColor = '#e0e0e0';
-            if (mainIcon) mainIcon.style.filter = '';
+            if (mainIcon) {
+                mainIcon.style.filter = '';
+                mainIcon.style.transform = 'scale(1)';
+            }
             if (statusIcon) {
                 statusIcon.className = 'far fa-circle delivery-status-icon';
                 statusIcon.style.color = '#ccc';
@@ -970,29 +1116,7 @@ window.proceedWithPayment = function() {
     }, 300);
 };
 
-// Back to payment options
-window.backToPaymentOptions = function() {
-    // Hide all payment detail forms with animation
-    const creditCardDetails = document.getElementById('creditCardDetails');
-    const syriatelDetails = document.getElementById('syriatelDetails');
-    
-    creditCardDetails.classList.remove('active');
-    syriatelDetails.classList.remove('active');
-    creditCardDetails.classList.add('hiding');
-    syriatelDetails.classList.add('hiding');
-    
-    setTimeout(() => {
-        creditCardDetails.style.display = 'none';
-        syriatelDetails.style.display = 'none';
-        creditCardDetails.classList.remove('hiding');
-        syriatelDetails.classList.remove('hiding');
-        
-        // Show payment options with animation
-        const paymentOptions = document.getElementById('paymentOptions');
-        paymentOptions.style.display = 'block';
-        setTimeout(() => paymentOptions.classList.add('active'), 50);
-    }, 300);
-};
+// Syriatel prep...
 
 // Prepare Syriatel form with order data and generate QR immediately
 async function prepareSyriatelForm() {
@@ -1016,10 +1140,9 @@ async function prepareSyriatelForm() {
             });
         }
         
-        // Calculate total with delivery and service fee
+        // Calculate total with delivery
         const deliveryCostUSD = deliveryCost / usdToSyp;
-        const serviceFee = subtotal * 0.05;
-        const totalUSD = subtotal + deliveryCostUSD + serviceFee;
+        const totalUSD = subtotal + deliveryCostUSD;
         const totalSYP = Math.round(totalUSD * usdToSyp);
         
         // Generate order code (8 digits)
@@ -1349,18 +1472,26 @@ function displayOrderSummary() {
     document.getElementById('orderSummary').innerHTML = html;
 }
 
-// Submit order
+// Submit order (legacy version kept for compatibility – updated to use text input and include delivery cost)
 async function submitOrder() {
+    const recipient = document.getElementById('recipientName')?.value || '';
+    const phone = document.getElementById('phoneNumber')?.value || '';
+    const village = document.getElementById('village')?.value || '';
+    const note = document.getElementById('addressNote')?.value || '';
+    if (!recipient || !phone || !village || !selectedLocation) {
+        showAlert('الرجاء ملء الحقول المطلوبة وتحديد الموقع على الخريطة', 'error');
+        return;
+    }
     const data = {
-        recipient_name: document.getElementById('recipientName').value,
-        phone: document.getElementById('phoneNumber').value,
-        village: document.getElementById('village').options[document.getElementById('village').selectedIndex].text,
-        address_note: document.getElementById('addressNote').value,
+        recipient_name: recipient,
+        phone: phone,
+        village: village,
+        address_note: note,
         location: selectedLocation,
         delivery_method: selectedDelivery,
-        payment_method: selectedPayment
+        payment_method: selectedPayment,
+        delivery_cost: (deliveryCost || 0) / (usdToSyp || 1)
     };
-    
     try {
         const response = await fetch('/api/orders/create', {
             method: 'POST',
@@ -1370,14 +1501,13 @@ async function submitOrder() {
             },
             body: JSON.stringify(data)
         });
-        
         const result = await response.json();
-        
-        if (result.success) {
+        if (result?.success) {
             showAlert('تم إنشاء الطلب بنجاح!', 'success');
             setTimeout(() => window.location.href = '/cart', 1500);
         } else {
-            showAlert('حدث خطأ', 'error');
+            const msg = result?.message || 'حدث خطأ';
+            showAlert(msg, 'error');
         }
     } catch (error) {
         showAlert('حدث خطأ في إنشاء الطلب', 'error');
@@ -1542,6 +1672,7 @@ async function saveAddressIfPossible(orderData) {
 // Initialize map when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     console.log('📄 DOM loaded, initializing...');
+    refreshHasMartItems();
     fetchExchangeRate();
     populateVillagesDropdown();
     loadUserData();
@@ -1579,7 +1710,10 @@ function populateVillagesDropdown() {
 window.switchCurrency = function(currency) {
     console.log('💱 Switching currency to:', currency, 'Current step:', currentStep);
     
-    selectedCurrency = currency;
+    selectedCurrency = (String(currency || '').toUpperCase() === 'SYP') ? 'SYP' : 'USD';
+    if (window.setCurrencyPreference) {
+        window.setCurrencyPreference(selectedCurrency);
+    }
     
     // Update button styles
     const usdBtn = document.getElementById('currencyUSD');
@@ -1590,7 +1724,7 @@ window.switchCurrency = function(currency) {
         return;
     }
     
-    if (currency === 'USD') {
+    if (selectedCurrency === 'USD') {
         usdBtn.style.background = '#2a7080';
         usdBtn.style.color = '#fff';
         sypBtn.style.background = '#fff';
@@ -1608,8 +1742,14 @@ window.switchCurrency = function(currency) {
         loadCartSummary();
     }
     
-    showAlert(`تم التبديل إلى ${currency === 'USD' ? 'الدولار الأمريكي' : 'الليرة السورية'}`, 'success');
+    showAlert(`تم التبديل إلى ${selectedCurrency === 'USD' ? 'الدولار الأمريكي' : 'الليرة السورية'}`, 'success');
 };
+
+document.addEventListener('DOMContentLoaded', function () {
+    if (document.getElementById('currencyUSD') && document.getElementById('currencySYP')) {
+        window.switchCurrency(selectedCurrency);
+    }
+});
 
 // Format price based on selected currency
 function formatPrice(priceUSD) {
@@ -1622,32 +1762,13 @@ function formatPrice(priceUSD) {
         return '$' + price.toFixed(2);
     } else {
         const priceSYP = Math.round(price * usdToSyp);
-        return priceSYP.toLocaleString() + ' ل.س';
+        return priceSYP.toLocaleString() + ' SYP';
     }
 }
 
 // Fetch USD to SYP exchange rate
 async function fetchExchangeRate() {
-    try {
-        console.log('💱 Fetching exchange rate...');
-        
-        // Using exchangerate-api.com (free tier)
-        const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-        
-        if (response.ok) {
-            const data = await response.json();
-            // Note: Most APIs don't have official SYP rate, using a multiplier
-            const baseRate = data.rates.AED || 3.67; // UAE Dirham as reference
-            usdToSyp = Math.round(baseRate * 3500); // Approximate conversion
-            
-            console.log('✅ Exchange rate updated:', usdToSyp, 'SYP per USD');
-        } else {
-            console.log('⚠️ Using default exchange rate:', usdToSyp);
-        }
-    } catch (error) {
-        console.error('❌ Error fetching exchange rate:', error);
-        console.log('⚠️ Using default exchange rate:', usdToSyp);
-    }
+    usdToSyp = (window.TULIP_USD_TO_SYP || 117);
 }
 
 console.log('Checkout.js functions defined');
@@ -1776,6 +1897,18 @@ async function submitOrder() {
         showAlert('الرجاء ملء جميع الحقول المطلوبة', 'error');
         return;
     }
+
+    if (window.hasMartItems) {
+        const supportedVillages = ['السويداء', 'عتيل', 'قنوات', 'Sweida', 'Atil', 'Kanawat'];
+        const isSupported = supportedVillages.some(v => (village || '').includes(v));
+
+        if (!isSupported) {
+            showAlert('عذراً، لا يمكن توصيل منتجات Mart إلى موقعك المختار. يرجى اختيار موقع ضمن السويداء، عتيل، أو قنوات والمحاولة مرة أخرى.', 'error');
+            goToStep(1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+    }
     
     if (!selectedLocation) {
         showAlert('الرجاء تحديد موقع التوصيل على الخريطة', 'error');
@@ -1798,28 +1931,8 @@ async function submitOrder() {
         delivery_method: selectedDelivery,
         payment_method: selectedPayment,
         delivery_cost: deliveryCostUSD,
-        service_fee: 0 // Will be calculated on server
+        service_fee: 0
     };
-    
-    // Calculate service fee (5% of subtotal)
-    try {
-        const response = await fetch('/api/cart/items');
-        if (response.ok) {
-            const cart = await response.json();
-            let subtotal = 0;
-            
-            if (cart && cart.length > 0) {
-                cart.forEach(item => {
-                    const priceUSD = item.product.discount_price || item.product.price;
-                    subtotal += priceUSD * item.quantity;
-                });
-            }
-            
-            orderData.service_fee = subtotal * 0.05;
-        }
-    } catch (error) {
-        console.error('Error calculating service fee:', error);
-    }
     
     console.log('Order data:', orderData);
     
@@ -1838,22 +1951,24 @@ async function submitOrder() {
         const result = await response.json();
         
         if (result.success) {
-            console.log('✅ Order created successfully!', result);
-            
-            // Show success card
-            showOrderSuccessCard(result.order_id);
-        } else {
-            console.error('❌ Order creation failed:', result);
-            showAlert(result.message || 'حدث خطأ في إنشاء الطلب', 'error');
-            if (result.error) {
-                console.error('Server error:', result.error);
-                console.error('Line:', result.line);
-            }
+        console.log('✅ Order created successfully!', result);
+        
+        // Show success card
+        showOrderSuccessCard(result.order_id);
+    } else {
+        console.error('❌ Order creation failed:', result);
+        const errorMsg = result.message || 'حدث خطأ في إنشاء الطلب';
+        const errorDetail = result.error ? ` (${result.error})` : '';
+        showAlert(errorMsg + errorDetail, 'error');
+        if (result.error) {
+            console.error('Server error:', result.error);
+            console.error('Line:', result.line);
         }
-    } catch (error) {
-        console.error('❌ Error submitting order:', error);
-        showAlert('حدث خطأ في إنشاء الطلب. الرجاء المحاولة مرة أخرى', 'error');
     }
+} catch (error) {
+    console.error('❌ Error submitting order:', error);
+    showAlert('حدث خطأ في إنشاء الطلب: ' + error.message, 'error');
+}
 }
 
 // Make submitOrder available globally

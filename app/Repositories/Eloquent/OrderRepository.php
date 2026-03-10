@@ -42,9 +42,10 @@ class OrderRepository implements OrderRepositoryInterface
 
     public function getTotalRevenue(Carbon $start, Carbon $end, ?int $storeId = null): float
     {
+        $terminal = (array) config('order_statuses.terminal', ['delivered', 'done']);
         $query = $this->model->newQuery()
             ->whereBetween('created_at', [$start, $end])
-            ->where('status', 'completed');
+            ->whereIn('status', $terminal);
 
         if ($storeId !== null) {
             $query->whereHas('items.product', function ($q) use ($storeId) {
