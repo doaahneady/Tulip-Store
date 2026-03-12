@@ -76,19 +76,36 @@ class TraderAuthController extends Controller
     public function apiRegister(Request $request)
     {
         $validated = $request->validate([
-            'business_name_en' => 'required|string|max:255',
-            'business_name_ar' => 'nullable|string|max:255',
+            'business_name_en' => 'required|string|max:255|regex:/^[a-zA-Z0-9\s]+$/',
+            'business_name_ar' => 'required|string|max:255|regex:/^[\x{0621}-\x{064A}0-9\s]+$/u',
             'email' => 'required|email|max:255|unique:users,email',
-            'phone' => 'required|string|max:30',
-            'password' => 'required|string|min:8|confirmed',
+            'phone' => 'required|string|regex:/^09\d{8}$/',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                \Illuminate\Validation\Rules\Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->symbols(),
+            ],
             'registration_number' => 'nullable|string|max:100',
             'tax_id' => 'nullable|string|max:100',
-            'contact_person' => 'required|string|max:255',
-            'business_address' => 'required|string|max:500',
+            'contact_person' => 'required|string|min:3|max:255',
+            'business_address' => 'required|string|min:3|max:500',
             'bank_name' => 'required|string|max:255',
             'account_holder' => 'required|string|max:255',
             'account_number' => 'required|string|max:100',
             'iban' => 'nullable|string|max:50',
+        ], [
+            'business_name_en.regex' => 'الاسم التجاري بالإنجليزية يجب أن يحتوي على أحرف إنجليزية وأرقام فقط',
+            'business_name_ar.required' => 'الاسم التجاري بالعربية مطلوب',
+            'business_name_ar.regex' => 'الاسم التجاري بالعربية يجب أن يحتوي على أحرف عربية وأرقام فقط',
+            'phone.regex' => 'رقم الهاتف يجب أن يبدأ بـ 09 ويتكون من 10 أرقام',
+            'password.min' => 'كلمة المرور يجب أن تكون 8 محارف على الأقل',
+            'contact_person.min' => 'اسم الشخص المسؤول يجب أن يكون 3 محارف على الأقل',
+            'business_address.min' => 'عنوان العمل يجب أن يكون 3 محارف على الأقل',
         ]);
 
         $user = User::create([
@@ -202,17 +219,26 @@ class TraderAuthController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'business_name_en' => 'required|string|max:255',
-            'business_name_ar' => 'nullable|string|max:255',
+            'business_name_en' => 'required|string|max:255|regex:/^[a-zA-Z0-9\s]+$/',
+            'business_name_ar' => 'required|string|max:255|regex:/^[\x{0621}-\x{064A}0-9\s]+$/u',
             'email' => 'required|email|max:255|unique:users,email',
-            'phone' => 'required|string|max:30',
-            'password' => 'required|string|min:8|confirmed',
+            'phone' => 'required|string|regex:/^09\d{8}$/',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                \Illuminate\Validation\Rules\Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->symbols(),
+            ],
 
             'registration_number' => 'nullable|string|max:100',
             'tax_id' => 'nullable|string|max:100',
-            'contact_person' => 'required|string|max:255',
-            'business_address' => 'required|string|max:500',
-            'business_logo' => 'nullable|image|max:2048',
+            'contact_person' => 'required|string|min:3|max:255',
+            'business_address' => 'required|string|min:3|max:500',
+            'business_logo' => 'required|image|max:2048',
 
             'bank_name' => 'required|string|max:255',
             'account_holder' => 'required|string|max:255',
@@ -221,7 +247,17 @@ class TraderAuthController extends Controller
 
             'business_license' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'tax_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'owner_id_card' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'owner_id_card' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ], [
+            'business_name_en.regex' => 'الاسم التجاري بالإنجليزية يجب أن يحتوي على أحرف إنجليزية وأرقام فقط',
+            'business_name_ar.required' => 'الاسم التجاري بالعربية مطلوب',
+            'business_name_ar.regex' => 'الاسم التجاري بالعربية يجب أن يحتوي على أحرف عربية وأرقام فقط',
+            'phone.regex' => 'رقم الهاتف يجب أن يبدأ بـ 09 ويتكون من 10 أرقام',
+            'password.min' => 'كلمة المرور يجب أن تكون 8 محارف على الأقل',
+            'contact_person.min' => 'اسم الشخص المسؤول يجب أن يكون 3 محارف على الأقل',
+            'business_address.min' => 'عنوان العمل يجب أن يكون 3 محارف على الأقل',
+            'business_logo.required' => 'يرجى رفع شعار العمل',
+            'owner_id_card.required' => 'يرجى رفع هوية المالك',
         ]);
 
         $user = User::create([

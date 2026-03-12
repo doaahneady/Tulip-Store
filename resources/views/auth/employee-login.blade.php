@@ -488,9 +488,7 @@
                         </button>
                     </form>
                     
-                    <div class="divider">
-                        <span>أو</span>
-                    </div>
+                    
                     
                     <div class="alt-links">
                         @auth('employee')
@@ -501,14 +499,7 @@
                                 </a>
                             @endif
                         @endauth
-                        <a href="{{ route('trader.login.form') }}" class="alt-link trader">
-                            <i class="fas fa-store"></i>
-                            بوابة التجار
-                        </a>
-                        <a href="{{ route('login') }}" class="alt-link">
-                            <i class="fas fa-user"></i>
-                            تسجيل دخول العملاء
-                        </a>
+                     
                     </div>
                 </div>
             </div>

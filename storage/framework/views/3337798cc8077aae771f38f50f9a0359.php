@@ -478,10 +478,7 @@
                         </div>
                         
                         <div class="form-options">
-                            <div class="remember-me">
-                                <input type="checkbox" id="remember" name="remember">
-                                <label for="remember">تذكرني</label>
-                            </div>
+                           
                             <a href="#" class="forgot-password">نسيت كلمة المرور؟</a>
                         </div>
                         
@@ -500,14 +497,7 @@
                             <i class="fas fa-user-plus"></i>
                             ليس لديك حساب؟ سجّل كتاجر
                         </a>
-                        <a href="<?php echo e(route('login')); ?>" class="alt-link">
-                            <i class="fas fa-user"></i>
-                            تسجيل دخول العملاء
-                        </a>
-                        <a href="<?php echo e(route('employee.login')); ?>" class="alt-link employee">
-                            <i class="fas fa-id-badge"></i>
-                            تسجيل دخول الموظفين
-                        </a>
+                        
                     </div>
                 </div>
             </div>

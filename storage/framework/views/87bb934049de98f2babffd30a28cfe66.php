@@ -490,10 +490,7 @@
                             تسجيل الدخول
                         </button>
                     </form>
-                    
-                    <div class="divider">
-                        <span>أو</span>
-                    </div>
+                   
                     
                     <div class="alt-links">
                         <?php if(auth()->guard('employee')->check()): ?>
@@ -504,14 +501,7 @@
                                 </a>
                             <?php endif; ?>
                         <?php endif; ?>
-                        <a href="<?php echo e(route('trader.login.form')); ?>" class="alt-link trader">
-                            <i class="fas fa-store"></i>
-                            بوابة التجار
-                        </a>
-                        <a href="<?php echo e(route('login')); ?>" class="alt-link">
-                            <i class="fas fa-user"></i>
-                            تسجيل دخول العملاء
-                        </a>
+                      
                     </div>
                 </div>
             </div>

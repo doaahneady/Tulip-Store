@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'El Messiri',sans-serif; min-height: 100vh; display: flex; background: #f8f9fa; }
+        body { font-family:"El Messiri", sans-serif; min-height: 100vh; display: flex; background: #f8f9fa; }
         .container { max-width: 980px; width: 100%; margin: auto; padding: 2rem; }
         .card { background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); overflow: hidden; }
         .header { padding: 2rem; background: linear-gradient(135deg, #4a148c 0%, #7b1fa2 100%); color: white; }
@@ -46,10 +46,47 @@
                 if ((idx + 1) === step) el.classList.add('active'); else el.classList.remove('active');
             });
             document.getElementById('prevBtn').style.visibility = step === 1 ? 'hidden' : 'visible';
-            document.getElementById('nextBtn').style.display = step === 4 ? 'none' : 'inline-flex';
-            document.getElementById('submitBtn').style.display = step === 4 ? 'inline-flex' : 'none';
+            document.getElementById('nextBtn').style.display = step === 3 ? 'none' : 'inline-flex';
+            document.getElementById('submitBtn').style.display = step === 3 ? 'inline-flex' : 'none';
+        }
+        function validateCurrentStep() {
+            const current = parseInt(document.getElementById('currentStep').value);
+            const pane = document.getElementById('step-' + current);
+            const requiredFields = pane.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                field.style.borderColor = '#e0e0e0';
+                if (!field.value.trim()) {
+                    field.style.borderColor = '#ff4444';
+                    isValid = false;
+                }
+            });
+
+            if (current === 1) {
+                const pass = pane.querySelector('input[name="password"]');
+                const confirm = pane.querySelector('input[name="password_confirmation"]');
+                if (pass.value !== confirm.value) {
+                    confirm.style.borderColor = '#ff4444';
+                    isValid = false;
+                    alert('كلمات المرور غير متطابقة');
+                }
+            }
+            
+            if (!isValid) {
+                const errorDiv = document.querySelector('.error');
+                if (errorDiv) {
+                    errorDiv.style.display = 'block';
+                    errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> يرجى ملء كافة الحقول المطلوبة بشكل صحيح';
+                } else {
+                    alert('يرجى ملء كافة الحقول المطلوبة');
+                }
+            }
+            
+            return isValid;
         }
         function nextStep() {
+            if (!validateCurrentStep()) return;
             const current = parseInt(document.getElementById('currentStep').value);
             showStep(current + 1);
             document.getElementById('currentStep').value = current + 1;
@@ -70,7 +107,6 @@
                 <div class="steps">
                     <div class="step active"><i class="fas fa-user"></i><span>الحساب</span></div>
                     <div class="step"><i class="fas fa-building"></i><span>تفاصيل العمل</span></div>
-                    <div class="step"><i class="fas fa-university"></i><span>المعلومات البنكية</span></div>
                     <div class="step"><i class="fas fa-file-upload"></i><span>المستندات</span></div>
                 </div>
             </div>
@@ -86,7 +122,6 @@
                     <div class="notice">
                         <i class="fas fa-check-circle"></i>
                         <?php echo e(session('success')); ?>
-
                     </div>
                 <?php endif; ?>
                 <form action="<?php echo e(route('trader.register')); ?>" method="POST" enctype="multipart/form-data">
@@ -112,24 +147,24 @@
                             </div>
                             <div class="form-group">
                                 <label>كلمة المرور</label>
-                                <input type="password" name="password" class="input" required>
+                                <div style="position: relative;">
+                                    <input type="password" name="password" class="input" required style="padding-left: 45px;">
+                                    <i class="fas fa-eye toggle-password" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 1.1rem;"></i>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label>تأكيد كلمة المرور</label>
-                                <input type="password" name="password_confirmation" class="input" required>
+                                <div style="position: relative;">
+                                    <input type="password" name="password_confirmation" class="input" required style="padding-left: 45px;">
+                                    <i class="fas fa-eye toggle-password" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 1.1rem;"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div id="step-2" class="step-pane" style="display:none">
                         <div class="grid grid-2">
-                            <div class="form-group">
-                                <label>رقم السجل التجاري</label>
-                                <input type="text" name="registration_number" class="input">
-                            </div>
-                            <div class="form-group">
-                                <label>الرقم الضريبي</label>
-                                <input type="text" name="tax_id" class="input">
-                            </div>
+                          
+                          
                             <div class="form-group">
                                 <label>اسم الشخص المسؤول</label>
                                 <input type="text" name="contact_person" class="input" required>
@@ -138,42 +173,15 @@
                                 <label>عنوان العمل</label>
                                 <input type="text" name="business_address" class="input" required>
                             </div>
-                            <div class="form-group">
-                                <label>شعار العمل</label>
-                                <input type="file" name="business_logo" class="file" accept="image/*">
-                            </div>
                         </div>
                     </div>
                     <div id="step-3" class="step-pane" style="display:none">
                         <div class="grid grid-2">
-                            <div class="form-group">
-                                <label>اسم البنك</label>
-                                <input type="text" name="bank_name" class="input" required>
+                                 <div class="form-group">
+                                <label>شعار العمل</label>
+                                <input type="file" name="business_logo" class="file" accept="image/*">
                             </div>
-                            <div class="form-group">
-                                <label>اسم صاحب الحساب</label>
-                                <input type="text" name="account_holder" class="input" required>
-                            </div>
-                            <div class="form-group">
-                                <label>رقم الحساب</label>
-                                <input type="text" name="account_number" class="input" required>
-                            </div>
-                            <div class="form-group">
-                                <label>IBAN</label>
-                                <input type="text" name="iban" class="input">
-                            </div>
-                        </div>
-                    </div>
-                    <div id="step-4" class="step-pane" style="display:none">
-                        <div class="grid grid-2">
-                            <div class="form-group">
-                                <label>رخصة العمل</label>
-                                <input type="file" name="business_license" class="file" accept=".pdf,image/*">
-                            </div>
-                            <div class="form-group">
-                                <label>الشهادة الضريبية</label>
-                                <input type="file" name="tax_certificate" class="file" accept=".pdf,image/*">
-                            </div>
+                        
                             <div class="form-group">
                                 <label>هوية المالك</label>
                                 <input type="file" name="owner_id_card" class="file" accept=".pdf,image/*">
@@ -188,7 +196,6 @@
                         <div>
                             <button type="button" id="nextBtn" class="btn btn-primary" onclick="nextStep()">التالي</button>
                             <button type="submit" id="submitBtn" class="btn btn-primary" style="display:none">إرسال التسجيل</button>
-                            <button type="button" id="apiSubmitBtn" class="btn btn-outline" style="display:none">إرسال عبر الواجهة</button>
                         </div>
                     </div>
                 </form>
@@ -199,30 +206,42 @@
 </html>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Password toggle
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.parentElement.querySelector('input');
+            const icon = this;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        });
+    });
+
     const apiBtn = document.getElementById('apiSubmitBtn');
     apiBtn.style.display = 'inline-flex';
     apiBtn.addEventListener('click', async () => {
+        if (!validateCurrentStep()) return;
+        
         const form = document.querySelector('form[action="<?php echo e(route('trader.register')); ?>"]');
-        const data = {
-            business_name_en: form.querySelector('input[name="business_name_en"]').value,
-            business_name_ar: form.querySelector('input[name="business_name_ar"]').value,
-            email: form.querySelector('input[name="email"]').value,
-            phone: form.querySelector('input[name="phone"]').value,
-            password: form.querySelector('input[name="password"]').value,
-            password_confirmation: form.querySelector('input[name="password_confirmation"]').value,
-            registration_number: form.querySelector('input[name="registration_number"]').value,
-            tax_id: form.querySelector('input[name="tax_id"]').value,
-            contact_person: form.querySelector('input[name="contact_person"]').value,
-            business_address: form.querySelector('input[name="business_address"]').value,
-            bank_name: form.querySelector('input[name="bank_name"]').value,
-            account_holder: form.querySelector('input[name="account_holder"]').value,
-            account_number: form.querySelector('input[name="account_number"]').value,
-            iban: form.querySelector('input[name="iban"]').value,
-        };
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((value, key) => {
+            if (!(value instanceof File)) {
+                data[key] = value;
+            }
+        });
+
         try {
             const res = await fetch('/api/trader/register', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
                 body: JSON.stringify(data)
             });
             const json = await res.json();
@@ -230,9 +249,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('تم إرسال التسجيل. سيتم إشعارك بعد المراجعة.');
                 window.location = "<?php echo e(route('trader.login.form')); ?>";
             } else {
-                alert('حدث خطأ أثناء الإرسال');
+                alert(json?.message || 'حدث خطأ أثناء الإرسال');
             }
-        } catch (e) {}
+        } catch (e) {
+            alert('حدث خطأ في الاتصال بالخادم');
+        }
     });
 });
 </script>

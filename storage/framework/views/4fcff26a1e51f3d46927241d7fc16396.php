@@ -18,7 +18,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'El Messiri',sans-serif;
+            font-family:"El Messiri", sans-serif;
             min-height: 100vh;
             display: flex;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -183,7 +183,7 @@
             border: 2px solid #e0e0e0;
             border-radius: 12px;
             font-size: 1rem;
-            font-family:'El Messiri', sans-serif;
+            font-family: "El Messiri", sans-serif;
             transition: all 0.3s ease;
             background: #fafafa;
         }
@@ -264,7 +264,7 @@
             border-radius: 12px;
             font-size: 1.1rem;
             font-weight: 600;
-            font-family: 'El Messiri', sans-serif;
+            font-family:"El Messiri", sans-serif;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
@@ -478,10 +478,6 @@
                         </div>
                         
                         <div class="form-options">
-                            <div class="remember-me">
-                                <input type="checkbox" id="remember" name="remember">
-                                <label for="remember">تذكرني</label>
-                            </div>
                             <a href="#" class="forgot-password">نسيت كلمة المرور؟</a>
                         </div>
                         
@@ -500,14 +496,7 @@
                             <i class="fas fa-user-plus"></i>
                             ليس لديك حساب؟ سجّل كتاجر
                         </a>
-                        <a href="<?php echo e(route('login')); ?>" class="alt-link">
-                            <i class="fas fa-user"></i>
-                            تسجيل دخول العملاء
-                        </a>
-                        <a href="<?php echo e(route('employee.login')); ?>" class="alt-link employee">
-                            <i class="fas fa-id-badge"></i>
-                            تسجيل دخول الموظفين
-                        </a>
+                       
                     </div>
                 </div>
             </div>
