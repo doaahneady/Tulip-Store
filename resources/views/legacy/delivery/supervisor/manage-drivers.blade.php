@@ -16,7 +16,7 @@
         }
 
         body {
-            font-family: 'Cairo', sans-serif;
+            font-family: 'El Messiri',sans-serif;
             background: #f7fafc;
             min-height: 100vh;
             padding-top: 80px; /* Space for fixed navbar */
@@ -160,7 +160,7 @@
             padding: 12px 24px;
             border: none;
             border-radius: 10px;
-            font-family: 'Cairo', sans-serif;
+            font-family: 'El Messiri',sans-serif;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
@@ -347,7 +347,7 @@
             border: 2px solid #e2e8f0;
             border-radius: 10px;
             font-size: 15px;
-            font-family: 'Cairo', sans-serif;
+            font-family: 'El Messiri',sans-serif;
             transition: all 0.3s;
         }
 

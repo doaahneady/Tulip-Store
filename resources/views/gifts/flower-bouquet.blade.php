@@ -24,7 +24,7 @@
             --shadow: 0 10px 40px rgba(194, 24, 91, 0.1);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Tajawal', sans-serif; background: var(--bg-cream); min-height: 100vh; }
+        body { font-family: 'El Messiri', sans-serif; background: var(--bg-cream); min-height: 100vh; }
         
         .hero-banner {
             background: linear-gradient(135deg, #880e4f 0%, #ad1457 50%, #c2185b 100%);
@@ -87,7 +87,7 @@
             background: var(--bg-warm); border: 2px solid transparent; border-radius: 16px;
             padding: 1.2rem; cursor: pointer; transition: all 0.3s; text-align: center; position: relative;
         }
-        button.option-card { font-family: inherit; width: 100%; }
+        button.option-card { font-family:  'El Messiri', sans-serif; width: 100%; }
         .option-card.selected { border-color: var(--accent); background: linear-gradient(135deg, #fff5f7, #fce4ec); }
         .option-card.selected::after {
             content: '✓'; position: absolute; top: 8px; left: 8px; width: 24px; height: 24px;
@@ -144,14 +144,14 @@
         .cart-btn:disabled { background: #ddd; cursor: not-allowed; }
 
         .nav-buttons { display: flex; gap: 1rem; }
-        .nav-btn { flex: 1; padding: 0.9rem; border: none; border-radius: 10px; font-family: inherit; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .nav-btn { flex: 1; padding: 0.9rem; border: none; border-radius: 10px; font-family:  'El Messiri', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
         .nav-btn.prev { background: #f5f5f5; color: #666; }
         .nav-btn.prev:hover { background: #eee; }
         .nav-btn.next { background: linear-gradient(135deg, #880e4f, #ad1457); color: #fff; }
         .nav-btn.next:hover { transform: translateY(-2px); }
 
         .message-section { margin-top: 1.5rem; }
-        .elegant-input, .elegant-textarea { width: 100%; padding: 1rem; border: 2px solid #fce4ec; border-radius: 12px; font-family: inherit; font-size: 1rem; transition: all 0.3s; margin-bottom: 0.5rem; background: var(--bg-warm); }
+        .elegant-input, .elegant-textarea { width: 100%; padding: 1rem; border: 2px solid #fce4ec; border-radius: 12px; font-family:  'El Messiri', sans-serif; font-size: 1rem; transition: all 0.3s; margin-bottom: 0.5rem; background: var(--bg-warm); }
         .elegant-input:focus, .elegant-textarea:focus { outline: none; border-color: var(--accent); background: #fff; }
         .elegant-textarea { min-height: 100px; resize: vertical; }
         .char-counter { text-align: left; color: var(--text-muted); font-size: 0.8rem; }
@@ -226,7 +226,7 @@
                 <div class="summary-card">
                     <div class="summary-header"><i class="fas fa-receipt"></i><span>ملخص الطلب</span></div>
                     <div class="summary-items" id="summaryItems"><div class="summary-empty">لم تختر أي عناصر بعد</div></div>
-                    <div class="summary-total"><span>الإجمالي</span><span id="totalPrice">0 ر.س</span></div>
+                    <div class="summary-total"><span>الإجمالي</span><span id="totalPrice">0ل.س</span></div>
                     <button class="cart-btn" id="addToCartBtn" disabled onclick="addBouquetToCart()"><i class="fas fa-shopping-cart"></i> أضف للسلة</button>
                 </div>
                 <div class="nav-buttons">
@@ -339,11 +339,11 @@
                     <div class="tooltip">
                         <div class="tooltip-img"><img src="${resolveMediaUrl(f.image)}" alt="${f.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'"></div>
                         <div class="tooltip-name">${f.name}</div>
-                        <div class="tooltip-price">${f.price} ر.س / وردة</div>
+                        <div class="tooltip-price">${f.price} ل.س / وردة</div>
                     </div>
                     <div class="option-visual"><img src="${resolveMediaUrl(f.image)}" alt="${f.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
                     <div class="option-name">${f.name}</div>
-                    <div class="option-price">${f.price} ر.س</div>
+                    <div class="option-price">${f.price} ل.س</div>
                 </button>
             `).join('');
         }
@@ -353,7 +353,7 @@
                 <button type="button" class="option-card ${state.size?.id === s.id ? 'selected' : ''}" onclick="selectSize(${s.id})" aria-label="اختر ${s.name}">
                     <div class="option-visual"><img src="${resolveMediaUrl(s.image)}" alt="${s.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
                     <div class="option-name">${s.name}</div>
-                    <div class="option-price">${s.price} ر.س</div>
+                    <div class="option-price">${s.price} ل.س</div>
                     <div class="option-meta">${s.desc}</div>
                 </button>
             `).join('');
@@ -365,11 +365,11 @@
                     <div class="tooltip">
                         <div class="tooltip-img"><img src="${resolveMediaUrl(w.image)}" alt="${w.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'"></div>
                         <div class="tooltip-name">${w.name}</div>
-                        <div class="tooltip-price">${w.price > 0 ? w.price + ' ر.س' : 'مجاني'}</div>
+                        <div class="tooltip-price">${w.price > 0 ? w.price + ' ل.س' : 'مجاني'}</div>
                     </div>
                     <div class="option-visual"><img src="${resolveMediaUrl(w.image)}" alt="${w.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
                     <div class="option-name">${w.name}</div>
-                    <div class="option-price">${w.price > 0 ? w.price + ' ر.س' : 'مجاني'}</div>
+                    <div class="option-price">${w.price > 0 ? w.price + 'ل.س' : 'مجاني'}</div>
                 </button>
             `).join('');
         }
@@ -379,7 +379,7 @@
                 <button type="button" class="option-card ${state.extras.includes(e.id) ? 'selected' : ''}" onclick="toggleExtra(${e.id})" aria-label="أضف ${e.name}">
                     <div class="option-visual"><img src="${resolveMediaUrl(e.image)}" alt="${e.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
                     <div class="option-name">${e.name}</div>
-                    <div class="option-price">${e.price} ر.س</div>
+                    <div class="option-price">${e.price} ل.س</div>
                 </button>
             `).join('');
         }
@@ -389,7 +389,7 @@
                 <button type="button" class="option-card ${state.card?.id === c.id ? 'selected' : ''}" onclick="selectCard(${c.id})" aria-label="اختر ${c.name}">
                     <div class="option-visual"><img src="${resolveMediaUrl(c.image)}" alt="${c.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
                     <div class="option-name">${c.name}</div>
-                    <div class="option-price">${c.price > 0 ? c.price + ' ر.س' : 'مجاني'}</div>
+                    <div class="option-price">${c.price > 0 ? c.price + ' ل.س' : 'مجاني'}</div>
                 </button>
             `).join('');
         }
@@ -435,8 +435,8 @@
             if (state.wrap?.price > 0) { items.push({ name: state.wrap.name, price: state.wrap.price }); total += state.wrap.price; }
             state.extras.forEach(id => { const e = extras.find(x => x.id === id); if (e) { items.push({ name: e.name, price: e.price }); total += e.price; } });
             if (state.card?.price > 0) { items.push({ name: state.card.name, price: state.card.price }); total += state.card.price; }
-            summaryEl.innerHTML = items.length ? items.map(i => `<div class="summary-item"><span class="summary-item-name">${i.name}</span><span class="summary-item-price">${i.price} ر.س</span></div>`).join('') : '<div class="summary-empty">لم تختر أي عناصر بعد</div>';
-            totalEl.textContent = total + ' ر.س';
+            summaryEl.innerHTML = items.length ? items.map(i => `<div class="summary-item"><span class="summary-item-name">${i.name}</span><span class="summary-item-price">${i.price}ل.س</span></div>`).join('') : '<div class="summary-empty">لم تختر أي عناصر بعد</div>';
+            totalEl.textContent = total + 'ل.س';
             btn.disabled = state.flowers.length === 0;
         }
 

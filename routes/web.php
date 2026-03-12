@@ -82,16 +82,19 @@ Route::get('/', function () {
             'image' => '/images/footer.jpg',
             'title' => 'أرسل ابتسامتك أينما كنت',
             'subtitle' => 'تسوق معنا أفضل المنتجات والعروض',
+            'link' => '/store',
         ],
         [
             'image' => '/images/logo-girl.jpg',
             'title' => 'عروض وخصومات',
             'subtitle' => 'اكتشف عروضنا المميزة وتوفير أكبر على مشترياتك',
+            'link' => '/store?on_sale=1',
         ],
         [
             'image' => '/images/white_orange_logo.png',
             'title' => 'وصل حديثاً',
             'subtitle' => 'اكتشف أحدث المنتجات في متجرنا',
+            'link' => '/store?sort=newest',
         ],
     ];
 

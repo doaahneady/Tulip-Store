@@ -110,8 +110,8 @@ function initializeModernSlider() {
         slideEl.innerHTML = `
             <img src="${slide.image}" alt="${slide.title}">
             <div class="modern-slide-content">
-                <h2 style="font-family:'Changa',sans-serif; font-size:2.5rem; font-weight:900; margin:0 0 1rem 0;">${slide.title}</h2>
-                <p style="font-family:'Changa',sans-serif; font-size:1.3rem; margin:0;">${slide.subtitle}</p>
+                <h2 style="font-family:"El Messiri", sans-serif; font-size:2.5rem; font-weight:900; margin:0 0 1rem 0;">${slide.title}</h2>
+                <p style="font-family:"El Messiri", sans-serif; font-size:1.3rem; margin:0;">${slide.subtitle}</p>
             </div>
         `;
         container.appendChild(slideEl);
@@ -203,9 +203,9 @@ function createProductCard(p, style = 'default') {
                 <img src="${p.image || 'https://via.placeholder.com/350'}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
             </div>
             <div style="padding:1.2rem;">
-                <h3 style="font-family:'Changa',sans-serif;font-size:1rem;font-weight:600;color:#1a1a1a;margin:0 0 0.8rem 0;line-height:1.5;height:3em;overflow:hidden;">${p.name}</h3>
-                <div style="font-family:'Changa',sans-serif;font-size:1.3rem;font-weight:800;color:${s.priceColor};margin-bottom:1rem;">${p.price}</div>
-                <button onclick="event.stopPropagation();addToCart(${p.id},this)" class="add-cart-btn" style="width:100%;background:#ff6b35;color:#fff;border:none;padding:0.8rem;font-size:1rem;font-weight:700;cursor:pointer;font-family:'Changa',sans-serif;border-radius:10px;transition:all 0.3s;" onmouseover="this.style.background='#e55a2b';this.style.transform='scale(1.03)'" onmouseout="if(!this.classList.contains('added')){this.style.background='#ff6b35';this.style.transform='scale(1)'}">
+                <h3 style="font-family:"El Messiri", sans-serif;font-size:1rem;font-weight:600;color:#1a1a1a;margin:0 0 0.8rem 0;line-height:1.5;height:3em;overflow:hidden;">${p.name}</h3>
+                <div style="font-family:"El Messiri", sans-serif;font-size:1.3rem;font-weight:800;color:${s.priceColor};margin-bottom:1rem;">${p.price}</div>
+                <button onclick="event.stopPropagation();addToCart(${p.id},this)" class="add-cart-btn" style="width:100%;background:#ff6b35;color:#fff;border:none;padding:0.8rem;font-size:1rem;font-weight:700;cursor:pointer;font-family:"El Messiri", sans-serif;border-radius:10px;transition:all 0.3s;" onmouseover="this.style.background='#e55a2b';this.style.transform='scale(1.03)'" onmouseout="if(!this.classList.contains('added')){this.style.background='#ff6b35';this.style.transform='scale(1)'}">
                     أضف للسلة
                 </button>
             </div>
@@ -222,12 +222,12 @@ function createDiscountCard(p) {
                 <img src="${p.image || 'https://via.placeholder.com/350'}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
             </div>
             <div style="padding:1.2rem;">
-                <h3 style="font-family:'Changa',sans-serif;font-size:1rem;font-weight:600;color:#1a1a1a;margin:0 0 0.8rem 0;line-height:1.5;height:3em;overflow:hidden;">${p.name}</h3>
+                <h3 style="font-family:"El Messiri", sans-serif;font-size:1rem;font-weight:600;color:#1a1a1a;margin:0 0 0.8rem 0;line-height:1.5;height:3em;overflow:hidden;">${p.name}</h3>
                 <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem;">
-                    <div style="font-family:'Changa',sans-serif;font-size:1.3rem;font-weight:800;color:#cc0c39;">${p.price}</div>
-                    <div style="font-family:'Changa',sans-serif;font-size:1rem;color:#999;text-decoration:line-through;">${originalPrice}</div>
+                    <div style="font-family:"El Messiri", sans-serif;font-size:1.3rem;font-weight:800;color:#cc0c39;">${p.price}</div>
+                    <div style="font-family:"El Messiri", sans-serif;font-size:1rem;color:#999;text-decoration:line-through;">${originalPrice}</div>
                 </div>
-                <button onclick="event.stopPropagation();addToCart(${p.id},this)" class="add-cart-btn" style="width:100%;background:#ff6b35;color:#fff;border:none;padding:0.8rem;font-size:1rem;font-weight:700;cursor:pointer;font-family:'Changa',sans-serif;border-radius:10px;transition:all 0.3s;" onmouseover="this.style.background='#e55a2b';this.style.transform='scale(1.03)'" onmouseout="if(!this.classList.contains('added')){this.style.background='#ff6b35';this.style.transform='scale(1)'}">
+                <button onclick="event.stopPropagation();addToCart(${p.id},this)" class="add-cart-btn" style="width:100%;background:#ff6b35;color:#fff;border:none;padding:0.8rem;font-size:1rem;font-weight:700;cursor:pointer;font-family:"El Messiri", sans-serif;border-radius:10px;transition:all 0.3s;" onmouseover="this.style.background='#e55a2b';this.style.transform='scale(1.03)'" onmouseout="if(!this.classList.contains('added')){this.style.background='#ff6b35';this.style.transform='scale(1)'}">
                     أضف للسلة
                 </button>
             </div>
@@ -243,9 +243,9 @@ function createJewelryCard(p) {
                 <div style="position:absolute;top:1rem;right:1rem;background:rgba(212,175,55,0.95);color:#fff;padding:0.4rem 1rem;border-radius:25px;font-size:0.75rem;font-weight:700;box-shadow:0 6px 15px rgba(212,175,55,0.4);"><i class="fas fa-gem"></i> مجوهرات</div>
             </div>
             <div style="padding:1.2rem;">
-                <h3 style="font-family:'Changa',sans-serif;font-size:1rem;font-weight:600;color:#1a1a1a;margin:0 0 0.8rem 0;line-height:1.5;height:3em;overflow:hidden;">${p.name}</h3>
-                <div style="font-family:'Changa',sans-serif;font-size:1.3rem;font-weight:800;color:#d4af37;margin-bottom:1rem;">${p.price}</div>
-                <button onclick="event.stopPropagation();addToCart(${p.id},this)" class="add-cart-btn" style="width:100%;background:#ff6b35;color:#fff;border:none;padding:0.8rem;font-size:1rem;font-weight:700;cursor:pointer;font-family:'Changa',sans-serif;border-radius:10px;transition:all 0.3s;" onmouseover="this.style.background='#e55a2b';this.style.transform='scale(1.03)'" onmouseout="if(!this.classList.contains('added')){this.style.background='#ff6b35';this.style.transform='scale(1)'}">
+                <h3 style="font-family:"El Messiri", sans-serif;font-size:1rem;font-weight:600;color:#1a1a1a;margin:0 0 0.8rem 0;line-height:1.5;height:3em;overflow:hidden;">${p.name}</h3>
+                <div style="font-family:"El Messiri", sans-serif;font-size:1.3rem;font-weight:800;color:#d4af37;margin-bottom:1rem;">${p.price}</div>
+                <button onclick="event.stopPropagation();addToCart(${p.id},this)" class="add-cart-btn" style="width:100%;background:#ff6b35;color:#fff;border:none;padding:0.8rem;font-size:1rem;font-weight:700;cursor:pointer;font-family:"El Messiri", sans-serif;border-radius:10px;transition:all 0.3s;" onmouseover="this.style.background='#e55a2b';this.style.transform='scale(1.03)'" onmouseout="if(!this.classList.contains('added')){this.style.background='#ff6b35';this.style.transform='scale(1)'}">
                     أضف للسلة
                 </button>
             </div>

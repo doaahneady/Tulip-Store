@@ -7,7 +7,7 @@
         @page { size: A4; margin: 15mm; }
         * { box-sizing: border-box; }
         body { 
-            font-family: 'DejaVu Sans', 'Arial', sans-serif; 
+            font-family: 'El Messiri', sans-serif; 
             font-size: 12px; 
             line-height: 1.5;
             color: #333;

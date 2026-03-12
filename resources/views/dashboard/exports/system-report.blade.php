@@ -5,7 +5,7 @@
     <title>System Report - {{ config('app.name') }}</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: "El Messiri", sans-serif;
             font-size: 12px;
             color: #333;
             margin: 20px;

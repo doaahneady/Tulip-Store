@@ -91,7 +91,7 @@ class Store3DController extends Controller
                         'id' => $product->id,
                         'name' => $product->name,
                         'price' => $product->price,
-                        'formatted_price' => number_format($product->price, 2).' ر.س',
+                        'formatted_price' => number_format($product->price, 2).' ل.س',
                         'image' => $product->image,
                         'type' => 'product',
                     ];
@@ -127,7 +127,7 @@ class Store3DController extends Controller
                 'id' => $category.'_'.($index + 1),
                 'name' => $name,
                 'price' => rand(50, 500),
-                'formatted_price' => rand(50, 500).' ر.س',
+                'formatted_price' => rand(50, 500).'ل.س',
                 'image' => null,
                 'icon' => $icon,
                 'type' => 'mock',

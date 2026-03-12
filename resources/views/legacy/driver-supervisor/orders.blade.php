@@ -12,7 +12,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family:  'El Messiri', sans-serif; }
         body { background: #f5f7fa; min-height: 100vh; }
         
         .header {
@@ -139,7 +139,7 @@
             padding: 0.8rem;
             border: none;
             border-radius: 10px;
-            font-family: 'Cairo', sans-serif;
+            font-family:  'El Messiri', sans-serif;
             font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
@@ -339,7 +339,7 @@
             padding: 1rem;
             border: 2px solid #e5e7eb;
             border-radius: 10px;
-            font-family: 'Cairo', sans-serif;
+            font-family: 'El Messiri', sans-serif;
             font-size: 1rem;
             transition: border-color 0.3s;
         }
@@ -675,7 +675,7 @@
                 
                 L.marker([lat, lng], {icon: destIcon})
                     .addTo(viewMap)
-                    .bindPopup(`<div style="text-align:center;font-family:Cairo,sans-serif;"><b style="font-size:1.1rem;color:#ff6b35;">📦 موقع التوصيل</b><br><b>${customerName}</b><br><span style="color:#6b7280;">${village}</span></div>`)
+                    .bindPopup(`<div style="text-align:center;font-family: 'El Messiri', sans-serif;"><b style="font-size:1.1rem;color:#ff6b35;">📦 موقع التوصيل</b><br><b>${customerName}</b><br><span style="color:#6b7280;">${village}</span></div>`)
                     .openPopup();
                 
                 // Add warehouse marker
@@ -689,10 +689,10 @@
                 
                 L.marker(defaultStart, {icon: warehouseIcon})
                     .addTo(viewMap)
-                    .bindPopup(`<div style="text-align:center;font-family:Cairo,sans-serif;"><b style="color:#059669;">🏭 المستودع</b><br>السويداء</div>`);
+                    .bindPopup(`<div style="text-align:center;font-family: 'El Messiri', sans-serif;"><b style="color:#059669;">🏭 المستودع</b><br>السويداء</div>`);
                 
                 // Add nearby drivers with distance
-                let driversInfo = '<div style="font-family:Cairo,sans-serif;"><b style="color:#1e3a8a;">🚗 السائقين القريبين:</b><br>';
+                let driversInfo = '<div style="font-family: 'El Messiri', sans-serif;"><b style="color:#1e3a8a;">🚗 السائقين القريبين:</b><br>';
                 
                 driversData.forEach(driver => {
                     if (driver.lat && driver.lng) {
@@ -711,7 +711,7 @@
                         
                         L.marker([driver.lat, driver.lng], {icon: driverIcon})
                             .addTo(viewMap)
-                            .bindPopup(`<div style="text-align:center;font-family:Cairo,sans-serif;min-width:150px;">
+                            .bindPopup(`<div style="text-align:center;font-family: 'El Messiri', sans-serif;min-width:150px;">
                                 <b style="color:${statusColor};">${driver.name}</b><br>
                                 <span style="background:${statusColor};color:white;padding:2px 8px;border-radius:10px;font-size:0.8rem;">${statusText}</span><br>
                                 <span style="color:#6b7280;">📞 ${driver.phone || 'غير متوفر'}</span><br>

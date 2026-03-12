@@ -38,7 +38,7 @@
         }
     </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Changa', Arial, sans-serif; background: linear-gradient(135deg, #0f4f55 0%, #1a7a7f 100%); direction: rtl;">
+<body style="margin: 0; padding: 0; font-family: 'El Messiri', sans-serif; background: linear-gradient(135deg, #0f4f55 0%, #1a7a7f 100%); direction: rtl;">
     <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #0f4f55 0%, #1a7a7f 100%); padding: 20px 10px;">
         <tr>
             <td align="center">
@@ -75,7 +75,7 @@
                                 <tr>
                                     <td align="center">
                                         <div class="code-box" style="background: linear-gradient(135deg, #ff6f35 0%, #ff8c5a 100%); border-radius: 20px; padding: 25px 20px; display: inline-block; box-shadow: 0 10px 30px rgba(255, 111, 53, 0.3); max-width: 90%;">
-                                            <p class="verification-code" style="color: #ffffff; font-size: 42px; font-weight: 600; letter-spacing: 10px; margin: 0; font-family: 'Courier New', monospace; word-break: break-all;">
+                                            <p class="verification-code" style="color: #ffffff; font-size: 42px; font-weight: 600; letter-spacing: 10px; margin: 0; font-family: 'El Messiri', sans-serif; word-break: break-all;">
                                                 {{ $code }}
                                             </p>
                                         </div>
@@ -102,7 +102,7 @@
                                 شكراً لاختيارك Tulip Store
                             </p>
                             <p style="color: #999; font-size: 11px; line-height: 1.6; margin: 0;">
-                                © 2025 Tulip Store. جميع الحقوق محفوظة.
+                                © 2026 Tulip Store. جميع الحقوق محفوظة.
                             </p>
                             <div style="margin-top: 15px;">
                                 <a href="#" style="color: #0f4f55; text-decoration: none; margin: 0 8px; font-size: 11px;">الموقع الإلكتروني</a>

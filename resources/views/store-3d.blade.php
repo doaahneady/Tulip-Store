@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Tajawal', sans-serif; background: #faf8f5; min-height: 100vh; }
+        body { font-family: "El Messiri", sans-serif; background: #faf8f5; min-height: 100vh; }
         
         /* Hero Banner */
         .hero-banner {
@@ -325,7 +325,7 @@
                     </div>
                     <div class="summary-total">
                         <span>الإجمالي</span>
-                        <span id="totalPrice">0 ر.س</span>
+                        <span id="totalPrice">ل.س</span>
                     </div>
                     <button class="add-cart-btn" id="addToCartBtn" disabled onclick="addGiftToCart()">
                         <i class="fas fa-shopping-cart"></i>
@@ -359,7 +359,7 @@
             background: #fff;
             border-radius: 25px;
             cursor: pointer;
-            font-family: inherit;
+            font-family: "El Messiri", sans-serif;
             font-size: 0.9rem;
             transition: all 0.3s;
         }
@@ -540,7 +540,7 @@
             padding: 1rem;
             border: none;
             border-radius: 12px;
-            font-family: inherit;
+            font-family:"El Messiri", sans-serif;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
@@ -568,7 +568,7 @@
             padding: 1rem;
             border: 2px solid #eee;
             border-radius: 12px;
-            font-family: inherit;
+            font-family: "El Messiri", sans-serif;
             font-size: 1rem;
             transition: all 0.3s;
             margin-bottom: 0.5rem;
@@ -681,7 +681,7 @@
                     <div class="option-check"><i class="fas fa-check"></i></div>
                     <div class="option-image">${box.emoji}</div>
                     <div class="option-name">${box.name}</div>
-                    <div class="option-price">${box.price} ر.س</div>
+                    <div class="option-price">${box.price} ل.س</div>
                     <div style="font-size:0.75rem;color:#999;margin-top:0.3rem;">حتى ${box.maxItems} عناصر</div>
                 </div>
             `).join('');
@@ -699,7 +699,7 @@
                         <div class="option-check"><i class="fas fa-check"></i></div>
                         <div class="option-image">${filler.emoji}</div>
                         <div class="option-name">${filler.name}</div>
-                        <div class="option-price">${filler.price} ر.س</div>
+                        <div class="option-price">${filler.price} ل.س</div>
                         <div class="filler-qty">
                             <button class="qty-btn" onclick="event.stopPropagation(); changeFiller(${filler.id}, -1)">-</button>
                             <span class="qty-value">${qty}</span>
@@ -717,7 +717,7 @@
                     <div class="option-check"><i class="fas fa-check"></i></div>
                     <div class="option-image" style="background:${w.color}20;">${w.emoji}</div>
                     <div class="option-name">${w.name}</div>
-                    <div class="option-price">${w.price > 0 ? w.price + ' ر.س' : 'مجاني'}</div>
+                    <div class="option-price">${w.price > 0 ? w.price + ' ل.س' : 'مجاني'}</div>
                 </div>
             `).join('');
         }
@@ -729,7 +729,7 @@
                     <div class="option-check"><i class="fas fa-check"></i></div>
                     <div class="option-image">${r.emoji}</div>
                     <div class="option-name">${r.name}</div>
-                    <div class="option-price">${r.price > 0 ? r.price + ' ر.س' : 'مجاني'}</div>
+                    <div class="option-price">${r.price > 0 ? r.price + ' ل.س' : 'مجاني'}</div>
                 </div>
             `).join('');
         }
@@ -741,7 +741,7 @@
                     <div class="option-check"><i class="fas fa-check"></i></div>
                     <div class="option-image">${c.emoji}</div>
                     <div class="option-name">${c.name}</div>
-                    <div class="option-price">${c.price > 0 ? c.price + ' ر.س' : 'مجاني'}</div>
+                    <div class="option-price">${c.price > 0 ? c.price + 'ل.س' : 'مجاني'}</div>
                 </div>
             `).join('');
         }
@@ -913,12 +913,12 @@
                 summaryItems.innerHTML = items.map(item => `
                     <div class="summary-item">
                         <span class="summary-item-name">${item.name}</span>
-                        <span class="summary-item-price">${item.price} ر.س</span>
+                        <span class="summary-item-price">${item.price}ل.س</span>
                     </div>
                 `).join('');
             }
 
-            totalEl.textContent = total + ' ر.س';
+            totalEl.textContent = total + ' ل.س';
             addBtn.disabled = !giftState.box;
         }
 

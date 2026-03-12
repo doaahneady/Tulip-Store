@@ -23,7 +23,7 @@
             --shadow: 0 10px 40px rgba(139, 105, 20, 0.1);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Tajawal', sans-serif; background: var(--bg-cream); min-height: 100vh; }
+        body { font-family: 'El Messiri', sans-serif; background: var(--bg-cream); min-height: 100vh; }
         
         .hero-banner {
             background: linear-gradient(135deg, #2c2416 0%, #4a3c28 50%, #6b5a3c 100%);
@@ -83,7 +83,7 @@
         .filter-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
         .filter-tab {
             padding: 0.6rem 1.2rem; border: 2px solid #eee; background: #fff; border-radius: 25px;
-            cursor: pointer; font-family: inherit; font-size: 0.9rem; transition: all 0.3s;
+            cursor: pointer; font-family:'El Messiri', sans-serif; font-size: 0.9rem; transition: all 0.3s;
         }
         .filter-tab:hover, .filter-tab.active { border-color: var(--accent); background: #fdf8e8; color: var(--primary); }
 
@@ -93,7 +93,7 @@
             background: var(--bg-warm); border: 2px solid transparent; border-radius: 16px;
             padding: 1.2rem; cursor: pointer; transition: all 0.3s; text-align: center; position: relative;
         }
-        button.option-card { font-family: inherit; width: 100%; }
+        button.option-card { font-family:'El Messiri', sans-serif; width: 100%; }
         .option-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(139,105,20,0.12); border-color: rgba(212,175,55,0.3); }
         .option-card.selected { border-color: var(--accent); background: linear-gradient(135deg, #fefbf3, #fdf8e8); }
         .option-card.selected::after {
@@ -101,7 +101,7 @@
             background: var(--gold-gradient); border-radius: 50%; color: #fff; display: flex;
             align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold;
         }
-        .option-visual { width: 80px; height: 80px; margin: 0 auto 0.8rem; border-radius: 14px; background: #fff; overflow: hidden; }
+        .option-visual { width: 100px; height: 100px; margin: 0 auto 0.8rem; border-radius: 14px; background: #fff; overflow: hidden; border: 1px solid #f0f0f0; }
         .option-visual img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .option-name { font-weight: 600; color: var(--text-dark); font-size: 0.95rem; margin-bottom: 0.3rem; }
         .option-price { color: var(--primary); font-weight: 700; font-size: 0.9rem; }
@@ -118,12 +118,13 @@
         .preview-content { min-height: 180px; background: linear-gradient(135deg, #fdf8e8, #fef6dc); border-radius: 14px; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
         .preview-empty { text-align: center; color: var(--text-muted); }
         .empty-icon { font-size: 3rem; margin-bottom: 0.5rem; }
-        .preview-gift { text-align: center; width: 100%; }
-        .preview-box-emoji { font-size: 4rem; position: relative; display: inline-block; }
-        .preview-ribbon { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 1.5rem; }
-        .preview-items { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.3rem; margin-top: 0.8rem; }
-        .preview-item { font-size: 1.3rem; background: #fff; padding: 0.25rem 0.4rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        .preview-label { font-weight: 600; color: var(--text-dark); margin-top: 0.5rem; font-size: 0.9rem; }
+        .preview-gift { text-align: center; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+        .preview-visual { position: relative; width: 120px; height: 120px; }
+        .preview-box-img { width: 100%; height: 100%; object-fit: contain; }
+        .preview-ribbon-img { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 60px; z-index: 2; }
+        .preview-items { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-top: 0.5rem; }
+        .preview-item-img { width: 40px; height: 40px; object-fit: cover; border-radius: 8px; background: #fff; padding: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .preview-label { font-weight: 700; color: var(--text-dark); font-size: 1rem; }
 
         .summary-items { max-height: 180px; overflow-y: auto; margin-bottom: 1rem; }
         .summary-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f0ebe0; font-size: 0.9rem; }
@@ -143,7 +144,7 @@
         .cart-btn:disabled { background: #ddd; cursor: not-allowed; }
 
         .nav-buttons { display: flex; gap: 1rem; }
-        .nav-btn { flex: 1; padding: 0.9rem; border: none; border-radius: 10px; font-family: inherit; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .nav-btn { flex: 1; padding: 0.9rem; border: none; border-radius: 10px; font-family: 'El Messiri', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
         .nav-btn.prev { background: #f5f5f5; color: #666; }
         .nav-btn.prev:hover { background: #eee; }
         .nav-btn.next { background: linear-gradient(135deg, #2c2416, #4a3c28); color: #fff; }
@@ -162,10 +163,9 @@
     <div class="hero-banner">
         <div class="hero-content">
             <div class="hero-text">
-                <h1>✨ صمم هديتك الفاخرة</h1>
+                <h1> صمم هديتك الفاخرة</h1>
                 <p>اختر من مجموعتنا الراقية من الصناديق والمحتويات الفاخرة لتصنع هدية مميزة</p>
             </div>
-            <div class="hero-icon">🎁</div>
         </div>
     </div>
 
@@ -226,7 +226,7 @@
                 <div class="summary-card">
                     <div class="summary-header"><i class="fas fa-receipt"></i><span>ملخص الطلب</span></div>
                     <div class="summary-items" id="summaryItems"><div class="summary-empty">لم تختر أي عناصر بعد</div></div>
-                    <div class="summary-total"><span>الإجمالي</span><span id="totalPrice">0 ر.س</span></div>
+                    <div class="summary-total"><span>الإجمالي</span><span id="totalPrice">0 ل.س</span></div>
                     <button class="cart-btn" id="addToCartBtn" disabled onclick="addGiftToCart()"><i class="fas fa-shopping-cart"></i> أضف للسلة</button>
                 </div>
                 <div class="nav-buttons">
@@ -290,16 +290,16 @@
                 };
 
                 const fillerCats = Array.from(new Set(fillers.map(f => f.category).filter(Boolean)));
-                categories = [{ id: 'all', name: 'الكل', emoji: '📦' }]
-                    .concat(fillerCats.map(id => ({ id, name: id, emoji: emojiByCategory[id] || '✨' })))
-                    .concat([{ id: 'tulip', name: 'منتجات Tulip', emoji: '🛍️' }]);
+                categories = [{ id: 'all', name: 'الكل' }]
+                    .concat(fillerCats.map(id => ({ id, name: id })))
+                    .concat([{ id: 'tulip', name: 'منتجات Tulip' }]);
             } catch (e) {
                 boxes = [];
                 fillers = [];
                 wrappings = [];
                 ribbons = [];
                 cards = [];
-                categories = [{ id: 'all', name: 'الكل', emoji: '📦' }, { id: 'tulip', name: 'منتجات Tulip', emoji: '🛍️' }];
+                categories = [{ id: 'all', name: 'الكل' }, { id: 'tulip', name: 'منتجات Tulip' }];
             }
         }
 
@@ -310,9 +310,9 @@
             }
             document.getElementById('boxesGrid').innerHTML = boxes.map(b => `
                 <button type="button" class="option-card ${giftState.box?.id === b.id ? 'selected' : ''}" onclick="selectBox(${b.id})" aria-label="اختر ${b.name}">
-                    <div class="option-visual"><img src="${resolveMediaUrl(b.image)}" alt="${b.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                    <div class="option-visual"><img src="${resolveMediaUrl(b.image)}" alt="${b.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'"></div>
                     <div class="option-name">${b.name}</div>
-                    <div class="option-price">${b.price} ر.س</div>
+                    <div class="option-price">${b.price} ل.س</div>
                     <div class="option-meta">حتى ${b.maxItems} عناصر</div>
                 </button>
             `).join('');
@@ -320,7 +320,7 @@
 
         function loadCategories() {
             document.getElementById('categoryTabs').innerHTML = categories.map(c => `
-                <button class="filter-tab ${c.id === 'all' ? 'active' : ''}" data-cat="${c.id}" onclick="filterCategory('${c.id}')">${c.emoji} ${c.name}</button>
+                <button class="filter-tab ${c.id === 'all' ? 'active' : ''}" data-cat="${c.id}" onclick="filterCategory('${c.id}')">${c.name}</button>
             `).join('');
         }
 
@@ -329,9 +329,9 @@
                 const selectedIds = giftState.storeProducts.map(p => p.id);
                 document.getElementById('fillersGrid').innerHTML = storeProducts.length ? storeProducts.map(p => `
                     <button type="button" class="option-card ${selectedIds.includes(p.id) ? 'selected' : ''}" onclick="toggleStoreProduct(${p.id})" aria-label="أضف ${p.name}">
-                        <div class="option-visual"><img src="${resolveMediaUrl(p.image)}" alt="${p.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                        <div class="option-visual"><img src="${resolveMediaUrl(p.image)}" alt="${p.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'"></div>
                         <div class="option-name">${p.name}</div>
-                        <div class="option-price">${p.price} ر.س</div>
+                        <div class="option-price">${p.price} ل.س</div>
                     </button>
                 `).join('') : '<div class="summary-empty">جاري تحميل منتجات Tulip...</div>';
                 return;
@@ -343,9 +343,9 @@
             }
             document.getElementById('fillersGrid').innerHTML = filtered.map(f => `
                 <button type="button" class="option-card ${giftState.fillers.includes(f.id) ? 'selected' : ''}" onclick="toggleFiller(${f.id})" aria-label="أضف ${f.name}">
-                    <div class="option-visual"><img src="${resolveMediaUrl(f.image)}" alt="${f.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                    <div class="option-visual"><img src="${resolveMediaUrl(f.image)}" alt="${f.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'"></div>
                     <div class="option-name">${f.name}</div>
-                    <div class="option-price">${f.price} ر.س</div>
+                    <div class="option-price">${f.price} ل.س</div>
                 </button>
             `).join('');
         }
@@ -374,9 +374,9 @@
             }
             document.getElementById('wrappingsGrid').innerHTML = wrappings.map(w => `
                 <button type="button" class="option-card ${giftState.wrapping?.id === w.id ? 'selected' : ''}" onclick="selectWrapping(${w.id})" aria-label="اختر ${w.name}">
-                    <div class="option-visual"><img src="${resolveMediaUrl(w.image)}" alt="${w.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                    <div class="option-visual"><img src="${resolveMediaUrl(w.image)}" alt="${w.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'"></div>
                     <div class="option-name">${w.name}</div>
-                    <div class="option-price">${w.price > 0 ? w.price + ' ر.س' : 'مجاني'}</div>
+                    <div class="option-price">${w.price > 0 ? w.price + ' ل.س' : 'مجاني'}</div>
                 </button>
             `).join('');
         }
@@ -388,9 +388,9 @@
             }
             document.getElementById('ribbonsGrid').innerHTML = ribbons.map(r => `
                 <button type="button" class="option-card ${giftState.ribbon?.id === r.id ? 'selected' : ''}" onclick="selectRibbon(${r.id})" aria-label="اختر ${r.name}">
-                    <div class="option-visual"><img src="${resolveMediaUrl(r.image)}" alt="${r.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                    <div class="option-visual"><img src="${resolveMediaUrl(r.image)}" alt="${r.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'"></div>
                     <div class="option-name">${r.name}</div>
-                    <div class="option-price">${r.price > 0 ? r.price + ' ر.س' : 'مجاني'}</div>
+                    <div class="option-price">${r.price > 0 ? r.price + ' ل.س' : 'مجاني'}</div>
                 </button>
             `).join('');
         }
@@ -402,9 +402,9 @@
             }
             document.getElementById('cardsGrid').innerHTML = cards.map(c => `
                 <button type="button" class="option-card ${giftState.card?.id === c.id ? 'selected' : ''}" onclick="selectCard(${c.id})" aria-label="اختر ${c.name}">
-                    <div class="option-visual"><img src="${resolveMediaUrl(c.image)}" alt="${c.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                    <div class="option-visual"><img src="${resolveMediaUrl(c.image)}" alt="${c.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'"></div>
                     <div class="option-name">${c.name}</div>
-                    <div class="option-price">${c.price > 0 ? c.price + ' ر.س' : 'مجاني'}</div>
+                    <div class="option-price">${c.price > 0 ? c.price + ' ل.س' : 'مجاني'}</div>
                 </button>
             `).join('');
         }
@@ -454,13 +454,27 @@
         function updatePreview() {
             const preview = document.getElementById('giftPreview');
             if (!giftState.box) { preview.innerHTML = '<div class="preview-empty"><div class="empty-icon">📦</div><p>اختر صندوق للبدء</p></div>'; return; }
-            const ribbonEmoji = giftState.ribbon && giftState.ribbon.id !== 5 ? giftState.ribbon.emoji : '';
-            const fillerEmojis = giftState.fillers.map(id => fillers.find(f => f.id === id)?.emoji).filter(Boolean);
+            
+            const ribbonImg = giftState.ribbon && giftState.ribbon.id !== 5 ? `<img src="${resolveMediaUrl(giftState.ribbon.image)}" class="preview-ribbon-img" alt="Ribbon">` : '';
+            
+            const selectedFillers = giftState.fillers.map(id => fillers.find(f => f.id === id)).filter(Boolean);
+            const selectedStoreProducts = giftState.storeProducts;
+            const allItems = [...selectedFillers, ...selectedStoreProducts];
+
             preview.innerHTML = `
                 <div class="preview-gift">
-                    <div class="preview-box-emoji">${ribbonEmoji ? `<span class="preview-ribbon">${ribbonEmoji}</span>` : ''}${giftState.box.emoji}</div>
+                    <div class="preview-visual">
+                        ${ribbonImg}
+                        <img src="${resolveMediaUrl(giftState.box.image)}" class="preview-box-img" alt="${giftState.box.name}">
+                    </div>
                     <div class="preview-label">${giftState.box.name}</div>
-                    ${fillerEmojis.length > 0 ? `<div class="preview-items">${fillerEmojis.map(e => `<span class="preview-item">${e}</span>`).join('')}</div>` : '<p style="color:var(--text-muted);font-size:0.85rem;margin-top:0.5rem;">أضف محتويات للهدية</p>'}
+                    ${allItems.length > 0 ? `
+                        <div class="preview-items">
+                            ${allItems.map(item => `
+                                <img src="${resolveMediaUrl(item.image)}" class="preview-item-img" title="${item.name}" alt="${item.name}" onerror="this.src='/images/gift-placeholder.svg'">
+                            `).join('')}
+                        </div>
+                    ` : '<p style="color:var(--text-muted);font-size:0.85rem;margin-top:0.5rem;">أضف محتويات للهدية</p>'}
                 </div>
             `;
         }
@@ -470,14 +484,24 @@
             const totalEl = document.getElementById('totalPrice');
             const btn = document.getElementById('addToCartBtn');
             let items = [], total = 0;
-            if (giftState.box) { items.push({ name: giftState.box.name, price: giftState.box.price }); total += giftState.box.price; }
-            giftState.fillers.forEach(id => { const f = fillers.find(x => x.id === id); if (f) { items.push({ name: f.name, price: f.price }); total += f.price; } });
-            giftState.storeProducts.forEach(p => { items.push({ name: p.name, price: p.price }); total += p.price; });
-            if (giftState.wrapping?.price > 0) { items.push({ name: giftState.wrapping.name, price: giftState.wrapping.price }); total += giftState.wrapping.price; }
-            if (giftState.ribbon?.price > 0) { items.push({ name: giftState.ribbon.name, price: giftState.ribbon.price }); total += giftState.ribbon.price; }
-            if (giftState.card?.price > 0) { items.push({ name: giftState.card.name, price: giftState.card.price }); total += giftState.card.price; }
-            summaryEl.innerHTML = items.length ? items.map(i => `<div class="summary-item"><span class="summary-item-name">${i.name}</span><span class="summary-item-price">${i.price} ر.س</span></div>`).join('') : '<div class="summary-empty">لم تختر أي عناصر بعد</div>';
-            totalEl.textContent = total + ' ر.س';
+            if (giftState.box) { items.push({ name: giftState.box.name, price: giftState.box.price, image: giftState.box.image }); total += giftState.box.price; }
+            giftState.fillers.forEach(id => { const f = fillers.find(x => x.id === id); if (f) { items.push({ name: f.name, price: f.price, image: f.image }); total += f.price; } });
+            giftState.storeProducts.forEach(p => { items.push({ name: p.name, price: p.price, image: p.image }); total += p.price; });
+            if (giftState.wrapping?.price > 0) { items.push({ name: giftState.wrapping.name, price: giftState.wrapping.price, image: giftState.wrapping.image }); total += giftState.wrapping.price; }
+            if (giftState.ribbon?.price > 0) { items.push({ name: giftState.ribbon.name, price: giftState.ribbon.price, image: giftState.ribbon.image }); total += giftState.ribbon.price; }
+            if (giftState.card?.price > 0) { items.push({ name: giftState.card.name, price: giftState.card.price, image: giftState.card.image }); total += giftState.card.price; }
+            
+            summaryEl.innerHTML = items.length ? items.map(i => `
+                <div class="summary-item">
+                    <div style="display:flex; align-items:center; gap:0.8rem;">
+                        <img src="${resolveMediaUrl(i.image)}" style="width:35px; height:35px; object-fit:cover; border-radius:6px; background:#f8f9fa;" onerror="this.src='/images/'">
+                        <span class="summary-item-name">${i.name}</span>
+                    </div>
+                    <span class="summary-item-price">${i.price} ل.س</span>
+                </div>
+            `).join('') : '<div class="summary-empty">لم تختر أي عناصر بعد</div>';
+            
+            totalEl.textContent = total + ' ل.س';
             btn.disabled = !giftState.box;
         }
 

@@ -65,7 +65,7 @@ class Gift extends Model
 
     public function getFormattedPriceAttribute()
     {
-        return number_format($this->price, 2).' ر.س';
+        return number_format($this->price, 2).' ل.س';
     }
 
     public function getMainImageAttribute()

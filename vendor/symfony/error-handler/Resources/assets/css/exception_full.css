@@ -56,7 +56,7 @@
 }
 .sf-reset .text-exception .open-quote,
 .sf-reset .text-exception .close-quote {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'El Messiri', sans-serif;
     position: absolute;
     color: #C9C9C9;
     font-size: 8em;
@@ -70,7 +70,7 @@
     right: 50px;
 }
 .sf-reset .block-exception p {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'El Messiri', sans-serif;
 }
 .sf-reset .block-exception p a,
 .sf-reset .block-exception p a:hover {
@@ -124,5 +124,5 @@
 .sf-reset #traces-text pre {
     white-space: pre;
     font-size: 12px;
-    font-family: monospace;
+    font-family: 'El Messiri', sans-serif;
 }

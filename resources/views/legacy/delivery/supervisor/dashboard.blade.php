@@ -13,7 +13,7 @@
             margin: 0; 
             padding: 0; 
             box-sizing: border-box; 
-            font-family: 'Cairo', sans-serif; 
+            font-family:  'El Messiri', sans-serif; 
         }
         
         body { 
@@ -115,7 +115,7 @@
             padding: 1rem 2rem;
             border: none;
             border-radius: 12px;
-            font-family: 'Cairo', sans-serif;
+            font-family: 'El Messiri', sans-serif;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -227,7 +227,7 @@
             border: 1px solid #e2e8f0;
             background: #ffffff;
             border-radius: 10px;
-            font-family: 'Cairo', sans-serif;
+            font-family:  'El Messiri', sans-serif;
             font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
@@ -481,7 +481,7 @@
         /* Custom Leaflet Popup Styles */
         .leaflet-popup-content-wrapper {
             border-radius: 12px;
-            font-family: 'Cairo', sans-serif;
+            font-family:  'El Messiri', sans-serif;
         }
         
         .driver-popup {

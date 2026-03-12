@@ -24,7 +24,7 @@
             background-attachment: fixed;
             min-height: 100vh;
             direction: rtl;
-            font-family: 'Changa', sans-serif;
+            font-family: 'El Messiri',sans-serif;
             font-weight: 400;
             height: 100%;
         }
@@ -113,7 +113,7 @@
             text-align:center;
             outline:none;
             transition: all 0.3s ease;
-            font-family: 'Changa', sans-serif;
+            font-family: 'El Messiri',sans-serif;
             font-weight: 400;
         }
         .code-inputs input:focus{
@@ -159,7 +159,7 @@
             text-align:center;
             margin-top:1rem;
             font-size:0.95rem;
-            font-family: 'Changa', sans-serif;
+            font-family:'El Messiri',sans-serif;
             font-weight: 300;
             color:#d3e7e2;
             cursor:pointer;

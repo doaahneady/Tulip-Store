@@ -8,7 +8,7 @@ body {
     word-wrap: break-word;
     background-color: #F9F9F9;
     color: #222;
-    font-family: Helvetica, Arial, sans-serif;
+    font-family:'El Messiri', sans-serif;
     font-size: 14px;
     line-height: 1.4;
 }
@@ -44,7 +44,7 @@ article > header > .row > h2 {
     font-size: 14px;
     color: #222;
     font-weight: normal;
-    font-family: "Lucida Console", monospace, sans-serif;
+    font-family:'El Messiri', sans-serif;
     word-break: break-all;
     margin: 20px 5px 0 0;
     user-select: all;

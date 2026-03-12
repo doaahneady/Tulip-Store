@@ -10,7 +10,7 @@
         body {
             background-color: #fff8f4;
             direction: rtl;
-            font-family: 'Poppins', 'Cairo', sans-serif;
+            font-family: 'El Messiri',sans-serif;
         }
         .ar-auth-container {
             display: flex;
@@ -48,7 +48,7 @@
             position: relative;
         }
         .auth-logo-title {
-            font-family: 'Poppins', 'Cairo', sans-serif;
+            font-family: 'El Messiri',sans-serif;
             font-size: 2.5rem;
             font-weight: 600;
             text-align: center;

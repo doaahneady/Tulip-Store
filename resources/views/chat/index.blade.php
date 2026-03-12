@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*{font-family:'Inter',sans-serif;margin:0;padding:0;box-sizing:border-box}
+*{font-family:"El Messiri", sans-serif;margin:0;padding:0;box-sizing:border-box}
 body{background:linear-gradient(135deg,#667eea 0%,#764ba2 50%,#f093fb 100%);min-height:100vh}
 
 .page-header{background:transparent;padding:2rem;margin-top:80px}

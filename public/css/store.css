@@ -571,12 +571,15 @@ h6 {
 
 .product-info {
   padding: 0.8rem 1rem 1rem 1rem;
+  text-align: right;
 }
 
 .product-name {
   font-size: 0.95rem;
   font-weight: 600;
   color: #3a3a3a;
+  text-align: right;
+  display: block;
 }
 
 .product-meta {

@@ -200,7 +200,7 @@ To see what you can do with output formatting, look at the tests in `tests/Outpu
 @charset "utf-8";
 
 @font-face {
-  font-family: "CrassRoots";
+  font-family: 'El Messiri', sans-serif;
   src: url("../media/cr.ttf");
 }
 
@@ -443,7 +443,7 @@ class Sabberworm\CSS\CSSList\Document#4 (2) {
 
 ```css
 @charset "utf-8";
-@font-face {font-family: "CrassRoots";src: url("../media/cr.ttf");}
+@font-face {font-family: 'El Messiri', sans-serif;src: url("../media/cr.ttf");}
 html, body {font-size: 1.6em;}
 @keyframes mymove {from {top: 0px;} to {top: 200px;}}
 ```
@@ -455,7 +455,7 @@ html, body {font-size: 1.6em;}
 ```css
 #header {
     margin: 10px 2em 1cm 2%;
-    font-family: Verdana, Helvetica, "Gill Sans", sans-serif;
+    font-family: 'El Messiri', sans-serif;
     color: red !important;
 }
 
@@ -612,7 +612,7 @@ class Sabberworm\CSS\CSSList\Document#4 (2) {
 #### Output (`render()`)
 
 ```css
-#header {margin: 10px 2em 1cm 2%;font-family: Verdana,Helvetica,"Gill Sans",sans-serif;color: red !important;}
+#header {margin: 10px 2em 1cm 2%;font-family: 'El Messiri', sans-serif;color: red !important;}
 ```
 
 ## Contributors/Thanks to

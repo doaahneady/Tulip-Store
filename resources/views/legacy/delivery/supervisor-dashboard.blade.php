@@ -52,7 +52,7 @@
         }
         
         body { 
-            font-family: 'Poppins', 'Cairo', sans-serif;
+            font-family:  'El Messiri', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
@@ -1212,7 +1212,7 @@
 
                     // Elegant popup
                     const popupContent = `
-                        <div style="min-width: 300px; font-family: 'Cairo', sans-serif; padding: 1.5rem; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 16px; color: white;">
+                        <div style="min-width: 300px; font-family:  'El Messiri', sans-serif; padding: 1.5rem; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 16px; color: white;">
                             <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
                                 <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.4rem; backdrop-filter: blur(10px);">
                                     ${driver.name ? driver.name.charAt(0) : 'S'}

@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Tajawal', sans-serif; min-height: 100vh; display: flex; background: #f8f9fa; }
+        body { font-family:"El Messiri", sans-serif; min-height: 100vh; display: flex; background: #f8f9fa; }
         .container { max-width: 980px; width: 100%; margin: auto; padding: 2rem; }
         .card { background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); overflow: hidden; }
         .header { padding: 2rem; background: linear-gradient(135deg, #4a148c 0%, #7b1fa2 100%); color: white; }

@@ -54,7 +54,7 @@
             gap: 0.75rem;
         }
         .cart-header p {
-            font-family: 'Changa', sans-serif;
+            font-family: "El Messiri", sans-serif;
             font-size: 1rem;
             margin: 0;
             color: rgba(255, 255, 255, 0.9);
@@ -91,7 +91,7 @@
         .continue-shopping-link {
             color: #0f4f55;
             text-decoration: none;
-            font-family: 'Changa', sans-serif;
+            font-family: "El Messiri", sans-serif;
             font-weight: 500;
             font-size: 0.95rem;
             display: flex;
@@ -162,7 +162,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 1rem;
-            font-family: 'Changa', sans-serif;
+            font-family: "El Messiri", sans-serif;
             font-size: 0.875rem;
             color: #7f8c8d;
         }
@@ -176,7 +176,7 @@
             color: #0f4f55;
         }
         .cart-item-stock {
-            font-family: 'Changa', sans-serif;
+            font-family:"El Messiri", sans-serif;
             font-size: 0.875rem;
             color: #27ae60;
             font-weight: 600;
@@ -210,13 +210,13 @@
             font-weight: 400;
         }
         .cart-item-savings {
-            font-family: 'Changa', sans-serif;
+            font-family: "El Messiri", sans-serif;
             font-size: 0.875rem;
             color: #27ae60;
             font-weight: 600;
         }
         .cart-item-subtotal {
-            font-family: 'Changa', sans-serif;
+            font-family: "El Messiri", sans-serif;
             font-size: 0.875rem;
             color: #7f8c8d;
         }
@@ -274,7 +274,7 @@
             color: #e74c3c;
             cursor: pointer;
             font-size: 0.875rem;
-            font-family: 'Changa', sans-serif;
+            font-family: "El Messiri", sans-serif;
             font-weight: 600;
             padding: 0.6rem 1rem;
             border-radius: 8px;
@@ -315,7 +315,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 0.75rem 0;
-            font-family: 'Changa', sans-serif;
+            font-family: "El Messiri", sans-serif;
             font-size: 0.95rem;
             color: #2c3e50;
         }
@@ -381,7 +381,7 @@
             display: flex;
             align-items: center;
             gap: 0.6rem;
-            font-family: 'Changa', sans-serif;
+            font-family: "El Messiri", sans-serif;
             font-size: 0.875rem;
             color: #7f8c8d;
         }
@@ -409,7 +409,7 @@
             font-weight: 400;
         }
         .empty-cart p {
-            font-family: 'Changa', sans-serif;
+            font-family:"El Messiri", sans-serif;
             color: #565959;
             font-size: 1rem;
             margin-bottom: 2rem;
@@ -491,7 +491,7 @@
         }
         .delete-modal-text {
             color: #7f8c8d;
-            font-family: 'Changa', sans-serif;
+            font-family:"El Messiri", sans-serif;
             font-size: 1rem;
             margin-bottom: 2rem;
             line-height: 1.6;

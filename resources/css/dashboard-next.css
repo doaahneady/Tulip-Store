@@ -1,5 +1,5 @@
 :root {
-  --dx-font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Inter", "Cairo", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  --dx-font-sans: "El Messiri", sans-serif;
   --dx-bg: #0b0f19;
   --dx-surface: rgba(255, 255, 255, 0.06);
   --dx-surface-2: rgba(255, 255, 255, 0.08);

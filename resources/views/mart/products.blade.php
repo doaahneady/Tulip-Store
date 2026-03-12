@@ -145,7 +145,7 @@
             cursor: pointer;
             border: none;
             background: transparent;
-            font-family: inherit;
+            font-family:  'El Messiri', sans-serif;
             padding: 0.25rem 0.4rem;
         }
         .clear-filters:hover { text-decoration: underline; }
@@ -173,7 +173,7 @@
             padding: 0.8rem 1rem 0.8rem 2.5rem;
             border: 1px solid #e5e7eb;
             border-radius: 14px;
-            font-family: inherit;
+            font-family:  'El Messiri', sans-serif;
             font-size: 0.9rem;
             transition: all 0.3s;
             background: #fff;
@@ -238,7 +238,7 @@
             padding: 0.6rem;
             border: 2px solid var(--border);
             border-radius: 8px;
-            font-family: inherit;
+            font-family: 'El Messiri', sans-serif;
             font-size: 0.85rem;
             text-align: center;
         }
@@ -273,7 +273,7 @@
             padding: 0.7rem 1rem;
             border: 2px solid var(--border);
             border-radius: 10px;
-            font-family: inherit;
+            font-family:'El Messiri',sans-serif;
             font-size: 0.9rem;
             background: #fff;
             cursor: pointer;
@@ -337,47 +337,47 @@
         /* Product Card */
         .product-card {
             background: var(--card);
-            border-radius: 32px;
+            border-radius: 24px;
             overflow: hidden;
             transition: all 0.3s;
             position: relative;
             border: 1px solid var(--border);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
         .product-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
             border-color: var(--teal);
         }
         .products-grid.list-view .product-card {
             display: grid;
-            grid-template-columns: 150px 1fr;
+            grid-template-columns: 120px 1fr;
         }
         .product-badges {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 8px;
+            right: 8px;
             display: flex;
             flex-direction: column;
-            gap: 0.3rem;
+            gap: 0.2rem;
             z-index: 5;
         }
         .badge {
-            padding: 0.3rem 0.7rem;
+            padding: 0.2rem 0.6rem;
             border-radius: 20px;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 700;
         }
         .badge-sale { background: var(--red); color: #fff; }
         .badge-new { background: var(--teal); color: #fff; }
         .badge-fresh { background: var(--green); color: #fff; }
         .product-image {
-            height: 180px;
+            height: 140px;
             background: linear-gradient(135deg, #eaf7f8, #f8f9fa);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4rem;
+            font-size: 3rem;
             position: relative;
         }
         .product-image img {
@@ -387,16 +387,16 @@
             display: block;
         }
         .product-emoji {
-            font-size: 4rem;
+            font-size: 3rem;
             line-height: 1;
         }
         .products-grid.list-view .product-image { height: 100%; }
         .product-favorite {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 32px;
-            height: 32px;
+            top: 8px;
+            left: 8px;
+            width: 28px;
+            height: 28px;
             background: #fff;
             border: none;
             border-radius: 50%;
@@ -406,7 +406,7 @@
             justify-content: center;
             color: #cbd5e1;
             transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
         .product-favorite:hover, .product-favorite.active { color: var(--red); }
 
@@ -422,12 +422,12 @@
                 margin-bottom: 1rem;
             }
             .products-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(4, 1fr);
             }
         }
         @media (max-width: 768px) {
             .products-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(3, 1fr);
             }
             .price-range {
                 gap: .4rem;
@@ -435,65 +435,65 @@
         }
         @media (max-width: 480px) {
             .products-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
             }
+            .product-image { height: 120px; }
         }
-        .product-body { padding: 1rem; display: flex; flex-direction: column; min-height: 220px; }
-        .product-body { padding: 1rem; display: flex; flex-direction: column; min-height: 220px; }
+        .product-body { padding: 0.8rem; display: flex; flex-direction: column; min-height: auto; }
         .product-category {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--teal);
             font-weight: 600;
             text-transform: uppercase;
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.1rem;
         }
         .product-name {
             font-family: 'El Messiri', sans-serif;
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: var(--text);
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.1rem;
             font-weight: 700;
         }
         .product-origin {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--muted);
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.5rem;
             display: flex;
             align-items: center;
-            gap: 0.3rem;
+            gap: 0.2rem;
         }
         .product-footer {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding-top: 0.8rem;
+            padding-top: 0.5rem;
             border-top: 1px solid var(--border);
-            margin-top: auto;
+            margin-top: 0.5rem;
         }
         .price-wrapper { display: flex; flex-direction: column; }
         .price-current {
-            font-family: 'El Messiri', sans-serif;
-            font-size: 1.2rem;
+            font-family:'El Messiri',sans-serif;
+            font-size: 1.05rem;
             font-weight: 700;
             color: var(--teal-dark);
         }
-        .price-old { font-size: 0.8rem; color: #94a3b8; text-decoration: line-through; }
+        .price-old { font-size: 0.75rem; color: #94a3b8; text-decoration: line-through; }
         .price-unit { font-size: 0.7rem; color: var(--muted); }
         .add-cart-btn {
             display: flex;
             align-items: center;
-            gap: 0.4rem;
-            padding: 0.6rem 1rem;
+            gap: 0.3rem;
+            padding: 0.4rem 0.8rem;
             background: var(--teal);
             color: #fff;
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            font-family: inherit;
-            font-size: 0.9rem;
+            font-family:'El Messiri',sans-serif;
+            font-size: 0.8rem;
             font-weight: 700;
             transition: all 0.3s;
-            box-shadow: 0 6px 16px rgba(15,79,85,0.25);
+            box-shadow: 0 4px 12px rgba(15,79,85,0.15);
         }
         .add-cart-btn:hover { background: var(--teal-dark); transform: scale(1.05); }
         .add-cart-btn.added { background: var(--green); }
@@ -540,7 +540,7 @@
             background: var(--card);
             border-radius: 10px;
             cursor: pointer;
-            font-family: inherit;
+            font-family: 'El Messiri',sans-serif;
             font-weight: 600;
             color: var(--text);
             transition: all 0.3s;
@@ -568,7 +568,7 @@
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            font-family: inherit;
+            font-family: 'El Messiri',sans-serif;
             font-weight: 600;
         }
         .filters-overlay {
@@ -611,11 +611,11 @@
         }
     </style>
 
-    <section class="hero">
+    <!-- <section class="hero">
         <div class="hero-card">
-            <img src="/images/banner-flower.jpg" alt="Tulip Banner" class="hero-card-img">
+            <img src="/images/banner.jpg" alt="Tulip Banner" class="hero-card-img">
         </div>
-    </section>
+    </section> -->
 
     <div class="filters-overlay" id="filtersOverlay" onclick="toggleFilters()"></div>
 
@@ -647,7 +647,7 @@
 
             <!-- Price Range -->
             <div class="filter-group">
-                <div class="filter-group-title">نطاق السعر (ر.س)</div>
+                <div class="filter-group-title">نطاق السعر (ل.س)</div>
                 <div class="price-range">
                     <input type="number" class="price-input" id="minPrice" placeholder="من">
                     <span class="price-separator">-</span>
@@ -667,15 +667,15 @@
                 <div class="checkbox-list">
                     <div class="checkbox-item">
                         <input type="checkbox" id="filterSale" onchange="applyFilters()">
-                        <label for="filterSale">🏷️ عروض</label>
+                        <label for="filterSale"> عروض</label>
                     </div>
                     <div class="checkbox-item">
                         <input type="checkbox" id="filterNew" onchange="applyFilters()">
-                        <label for="filterNew">✨ جديد</label>
+                        <label for="filterNew"> جديد</label>
                     </div>
                     <div class="checkbox-item">
                         <input type="checkbox" id="filterFresh" onchange="applyFilters()">
-                        <label for="filterFresh">🌿 طازج</label>
+                        <label for="filterFresh"> طازج</label>
                     </div>
                 </div>
             </div>
@@ -719,7 +719,9 @@
             <div class="active-filters" id="activeFilters"></div>
 
             <!-- Products Grid -->
-            <div class="products-grid" id="productsGrid"></div>
+            <div class="products-grid" id="productsGrid">
+
+            </div>
 
             <!-- Pagination -->
             <div class="pagination" id="pagination"></div>
@@ -727,19 +729,19 @@
     </div>
     <script>
         let products = {};
-        let categories = [{ id: 'all', name: 'الكل', emoji: '🛒' }];
+        let categories = [{ id: 'all', name: 'الكل', emoji: '' }];
         const isAuthenticated = @json(auth()->check());
         let favoriteIds = new Set();
 
         function guessEmoji(slug, name) {
             const s = String(slug || '').toLowerCase();
             const n = String(name || '').toLowerCase();
-            if (s.includes('fruit') || n.includes('فواك')) return '🍎';
-            if (s.includes('veget') || n.includes('خض')) return '🥕';
-            if (s.includes('leaf') || n.includes('ورق')) return '🥬';
-            if (s.includes('dairy') || n.includes('لب')) return '🥛';
-            if (s.includes('baker') || n.includes('مخب')) return '🍞';
-            if (s.includes('groc') || n.includes('بقال')) return '🛒';
+            if (s.includes('fruit') || n.includes('فواك')) return '';
+            if (s.includes('veget') || n.includes('خض')) return '';
+            if (s.includes('leaf') || n.includes('ورق')) return '';
+            if (s.includes('dairy') || n.includes('لب')) return '';
+            if (s.includes('baker') || n.includes('مخب')) return '';
+            if (s.includes('groc') || n.includes('بقال')) return '';
             return '🛒';
         }
 
@@ -765,8 +767,8 @@
             const slug = String(categorySlug || '').toLowerCase();
             const name = String(categoryName || '').toLowerCase();
             if (slug.includes('fruit') || slug.includes('veget') || name.includes('فوا') || name.includes('خضا') || name.includes('خضر')) return '/images/grocery.jpg';
-            if (slug.includes('dairy') || name.includes('ألبان') || name.includes('حليب')) return '/images/grocery.jpg';
-            if (slug.includes('bakery') || name.includes('مخب')) return '/images/grocery.jpg';
+            if (slug.includes('dairy') || name.includes('ألبان') || name.includes('حليب')) return '/images/pic2.png';
+            if (slug.includes('bakery') || name.includes('مخب')) return '/images/pic1.png';
             return '/images/grocery.jpg';
         }
 
@@ -844,7 +846,7 @@
             const apiCategories = Array.isArray(categoriesPayload.data) ? categoriesPayload.data : [];
             const apiProducts = Array.isArray(productsPayload.data) ? productsPayload.data : [];
 
-            categories = [{ id: 'all', name: 'الكل', emoji: '🛒' }].concat(
+            categories = [{ id: 'all', name: 'الكل', emoji: '' }].concat(
                 apiCategories.map((c) => ({
                     id: c.slug || String(c.id),
                     name: c.name || (c.slug || String(c.id)),
@@ -1052,9 +1054,9 @@
                         </div>
                         <div class="product-footer">
                             <div class="price-wrapper">
-                                <span class="price-current">${p.price} ر.س</span>
-                                ${p.oldPrice ? `<span class="price-old">${p.oldPrice} ر.س</span>` : ''}
-                                <span class="price-unit">/ ${p.unit}</span>
+                                <span class="price-current">${p.price} ل.س</span>
+                                ${p.oldPrice ? `<span class="price-old">${p.oldPrice} ل.س</span>` : ''}
+                                <span class="price-unit">لكل 1 كغ</span>
                             </div>
                             <button class="add-cart-btn" onclick="addToCart('${p.id}', this)" id="btn-${p.id}">
                                 <i class="fas fa-plus"></i>
@@ -1146,7 +1148,7 @@
             const minPrice = document.getElementById('minPrice').value;
             const maxPrice = document.getElementById('maxPrice').value;
             if (minPrice || maxPrice) {
-                const priceLabel = `السعر: ${minPrice || '0'} - ${maxPrice || '∞'} ر.س`;
+                const priceLabel = `السعر: ${minPrice || '0'} - ${maxPrice || '∞'}ل.س`;
                 filters.push({
                     type: 'price',
                     label: priceLabel,

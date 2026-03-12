@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تطبيق السائق - Tulip Store</title>
     <style>
-        body { font-family: 'Tajawal', sans-serif; background:#f5f7fb; color:#222; margin:0; }
+        body { font-family:'El Messiri',sans-serif; background:#f5f7fb; color:#222; margin:0; }
         .container { max-width: 640px; margin: 0 auto; padding: 2rem; }
         .card { background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); padding: 1.5rem; margin-bottom: 1rem; }
         .title { font-weight: 700; font-size: 1.25rem; margin-bottom: .5rem; }

@@ -28,7 +28,7 @@
                             <td class="px-4 py-3">{{ $f->forecast_period }}</td>
                             <td class="px-4 py-3">{{ $f->product->name ?? ('#'.$f->product_id) }}</td>
                             <td class="px-4 py-3">{{ number_format((int) ($f->forecasted_quantity ?? 0)) }}</td>
-                            <td class="px-4 py-3">{{ number_format((float) ($f->forecasted_revenue ?? 0), 2) }} ر.س</td>
+                            <td class="px-4 py-3">{{ number_format((float) ($f->forecasted_revenue ?? 0), 2) }} ل.س</td>
                             <td class="px-4 py-3">{{ number_format((float) ($f->confidence_score ?? 0), 2) }}</td>
                         </tr>
                     @empty

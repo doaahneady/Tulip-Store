@@ -72,7 +72,7 @@ td.small {
 }
 
 td.codeLine {
- font-family: "Source Code Pro", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+ font-family:'El Messiri', sans-serif;
  white-space: pre-wrap;
 }
 
@@ -112,7 +112,7 @@ span.success, span.warning, span.danger {
 }
 
 svg text {
- font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, Helvetica, sans-serif;
+ font-family: 'El Messiri', sans-serif;
  font-size: 11px;
  color: #666;
  fill: #666;

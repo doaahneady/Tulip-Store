@@ -91,7 +91,7 @@
         }
         .filter-option label {
             cursor: pointer;
-            font-family: 'Changa', sans-serif;
+            font-family:"El Messiri", sans-serif;
             font-size: 0.9rem;
             color: #2c3e50;
             line-height: 1.5;
@@ -103,7 +103,7 @@
         }
         .filter-see-more {
             color: #0f4f55;
-            font-family: 'Changa', sans-serif;
+            font-family:"El Messiri", sans-serif;
             font-size: 0.875rem;
             cursor: pointer;
             padding: 0.5rem 1.2rem;
@@ -132,7 +132,7 @@
             padding: 0.5rem 0.4rem;
             border: 2px solid #d1e7e9;
             border-radius: 8px;
-            font-family: 'Changa', sans-serif;
+            font-family:"El Messiri", sans-serif;
             font-size: 0.8rem;
             transition: all 0.2s ease;
             background: #fafafa;

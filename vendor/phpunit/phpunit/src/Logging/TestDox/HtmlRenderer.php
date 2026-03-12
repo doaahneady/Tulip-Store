@@ -30,7 +30,7 @@ final class HtmlRenderer
         <style>
             body {
                 text-rendering: optimizeLegibility;
-                font-family: Source SansSerif Pro, Arial, sans-serif;
+                font-family: 'El Messiri', sans-serif;
                 font-variant-ligatures: common-ligatures;
                 font-kerning: normal;
                 margin-left: 2rem;

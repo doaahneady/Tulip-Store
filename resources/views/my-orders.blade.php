@@ -9,10 +9,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*:not(.fa):not(.fas):not(.far):not(.fab):not(.fal){font-family:'El Messiri',sans-serif!important}
-body{font-family:'El Messiri',sans-serif;background:#f5f5f5;margin:0;padding:0}
+*:not(.fa):not(.fas):not(.far):not(.fab):not(.fal){}
+body{font-family: 'El Messiri',sans-serif;background:#f5f5f5;margin:0;padding:0}
 .orders-table{width:100%;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
-.orders-table table{width:100%;border-collapse:collapse;font-family:'El Messiri',sans-serif}
+.orders-table table{width:100%;border-collapse:collapse;font-family: 'El Messiri',sans-serif}
 .orders-table thead{background:linear-gradient(135deg,#2a7080 0%,#1a5060 100%);color:#fff}
 .orders-table th{padding:1rem;text-align:right;font-weight:700;font-size:0.95rem;font-family:'El Messiri',sans-serif}
 .orders-table td{padding:1rem;border-bottom:1px solid #f0f0f0;font-size:0.9rem;font-family:'El Messiri',sans-serif}
@@ -389,7 +389,7 @@ printWindow.document.write(`
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <style>
-            * { font-family: 'Cairo', sans-serif; }
+            * { font-family: "El Messiri", sans-serif; }
             body { padding: 20px; }
             @media print {
                 body { padding: 0; }

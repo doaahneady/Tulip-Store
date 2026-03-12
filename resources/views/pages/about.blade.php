@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Tajawal', sans-serif; background: #f8f9fa; min-height: 100vh; }
+        body { font-family:'El Messiri',sans-serif; background: #f8f9fa; min-height: 100vh; }
         
         .hero-section {
             background: linear-gradient(135deg, #0D464C 0%, #1a6b75 50%, #2d8a8a 100%);
@@ -215,63 +215,6 @@
 </div>
 
 <!-- Footer -->
-<footer style="background:#0D464C; padding:3rem 2rem 2rem; margin-top:4rem; font-family:'El Messiri', sans-serif;">
-    <div style="max-width:1400px; margin:0 auto;">
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:3rem; margin-bottom:2.5rem;">
-            <!-- Logo & Description -->
-            <div style="text-align:center;">
-                <img src="/images/white_orange_logo.png" style="height:100px; margin-bottom:1.5rem;">
-                <p style="color:rgba(255,255,255,0.8); line-height:1.8; font-size:0.95rem;">
-                    متجر فاخر للهدايا والمنتجات المميزة. نساعدك في إرسال ابتسامتك لأحبائك أينما كانوا.
-                </p>
-                <div style="display:flex; gap:1rem; justify-content:center; margin-top:1rem;">
-                    <a href="#" style="width:40px; height:40px; background:rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.8); text-decoration:none;">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a href="#" style="width:40px; height:40px; background:rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.8); text-decoration:none;">
-                        <i class="fab fa-facebook"></i>
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Quick Links -->
-            <div style="text-align:center;">
-                <h3 style="color:#ff6b35; font-weight:700; margin-bottom:1.5rem; font-size:1.2rem;">روابط سريعة</h3>
-                <div style="display:flex; flex-direction:column; gap:0.8rem;">
-                    <a href="/store" style="color:rgba(255,255,255,0.8); text-decoration:none;">المتجر</a>
-                    <a href="/about" style="color:rgba(255,255,255,0.8); text-decoration:none;">من نحن؟</a>
-                    <a href="/contact" style="color:rgba(255,255,255,0.8); text-decoration:none;">تواصل معنا</a>
-                </div>
-            </div>
-
-            <!-- Support -->
-            <div style="text-align:center;">
-                <h3 style="color:#ff6b35; font-weight:700; margin-bottom:1.5rem; font-size:1.2rem;">الدعم</h3>
-                <div style="display:flex; flex-direction:column; gap:0.8rem;">
-                    <a href="/faq" style="color:rgba(255,255,255,0.8); text-decoration:none;">الأسئلة الشائعة</a>
-                    <a href="/shipping" style="color:rgba(255,255,255,0.8); text-decoration:none;">سياسة الشحن</a>
-                    <a href="/returns" style="color:rgba(255,255,255,0.8); text-decoration:none;">سياسة الإرجاع</a>
-                    <a href="/privacy" style="color:rgba(255,255,255,0.8); text-decoration:none;">سياسة الخصوصية</a>
-                </div>
-            </div>
-
-            <!-- Special Sections -->
-            <div style="text-align:center;">
-                <h3 style="color:#ff6b35; font-weight:700; margin-bottom:1.5rem; font-size:1.2rem;">الأقسام الخاصة</h3>
-                <div style="display:flex; flex-direction:column; gap:0.8rem;">
-                    <a href="/mart" style="color:rgba(255,255,255,0.8); text-decoration:none;">توليب مارت</a>
-                    <a href="/gifts" style="color:rgba(255,255,255,0.8); text-decoration:none;">توليب للتنسيق العطايا</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bottom Row -->
-        <div style="padding-top:2rem; border-top:1px solid rgba(255,255,255,0.1); text-align:center;">
-            <p style="margin:0; font-size:0.9rem; color:rgba(255,255,255,0.6);">
-                © 2025 Tulip Store. جميع الحقوق محفوظة
-            </p>
-        </div>
-    </div>
-</footer>
+@include('components.footer')
 </body>
 </html>

@@ -6,7 +6,7 @@
     <title>Test Gifts - No Navbar</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family:  'El Messiri', sans-serif;
             background: #f0f0f0;
             margin: 0;
             padding: 0;

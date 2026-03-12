@@ -401,7 +401,7 @@
                     <textarea id="addressNote" placeholder="اكتب تفاصيل إضافية عن موقع التوصيل" style="width:100%; padding:0.75rem; border:2px solid #e0e0e0; border-radius:10px; font-family:'El Messiri',sans-serif; font-size:0.9rem; min-height:70px; resize:vertical; transition:all 0.3s;" onfocus="this.style.borderColor='#2a7080'" onblur="this.style.borderColor='#e0e0e0'"></textarea>
                 </div>
                 
-                <button onclick="goToStep(2)" style="width:100%; background:#ff6b35; color:#fff; border:none; padding:0.9rem; font-family:'El Messiri',sans-serif; font-size:0.95rem; font-weight:700; border-radius:10px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 15px rgba(255,107,53,0.3);" onmouseover="this.style.background='#e55a2b'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255,107,53,0.4)'" onmouseout="this.style.background='#ff6b35'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255,107,53,0.3)'">
+                <button onclick="goToStep(2)" style="width:100%; background:#ff6b35; color:#fff; border:none; padding:0.6rem; font-family:'El Messiri',sans-serif; font-size:0.85rem; font-weight:700; border-radius:10px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 15px rgba(255,107,53,0.3);" onmouseover="this.style.background='#e55a2b'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255,107,53,0.4)'" onmouseout="this.style.background='#ff6b35'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255,107,53,0.3)'">
                     التالي <i class="fas fa-arrow-left" style="margin-right:0.5rem;"></i>
                 </button>
             </div>
@@ -443,53 +443,44 @@
                 <div style="background:#e8f4f8; padding:1.5rem; border-radius:12px; margin-bottom:2rem;">
                     
                     <!-- Option 1: توصيل عادي -->
-                    <div onclick="selectDelivery('normal')" class="delivery-option" data-type="normal" style="background:#fff; padding:2.2rem; border-radius:14px; margin-bottom:1.2rem; cursor:pointer; border:3px solid #ff6b35; transition:all 0.3s; display:flex; align-items:center; gap:1.5rem;">
+                    <div onclick="selectDelivery('normal')" class="delivery-option" data-type="normal" style="background:#fff; padding:1rem; border-radius:14px; margin-bottom:1rem; cursor:pointer; border:3px solid #ff6b35; transition:all 0.3s; display:flex; align-items:center; gap:1rem;">
                         <div style="flex-shrink:0;">
-                            <img src="/images/shipping/truck-tulip.png" alt="توصيل عادي" class="delivery-main-icon" style="width:100px; height:100px; object-fit:contain;" onerror="this.style.display='none';">
+                            <img src="/images/shipping/truck-tulip.png" alt="توصيل عادي" class="delivery-main-icon" style="width:60px; height:60px; object-fit:contain;" onerror="this.style.display='none';">
                         </div>
                         <div style="flex:1;">
-                            <h3 style="font-family:'El Messiri',sans-serif; font-size:1.4rem; font-weight:700; color:#1a1a1a; margin:0 0 0.4rem 0;">توصيل عادي</h3>
-                            <p style="font-family:'El Messiri',sans-serif; font-size:1.1rem; color:#666; margin:0;">خلال مدة أقصاها أسبوع</p>
-                        </div>
-                        <div style="flex-shrink:0;">
-                            <i class="fas fa-check-circle delivery-status-icon" style="font-size:1.8rem; color:#ff6b35;"></i>
+                            <h3 style="font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; color:#1a1a1a; margin:0 0 0.2rem 0;">توصيل عادي</h3>
+                            <p style="font-family:'El Messiri',sans-serif; font-size:0.9rem; color:#666; margin:0;">خلال مدة أقصاها أسبوع</p>
                         </div>
                     </div>
                     
                     <!-- Option 2: توصيل مستعجل -->
-                    <div onclick="selectDelivery('express')" class="delivery-option" data-type="express" style="background:#fff; padding:2.2rem; border-radius:14px; margin-bottom:1.2rem; cursor:pointer; border:3px solid #e0e0e0; transition:all 0.3s; display:flex; align-items:center; gap:1.5rem;">
+                    <div onclick="selectDelivery('express')" class="delivery-option" data-type="express" style="background:#fff; padding:1rem; border-radius:14px; margin-bottom:1rem; cursor:pointer; border:3px solid #e0e0e0; transition:all 0.3s; display:flex; align-items:center; gap:1rem;">
                         <div style="flex-shrink:0;">
-                            <img src="/images/shipping/scooter-24h.png" alt="توصيل مستعجل" class="delivery-main-icon" style="width:100px; height:100px; object-fit:contain;" onerror="this.style.display='none';">
+                            <img src="/images/shipping/scooter-24h.png" alt="توصيل مستعجل" class="delivery-main-icon" style="width:60px; height:60px; object-fit:contain;" onerror="this.style.display='none';">
                         </div>
                         <div style="flex:1;">
-                            <h3 style="font-family:'El Messiri',sans-serif; font-size:1.4rem; font-weight:700; color:#1a1a1a; margin:0 0 0.4rem 0;">توصيل مستعجل</h3>
-                            <p style="font-family:'El Messiri',sans-serif; font-size:1.1rem; color:#666; margin:0;">خلال 24 ساعة</p>
-                        </div>
-                        <div style="flex-shrink:0;">
-                            <i class="far fa-circle delivery-status-icon" style="font-size:1.8rem; color:#ccc;"></i>
+                            <h3 style="font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; color:#1a1a1a; margin:0 0 0.2rem 0;">توصيل مستعجل</h3>
+                            <p style="font-family:'El Messiri',sans-serif; font-size:0.9rem; color:#666; margin:0;">خلال 24 ساعة</p>
                         </div>
                     </div>
                     
                     <!-- Option 3: توصيل فوري -->
-                    <div onclick="selectDelivery('instant')" class="delivery-option" data-type="instant" style="background:#fff; padding:2.2rem; border-radius:14px; cursor:pointer; border:3px solid #e0e0e0; transition:all 0.3s; display:flex; align-items:center; gap:1.5rem;">
+                    <div onclick="selectDelivery('instant')" class="delivery-option" data-type="instant" style="background:#fff; padding:1rem; border-radius:14px; cursor:pointer; border:3px solid #e0e0e0; transition:all 0.3s; display:flex; align-items:center; gap:1rem;">
                         <div style="flex-shrink:0;">
-                            <img src="/images/shipping/phone-2h.png" alt="توصيل فوري" class="delivery-main-icon" style="width:100px; height:100px; object-fit:contain;" onerror="this.style.display='none';">
+                            <img src="/images/shipping/phone-2h.png" alt="توصيل فوري" class="delivery-main-icon" style="width:60px; height:60px; object-fit:contain;" onerror="this.style.display='none';">
                         </div>
                         <div style="flex:1;">
-                            <h3 style="font-family:'El Messiri',sans-serif; font-size:1.4rem; font-weight:700; color:#1a1a1a; margin:0 0 0.4rem 0;">توصيل فوري</h3>
-                            <p style="font-family:'El Messiri',sans-serif; font-size:1.1rem; color:#666; margin:0;">مسافة الطريق</p>
-                        </div>
-                        <div style="flex-shrink:0;">
-                            <i class="far fa-circle delivery-status-icon" style="font-size:1.8rem; color:#ccc;"></i>
+                            <h3 style="font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; color:#1a1a1a; margin:0 0 0.2rem 0;">توصيل فوري</h3>
+                            <p style="font-family:'El Messiri',sans-serif; font-size:0.9rem; color:#666; margin:0;">مسافة الطريق</p>
                         </div>
                     </div>
                 </div>
                 
                 <div style="display:flex; gap:1rem;">
-                    <button onclick="goToStep(1)" style="flex:1; background:#e0e0e0; color:#666; border:none; padding:1.2rem; font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s;">
+                    <button onclick="goToStep(1)" style="flex:1; background:#e0e0e0; color:#666; border:none; padding:0.6rem; font-family:'El Messiri',sans-serif; font-size:0.85rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s;">
                         <i class="fas fa-arrow-right" style="margin-left:0.5rem;"></i> السابق
                     </button>
-                    <button onclick="goToStep(3)" style="flex:2; background:#ff6b35; color:#fff; border:none; padding:1.2rem; font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 15px rgba(255,107,53,0.3);">
+                    <button onclick="goToStep(3)" style="flex:2; background:#ff6b35; color:#fff; border:none; padding:0.6rem; font-family:'El Messiri',sans-serif; font-size:0.85rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 15px rgba(255,107,53,0.3);">
                         التالي <i class="fas fa-arrow-left" style="margin-right:0.5rem;"></i>
                     </button>
                 </div>
@@ -533,10 +524,10 @@
                     </div>
                     
                     <div style="display:flex; gap:1rem;">
-                        <button onclick="goToStep(2)" style="flex:1; background:#e0e0e0; color:#666; border:none; padding:1.2rem; font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s;">
+                        <button onclick="goToStep(2)" style="flex:1; background:#e0e0e0; color:#666; border:none; padding:0.6rem; font-family:'El Messiri',sans-serif; font-size:0.85rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s;">
                             <i class="fas fa-arrow-right" style="margin-left:0.5rem;"></i> السابق
                         </button>
-                        <button onclick="proceedWithPayment()" style="flex:2; background:#ff6b35; color:#fff; border:none; padding:1.2rem; font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 15px rgba(255,107,53,0.3);">
+                        <button onclick="proceedWithPayment()" style="flex:2; background:#ff6b35; color:#fff; border:none; padding:0.6rem; font-family:'El Messiri',sans-serif; font-size:0.85rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 15px rgba(255,107,53,0.3);">
                             متابعة <i class="fas fa-arrow-left" style="margin-right:0.5rem;"></i>
                         </button>
                     </div>
@@ -544,7 +535,7 @@
                 
                 <!-- Credit Card Details Form -->
                 <div id="creditCardDetails" class="payment-section" style="display:none;">
-                    <button onclick="backToPaymentOptions()" style="background:transparent; border:none; color:#2a7080; font-family:'El Messiri',sans-serif; font-size:1rem; font-weight:600; cursor:pointer; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.5rem; transition:all 0.3s;">
+                    <button onclick="backToPaymentOptions()" style="background:transparent; border:none; color:#2a7080; font-family:'El Messiri',sans-serif; font-size:0.9rem; font-weight:600; cursor:pointer; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.5rem; transition:all 0.3s;">
                         <i class="fas fa-arrow-right"></i> العودة لطرق الدفع
                     </button>
                     
@@ -556,7 +547,7 @@
                                 <i id="previewCardType" class="fas fa-credit-card" style="font-size:2.5rem; color:rgba(255,255,255,0.9);"></i>
                             </div>
                             <div style="position:absolute; bottom:5rem; right:2rem; left:2rem;">
-                                <div id="previewCardNumber" style="font-family:'Courier New',monospace; font-size:1.5rem; font-weight:700; color:#fff; letter-spacing:3px; direction:ltr; text-align:left;">•••• •••• •••• ••••</div>
+                                <div id="previewCardNumber" style="font-family:'El Messiri', sans-serif; font-size:1.5rem; font-weight:700; color:#fff; letter-spacing:3px; direction:ltr; text-align:left;">•••• •••• •••• ••••</div>
                             </div>
                             <div style="position:absolute; bottom:2rem; right:2rem; left:2rem; display:flex; justify-content:space-between; align-items:flex-end;">
                                 <div>
@@ -565,7 +556,7 @@
                                 </div>
                                 <div style="text-align:left;">
                                     <div style="font-size:0.7rem; color:rgba(255,255,255,0.7); margin-bottom:0.3rem;">ينتهي في</div>
-                                    <div id="previewCardExpiry" style="font-family:'Courier New',monospace; font-size:1rem; font-weight:600; color:#fff; direction:ltr;">MM/YY</div>
+                                    <div id="previewCardExpiry" style="font-family:'El Messiri', sans-serif; font-size:1rem; font-weight:600; color:#fff; direction:ltr;">MM/YY</div>
                                 </div>
                             </div>
                         </div>
@@ -598,11 +589,12 @@
                                     رقم البطاقة
                                 </label>
                                 <div style="position:relative;">
-                                    <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" style="width:100%; padding:1.3rem 70px 1.3rem 1.3rem; border:2px solid #e0e7ff; border-radius:16px; font-family:'Courier New',monospace; font-size:1.2rem; font-weight:700; transition:all 0.3s; direction:ltr; text-align:left; background:linear-gradient(135deg, #fafbff 0%, #f8f9ff 100%);" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 4px rgba(102,126,234,0.15)'; this.style.background='#fff'" onblur="this.style.borderColor='#e0e7ff'; this.style.boxShadow='none'; this.style.background='linear-gradient(135deg, #fafbff 0%, #f8f9ff 100%)'" oninput="formatCardNumber(this); detectCardType(this); updateCardPreview()">
+                                    <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" style="width:100%; padding:1.3rem 70px 1.3rem 1.3rem; border:2px solid #e0e7ff; border-radius:16px; font-family:'El Messiri', sans-serif; font-size:1.2rem; font-weight:700; transition:all 0.3s; direction:ltr; text-align:left; background:linear-gradient(135deg, #fafbff 0%, #f8f9ff 100%);" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 4px rgba(102,126,234,0.15)'; this.style.background='#fff'" onblur="this.style.borderColor='#e0e7ff'; this.style.boxShadow='none'; this.style.background='linear-gradient(135deg, #fafbff 0%, #f8f9ff 100%)'" oninput="formatCardNumber(this); detectCardType(this); updateCardPreview()">
                                     <div style="position:absolute; right:8px; top:50%; transform:translateY(-50%); width:50px; height:35px; display:flex; align-items:center; justify-content:center; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); pointer-events:none;">
                                         <i id="cardTypeIcon" class="fab fa-cc-visa" style="font-size:2rem; transition:all 0.3s;"></i>
                                     </div>
                                 </div>
+                                <span id="cardNumberError" style="color: #e74c3c; font-size: 0.85rem; font-family: 'El Messiri', sans-serif; margin-top: 0.5rem; display: none;">الرجاء إدخال رقم بطاقة صحيح</span>
                             </div>
                             
                             <!-- Card Holder Name -->
@@ -612,6 +604,7 @@
                                     اسم حامل البطاقة
                                 </label>
                                 <input type="text" id="cardName" placeholder="الاسم كما هو مكتوب على البطاقة" style="width:100%; padding:1.3rem; border:2px solid #e0e7ff; border-radius:16px; font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:600; transition:all 0.3s; background:linear-gradient(135deg, #fafbff 0%, #f8f9ff 100%);" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 4px rgba(102,126,234,0.15)'; this.style.background='#fff'" onblur="this.style.borderColor='#e0e7ff'; this.style.boxShadow='none'; this.style.background='linear-gradient(135deg, #fafbff 0%, #f8f9ff 100%)'" oninput="updateCardPreview()">
+                                <span id="cardNameError" style="color: #e74c3c; font-size: 0.85rem; font-family: 'El Messiri', sans-serif; margin-top: 0.5rem; display: none;">الرجاء إدخال اسم حامل البطاقة</span>
                             </div>
                             
                             <!-- Expiry and CVV -->
@@ -621,14 +614,16 @@
                                         <i class="fas fa-calendar-alt" style="margin-left:0.4rem; color:#667eea;"></i>
                                         تاريخ الانتهاء
                                     </label>
-                                    <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5" style="width:100%; padding:1.3rem; border:2px solid #e0e7ff; border-radius:16px; font-family:'Courier New',monospace; font-size:1.2rem; font-weight:700; transition:all 0.3s; direction:ltr; text-align:center; background:linear-gradient(135deg, #fafbff 0%, #f8f9ff 100%);" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 4px rgba(102,126,234,0.15)'; this.style.background='#fff'" onblur="this.style.borderColor='#e0e7ff'; this.style.boxShadow='none'; this.style.background='linear-gradient(135deg, #fafbff 0%, #f8f9ff 100%)'" oninput="formatExpiry(this); updateCardPreview()">
+                                    <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5" style="width:100%; padding:1.3rem; border:2px solid #e0e7ff; border-radius:16px; font-family:'El Messiri', sans-serif; font-size:1.2rem; font-weight:700; transition:all 0.3s; direction:ltr; text-align:center; background:linear-gradient(135deg, #fafbff 0%, #f8f9ff 100%);" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 4px rgba(102,126,234,0.15)'; this.style.background='#fff'" onblur="this.style.borderColor='#e0e7ff'; this.style.boxShadow='none'; this.style.background='linear-gradient(135deg, #fafbff 0%, #f8f9ff 100%)'" oninput="formatExpiry(this); updateCardPreview()">
+                                    <span id="cardExpiryError" style="color: #e74c3c; font-size: 0.85rem; font-family: 'El Messiri', sans-serif; margin-top: 0.5rem; display: none;">تاريخ غير صحيح</span>
                                 </div>
                                 <div>
                                     <label style="display:block; font-family:'El Messiri',sans-serif; font-size:1rem; font-weight:700; color:#1a1a1a; margin-bottom:0.8rem;">
                                         <i class="fas fa-lock" style="margin-left:0.4rem; color:#667eea;"></i>
                                         CVV
                                     </label>
-                                    <input type="text" id="cardCVV" placeholder="123" maxlength="4" style="width:100%; padding:1.3rem; border:2px solid #e0e7ff; border-radius:16px; font-family:'Courier New',monospace; font-size:1.2rem; font-weight:700; transition:all 0.3s; direction:ltr; text-align:center; background:linear-gradient(135deg, #fafbff 0%, #f8f9ff 100%);" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 4px rgba(102,126,234,0.15)'; this.style.background='#fff'" onblur="this.style.borderColor='#e0e7ff'; this.style.boxShadow='none'; this.style.background='linear-gradient(135deg, #fafbff 0%, #f8f9ff 100%)'" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                    <input type="text" id="cardCVV" placeholder="123" maxlength="4" style="width:100%; padding:1.3rem; border:2px solid #e0e7ff; border-radius:16px; font-family:'El Messiri', sans-serif; font-size:1.2rem; font-weight:700; transition:all 0.3s; direction:ltr; text-align:center; background:linear-gradient(135deg, #fafbff 0%, #f8f9ff 100%);" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 4px rgba(102,126,234,0.15)'; this.style.background='#fff'" onblur="this.style.borderColor='#e0e7ff'; this.style.boxShadow='none'; this.style.background='linear-gradient(135deg, #fafbff 0%, #f8f9ff 100%)'" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                    <span id="cardCVVError" style="color: #e74c3c; font-size: 0.85rem; font-family: 'El Messiri', sans-serif; margin-top: 0.5rem; display: none;">رمز CVV غير صحيح</span>
                                 </div>
                             </div>
                             
@@ -647,10 +642,10 @@
                     
                     <!-- Navigation Buttons -->
                     <div style="display:flex; gap:1rem;">
-                        <button onclick="backToPaymentOptions()" style="flex:1; background:#e0e0e0; color:#666; border:none; padding:1.2rem; font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s;">
+                        <button onclick="backToPaymentOptions()" style="flex:1; background:#e0e0e0; color:#666; border:none; padding:0.6rem; font-family:'El Messiri',sans-serif; font-size:0.85rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s;">
                             <i class="fas fa-arrow-right" style="margin-left:0.5rem;"></i> العودة
                         </button>
-                        <button onclick="validateCardAndProceed()" style="flex:2; background:#ff6b35; color:#fff; border:none; padding:1.2rem; font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 15px rgba(255,107,53,0.3);">
+                        <button onclick="validateCardAndProceed()" style="flex:2; background:#ff6b35; color:#fff; border:none; padding:0.6rem; font-family:'El Messiri',sans-serif; font-size:0.85rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 15px rgba(255,107,53,0.3);">
                             متابعة <i class="fas fa-arrow-left" style="margin-right:0.5rem;"></i>
                         </button>
                     </div>
@@ -680,10 +675,10 @@
                 </div>
                 
                 <div style="display:flex; gap:1rem;">
-                    <button type="button" onclick="event.stopPropagation(); console.log('Back button clicked'); goToStep(3); return false;" style="flex:1; background:#e0e0e0; color:#666; border:none; padding:1.2rem; font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s;">
+                    <button type="button" onclick="event.stopPropagation(); console.log('Back button clicked'); goToStep(3); return false;" style="flex:1; background:#e0e0e0; color:#666; border:none; padding:0.6rem; font-family:'El Messiri',sans-serif; font-size:0.85rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s;">
                         <i class="fas fa-arrow-right" style="margin-left:0.5rem;"></i> السابق
                     </button>
-                    <button type="button" onclick="event.stopPropagation(); console.log('Submit button clicked!'); submitOrder(); return false;" style="flex:2; background:linear-gradient(135deg, #28a745 0%, #20c997 100%); color:#fff; border:none; padding:1.2rem; font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 15px rgba(40,167,69,0.3);">
+                    <button type="button" onclick="event.stopPropagation(); console.log('Submit button clicked!'); submitOrder(); return false;" style="flex:2; background:linear-gradient(135deg, #28a745 0%, #20c997 100%); color:#fff; border:none; padding:0.6rem; font-family:'El Messiri',sans-serif; font-size:0.85rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 15px rgba(40,167,69,0.3);">
                         <i class="fas fa-check-circle" style="margin-left:0.5rem;"></i>
                         تأكيد الطلب
                     </button>

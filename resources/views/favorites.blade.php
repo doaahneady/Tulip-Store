@@ -149,7 +149,7 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-family: 'Changa', sans-serif;
+            font-family:"El Messiri", sans-serif;
             font-size: 0.75rem;
             display: flex;
             align-items: center;

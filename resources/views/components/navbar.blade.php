@@ -354,7 +354,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="fas fa-search search-result-icon"></i>
                         <div class="search-result-info">
                             <div class="search-result-name">${product.name}</div>
-                            <div class="search-result-price">${product.price} ر.س</div>
+                            <div class="search-result-price">${product.price} ل.س</div>
                         </div>
                         <img src="${product.primary_image_url || product.image || (Array.isArray(product.images) ? product.images[0] : null) || '/images/gift-placeholder.svg'}" class="search-result-img" alt="${product.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'">
                     </div>
@@ -678,7 +678,7 @@ window.showToast = function(message, duration = 2500) {
         opacity: 0;
         transition: all 0.3s ease;
         font-weight: 500;
-        font-family: 'El Messiri', sans-serif;
+        font-family: "Montserrat-Alt", sans-serif;
     `;
     toast.innerHTML = `
         <span>${message}</span>

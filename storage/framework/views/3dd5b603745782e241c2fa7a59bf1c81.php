@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice - <?php echo e($order->order_number); ?></title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 24px; color: #111827; }
+        body { font-family: 'El Messiri',sans-serif; margin: 0; padding: 24px; color: #111827; }
         .header { display:flex; justify-content:space-between; align-items:flex-start; gap: 16px; margin-bottom: 18px; }
         .brand { font-weight: 800; letter-spacing: 0.5px; color: #0f766e; font-size: 18px; }
         .muted { color:#6b7280; font-size: 12px; }

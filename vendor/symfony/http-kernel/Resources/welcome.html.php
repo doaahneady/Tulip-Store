@@ -15,7 +15,7 @@
         h2 { font-size: 21px; margin-bottom: 1em; }
         a { color: <?= $darkColor(0.75); ?> }
         a:hover { text-decoration: none; }
-        code { border-radius: 25px; background: <?= $lightColor(); ?>; box-shadow: 0 0 45px -15px hsl(<?= $hue; ?>, 20%, 2%); color: <?= $darkColor(); ?>; font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; align-items: center; padding-right: 20px; position: relative; word-wrap: break-word; z-index: 1; }
+        code { border-radius: 25px; background: <?= $lightColor(); ?>; box-shadow: 0 0 45px -15px hsl(<?= $hue; ?>, 20%, 2%); color: <?= $darkColor(); ?>; font-family: 'El Messiri', sans-serif; align-items: center; padding-right: 20px; position: relative; word-wrap: break-word; z-index: 1; }
         svg { overflow: hidden; vertical-align: text-bottom; }
         .wrapper { text-align: center; width: 100%; }
         .container { position: relative; background: radial-gradient(ellipse at bottom, <?= $darkColor(); ?> 0%, hsl(<?= $hue; ?>, 20%, 13%) 100%); background-attachment: fixed; color: <?= $lightColor(); ?>; }

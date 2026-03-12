@@ -10,13 +10,13 @@
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Tajawal', sans-serif; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh; }
+        body { font-family:  'El Messiri', sans-serif; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh; }
 
         /* Beautiful Hero Section */
         .prices-hero {
-            background: linear-gradient(135deg, #2d5016 0%, #4a7c59 30%, #5d8a66 60%, #7dd3c0 100%);
+            background: linear-gradient(135deg, #F05928 0%, #0D464C 60%,  #7dd3c0 100%);
             position: relative;
-            padding: 6rem 2rem 10rem;
+            padding: 3rem 2rem 10rem;
             overflow: hidden;
         }
         .prices-hero::before {
@@ -118,32 +118,8 @@
             z-index: 2;
         }
 
-        /* Live Badge */
-        .live-badge {
-            position: fixed;
-            top: 130px;
-            left: 30px;
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
-            color: #fff;
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            box-shadow: 0 15px 40px rgba(39,174,96,0.4);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255,255,255,0.2);
-        }
-        .live-dot {
-            width: 10px; height: 10px;
-            background: #ffeb3b;
-            border-radius: 50%;
-            animation: pulse 1.8s infinite;
-            box-shadow: 0 0 10px rgba(255,235,59,0.6);
-        }
+       
+       
         @keyframes pulse { 
             0%, 100% { opacity: 1; transform: scale(1); } 
             50% { opacity: 0.6; transform: scale(1.2); } 
@@ -251,7 +227,7 @@
         }
         .category-title .emoji { font-size: 2.5rem; }
         .category-count {
-            background: linear-gradient(135deg, #1a5a5a, #2d7a7a);
+            background: linear-gradient(135deg, #0D464C, #F05928);
             color: #fff;
             padding: 0.6rem 1.5rem;
             border-radius: 50px;
@@ -260,81 +236,102 @@
         }
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.5rem;
         }
         .price-card {
             display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            padding: 1.5rem;
-            background: #f8f9fa;
+            align-items: stretch;
+            gap: 0;
+            padding: 0;
+            background: #fff;
             border-radius: 20px;
             transition: all 0.4s ease;
             cursor: pointer;
-            border: 2px solid transparent;
+            border: 1px solid #eee;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
         .price-card:hover {
-            background: #fff;
             border-color: #7dd3c0;
             box-shadow: 0 10px 30px rgba(125,211,192,0.15);
             transform: translateY(-5px);
         }
-        .price-card .emoji { 
-            font-size: 3.5rem; 
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
+        .price-card .photo-container {
+            width: 100px;
+            height: 100px;
+            flex-shrink: 0;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-left: 1px solid #f0f0f0;
         }
-        .price-card .info { flex: 1; }
+        .price-card .photo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .price-card .photo-container .emoji {
+            font-size: 3rem;
+        }
+        .price-card .info {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
         .price-card .name { 
             font-family: 'El Messiri', sans-serif;
-            font-size: 1.2rem; 
+            font-size: 1.1rem; 
             font-weight: 700; 
             color: #1a5a5a; 
-            margin-bottom: 0.3rem; 
+            margin-bottom: 0.2rem; 
         }
         .price-card .origin { 
-            font-size: 0.85rem; 
+            font-size: 0.8rem; 
             color: #7f8c8d; 
-            margin-bottom: 0.8rem; 
+            margin-bottom: 0.5rem; 
             display: flex; 
             align-items: center; 
-            gap: 0.4rem; 
+            gap: 0.3rem; 
         }
         .price-card .prices { 
             display: flex; 
-            align-items: center; 
-            gap: 0.8rem; 
-            flex-wrap: wrap; 
-            margin-bottom: 0.8rem;
+            align-items: baseline; 
+            gap: 0.5rem; 
+            margin-bottom: 0;
         }
         .price-card .current { 
-            font-family: 'El Messiri', sans-serif;
-            font-size: 1.4rem; 
+            font-family:'El Messiri',sans-serif;
+            font-size: 1.15rem; 
             font-weight: 800; 
             color: #1a5a5a; 
         }
         .price-card .old { 
-            font-size: 1rem; 
+            font-size: 0.85rem; 
             color: #bdc3c7; 
             text-decoration: line-through; 
         }
         .price-card .unit { 
-            font-size: 0.85rem; 
+            font-size: 0.75rem; 
             color: #7f8c8d; 
+            margin-inline-start: 0.2rem;
         }
         .add-btn {
-            width: 50px; height: 50px;
+            width: 45px;
             background: linear-gradient(135deg, #f39c12, #e67e22);
             color: #fff;
             border: none;
-            border-radius: 16px;
+            border-radius: 0;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
             flex-shrink: 0;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
         .add-btn:hover { 
             transform: scale(1.1); 
@@ -364,10 +361,7 @@
             <i class="fas fa-sync-alt"></i>
             تحديث مستمر كل ساعة
         </div>
-        <div class="hero-icons">
-            <span class="hero-icon-item">🍎</span>
-            <span class="hero-icon-item">🥬</span>
-        </div>
+       
         <h1 class="hero-title">أسعار <span>الفواكه والخضروات</span></h1>
         <p class="hero-subtitle">تابع أحدث أسعار الفواكه والخضروات الطازجة مع تحديث مستمر لضمان أفضل الصفقات</p>
         <div class="date-badge">
@@ -377,10 +371,10 @@
     </div>
 </section>
 
-<div class="live-badge">
+<!-- <div class="live-badge">
     <div class="live-dot"></div>
     تحديث مباشر
-</div>
+</div> -->
 
 <div class="prices-container">
     <!-- Categories -->
@@ -388,69 +382,7 @@
 </div>
 
 <!-- Footer -->
-<footer style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); padding: 3rem 2rem 2rem; margin-top: 4rem; position: relative; overflow: hidden;">
-    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.02\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E'); opacity: 0.1;"></div>
-    
-    <div style="max-width: 1400px; margin: 0 auto; position: relative; z-index: 1;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 3rem; margin-bottom: 2.5rem;">
-            <!-- Logo & Description -->
-            <div style="text-align: center;">
-                <img src="/images/white_orange_logo.png" style="height: 120px; margin-bottom: 1.5rem; display: block; margin-left: auto; margin-right: auto;">
-                <p style="color: rgba(255,255,255,0.8); line-height: 1.8; font-size: 1rem; margin-bottom: 1.5rem; max-width: 400px; margin-left: auto; margin-right: auto;">
-                    متجر فاخر للهدايا والمنتجات المميزة. نساعدك في إرسال ابتسامتك لأحبائك أينما كانوا.
-                </p>
-                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
-                    <a href="#" style="width: 45px; height: 45px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.8); text-decoration: none; transition: all 0.3s; font-size: 1.2rem;">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a href="#" style="width: 45px; height: 45px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.8); text-decoration: none; transition: all 0.3s; font-size: 1.2rem;">
-                        <i class="fab fa-facebook"></i>
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Quick Links -->
-            <div style="text-align: center;">
-                <h3 style="color: #27ae60; font-family: 'El Messiri', sans-serif; font-weight: 700; margin-bottom: 1.5rem; font-size: 1.3rem;">روابط سريعة</h3>
-                <div style="display: flex; flex-direction: column; gap: 0.8rem; align-items: center;">
-                    <a href="/" style="color: rgba(255,255,255,0.8); text-decoration: none; font-size: 1rem;">الرئيسية</a>
-                    <a href="/store" style="color: rgba(255,255,255,0.8); text-decoration: none; font-size: 1rem;">المتجر</a>
-                    <a href="/gifts" style="color: rgba(255,255,255,0.8); text-decoration: none; font-size: 1rem;">الهدايا</a>
-                    <a href="/mart" style="color: rgba(255,255,255,0.8); text-decoration: none; font-size: 1rem;">السوبرماركت</a>
-                    <a href="/about" style="color: rgba(255,255,255,0.8); text-decoration: none; font-size: 1rem;">من نحن</a>
-                </div>
-            </div>
-
-            <!-- Support -->
-            <div style="text-align: center;">
-                <h3 style="color: #27ae60; font-family: 'El Messiri', sans-serif; font-weight: 700; margin-bottom: 1.5rem; font-size: 1.3rem;">الدعم</h3>
-                <div style="display: flex; flex-direction: column; gap: 0.8rem; align-items: center;">
-                    <a href="/contact" style="color: rgba(255,255,255,0.8); text-decoration: none; font-size: 1rem;">اتصل بنا</a>
-                    <a href="/faq" style="color: rgba(255,255,255,0.8); text-decoration: none; font-size: 1rem;">الأسئلة الشائعة</a>
-                    <a href="/returns" style="color: rgba(255,255,255,0.8); text-decoration: none; font-size: 1rem;">سياسة الإرجاع</a>
-                    <a href="/shipping" style="color: rgba(255,255,255,0.8); text-decoration: none; font-size: 1rem;">الشحن والتوصيل</a>
-                </div>
-            </div>
-
-            <!-- Legal -->
-            <div style="text-align: center;">
-                <h3 style="color: #27ae60; font-family: 'El Messiri', sans-serif; font-weight: 700; margin-bottom: 1.5rem; font-size: 1.3rem;">قانوني</h3>
-                <div style="display: flex; flex-direction: column; gap: 0.8rem; align-items: center;">
-                    <a href="/privacy" style="color: rgba(255,255,255,0.8); text-decoration: none; font-size: 1rem;">سياسة الخصوصية</a>
-                    <a href="/terms" style="color: rgba(255,255,255,0.8); text-decoration: none; font-size: 1rem;">شروط الخدمة</a>
-                    <a href="/cookies" style="color: rgba(255,255,255,0.8); text-decoration: none; font-size: 1rem;">سياسة ملفات تعريف الارتباط</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bottom Row -->
-        <div style="padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
-            <p style="margin: 0; font-size: 0.95rem; color: rgba(255,255,255,0.6);">
-                © 2024 متجر توليب. جميع الحقوق محفوظة
-            </p>
-        </div>
-    </div>
-</footer>
+@include('components.footer')
 
 <script>
 const API_BASE = window.location.origin + '/api';
@@ -464,6 +396,14 @@ document.addEventListener('DOMContentLoaded', () => {
 function loadDate() {
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('ar-SA', options);
+}
+
+function resolvePublicImage(path) {
+    if (!path) return null;
+    const p = String(path);
+    if (p.startsWith('http://') || p.startsWith('https://')) return p;
+    if (p.startsWith('/')) return p;
+    return `/storage/${p}`;
 }
 
 async function fetchDailyPrices() {
@@ -480,12 +420,12 @@ async function fetchDailyPrices() {
 function renderCategories() {
     const container = document.getElementById('categoriesContainer');
     const categoryInfo = {
-        fruits: { title: 'الفواكه', emojiFallback: '🍎' },
-        vegetables: { title: 'الخضروات', emojiFallback: '🥬' }
+        fruits: { title: 'الفواكه', emojiFallback: '' },
+        vegetables: { title: 'الخضروات', emojiFallback: '' }
     };
     const entries = Object.entries(productsData.categories || {});
     container.innerHTML = entries.map(([key, items]) => {
-        const info = categoryInfo[key] || { title: key, emojiFallback: '🥗' };
+        const info = categoryInfo[key] || { title: key, emojiFallback: '' };
         return `
             <section class="category-section" id="${key}">
                 <div class="category-header">
@@ -503,19 +443,19 @@ function renderCategories() {
 }
 
 function createCard(p) {
-    const icon = p.photo
-        ? `<img src="${p.photo}" alt="${p.name}" style="width:52px;height:52px;border-radius:14px;object-fit:cover;border:1px solid #eee;">`
-        : `<span class="emoji">${p.emoji || '🛍️'}</span>`;
+    const photoUrl = resolvePublicImage(p.photo || p.image || p.imageUrl) || '/images/grocery.jpg';
     return `
         <div class="price-card">
-            ${icon}
+            <div class="photo-container">
+                <img src="${photoUrl}" alt="${p.name}" onerror="this.src='/images/grocery.jpg'">
+            </div>
             <div class="info">
                 <div class="name">${p.name}</div>
                 <div class="origin"><i class="fas fa-map-marker-alt"></i> ${p.origin || ''}</div>
                 <div class="prices">
-                    <span class="current">${p.price} ر.س</span>
-                    ${p.oldPrice ? `<span class="old">${p.oldPrice} ر.س</span>` : ''}
-                    <span class="unit">/ ${p.unit || ''}</span>
+                    <span class="current">${p.price} ل.س</span>
+                    ${p.oldPrice ? `<span class="old">${p.oldPrice} ل.س</span>` : ''}
+                    <span class="unit">لكل 1 كغ</span>
                 </div>
             </div>
             <button class="add-btn" onclick="addToCart('${p.id || p.name}', this)">
@@ -533,13 +473,23 @@ async function addToCart(id, btn) {
     const p = all.find(x => (x.id || x.name) === id);
     
     try {
+        const photoUrl = resolvePublicImage(p?.photo || p?.image || p?.imageUrl) || '/images/grocery.jpg';
         const r = await fetch(`${API_BASE}/cart/add`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
             },
-            body: JSON.stringify({ product_id: id, name: p?.name, price: p?.price, quantity: 1 })
+            body: JSON.stringify({ 
+                product_id: id, 
+                product_type: 'mart',
+                name: p?.name, 
+                price: p?.price, 
+                quantity: 1,
+                image: photoUrl,
+                unit: 'كغ',
+                emoji: p?.emoji || ''
+            })
         });
         const d = await r.json();
         

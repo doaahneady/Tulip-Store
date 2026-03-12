@@ -2260,6 +2260,100 @@ function updateCardPreview() {
     }
 }
 
+// Validate card and proceed to confirmation
+window.validateCardAndProceed = function() {
+    console.log('💳 Validating credit card...');
+    
+    // Check if a saved card is selected
+    const savedCardItems = document.querySelectorAll('.saved-card-item');
+    let savedCardSelected = false;
+    savedCardItems.forEach(item => {
+        if (item.style.borderColor === 'rgb(42, 112, 128)' || item.style.borderColor === '#2a7080') {
+            savedCardSelected = true;
+        }
+    });
+    
+    if (savedCardSelected) {
+        console.log('✅ Saved card selected, proceeding...');
+        goToStep(4);
+        return;
+    }
+    
+    // Validate new card fields
+    const cardNumber = document.getElementById('cardNumber');
+    const cardName = document.getElementById('cardName');
+    const cardExpiry = document.getElementById('cardExpiry');
+    const cardCVV = document.getElementById('cardCVV');
+    
+    let isValid = true;
+    
+    // Reset errors
+    document.getElementById('cardNumberError').style.display = 'none';
+    document.getElementById('cardNameError').style.display = 'none';
+    document.getElementById('cardExpiryError').style.display = 'none';
+    document.getElementById('cardCVVError').style.display = 'none';
+    
+    cardNumber.style.borderColor = '#e0e7ff';
+    cardName.style.borderColor = '#e0e7ff';
+    cardExpiry.style.borderColor = '#e0e7ff';
+    cardCVV.style.borderColor = '#e0e7ff';
+    
+    // Card Number Validation (16 digits minimum)
+    const cardNumVal = cardNumber.value.replace(/\s/g, '');
+    if (cardNumVal.length < 16 || !/^\d+$/.test(cardNumVal)) {
+        document.getElementById('cardNumberError').style.display = 'block';
+        cardNumber.style.borderColor = '#e74c3c';
+        isValid = false;
+    }
+    
+    // Card Name Validation
+    if (cardName.value.trim().length < 3) {
+        document.getElementById('cardNameError').style.display = 'block';
+        cardName.style.borderColor = '#e74c3c';
+        isValid = false;
+    }
+    
+    // Card Expiry Validation (MM/YY)
+    const expiryVal = cardExpiry.value;
+    const expiryRegex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
+    if (!expiryRegex.test(expiryVal)) {
+        document.getElementById('cardExpiryError').style.display = 'block';
+        cardExpiry.style.borderColor = '#e74c3c';
+        isValid = false;
+    } else {
+        // Check if expired
+        const parts = expiryVal.split('/');
+        const month = parseInt(parts[0], 10);
+        const year = parseInt('20' + parts[1], 10);
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1;
+        
+        if (year < currentYear || (year === currentYear && month < currentMonth)) {
+            document.getElementById('cardExpiryError').textContent = 'البطاقة منتهية الصلاحية';
+            document.getElementById('cardExpiryError').style.display = 'block';
+            cardExpiry.style.borderColor = '#e74c3c';
+            isValid = false;
+        }
+    }
+    
+    // CVV Validation
+    const cvvVal = cardCVV.value;
+    if (cvvVal.length < 3 || !/^\d+$/.test(cvvVal)) {
+        document.getElementById('cardCVVError').style.display = 'block';
+        cardCVV.style.borderColor = '#e74c3c';
+        isValid = false;
+    }
+    
+    if (isValid) {
+        console.log('✅ New card validation successful, proceeding...');
+        goToStep(4);
+    } else {
+        console.log('❌ Card validation failed');
+        showAlert('الرجاء تصحيح الأخطاء في بيانات البطاقة', 'error');
+    }
+};
+
 
 // Override placeMarker for Leaflet
 window.placeMarkerLeaflet = function(latlng) {

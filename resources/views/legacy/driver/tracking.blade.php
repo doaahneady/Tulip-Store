@@ -14,7 +14,7 @@
         }
 
         body {
-            font-family: 'Cairo', sans-serif;
+            font-family:  'El Messiri', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
@@ -72,7 +72,7 @@
             border: 2px solid #e2e8f0;
             border-radius: 10px;
             font-size: 16px;
-            font-family: 'Cairo', sans-serif;
+            font-family:  'El Messiri', sans-serif;
             transition: all 0.3s;
         }
 
@@ -91,7 +91,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            font-family: 'Cairo', sans-serif;
+            font-family:  'El Messiri', sans-serif;
         }
 
         .btn-primary {

@@ -23,7 +23,7 @@
             background-attachment: fixed;
             min-height: 100vh;
             direction: rtl;
-            font-family: 'Changa', sans-serif;
+            font-family: 'El Messiri',sans-serif;
             font-weight: 400;
             height: 100%;
         }
@@ -133,12 +133,12 @@
             text-align:center;
             outline:none;
             transition: border-bottom 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
-            font-family: 'Changa', sans-serif;
+            font-family: 'El Messiri',sans-serif;
             font-weight: 400;
         }
         input::placeholder{
             color:#d3e7e2;
-            font-family: 'Changa', sans-serif;
+            font-family: 'El Messiri',sans-serif;
             font-weight: 300;
         }
         input:focus{
@@ -198,7 +198,7 @@
             justify-content:flex-end;
             gap:0.4rem;
             font-size:0.95rem;
-            font-family: 'Changa', sans-serif;
+            font-family: 'El Messiri',sans-serif;
             font-weight: 300;
             cursor: pointer;
         }

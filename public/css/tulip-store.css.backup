@@ -16,7 +16,7 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "El Messiri", sans-serif;
     background-color: var(--tulip-cream);
     color: var(--tulip-text);
 }

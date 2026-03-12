@@ -196,7 +196,7 @@
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
     <div class="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl p-6 text-white">
         <p class="text-purple-200 text-sm">إيرادات اليوم</p>
-        <h3 class="text-3xl font-bold mt-2">{{ number_format($revenue['today'], 2) }} ر.س</h3>
+        <h3 class="text-3xl font-bold mt-2">{{ number_format($revenue['today'], 2) }}ل.س</h3>
         <div class="mt-4 flex items-center gap-2">
             <span class="bg-white/20 px-2 py-1 rounded text-xs">{{ $metrics['orders_today'] }} طلب</span>
         </div>
@@ -204,7 +204,7 @@
     
     <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white">
         <p class="text-green-200 text-sm">إيرادات هذا الأسبوع</p>
-        <h3 class="text-3xl font-bold mt-2">{{ number_format($revenue['this_week'], 2) }} ر.س</h3>
+        <h3 class="text-3xl font-bold mt-2">{{ number_format($revenue['this_week'], 2) }} ل.س</h3>
         <div class="mt-4 flex items-center gap-2">
             <span class="bg-white/20 px-2 py-1 rounded text-xs">{{ $metrics['new_users_week'] }} مستخدم جديد</span>
         </div>
@@ -212,7 +212,7 @@
     
     <div class="bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl p-6 text-white">
         <p class="text-orange-200 text-sm">إيرادات هذا الشهر</p>
-        <h3 class="text-3xl font-bold mt-2">{{ number_format($revenue['this_month'], 2) }} ر.س</h3>
+        <h3 class="text-3xl font-bold mt-2">{{ number_format($revenue['this_month'], 2) }} ل.س</h3>
         <div class="mt-4 flex items-center gap-2">
             @php $growth = $revenue['last_month'] > 0 ? round((($revenue['this_month'] - $revenue['last_month']) / $revenue['last_month']) * 100, 1) : 0; @endphp
             <span class="bg-white/20 px-2 py-1 rounded text-xs">{{ $growth > 0 ? '+' : '' }}{{ $growth }}% من الشهر الماضي</span>
@@ -267,7 +267,7 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 text-sm font-medium text-gray-800">#{{ $order->id }}</td>
                         <td class="px-6 py-4 text-sm text-gray-600">{{ $order->user->name ?? 'غير معروف' }}</td>
-                        <td class="px-6 py-4 text-sm font-semibold text-gray-800">{{ number_format($order->total, 2) }} ر.س</td>
+                        <td class="px-6 py-4 text-sm font-semibold text-gray-800">{{ number_format($order->total, 2) }} ل.س</td>
                         <td class="px-6 py-4">
                             @php
                                 $statusColors = ['pending' => 'yellow', 'confirmed' => 'blue', 'processing' => 'indigo', 'shipped' => 'purple', 'delivered' => 'green', 'cancelled' => 'red'];
@@ -301,7 +301,7 @@
                     <p class="font-semibold text-gray-800">{{ $product->name }}</p>
                     <p class="text-sm text-gray-500">{{ $product->order_items_count ?? 0 }} مبيعات</p>
                 </div>
-                <p class="font-bold text-gray-800">{{ number_format($product->price, 2) }} ر.س</p>
+                <p class="font-bold text-gray-800">{{ number_format($product->price, 2) }}ل.س</p>
             </div>
             @empty
             <p class="text-center text-gray-500">لا توجد منتجات</p>

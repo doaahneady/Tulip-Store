@@ -4,7 +4,7 @@
     <title>تسجيل الدخول بنجاح</title>
     <style>
         body {
-            font-family: 'Changa', sans-serif;
+            font-family: "El Messiri", sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;

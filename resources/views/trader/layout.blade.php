@@ -11,7 +11,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Tajawal', sans-serif; background: #f6f7fb; color: #1f2937; }
+        body { font-family: 'El Messiri',sans-serif; background: #f6f7fb; color: #1f2937; }
         .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; gap: 1rem; flex-wrap: wrap; }
         .header h1 { font-family: 'El Messiri', sans-serif; font-size: 1.8rem; color: #4a148c; }
@@ -45,7 +45,7 @@
         .btn.primary { background:#7b1fa2; color:#fff; }
         .btn.gray { background:#e5e7eb; color:#111827; }
         .btn.danger { background:#fee2e2; color:#b91c1c; }
-        .input, .select, .textarea { width:100%; border:2px solid #e5e7eb; border-radius:12px; padding:.75rem .9rem; font-family: inherit; background:#fff; }
+        .input, .select, .textarea { width:100%; border:2px solid #e5e7eb; border-radius:12px; padding:.75rem .9rem; font-family:'El Messiri',sans-serif; background:#fff; }
         .input:focus, .select:focus, .textarea:focus { outline:none; border-color:#7b1fa2; box-shadow: 0 0 0 4px rgba(123,31,162,.08); }
         .alert { padding:.9rem 1rem; border-radius:12px; font-weight:700; margin-bottom: 1rem; }
         .alert.success { background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; }

@@ -123,11 +123,13 @@ function initializeModernSlider() {
         const slideEl = document.createElement('div');
         slideEl.className = 'modern-slide';
         slideEl.innerHTML = `
-            <img src="${slide.image}" alt="${slide.title}">
-            <div class="modern-slide-content">
-                <h2 style="font-family:'Changa',sans-serif; font-size:2rem; font-weight:900; margin:0 0 0.8rem 0;">${slide.title}</h2>
-                <p style="font-family:'Changa',sans-serif; font-size:1.1rem; margin:0;">${slide.subtitle}</p>
-            </div>
+            <a href="${slide.link || '#'}" style="display:block; width:100%; height:100%; text-decoration:none;">
+                <img src="${slide.image}" alt="${slide.title}">
+                <div class="modern-slide-content">
+                    <h2 style="font-family:'El Messiri', sans-serif; font-size:2rem; font-weight:900; margin:0 0 0.8rem 0;">${slide.title}</h2>
+                    <p style="font-family:'El Messiri', sans-serif; font-size:1.1rem; margin:0;">${slide.subtitle}</p>
+                </div>
+            </a>
         `;
         container.appendChild(slideEl);
         

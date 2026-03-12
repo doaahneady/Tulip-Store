@@ -18,7 +18,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'Tajawal', sans-serif;
+            font-family:"El Messiri", sans-serif;
             min-height: 100vh;
             display: flex;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -183,7 +183,7 @@
             border: 2px solid #e0e0e0;
             border-radius: 12px;
             font-size: 1rem;
-            font-family: inherit;
+            font-family: "El Messiri", sans-serif;
             transition: all 0.3s ease;
             background: #fafafa;
         }
@@ -264,7 +264,7 @@
             border-radius: 12px;
             font-size: 1.1rem;
             font-weight: 600;
-            font-family: inherit;
+            font-family:"El Messiri", sans-serif;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;

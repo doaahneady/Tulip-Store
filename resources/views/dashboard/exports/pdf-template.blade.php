@@ -5,7 +5,7 @@
     <title>{{ $metadata['title'] ?? 'Export Report' }}</title>
     <style>
         * { box-sizing: border-box; }
-        body { font-family: DejaVu Sans, Arial, Tahoma, sans-serif; color: #111827; margin: 24px; }
+        body { font-family: "El Messiri", sans-serif; color: #111827; margin: 24px; }
         .header { margin-bottom: 16px; }
         .title { font-size: 20px; font-weight: 700; margin: 0 0 4px 0; }
         .subtitle { font-size: 12px; color: #6B7280; margin: 0 0 8px 0; }

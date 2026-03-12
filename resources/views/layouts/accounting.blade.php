@@ -11,7 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     @stack('styles')
     <style>
-        * { font-family: 'Cairo', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+        * { font-family:  'El Messiri', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #f5f7fa; min-height: 100vh; display: flex; flex-direction: column; }
         
         /* Top Navbar */
@@ -156,7 +156,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            font-family: 'Cairo', sans-serif;
+            font-family:  'El Messiri', sans-serif;
         }
         .btn-primary { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #fff; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(30,58,138,0.3); }
@@ -178,7 +178,7 @@
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
         .stat-card { background: #fff; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-right: 5px solid #1e3a8a; }
         .stat-icon { width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 0.8rem; background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #fff; border-radius: 8px; }
-        .stat-value { font-size: 2rem; font-weight: 800; color: #1e3a8a; font-family: 'Courier New', monospace; }
+        .stat-value { font-size: 2rem; font-weight: 800; color: #1e3a8a; font-family: 'El Messiri', sans-serif; }
         .stat-label { color: #6b7280; font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem; }
         
         /* Colors */

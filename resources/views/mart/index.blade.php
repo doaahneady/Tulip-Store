@@ -31,7 +31,7 @@
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            font-family: 'Tajawal', sans-serif; 
+            font-family: 'El Messiri', sans-serif; 
             background: var(--bg); 
             line-height: 1.6;
             color: var(--text);
@@ -134,7 +134,7 @@
         .btn {
             padding: 0.9rem 2.3rem;
             border-radius: 50px;
-            font-family: inherit;
+            font-family:  'El Messiri', sans-serif;
             font-weight: 600;
             font-size: 1.1rem;
             cursor: pointer;
@@ -283,7 +283,7 @@
         .main-content {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 4rem 2rem;
+            /* padding: 4rem 2rem; */
         }
 
         /* Section Styles */
@@ -292,7 +292,7 @@
         }
         .section-header {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
         }
         .section-title {
             font-family: 'El Messiri', sans-serif;
@@ -330,7 +330,7 @@
         .category-card {
             background: var(--card);
             border-radius: 24px;
-            padding: 2.5rem 1.5rem;
+            padding: 0;
             text-align: center;
             cursor: pointer;
             transition: all 0.4s ease;
@@ -338,6 +338,8 @@
             position: relative;
             overflow: hidden;
             box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
         }
         .category-card::before {
             content: '';
@@ -349,6 +351,7 @@
             background: var(--cat-gradient);
             transform: scaleX(0);
             transition: transform 0.4s ease;
+            z-index: 2;
         }
         .category-card:hover::before {
             transform: scaleX(1);
@@ -359,68 +362,47 @@
             border-color: var(--cat-color);
         }
         .category-icon {
-            font-size: 4.5rem;
-            margin-bottom: 1.5rem;
+            font-size: 4rem;
+            margin-bottom: 1rem;
             display: block;
             filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
         }
         .category-photo {
             width: 100%;
-            height: 120px;
+            height: 110px;
             object-fit: cover;
-            border-radius: 16px;
-            margin-bottom: 1rem;
+            border-radius: 0;
+            margin-bottom: 0.75rem;
             display: block;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        }
+        .category-info {
+            padding: 0 1rem 1.2rem;
         }
         .category-name {
             font-family: 'El Messiri', sans-serif;
-            font-size: 1.3rem;
+            font-size: 1.15rem;
             font-weight: 600;
             color: var(--text);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.2rem;
         }
         .category-count {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: var(--text-light);
             background: var(--bg);
-            padding: 0.4rem 1rem;
+            padding: 0.2rem 0.8rem;
             border-radius: 20px;
             display: inline-block;
         }
         /* Daily Prices Feature */
         .daily-prices-feature {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+           
             border-radius: 32px;
             padding: 4rem;
             margin: 4rem 0;
             position: relative;
             overflow: hidden;
         }
-        .daily-prices-feature::before {
-            content: '📊';
-            position: absolute;
-            top: -50px;
-            right: -50px;
-            font-size: 15rem;
-            opacity: 0.1;
-        }
-        .prices-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-        .prices-title {
-            font-family: 'El Messiri', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #92400e;
-            margin-bottom: 1rem;
-        }
-        .prices-subtitle {
-            font-size: 1.1rem;
-            color: #a16207;
-            margin-bottom: 2rem;
-        }
+     
         .prices-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -466,47 +448,52 @@
         }
         .price-item {
             display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1.5rem;
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            align-items: stretch;
+            gap: 0;
+            padding: 0;
+            background: #fff;
             border-radius: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            border: 1px solid #eee;
+            overflow: hidden;
         }
         .price-item:hover {
             transform: translateY(-3px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             border-color: var(--category-color);
         }
-        .price-item-icon {
-            font-size: 3rem;
-        }
         .price-item-photo {
-            width: 48px;
-            height: 48px;
-            border-radius: 10px;
+            width: 85px;
+            height: 85px;
             object-fit: cover;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+            flex-shrink: 0;
         }
         .price-item-info {
             flex: 1;
+            padding: 0.8rem 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: right;
         }
         .price-item-name {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text);
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
+            margin-bottom: 0.3rem;
+            font-size: 1.05rem;
         }
         .price-item-value {
-            font-family: 'El Messiri', sans-serif;
-            font-size: 1.3rem;
-            font-weight: 700;
+            font-family:'El Messiri',sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
             color: var(--category-color);
         }
-        .view-all-prices {
-            text-align: center;
+        .view-all-prices .view-all-btn{
+            background:#F05928 ; 
+             color:#fff ;
+            display: flex;
+            justify-content: center;
             margin-top: 3rem;
         }
         .view-all-btn {
@@ -514,8 +501,8 @@
             align-items: center;
             gap: 0.75rem;
             padding: 1rem 2.5rem;
-            background: #92400e;
-            color: #fff;
+            /* background: ; */
+            color: #F05928;
             text-decoration: none;
             border-radius: 50px;
             font-weight: 600;
@@ -523,9 +510,9 @@
             transition: all 0.3s ease;
         }
         .view-all-btn:hover {
-            background: #78350f;
+            /* background: #F05928; */
             transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(146, 64, 14, 0.3);
+            text-shadow: 0 10px 25px #F05928;
         }
 
         /* Products Section */
@@ -569,7 +556,7 @@
         .badge-new { background: var(--info); color: #fff; }
         .badge-fresh { background: var(--success); color: #fff; }
         .product-image {
-            height: 180px;
+            height: 150px;
             background: #fff;
             display: flex;
             align-items: center;
@@ -581,10 +568,10 @@
         .product-image img { width: 100%; height: 100%; object-fit: cover; }
         .product-favorite {
             position: absolute;
-            top: 15px;
-            left: 15px;
-            width: 40px;
-            height: 40px;
+            top: 10px;
+            left: 10px;
+            width: 35px;
+            height: 35px;
             background: rgba(255,255,255,0.9);
             border: none;
             border-radius: 50%;
@@ -603,59 +590,59 @@
             transform: scale(1.1);
         }
         .product-body {
-            padding: 1.5rem;
+            padding: 1rem;
         }
         .product-category {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--primary);
             font-weight: 600;
             text-transform: uppercase;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.2rem;
             letter-spacing: 0.5px;
         }
         .product-name {
             font-family: 'El Messiri', sans-serif;
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: var(--text);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.2rem;
             font-weight: 600;
             line-height: 1.3;
         }
         .product-origin {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-light);
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.8rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
         .product-footer {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding-top: 1rem;
-            border-top: 2px solid var(--border);
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
         }
         .price-info {
             display: flex;
             flex-direction: column;
         }
         .price-current {
-            font-family: 'El Messiri', sans-serif;
-            font-size: 1.4rem;
+            font-family:'El Messiri',sans-serif;
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--primary-dark);
         }
         .price-old {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: #9ca3af;
             text-decoration: line-through;
-            margin-top: 0.2rem;
+            margin-top: 0.1rem;
         }
         .price-unit {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--text-light);
-            margin-top: 0.2rem;
+            margin-top: 0.1rem;
         }
         .add-to-cart {
             display: flex;
@@ -667,7 +654,7 @@
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            font-family: inherit;
+            font-family: 'El Messiri', sans-serif;
             font-size: 0.9rem;
             font-weight: 600;
             transition: all 0.3s ease;
@@ -716,8 +703,7 @@
         }
     </style>
 
-    
-
+    <div ><img src="{{ asset('images/panner_mart.png') }}" alt="" style="width: 100%;"></div>
     <div class="main-content">
         <!-- Categories Section -->
         <section class="section">
@@ -725,26 +711,28 @@
                 <h2 class="section-title">تسوق حسب الأقسام</h2>
                 <p class="section-subtitle">اختر من مجموعة واسعة من الأقسام المتنوعة لتلبية جميع احتياجاتك اليومية</p>
             </div>
-            <div class="categories-grid" id="categoriesGrid"></div>
+            <div class="categories-grid" id="categoriesGrid">
+
+            </div>
         </section>
 
         <!-- Daily Prices Feature -->
         <section class="daily-prices-feature">
-            <div class="prices-header">
-                <h2 class="prices-title">أسعار الفواكه والخضروات اليوم</h2>
-                <p class="prices-subtitle" id="todayDate"></p>
+            <div class="section-header">
+                <h2 class="section-title">أسعار الفواكه والخضروات اليوم</h2>
+                <p class="section-subtitle" id="todayDate"></p>
             </div>
             <div class="prices-grid">
-                <div class="price-category" style="--category-color: #f97316; --category-border: #f97316; --category-gradient: linear-gradient(90deg, #f97316, #fb923c);">
+                <div class="price-category" style="--category-color: #f97316; --category-border: #F05928; --category-gradient: linear-gradient(90deg, #F05928, #fb923c);">
                     <div class="price-category-header">
-                        <span class="price-category-icon">🍎</span>
+                        
                         <h3 class="price-category-title">الفواكه الطازجة</h3>
                     </div>
                     <div class="price-items" id="fruitsSpecialPrices"></div>
                 </div>
-                <div class="price-category" style="--category-color: #22c55e; --category-border: #22c55e; --category-gradient: linear-gradient(90deg, #22c55e, #16a34a);">
+                <div class="price-category" style="--category-color: #0D464C; --category-border: #0D464C; --category-gradient: linear-gradient(90deg, #0D464C, #408C94);">
                     <div class="price-category-header">
-                        <span class="price-category-icon">🥕</span>
+                      
                         <h3 class="price-category-title">الخضروات الطازجة</h3>
                     </div>
                     <div class="price-items" id="vegetablesSpecialPrices"></div>
@@ -789,135 +777,9 @@
         </section>
     </div>
     <!-- Footer -->
-    <footer style="background:#0D464C; padding:1.8rem 3rem 2rem; position:relative;">
-        <style>
-            /* Responsive overrides (use !important to override inline styles) */
-            footer { padding:1.4rem 1rem 1.6rem !important; box-sizing:border-box; }
-            footer > div { max-width:1400px; margin:0 auto; padding:0 1rem; box-sizing:border-box; }
-            footer > img { /* background image subtle */ width:100%; height:100%; object-fit:cover; opacity:0.03; pointer-events:none; }
-
-            /* Grid container (first inner div) - center everything */
-            footer > div > div:first-of-type {
-                display:grid !important;
-                grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)) !important;
-                gap:2.5rem !important;
-                margin-bottom:2rem !important;
-                align-items:start;
-                justify-items:center !important; /* center columns content */
-                text-align:center !important;     /* center text inside columns */
-            }
-
-            footer h2 { margin-top:0.6rem !important; margin-bottom:0.8rem !important; font-size:1rem !important; text-align:center !important; }
-            footer p { font-size:0.95rem !important; line-height:1.6 !important; text-align:center !important; }
-
-            /* Logo & social icons */
-            footer > div > div:first-of-type > div:first-of-type img { height:110px !important; margin-bottom:0.6rem !important; display:block; margin-left:auto; margin-right:auto; }
-            footer > div > div:first-of-type > div:first-of-type .social-wrap { display:flex; gap:0.9rem; flex-wrap:wrap; margin-top:0.6rem; justify-content:center; }
-
-            /* Make links inline-block to allow centered spacing and hover padding */
-            footer > div > div:first-of-type a { display:inline-block; text-align:center; }
-
-            /* Bottom row centered */
-            footer > div > div:last-of-type {
-                padding-top:1.4rem !important;
-                border-top:1px solid rgba(255,255,255,0.1) !important;
-                display:flex !important;
-                justify-content:center !important;
-                align-items:center !important;
-                gap:1rem !important;
-                flex-wrap:wrap;
-                text-align:center;
-            }
-            footer > div > div:last-of-type p { margin:0 !important; font-size:0.9rem !important; color:rgba(255,255,255,0.55) !important; text-align:center !important; }
-
-            footer > div > div:last-of-type .payments { display:flex; gap:1.2rem; align-items:center; flex-wrap:wrap; justify-content:center; }
-
-            footer img.payment-icon { height:30px !important; opacity:1 !important; }
-
-            /* Responsive breakpoints */
-            @media (max-width:1200px) {
-                footer > div > div:first-of-type { grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)) !important; gap:1.4rem !important; }
-                footer > div > div:first-of-type > div:first-of-type img { height:95px !important; }
-            }
-
-            @media (max-width:800px) {
-                footer { padding:1rem 0.8rem 1rem !important; }
-                footer > div > div:first-of-type { grid-template-columns:1fr !important; gap:1rem !important; }
-                footer > div > div:first-of-type > div { text-align:center !important; }
-                footer > div > div:first-of-type > div:not(:first-of-type) a { display:inline-block !important; }
-                /* center social icons */
-                footer > div > div:first-of-type > div:first-of-type .social-wrap { justify-content:center; margin:0.6rem auto 0; }
-                /* bottom row stack */
-                footer > div > div:last-of-type { flex-direction:column !important; align-items:center !important; text-align:center !important; gap:0.8rem !important; }
-                footer > div > div:last-of-type .payments { justify-content:center; }
-            }
-
-            @media (max-width:420px) {
-                footer h2 { font-size:0.95rem !important; }
-                footer p { font-size:0.9rem !important; }
-                footer > div > div:first-of-type > div:first-of-type img { height:78px !important; }
-                footer img.payment-icon { height:26px !important; }
-            }
-        </style>
-
-        <img src="/images/footer.jpg" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.03;">
-        
-        <div style="max-width:1400px; margin:0 auto; position:relative;">
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:2.5rem; margin-bottom:2rem; justify-items:center; text-align:center;">
-                <div>
-                    <img src="/images/white_orange_logo.png" style="height:130px;margin-bottom:0.8rem; display:block; margin-left:auto; margin-right:auto;">
-                    <p style="color:rgba(255,255,255,0.7); line-height:1.8; font-size:1rem; margin-bottom:1rem; max-width:480px; margin-left:auto; margin-right:auto;">
-                        متجر فاخر للهدايا والمنتجات المميزة. نساعدك في إرسال ابتسامتك لأحبائك أينما كانوا.
-                    </p>
-                    <div class="social-wrap" style="display:flex; gap:0.9rem; justify-content:center; margin-top:0.6rem;">
-                        <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" style="width:42px; height:42px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='#2a7080'; this.style.borderColor='#2a7080'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='rgba(255,255,255,0.7)'">
-                            <i class="fab fa-facebook"></i>
-                        </a>
-                    </div>
-                </div>
-                
-                <div>
-                    <h2 style="color:#ff6b35; font-weight:800; margin-bottom:1rem;margin-top:1rem ">روابط سريعة</h2>
-                    <div style="display:flex; flex-direction:column; gap:1.1rem; align-items:center;">
-                        <a href="/mart" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">توليب مارت</a>
-                        <a href="/gifts" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">هدايا توليب</a>
-                        <a href="/about" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">من نحن؟</a>
-                        <a href="/contact" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">تواصل معنا</a>
-                    </div>
-                </div>
-                
-                <div>
-                    <h2 style="color:#ff6b35; font-weight:800; margin-bottom:1rem;margin-top:1rem ">الدعم التقني</h2>
-                    <div style="display:flex; flex-direction:column; gap:1.1rem; align-items:center;">
-                        <a href="/faq" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">الأسئلة الشائعة</a>
-                        <a href="/shipping" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الشحن</a>
-                        <a href="/returns" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الإرجاع</a>
-                        <a href="/privacy" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">سياسة الخصوصية</a>
-                    </div>
-                </div>
-                
-                <div>
-                    <h2 style="color:#ff6b35; font-weight:800; margin-bottom:1rem;margin-top:1rem ">الأقسام الخاصة</h2>
-                    <div style="display:flex; flex-direction:column; gap:1.1rem; align-items:center;">
-                        <a href="/mart/daily-prices" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">أسعار اليوم</a>
-                        <a href="/mart/products" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">جميع المنتجات</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="padding-top:2rem; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:center; align-items:center; gap:1.2rem; flex-wrap:wrap;">
-                <p style="color:rgba(255,255,255,0.5); margin:0; font-size:0.95rem;">© 2025 Tulip Store. جميع الحقوق محفوظة</p>
-                <div class="payments" style="display:flex; gap:1.2rem; align-items:center; justify-content:center;">
-                    <i class="fab fa-cc-visa" style="font-size:28px; color:#fff;"></i>
-                    <i class="fab fa-cc-mastercard" style="font-size:28px; color:#fff;"></i>
-                    <i class="fas fa-hand-holding-dollar" style="font-size:26px; color:#fff;"></i>
-                </div>
-            </div>
-        </div>
-    </footer>
+   <div style="position:relative; z-index:1001;">
+    @include('components.footer')
+</div>
     <script>
         let products = {};
         let categories = [];
@@ -935,13 +797,13 @@
         function guessEmoji(slug, name) {
             const s = String(slug || '').toLowerCase();
             const n = String(name || '').toLowerCase();
-            if (s.includes('fruit') || n.includes('فواك')) return '🍎';
-            if (s.includes('veget') || n.includes('خض')) return '🥕';
-            if (s.includes('leaf') || n.includes('ورق')) return '🥬';
-            if (s.includes('dairy') || n.includes('لب')) return '🥛';
-            if (s.includes('baker') || n.includes('مخب')) return '🍞';
-            if (s.includes('groc') || n.includes('بقال')) return '🛒';
-            return '🛒';
+            if (s.includes('fruit') || n.includes('فواك')) return '';
+            if (s.includes('veget') || n.includes('خض')) return '';
+            if (s.includes('leaf') || n.includes('ورق')) return '';
+            if (s.includes('dairy') || n.includes('لب')) return '';
+            if (s.includes('baker') || n.includes('مخب')) return '';
+            if (s.includes('groc') || n.includes('بقال')) return '';
+            return '';
         }
 
         function normalizeApiProduct(p) {
@@ -970,7 +832,8 @@
                 badge,
                 category: categoryName,
                 categorySlug,
-                imageUrl: resolvePublicImage(p.image) || (Array.isArray(p.images) && p.images[0]) || null,
+                imageUrl: resolvePublicImage(p.image) || (Array.isArray(p.images) && p.images[0])
+                 || null,
             };
         }
 
@@ -987,7 +850,7 @@
 
             const palette = [
                 { color: '#f97316', gradient: 'linear-gradient(135deg, #f97316, #fb923c)' },
-                { color: '#22c55e', gradient: 'linear-gradient(135deg, #22c55e, #16a34a)' },
+                { color: '#0D464C', gradient: 'linear-gradient(135deg, #0D464C, #0D464C)' },
                 { color: '#3b82f6', gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)' },
                 { color: '#7c3aed', gradient: 'linear-gradient(135deg, #7c3aed, #6d28d9)' },
                 { color: '#10b981', gradient: 'linear-gradient(135deg, #10b981, #059669)' },
@@ -1041,8 +904,10 @@
             document.getElementById('categoriesGrid').innerHTML = categories.map(c => `
                 <div class="category-card" style="--cat-color: ${c.color}; --cat-gradient: ${c.gradient}" onclick="filterCategory('${c.id}')">
                     <img src="${c.image}" alt="${c.name}" class="category-photo">
-                    <div class="category-name">${c.name}</div>
-                    <div class="category-count">${products[c.id]?.length || 0} منتج</div>
+                    <div class="category-info">
+                        <div class="category-name">${c.name}</div>
+                        <div class="category-count">${products[c.id]?.length || 0} منتج</div>
+                    </div>
                 </div>
             `).join('');
         }
@@ -1057,22 +922,22 @@
 
             const fruitsSpecial = first ? (products[first.id] || []).slice(0, 4) : [];
             document.getElementById('fruitsSpecialPrices').innerHTML = fruitsSpecial.map(p => `
-                <div class="price-item" onclick="addToCart('${p.id}', event)" style="--category-color: ${first?.color || '#059669'};">
+                <div class="price-item" onclick="addToCart('${p.id}', event)" style="--category-color: ${first?.color || '#0D464C'};">
                     <img src="${getProductImage(p)}" alt="${p.name}" class="price-item-photo">
                     <div class="price-item-info">
                         <div class="price-item-name">${p.name}</div>
-                        <div class="price-item-value">${p.price} ر.س / ${p.unit}</div>
+                        <div class="price-item-value">${p.price} ل.س لكل 1 كغ</div>
                     </div>
                 </div>
             `).join('');
 
             const vegetablesSpecial = second ? (products[second.id] || []).slice(0, 4) : [];
             document.getElementById('vegetablesSpecialPrices').innerHTML = vegetablesSpecial.map(p => `
-                <div class="price-item" onclick="addToCart('${p.id}', event)" style="--category-color: ${second?.color || '#059669'};">
+                <div class="price-item" onclick="addToCart('${p.id}', event)" style="--category-color: ${second?.color || '#0D464C'};">
                     <img src="${getProductImage(p)}" alt="${p.name}" class="price-item-photo">
                     <div class="price-item-info">
                         <div class="price-item-name">${p.name}</div>
-                        <div class="price-item-value">${p.price} ر.س / ${p.unit}</div>
+                        <div class="price-item-value">${p.price} ل.س لكل 1 كغ</div>
                     </div>
                 </div>
             `).join('');
@@ -1113,9 +978,9 @@
                         </div>
                         <div class="product-footer">
                             <div class="price-info">
-                                <span class="price-current">${p.price} ر.س</span>
-                                ${p.oldPrice ? `<span class="price-old">${p.oldPrice} ر.س</span>` : ''}
-                                <span class="price-unit">/ ${p.unit}</span>
+                                <span class="price-current">${p.price} ل.س</span>
+                                ${p.oldPrice ? `<span class="price-old">${p.oldPrice} ل.س</span>` : ''}
+                                <span class="price-unit">لكل 1 كغ</span>
                             </div>
                             <button class="add-to-cart" onclick="addToCart('${p.id}', event)" id="btn-${p.id}">
                                 <i class="fas fa-plus"></i>
@@ -1304,9 +1169,9 @@
                                 <span><i class="fas fa-tag"></i> ${p.category}</span>
                                 <span><i class="fas fa-map-marker-alt"></i> ${p.origin}</span>
                             </div>
-                            <div class="search-result-price" style="color:#059669;font-weight:700;font-size:1.1rem;margin-top:0.3rem;">${p.price} ر.س / ${p.unit}</div>
+                            <div class="search-result-price" style="color:#059669;font-weight:700;font-size:1.1rem;margin-top:0.3rem;">${p.price} ل.س لكل 1 كغ</div>
                         </div>
-                        <button style="background:#059669;color:#fff;border:none;padding:0.7rem 1.2rem;border-radius:25px;cursor:pointer;font-family:inherit;font-weight:600;transition:all 0.3s;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
+                        <button style="background:#059669;color:#fff;border:none;padding:0.7rem 1.2rem;border-radius:25px;cursor:pointer;font-family: 'El Messiri', sans-serif;font-weight:600;transition:all 0.3s;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
                             <i class="fas fa-plus"></i> أضف
                         </button>
                     </div>

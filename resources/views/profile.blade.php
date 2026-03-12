@@ -214,12 +214,22 @@
                 <div class="profile-nav-item" onclick="showSection('addresses')">
                     <i class="fas fa-map-marker-alt"></i><span>العناوين</span>
                 </div>
-                <div class="profile-nav-item" onclick="showSection('security')">
-                    <i class="fas fa-lock"></i><span>الأمان</span>
+               
+                <div class="profile-nav-item" onclick="showSection('orders')">
+                    <i class="fas fa-box-open"></i><span>طلباتي</span>
                 </div>
-                <div class="profile-nav-item" onclick="showSection('notifications')">
+                 <div class="profile-nav-item " onclick="showSection('cards')">
+                    <i class="fas fa-credit-card"></i><span>بطاقاتي</span>
+                </div>
+                 <div class="profile-nav-item" onclick="showSection('notifications')">
                     <i class="fas fa-bell"></i><span>الإشعارات</span>
                     <span id="notifBadge" style="display:none;background:#ff6b35;color:white;padding:0.2rem 0.6rem;border-radius:10px;font-size:0.75rem;margin-right:auto;"></span>
+                </div>
+                 <div class="profile-nav-item " onclick="showSection('support')">
+                    <i class="fas fa-headset"></i><span>التواصل مع الدعم التقني</span>
+                </div>
+                   <div class="profile-nav-item " onclick="showSection('signout')">
+                    <i class="fas fa-sign-out-alt"></i><span>تسجيل خروج</span>
                 </div>
             </div>
         </div>
@@ -236,7 +246,7 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">البريد الإلكتروني</label>
-                            <input type="email" class="form-input" id="email" value="{{ Auth::user()->email ?? '' }}" placeholder="example@email.com">
+                            <input type="email" disabled class="form-input" id="email" value="{{ Auth::user()->email ?? '' }}" placeholder="example@email.com">
                         </div>
                     </div>
                     <div class="form-row">
@@ -249,6 +259,7 @@
                             <input type="text" class="form-input" id="address" value="{{ Auth::user()->address ?? '' }}" placeholder="المدينة، الحي، الشارع">
                         </div>
                     </div>
+                   
                     <div class="form-row">
                         <div class="form-group" style="grid-column:1/-1;">
                             <label class="form-label">العملة المفضلة</label>
@@ -268,34 +279,68 @@
             </div>
 
             <div class="content-section" id="section-addresses">
-                <h2 class="section-title"><i class="fas fa-map-marker-alt"></i> العناوين</h2>
-                <div id="addressesList" style="margin-bottom:1.5rem;">
+                <h2 class="section-title"><i class="fas fa-map-marker-alt"></i> عناويني</h2>
+                <p style="color: #666; font-family: 'El Messiri', sans-serif; margin-bottom: 1.5rem; font-size: 0.95rem;">
+                    العناوين التي قمت باستخدامها في طلباتك السابقة:
+                </p>
+                <div id="addressesList">
                     <div class="empty-state">
                         <i class="fas fa-spinner fa-spin"></i>
                         <p>جاري تحميل العناوين...</p>
                     </div>
                 </div>
-                <form id="addressForm" onsubmit="saveAddress(event)">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">الاسم (اختياري)</label>
-                            <input type="text" class="form-input" id="addrLabel" placeholder="المنزل / العمل">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">الهاتف (اختياري)</label>
-                            <input type="tel" class="form-input" id="addrPhone" placeholder="09xxxxxxxx">
-                        </div>
+            </div>
+
+            <div class="content-section" id="section-orders">
+                <h2 class="section-title"><i class="fas fa-box-open"></i> طلباتي</h2>
+                <div id="ordersList">
+                    <div class="empty-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>جاري تحميل الطلبات...</p>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">العنوان</label>
-                        <input type="text" class="form-input" id="addrLine1" required placeholder="المدينة، الحي، الشارع">
+                </div>
+            </div>
+
+            <div class="content-section" id="section-cards">
+                <h2 class="section-title"><i class="fas fa-credit-card"></i> بطاقاتي</h2>
+                <p style="color: #666; font-family: 'El Messiri', sans-serif; margin-bottom: 1.5rem; font-size: 0.95rem;">
+                    البطاقات الائتمانية المحفوظة من عمليات الدفع السابقة:
+                </p>
+                <div id="cardsList">
+                    <div class="empty-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>جاري تحميل البطاقات...</p>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">تفاصيل إضافية (اختياري)</label>
-                        <input type="text" class="form-input" id="addrLine2" placeholder="رقم البناء، طابق، ملاحظة...">
+                </div>
+            </div>
+
+            <div class="content-section" id="section-support">
+                <h2 class="section-title"><i class="fas fa-headset"></i> الدعم التقني</h2>
+                <div style="background: #f8f9fa; padding: 2rem; border-radius: 15px; text-align: center; border: 1px solid #e0e0e0;">
+                    <i class="fas fa-headset" style="font-size: 3rem; color: #2a7080; margin-bottom: 1.5rem;"></i>
+                    <h3 style="font-family: 'El Messiri', sans-serif; color: #1a1a1a; margin-bottom: 1rem;">نحن هنا لخدمتكم 24/24</h3>
+                    <p style="font-family: 'El Messiri', sans-serif; color: #666; line-height: 1.6; margin-bottom: 2rem;">
+                        يسعدنا الرد على استفساراتكم وحل مشكلاتكم في أي وقت. تواصل معنا عبر الواتساب للحصول على رد فوري من فريق الدعم.
+                    </p>
+                    <a href="https://wa.me/9639xxxxxxxx" target="_blank" style="display: inline-flex; align-items: center; gap: 0.8rem; background: #25D366; color: white; padding: 1rem 2rem; border-radius: 12px; font-family: 'El Messiri', sans-serif; font-weight: 700; text-decoration: none; transition: all 0.3s; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);">
+                        <i class="fab fa-whatsapp" style="font-size: 1.5rem;"></i>
+                        تواصل معنا عبر واتساب
+                    </a>
+                </div>
+            </div>
+
+            <div class="content-section" id="section-signout">
+                <h2 class="section-title"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</h2>
+                <div style="background: #fff5f5; padding: 2rem; border-radius: 15px; text-align: center; border: 1px solid #fed7d7;">
+                    <p style="font-family: 'El Messiri', sans-serif; color: #c53030; font-weight: 700; font-size: 1.2rem; margin-bottom: 1.5rem;">هل أنت متأكد من رغبتك في تسجيل الخروج؟</p>
+                    <div style="display: flex; gap: 1rem; justify-content: center;">
+                        <button onclick="showSection('info')" style="padding: 0.8rem 2rem; border-radius: 10px; border: 1px solid #e2e8f0; background: white; font-family: 'El Messiri', sans-serif; cursor: pointer;">إلغاء</button>
+                        <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                            @csrf
+                            <button type="submit" style="padding: 0.8rem 2rem; border-radius: 10px; border: none; background: #e53e3e; color: white; font-family: 'El Messiri', sans-serif; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);">تأكيد تسجيل الخروج</button>
+                        </form>
                     </div>
-                    <button type="submit" class="btn-save"><i class="fas fa-plus"></i> إضافة عنوان</button>
-                </form>
+                </div>
             </div>
 
             <div class="content-section" id="section-security">
@@ -303,16 +348,25 @@
                 <form id="passwordForm" onsubmit="changePassword(event)">
                     <div class="form-group">
                         <label class="form-label">كلمة المرور الحالية</label>
-                        <input type="password" class="form-input" id="currentPassword" required>
+                        <div style="position: relative;">
+                            <input type="password" class="form-input" id="currentPassword" required style="padding-left: 45px;">
+                            <i class="fas fa-eye toggle-password" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 1.1rem;"></i>
+                        </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">كلمة المرور الجديدة</label>
-                            <input type="password" class="form-input" id="newPassword" required>
+                            <div style="position: relative;">
+                                <input type="password" class="form-input" id="newPassword" required style="padding-left: 45px;">
+                                <i class="fas fa-eye toggle-password" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 1.1rem;"></i>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">تأكيد كلمة المرور</label>
-                            <input type="password" class="form-input" id="newPasswordConfirm" required>
+                            <div style="position: relative;">
+                                <input type="password" class="form-input" id="newPasswordConfirm" required style="padding-left: 45px;">
+                                <i class="fas fa-eye toggle-password" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 1.1rem;"></i>
+                            </div>
                         </div>
                     </div>
                     <button type="submit" class="btn-save"><i class="fas fa-save"></i> تغيير كلمة المرور</button>
@@ -367,11 +421,78 @@
         function showSection(section) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.profile-nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('section-' + section).classList.add('active');
+            
+            const targetSection = document.getElementById('section-' + section);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
             event.currentTarget.classList.add('active');
             
             if (section === 'addresses') loadAddresses();
+            if (section === 'orders') loadOrders();
+            if (section === 'cards') loadCards();
             if (section === 'notifications') loadNotifications();
+        }
+
+        async function loadAddresses() {
+            const container = document.getElementById('addressesList');
+            try {
+                const response = await fetch(API_BASE + '/profile/orders', {
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                });
+                const data = await response.json();
+                const orders = data.orders || [];
+                
+                // Extract unique addresses from orders
+                const addresses = [...new Set(orders.map(o => o.address).filter(a => a))];
+                
+                if (addresses.length > 0) {
+                    container.innerHTML = addresses.map(addr => `
+                        <div style="background:white; padding:1.2rem; border-radius:12px; margin-bottom:1rem; border:1px solid #eee; display:flex; align-items:center; gap:1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                            <div style="width:40px; height:40px; background:#e8f4f8; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#2a7080;">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div style="flex:1;">
+                                <p style="font-family:'El Messiri',sans-serif; font-weight:600; color:#1a1a1a; margin:0;">${addr}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-map-marker-alt"></i><p>لا توجد عناوين مسجلة بعد</p></div>';
+                }
+            } catch (error) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-map-marker-alt"></i><p>لا توجد عناوين مسجلة بعد</p></div>';
+            }
+        }
+
+        async function loadCards() {
+            const container = document.getElementById('cardsList');
+            try {
+                const response = await fetch(API_BASE + '/api/user/saved-cards', {
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                });
+                const cards = await response.json();
+                
+                if (cards && cards.length > 0) {
+                    container.innerHTML = cards.map(card => `
+                        <div style="background:linear-gradient(135deg, #2a7080 0%, #1a5060 100%); padding:1.5rem; border-radius:15px; margin-bottom:1rem; color:white; display:flex; align-items:center; justify-content:space-between; box-shadow: 0 4px 15px rgba(42,112,128,0.2);">
+                            <div style="display:flex; align-items:center; gap:1.2rem;">
+                                <i class="fab fa-cc-${card.type || 'visa'}" style="font-size:2.5rem; opacity:0.9;"></i>
+                                <div>
+                                    <p style="font-family:monospace; font-size:1.1rem; letter-spacing:2px; margin:0;">•••• •••• •••• ${card.last4}</p>
+                                    <p style="font-family:'El Messiri',sans-serif; font-size:0.85rem; opacity:0.8; margin-top:0.3rem;">ينتهي في ${card.expiry}</p>
+                                </div>
+                            </div>
+                            <i class="fas fa-shield-alt" style="font-size:1.2rem; opacity:0.5;"></i>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-credit-card"></i><p>لا توجد بطاقات محفوظة بعد</p></div>';
+                }
+            } catch (error) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-credit-card"></i><p>لا توجد بطاقات محفوظة بعد</p></div>';
+            }
         }
         
         async function saveProfile(e) {
@@ -768,9 +889,9 @@
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        current_password: document.getElementById('currentPassword').value,
-                        new_password: document.getElementById('newPassword').value,
-                        new_password_confirmation: document.getElementById('newPasswordConfirm').value
+                        current_password: e.target.querySelector('#currentPassword').value,
+                        new_password: e.target.querySelector('#newPassword').value,
+                        new_password_confirmation: e.target.querySelector('#newPasswordConfirm').value
                     })
                 });
 
@@ -800,6 +921,22 @@
                 }, 1500);
             }
         }
+
+        // Toggle Password Visibility
+         document.addEventListener('DOMContentLoaded', function() {
+              // Other password toggles
+               document.querySelectorAll('.toggle-password').forEach(btn => {
+                  btn.addEventListener('click', function() {
+                      const input = this.parentElement.querySelector('input');
+                      if (input) {
+                          const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                          input.setAttribute('type', type);
+                          this.classList.toggle('fa-eye');
+                          this.classList.toggle('fa-eye-slash');
+                      }
+                  });
+              });
+          });
     </script>
 </body>
 </html>

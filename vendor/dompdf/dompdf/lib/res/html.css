@@ -345,7 +345,7 @@ form {
 
 input, button, select {
   display: inline-block;
-  font-family: sans-serif;
+  font-family:'El Messiri', sans-serif;
 }
 
 input, button, textarea, select {
@@ -399,7 +399,7 @@ input[type=file]::before {
 }
 
 input[type=password][value]::before {
-  font-family: "DejaVu Sans" !important;
+  font-family:'El Messiri', sans-serif !important;
   content: "\2022\2022\2022\2022\2022\2022\2022\2022";
   line-height: 1em;
 }
@@ -411,7 +411,7 @@ input[type=password][value=""]::before {
 input[type=checkbox],
 input[type=radio],
 select::after {
-  font-family: "DejaVu Sans" !important;
+  font-family: 'El Messiri', sans-serif !important;
   font-size: 18px;
   line-height: 1;
 }
@@ -436,7 +436,7 @@ textarea {
   display: block;
   height: 3em;
   overflow: hidden;
-  font-family: monospace;
+  font-family: 'El Messiri', sans-serif;
   white-space: pre-wrap;
   overflow-wrap: break-word;
 }

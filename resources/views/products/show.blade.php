@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Tajawal', sans-serif; background: #fafafa; }
+        body { font-family: 'El Messiri',sans-serif; background: #fafafa; }
         
         .page-wrapper { min-height: 100vh; padding-bottom: 3rem; }
         
@@ -751,7 +751,7 @@
                                     {{ $rp->name }}
                                 </div>
                                 <div style="font-weight:800; color:#ea580c;">
-                                    {{ number_format($rp->discount_price ?? $rp->price, 0) }} ر.س
+                                    {{ number_format($rp->discount_price ?? $rp->price, 0) }} ل.س
                                 </div>
                             </div>
                         </a>

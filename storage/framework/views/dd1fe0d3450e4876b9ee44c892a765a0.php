@@ -99,7 +99,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-500 text-xs">إجمالي الإيرادات</p>
-                <h3 class="text-2xl font-black text-gray-800 mt-1"><?php echo e(number_format($metrics['total_revenue'] ?? 0, 2)); ?> ر.س</h3>
+                <h3 class="text-2xl font-black text-gray-800 mt-1"><?php echo e(number_format($metrics['total_revenue'] ?? 0, 2)); ?> ل.س</h3>
             </div>
             <div class="w-10 h-10 bg-emerald-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-dollar-sign text-emerald-600 text-base"></i>
@@ -110,7 +110,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-500 text-xs">إيرادات هذا الشهر</p>
-                <h3 class="text-2xl font-black text-gray-800 mt-1"><?php echo e(number_format($metrics['monthly_revenue'] ?? 0, 2)); ?> ر.س</h3>
+                <h3 class="text-2xl font-black text-gray-800 mt-1"><?php echo e(number_format($metrics['monthly_revenue'] ?? 0, 2)); ?> ل.س</h3>
             </div>
             <div class="w-10 h-10 bg-teal-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-chart-line text-teal-600 text-base"></i>
@@ -121,7 +121,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-500 text-xs">إجمالي الأرباح (بدون التوصيل)</p>
-                <h3 class="text-2xl font-black text-gray-800 mt-1"><?php echo e(number_format($metrics['earnings_ex_delivery_total'] ?? 0, 2)); ?> ر.س</h3>
+                <h3 class="text-2xl font-black text-gray-800 mt-1"><?php echo e(number_format($metrics['earnings_ex_delivery_total'] ?? 0, 2)); ?>ل.س</h3>
             </div>
             <div class="w-10 h-10 bg-emerald-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-coins text-emerald-600 text-base"></i>
@@ -132,7 +132,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-500 text-xs">أرباح هذا الشهر (بدون التوصيل)</p>
-                <h3 class="text-2xl font-black text-gray-800 mt-1"><?php echo e(number_format($metrics['earnings_ex_delivery_month'] ?? 0, 2)); ?> ر.س</h3>
+                <h3 class="text-2xl font-black text-gray-800 mt-1"><?php echo e(number_format($metrics['earnings_ex_delivery_month'] ?? 0, 2)); ?> ل.س</h3>
             </div>
             <div class="w-10 h-10 bg-teal-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-coins text-teal-600 text-base"></i>
@@ -143,7 +143,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-500 text-xs">الرصيد المتاح</p>
-                <h3 class="text-2xl font-black text-gray-800 mt-1"><?php echo e(number_format($metrics['available_balance'] ?? 0, 2)); ?> ر.س</h3>
+                <h3 class="text-2xl font-black text-gray-800 mt-1"><?php echo e(number_format($metrics['available_balance'] ?? 0, 2)); ?> ل.س</h3>
             </div>
             <div class="w-10 h-10 bg-purple-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-wallet text-purple-600 text-base"></i>
@@ -154,7 +154,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-500 text-xs">دفعات معلقة</p>
-                <h3 class="text-2xl font-black text-gray-800 mt-1"><?php echo e(number_format($metrics['pending_payout'] ?? 0, 2)); ?> ر.س</h3>
+                <h3 class="text-2xl font-black text-gray-800 mt-1"><?php echo e(number_format($metrics['pending_payout'] ?? 0, 2)); ?> ل.س</h3>
             </div>
             <div class="w-10 h-10 bg-pink-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-money-check-alt text-pink-600 text-base"></i>
@@ -260,7 +260,7 @@
                             <div class="text-xs text-gray-500">طلبات: <?php echo e($product->order_items_count); ?></div>
                         </div>
                     </div>
-                    <div class="text-sm font-semibold text-gray-700"><?php echo e(number_format($product->price, 2)); ?> ر.س</div>
+                    <div class="text-sm font-semibold text-gray-700"><?php echo e(number_format($product->price, 2)); ?>ل.س</div>
                 </div>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
@@ -293,7 +293,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="text-sm font-semibold text-gray-700"><?php echo e(number_format($order->total_amount ?? $order->total ?? 0, 2)); ?> ر.س</div>
+                    <div class="text-sm font-semibold text-gray-700"><?php echo e(number_format($order->total_amount ?? $order->total ?? 0, 2)); ?> ل.س</div>
                 </div>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
