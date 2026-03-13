@@ -42,8 +42,9 @@
 
 html,
 body {
-  overflow-x: hidden;
-  width: 100%;
+  overflow-x: hidden !important;
+  width: 100% !important;
+  max-width: 100% !important;
   position: relative;
   margin: 0;
   padding: 0;
@@ -51,7 +52,15 @@ body {
 }
 
 * {
-  box-sizing: border-box;
+  box-sizing: border-box !important;
+}
+
+/* Force elements to stay within bounds on mobile */
+@media (max-width: 480px) {
+  .tulip-navbar, .navbar-wrapper, .main-page, .section, .hero, .products-grid {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
 }
 
 body {
@@ -680,168 +689,10 @@ h6 {
 
 /* Footer */
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 1024px) {
-  .nav-wrapper {
-    gap: 1rem;
-  }
-
-  .search-container {
-    max-width: 300px;
-  }
-
-  .hero-title {
-    font-size: 2.5rem;
-  }
-
-  .flower-img {
-    max-width: 250px;
-  }
-}
-
-@media (max-width: 768px) {
-  .nav-wrapper {
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  .search-container {
-    order: 3;
-    flex-basis: 100%;
-    max-width: 100%;
-  }
-
-  .hero-content {
-    flex-direction: column;
-    text-align: center;
-    gap: 2rem;
-  }
-
-  .hero-title {
-    font-size: 1.8rem;
-  }
-
-  .flower-img {
-    max-width: 200px;
-  }
-
-  .hero-watermark {
-    font-size: 3rem;
-    bottom: 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .navbar {
-    padding: 0.8rem 1rem;
-  }
-
-  .logo {
-    font-size: 1.4rem;
-  }
-
-  .icons-container {
-    gap: 1rem;
-  }
-
-  .nav-dropdown {
-    right: 1rem;
-    min-width: 250px;
-  }
-
-  .hero {
-    min-height: 350px;
-    margin: 1rem 0.5rem;
-  }
-
-  .hero-title {
-    font-size: 1.5rem;
-  }
-
-  .flower-img {
-    max-width: 150px;
-  }
-}
-
-/* Hover Effects */
-.nav-item:hover .item-label {
-  display: flex;
-}
-
-.nav-item:hover .item-icon,
-.nav-item:hover i:not(.item-label i) {
-  display: none;
-}
-
 /* ===== RESPONSIVE DESIGN ===== */
 
 /* Tablet (768px and below) */
 @media (max-width: 768px) {
-  /* Navbar */
-  .navbar-wrapper {
-    padding: 0.4rem 1rem;
-    gap: 1rem;
-  }
-
-  .navbar-logo {
-    font-size: 1.5rem;
-  }
-
-  .logo-girl {
-    width: 40px;
-    height: 40px;
-  }
-
-  .navbar-search-wrapper {
-    max-width: 300px;
-  }
-
-  .navbar-search {
-    padding: 0.4rem 1rem;
-    gap: 0.5rem;
-  }
-
-  .navbar-search input {
-    font-size: 0.75rem;
-  }
-
-  .navbar-icons {
-    gap: 1rem;
-  }
-
-  .nav-icon-item > i {
-    font-size: 1.2rem;
-  }
-
-  /* Disable hover hiding on mobile */
-  .nav-icon-item:hover > i:not(.icon-favorite) {
-    opacity: 1 !important;
-  }
-  .nav-icon-item:hover .icon-label:not(.favorite-label) {
-    max-width: 0 !important;
-    opacity: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-  .cart-icon-container:hover .cart-badge-icon {
-    opacity: 1 !important;
-  }
-
-  .icon-label {
-    font-size: 0.75rem;
-    padding: 0.4rem 0.8rem;
-  }
-
-  /* Search Dropdown */
-  .search-dropdown {
-    max-height: 300px;
-  }
-
-  .search-chip {
-    font-size: 0.75rem;
-    padding: 0.3rem 0.8rem;
-  }
-
   /* Products Grid */
   .products-grid,
   .range-grid {
@@ -860,126 +711,6 @@ h6 {
 
 /* Mobile (480px and below) */
 @media (max-width: 480px) {
-  /* Navbar */
-  .tulip-navbar {
-    padding: 0.3rem 0;
-    width: 100%;
-    overflow-x: hidden;
-  }
-
-  .navbar-wrapper {
-    flex-wrap: wrap;
-    padding: 0.3rem 0.6rem;
-    gap: 0.3rem;
-    margin: 3px auto;
-    width: 96%;
-    max-width: 100%;
-    border-radius: 20px;
-  }
-
-  .navbar-logo {
-    font-size: 1.2rem;
-    order: 2;
-    flex-shrink: 1;
-  }
-
-  .logo-girl {
-    width: 30px;
-    height: 30px;
-  }
-
-  .navbar-icons {
-    order: 1;
-    gap: 0.5rem;
-    flex-shrink: 1;
-    min-width: 0;
-  }
-
-  .nav-icon-item {
-    cursor: pointer;
-  }
-
-  .nav-icon-item > i {
-    font-size: 1.1rem;
-  }
-
-  .navbar-search-wrapper {
-    order: 3;
-    flex-basis: 100%;
-    max-width: 100%;
-  }
-
-  .navbar-search {
-    padding: 0.35rem 1rem;
-  }
-
-  .navbar-search input {
-    font-size: 0.7rem;
-  }
-
-  /* Make icons clickable on mobile without hover */
-  .icon-label {
-    display: none !important;
-  }
-
-  .nav-icon-item:active > i {
-    transform: scale(1.2);
-    transition: transform 0.1s;
-  }
-
-  /* Search Dropdown */
-  .search-dropdown {
-    max-height: 250px;
-    padding: 0.8rem;
-  }
-
-  .search-dropdown-header {
-    font-size: 0.8rem;
-    margin-bottom: 0.6rem;
-  }
-
-  .search-chips {
-    gap: 0.4rem;
-  }
-
-  .search-chip {
-    font-size: 0.7rem;
-    padding: 0.25rem 0.6rem;
-  }
-
-  .search-result-item {
-    gap: 0.6rem;
-    padding: 0.4rem;
-  }
-
-  .search-result-img {
-    width: 40px;
-    height: 40px;
-  }
-
-  .search-result-name {
-    font-size: 0.8rem;
-  }
-
-  .search-result-price {
-    font-size: 0.75rem;
-  }
-
-  /* Products Grid */
-  .products-grid,
-  .range-grid {
-    grid-template-columns: 1fr;
-    gap: 0.8rem;
-  }
-
-  .section-title {
-    font-size: 1.1rem;
-  }
-
-  .section-subtitle {
-    font-size: 0.75rem;
-  }
-
   .section-inner {
     padding: 0 0.8rem;
   }
@@ -1729,12 +1460,7 @@ body.dark-mode .floating-view-details {
   }
 }
 
-@media (max-width: 480px) {
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem 0.5rem;
-  }
-}
+/* Grid Logic */
 
 /* Product Card - Clean with Noticeable Shadow Hover */
 .product-card {
@@ -1950,9 +1676,12 @@ body.dark-mode .floating-view-details {
 /* ===== RESPONSIVE NAVBAR ===== */
 @media (max-width: 1024px) {
   .navbar-wrapper {
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
+    flex-direction: column !important;
+    gap: 1.2rem !important;
+    padding: 1.2rem 1.5rem !important;
+    border-radius: 25px !important;
+    height: auto !important;
+    width: 95% !important;
   }
 
   .navbar-search-wrapper {
@@ -1965,6 +1694,8 @@ body.dark-mode .floating-view-details {
     order: 2;
     justify-content: center;
     width: 100%;
+    flex-wrap: wrap;
+    gap: 1.2rem;
   }
 
   .navbar-logo {
@@ -1974,13 +1705,12 @@ body.dark-mode .floating-view-details {
 
 @media (max-width: 768px) {
   .navbar-wrapper {
-    padding: 0.8rem 1rem;
-    border-radius: 30px;
+    padding: 1rem 0.8rem !important;
+    border-radius: 20px !important;
   }
 
   .navbar-icons {
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.8rem !important;
   }
 
   .nav-icon-item {
@@ -1996,38 +1726,78 @@ body.dark-mode .floating-view-details {
   }
 
   .user-dropdown {
-    right: 0;
-    left: auto;
-    min-width: 200px;
+    width: 90vw !important;
+    max-width: 320px !important;
+    left: 50% !important;
+    transform: translateX(-50%) translateY(-10px) !important;
   }
 
-  .user-name-pill {
-    font-size: 0.85rem;
-    padding: 0.4rem 0.8rem !important;
+  .user-dropdown.show {
+    transform: translateX(-50%) translateY(0) !important;
   }
 }
 
 @media (max-width: 480px) {
+  /* Products Grid & Range Grid */
+  .products-grid,
+  .range-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.8rem 0.5rem !important;
+  }
+
+  .section-title {
+    font-size: 1.1rem !important;
+  }
+
+  .section-subtitle {
+    font-size: 0.75rem !important;
+  }
+
   .navbar-logo {
-    transform: scale(0.8);
+    transform: scale(0.85);
+    margin-bottom: 0.2rem;
   }
 
   .logo-girl {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
   }
 
   .nav-icon-item {
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
 
   .navbar-search {
-    padding: 0.6rem 1rem;
+    padding: 0.5rem 1rem !important;
   }
 
   .navbar-wrapper {
-    padding: 0.6rem 0.8rem;
+    padding: 0.8rem 0.4rem !important;
+    width: 98% !important;
+    margin: 4px auto !important;
+    gap: 0.8rem !important;
   }
+
+  .navbar-icons {
+    gap: 0.6rem !important;
+    margin-bottom: 0.2rem;
+  }
+}
+
+/* Menu Icon Z-Index Fix */
+#menuIcon {
+  position: relative;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.navbar-search {
+  position: relative;
+  z-index: 1001; /* Ensure search bar elements are above other content */
+}
+
+.search-dropdown {
+  z-index: 1002 !important; /* Ensure dropdown is above search bar */
 }
 
 /* ===== CART CHECK ICON ===== */
