@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Changa:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/store.css?v=2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     <style>
         .category-header {
             background: linear-gradient(135deg, #0f4f55 0%, #1a6b73 100%);
@@ -91,7 +92,7 @@
         }
         .filter-option label {
             cursor: pointer;
-            font-family: 'El Messiri',sans-serif;
+            font-family:"El Messiri", sans-serif;
             font-size: 0.9rem;
             color: #2c3e50;
             line-height: 1.5;
@@ -103,7 +104,7 @@
         }
         .filter-see-more {
             color: #0f4f55;
-            font-family: 'El Messiri',sans-serif;
+            font-family:"El Messiri", sans-serif;
             font-size: 0.875rem;
             cursor: pointer;
             padding: 0.5rem 1.2rem;
@@ -132,7 +133,7 @@
             padding: 0.5rem 0.4rem;
             border: 2px solid #d1e7e9;
             border-radius: 8px;
-            font-family:'El Messiri',sans-serif;
+            font-family:"El Messiri", sans-serif;
             font-size: 0.8rem;
             transition: all 0.2s ease;
             background: #fafafa;
@@ -164,6 +165,107 @@
         .price-input { min-width: 0; }
         .products-content {
             min-width: 0;
+        }
+        @media (max-width: 768px) {
+            .products-container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+                gap: 1rem;
+            }
+            .filters-sidebar {
+                display: none;
+            }
+            .mobile-filters-wrapper {
+                display: block;
+                margin-bottom: 1.5rem;
+                width: 100%;
+                overflow-x: auto;
+                white-space: nowrap;
+                padding: 0.5rem 0;
+                scrollbar-width: none; /* Firefox */
+                -ms-overflow-style: none;  /* IE and Edge */
+            }
+            .mobile-filters-wrapper::-webkit-scrollbar {
+                display: none; /* Hide scrollbar for Chrome, Safari and Opera */
+            }
+            .mobile-filters-list {
+                display: flex;
+                gap: 0.6rem;
+                padding: 0 0.5rem;
+            }
+            .mobile-filter-dropdown {
+                position: relative;
+                display: inline-block;
+            }
+            .mobile-filter-btn {
+                background: white;
+                border: 1px solid #d1e7e9;
+                padding: 0.5rem 1rem;
+                border-radius: 50px;
+                font-family: 'El Messiri', sans-serif;
+                font-size: 0.85rem;
+                color: #0f4f55;
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                white-space: nowrap;
+            }
+            .mobile-filter-btn.active {
+                background: #0f4f55;
+                color: white;
+                border-color: #0f4f55;
+            }
+            .mobile-filter-content {
+                display: none;
+                position: absolute;
+                top: 100%;
+                right: 0;
+                background: white;
+                min-width: 200px;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+                border-radius: 12px;
+                z-index: 1000;
+                margin-top: 0.5rem;
+                padding: 0.8rem 0;
+            }
+            .mobile-filter-dropdown.active .mobile-filter-content {
+                display: block;
+            }
+            .mobile-filter-option {
+                display: flex;
+                align-items: center;
+                gap: 0.8rem;
+                padding: 0.6rem 1.2rem;
+                cursor: pointer;
+            }
+            .mobile-filter-option:hover {
+                background: #f0f9fa;
+            }
+            .mobile-filter-option input {
+                width: 18px;
+                height: 18px;
+                accent-color: #0f4f55;
+            }
+            .mobile-filter-option label {
+                font-size: 0.9rem;
+                color: #2c3e50;
+                font-family: 'El Messiri', sans-serif;
+            }
+            .mobile-price-filter {
+                padding: 1rem;
+                min-width: 250px;
+            }
+            .mobile-price-inputs {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+        }
+        @media (min-width: 769px) {
+            .mobile-filters-wrapper {
+                display: none;
+            }
         }
         .products-grid {
             display: grid;
@@ -200,12 +302,18 @@
             opacity: 0.3;
         }
         @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 1rem !important;
+            }
             .category-title {
                 font-size: 1.5rem;
             }
+        }
+        @media (max-width: 480px) {
             .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 1rem;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.5rem !important;
             }
         }
     </style>
@@ -214,6 +322,64 @@
     <?php echo $__env->make('components.navbar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
     <div class="products-container">
+        <!-- Mobile Filters -->
+        <div class="mobile-filters-wrapper">
+            <div class="mobile-filters-list">
+                <?php
+                    $brands = $products->pluck('brand')->unique()->filter()->sort()->values()->take(12);
+                ?>
+                
+                <?php if($brands->count() > 0): ?>
+                <div class="mobile-filter-dropdown" id="brandDropdown">
+                    <button class="mobile-filter-btn" onclick="toggleMobileDropdown('brandDropdown')">
+                        <span>العلامة التجارية</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="mobile-filter-content">
+                        <?php $__currentLoopData = $brands; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $brand): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <div class="mobile-filter-option">
+                            <input type="checkbox" id="m-brand-<?php echo e($loop->index); ?>" value="<?php echo e($brand); ?>" onchange="applyFilters(); syncDesktopFilters('brand-<?php echo e($loop->index); ?>', this.checked)">
+                            <label for="m-brand-<?php echo e($loop->index); ?>"><?php echo e($brand); ?></label>
+                        </div>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <div class="mobile-filter-dropdown" id="priceDropdown">
+                    <button class="mobile-filter-btn" onclick="toggleMobileDropdown('priceDropdown')">
+                        <span>السعر</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="mobile-filter-content mobile-price-filter">
+                        <div class="mobile-price-inputs">
+                            <input type="number" class="price-input" id="m-minPrice" placeholder="من" oninput="syncDesktopPrice('minPrice', this.value)">
+                            <span class="price-separator">-</span>
+                            <input type="number" class="price-input" id="m-maxPrice" placeholder="إلى" oninput="syncDesktopPrice('maxPrice', this.value)">
+                        </div>
+                        <button class="btn-primary" style="margin-top: 1rem; width: 100%; padding: 0.6rem; font-size: 0.85rem;" onclick="applyFilters(); toggleMobileDropdown('priceDropdown')">تطبيق</button>
+                    </div>
+                </div>
+
+                <div class="mobile-filter-dropdown" id="stockDropdown">
+                    <button class="mobile-filter-btn" onclick="toggleMobileDropdown('stockDropdown')">
+                        <span>التوفر</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="mobile-filter-content">
+                        <div class="mobile-filter-option">
+                            <input type="checkbox" id="m-inStock" onchange="toggleAvailabilityFilter('in-stock'); syncDesktopFilters('inStock', this.checked)">
+                            <label for="m-inStock">متوفر</label>
+                        </div>
+                        <div class="mobile-filter-option">
+                            <input type="checkbox" id="m-includeOutOfStock" onchange="toggleAvailabilityFilter('include-out'); syncDesktopFilters('includeOutOfStock', this.checked)">
+                            <label for="m-includeOutOfStock">تضمين غير المتوفر</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Products Content -->
         <div class="products-content">
             <h2 style="font-family: 'El Messiri', sans-serif; font-size: 2rem; color: #0f4f55; margin: 0 0 2rem 0;"><?php echo e($category->name); ?></h2>
@@ -225,7 +391,7 @@
                                 <i class="far fa-heart"></i>
                             </button>
                             <div class="product-image-wrapper" onclick="openFloatingViewFromCard(this)">
-                                <img src="<?php echo e($product->primary_image_url); ?>" srcset="<?php echo e($product->primary_image_srcset); ?>" sizes="(max-width: 768px) 50vw, 25vw" alt="<?php echo e($product->name); ?>" class="product-img" loading="lazy" width="320" height="250" onerror="this.src='/images/gift-placeholder.svg'">
+                                <img src="<?php echo e($product->primary_image_url); ?>" srcset="<?php echo e($product->primary_image_srcset); ?>" sizes="(max-width: 768px) 50vw, 25vw" alt="<?php echo e($product->name); ?>" class="product-img" loading="lazy" width="320" height="320" onerror="this.src='/images/gift-placeholder.svg'">
                             </div>
                             <div class="product-info">
                                 <h3 class="product-name"><?php echo e($product->name); ?></h3>
@@ -283,7 +449,7 @@
             <?php endif; ?>
 
             <div class="filter-section">
-                <div class="filter-section-title">نطاق السعر (ر.س)</div>
+                <div class="filter-section-title">نطاق السعر (ل.س)</div>
                 <div class="price-inputs">
                     <div class="price-input-wrapper">
                         <input type="number" class="price-input" id="minPrice" placeholder="من" min="0">
@@ -489,6 +655,48 @@
             }
         }
 
+        // Mobile Filter Logic
+        function toggleMobileDropdown(id) {
+            const dropdown = document.getElementById(id);
+            const isActive = dropdown.classList.contains('active');
+            
+            // Close all dropdowns
+            document.querySelectorAll('.mobile-filter-dropdown').forEach(d => {
+                d.classList.remove('active');
+                d.querySelector('.mobile-filter-btn').classList.remove('active');
+            });
+
+            if (!isActive) {
+                dropdown.classList.add('active');
+                dropdown.querySelector('.mobile-filter-btn').classList.add('active');
+            }
+        }
+
+        // Close mobile dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.mobile-filter-dropdown')) {
+                document.querySelectorAll('.mobile-filter-dropdown').forEach(d => {
+                    d.classList.remove('active');
+                    d.querySelector('.mobile-filter-btn').classList.remove('active');
+                });
+            }
+        });
+
+        function syncDesktopFilters(desktopId, isChecked) {
+            const desktopEl = document.getElementById(desktopId);
+            if (desktopEl) {
+                desktopEl.checked = isChecked;
+                // applyFilters is usually called from the onchange of the mobile input
+            }
+        }
+
+        function syncDesktopPrice(desktopId, value) {
+            const desktopEl = document.getElementById(desktopId);
+            if (desktopEl) {
+                desktopEl.value = value;
+            }
+        }
+
         // Add to cart function
         async function addToCart(event, productId) {
             event.stopPropagation();
@@ -669,7 +877,7 @@
                                 <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
                             </button>
                             <div class="product-image-wrapper" onclick="openFloatingViewFromCard(this)">
-                                <img src="${product.primary_image_url || product.image || (Array.isArray(product.images) ? product.images[0] : null) || '/images/gift-placeholder.svg'}" srcset="${product.primary_image_srcset || ''}" sizes="(max-width: 768px) 50vw, 25vw" alt="${product.name}" class="product-img" loading="lazy" width="320" height="250" onerror="this.src='/images/gift-placeholder.svg'">
+                                <img src="${product.primary_image_url || product.image || (Array.isArray(product.images) ? product.images[0] : null) || '/images/gift-placeholder.svg'}" srcset="${product.primary_image_srcset || ''}" sizes="(max-width: 768px) 50vw, 25vw" alt="${product.name}" class="product-img" loading="lazy" width="320" height="320" onerror="this.src='/images/gift-placeholder.svg'">
                             </div>
                             <div class="product-info">
                                 <h3 class="product-name">${product.name}</h3>
@@ -729,6 +937,11 @@
         
         document.getElementById('minPrice').addEventListener('input', debouncedApplyFilters);
         document.getElementById('maxPrice').addEventListener('input', debouncedApplyFilters);
+        
+        const mMinPrice = document.getElementById('m-minPrice');
+        const mMaxPrice = document.getElementById('m-maxPrice');
+        if (mMinPrice) mMinPrice.addEventListener('input', debouncedApplyFilters);
+        if (mMaxPrice) mMaxPrice.addEventListener('input', debouncedApplyFilters);
 
         function decodeProductFromCard(card) {
             const raw = card?.dataset?.product || '';

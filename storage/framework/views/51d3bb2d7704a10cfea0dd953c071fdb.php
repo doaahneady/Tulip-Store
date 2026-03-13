@@ -23,7 +23,7 @@
             background-attachment: fixed;
             min-height: 100vh;
             direction: rtl;
-            font-family: 'El Messiri',sans-serif;
+            font-family:'El Messiri',sans-serif;
             font-weight: 400;
             height: 100%;
         }
@@ -154,7 +154,7 @@
         }
         .phone-input-wrapper input::placeholder{
             text-align:center !important;
-            font-family: 'El Messiri',sans-serif;
+            font-family:'El Messiri',sans-serif;
         }
         .phone-input-wrapper input:not(:placeholder-shown){
             text-align:left !important;
@@ -201,7 +201,7 @@
         }
         input::placeholder{
             color:#d3e7e2;
-            font-family: 'El Messiri',sans-serif;
+            font-family'El Messiri',sans-serif;
             font-weight: 300;
         }
         input:focus{

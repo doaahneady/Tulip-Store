@@ -36,7 +36,20 @@
         .links { margin-top: 1rem; display: flex; gap: 1rem; }
         .links a { color: #7b1fa2; text-decoration: none; }
         .links a:hover { text-decoration: underline; }
-        @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { 
+            .grid-2 { grid-template-columns: 1fr; } 
+            .container { padding: 0; }
+            .card { border-radius: 0; box-shadow: none; }
+            .header { padding: 2rem 1.5rem; }
+            .header h1 { font-size: 1.6rem; }
+            .steps { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; padding: 0 1rem; }
+            .step span { font-size: 0.8rem; }
+            .content { padding: 2rem 1.5rem; }
+            .actions { flex-direction: column; gap: 1rem; }
+            .actions > div { width: 100%; display: flex; flex-direction: column; gap: 0.75rem; }
+            .btn { width: 100%; display: flex; justify-content: center; align-items: center; }
+            .nav { width: 100%; justify-content: center; }
+        }
     </style>
     <script>
         function showStep(step) {
@@ -52,44 +65,42 @@
         function validateCurrentStep() {
             const current = parseInt(document.getElementById('currentStep').value);
             const pane = document.getElementById('step-' + current);
-            const fields = pane.querySelectorAll('input');
+            const fields = pane.querySelectorAll('input[required], select[required], textarea[required]');
             let isValid = true;
             let errorMessage = '';
             
             fields.forEach(field => {
+                // Reset border
                 field.style.borderColor = '#e0e0e0';
                 
-                if (field.hasAttribute('required') && !field.value.trim()) {
+                const value = field.value.trim();
+                
+                // Required check
+                if (!value) {
                     field.style.borderColor = '#ff4444';
                     isValid = false;
                     if (!errorMessage) errorMessage = 'يرجى ملء جميع الحقول المطلوبة';
-                } else if (field.hasAttribute('pattern') && field.value.trim()) {
+                } 
+                // Pattern check (Regex)
+                else if (field.hasAttribute('pattern')) {
                     const regex = new RegExp(field.getAttribute('pattern'));
-                    if (!regex.test(field.value)) {
+                    if (!regex.test(value)) {
                         field.style.borderColor = '#ff4444';
                         isValid = false;
                         if (!errorMessage) errorMessage = field.getAttribute('title') || 'تنسيق الحقل غير صحيح';
                     }
-                } else if (field.hasAttribute('minlength') && field.value.trim() && field.value.length < parseInt(field.getAttribute('minlength'))) {
-                    field.style.borderColor = '#ff4444';
-                    isValid = false;
-                    if (!errorMessage) errorMessage = `يجب أن يكون طول الحقل ${field.getAttribute('minlength')} محارف على الأقل`;
                 }
-
-                // Custom password strength check for step 1
-                if (current === 1 && field.name === 'password' && field.value.trim()) {
-                    const pass = field.value;
-                    const hasUpper = /[A-Z]/.test(pass);
-                    const hasLower = /[a-z]/.test(pass);
-                    const hasSymbol = /[\W_]/.test(pass);
-                    if (!hasUpper || !hasLower || !hasSymbol) {
+                // Minlength check
+                else if (field.hasAttribute('minlength')) {
+                    const min = parseInt(field.getAttribute('minlength'));
+                    if (value.length < min) {
                         field.style.borderColor = '#ff4444';
                         isValid = false;
-                        if (!errorMessage) errorMessage = 'كلمة المرور يجب أن تحتوي على أحرف كبيرة وصغيرة ورموز';
+                        if (!errorMessage) errorMessage = `يجب أن يكون طول الحقل ${min} محارف على الأقل`;
                     }
                 }
 
-                // Add reset listener
+                // Reset on input
                 if (!field.hasAttribute('data-has-reset-listener')) {
                     field.addEventListener('input', function() {
                         this.style.borderColor = '#e0e0e0';
@@ -98,13 +109,14 @@
                 }
             });
 
-            if (current === 1) {
+            // Password Match Check (Step 1)
+            if (current === 1 && isValid) {
                 const pass = pane.querySelector('input[name="password"]');
                 const confirm = pane.querySelector('input[name="password_confirmation"]');
-                if (pass.value && confirm.value && pass.value !== confirm.value) {
+                if (pass.value !== confirm.value) {
                     confirm.style.borderColor = '#ff4444';
                     isValid = false;
-                    if (!errorMessage) errorMessage = 'كلمة المرور غير متطابقة';
+                    errorMessage = 'كلمة المرور غير متطابقة';
                 }
             }
             
@@ -167,11 +179,11 @@
                         <div class="grid grid-2">
                             <div class="form-group">
                                 <label>الاسم التجاري (بالإنجليزية)</label>
-                                <input type="text" name="business_name_en" class="input" required pattern="^[a-zA-Z0-9\s]+$" title="يرجى إدخال أحرف إنجليزية وأرقام فقط">
+                                <input type="text" name="business_name_en" class="input" required minlength="3" pattern="^[a-zA-Z0-9\s]+$" title="يجب إدخال أحرف إنجليزية وأرقام فقط، و3 محارف على الأقل">
                             </div>
                             <div class="form-group">
                                 <label>الاسم التجاري (بالعربية)</label>
-                                <input type="text" name="business_name_ar" class="input" required pattern="^[\u0621-\u064A0-9\s]+$" title="يرجى إدخال أحرف عربية وأرقام فقط">
+                                <input type="text" name="business_name_ar" class="input" required minlength="3" pattern="^[\u0621-\u064A0-9\s]+$" title="يجب إدخال أحرف عربية وأرقام فقط، و3 محارف على الأقل">
                             </div>
                             <div class="form-group">
                                 <label>البريد الإلكتروني</label>
@@ -187,12 +199,11 @@
                                     <input type="password" name="password" class="input" required minlength="8" style="padding-left: 45px;">
                                     <i class="fas fa-eye toggle-password" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 1.1rem;"></i>
                                 </div>
-                                <small style="color: #666; font-size: 0.8rem;">8 محارف على الأقل، تشمل أحرف كبيرة وصغيرة ورموز</small>
                             </div>
                             <div class="form-group">
                                 <label>تأكيد كلمة المرور</label>
                                 <div style="position: relative;">
-                                    <input type="password" name="password_confirmation" class="input" required style="padding-left: 45px;">
+                                    <input type="password" name="password_confirmation" class="input" required minlength="8" style="padding-left: 45px;">
                                     <i class="fas fa-eye toggle-password" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 1.1rem;"></i>
                                 </div>
                             </div>

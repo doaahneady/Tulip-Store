@@ -230,13 +230,17 @@
             box-shadow: 0 8px 30px rgba(0,0,0,0.08);
             transition: all 0.4s ease;
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
         }
         .gift-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 15px 40px rgba(0,0,0,0.12);
         }
         .gift-image {
-            height: 200px;
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            height: auto;
             background: linear-gradient(135deg, #f5f7fa, #e4e8eb);
             display: flex;
             align-items: center;
@@ -245,13 +249,11 @@
             overflow: hidden;
         }
         .gift-image img {
+            width: 100%;
             height: 100%;
-            max-height: 180px;
-            width: auto;
-            object-fit: contain;
+            object-fit: cover;
             position: relative;
             z-index: 1;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
         }
         .gift-image::before {
             content: '';
@@ -368,13 +370,26 @@
         @media (max-width: 900px) {
             .premium-cards { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto 4rem; }
             .gifts-grid { grid-template-columns: repeat(2, 1fr); }
+            
+            /* Disable hover scale on mobile */
+            .premium-card:hover, .gift-card:hover {
+                transform: none !important;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.08) !important;
+            }
         }
         @media (max-width: 600px) {
             .hero-title { font-size: 2.2rem; }
             .hero-subtitle { font-size: 1rem; }
             .hero-icon-item { font-size: 2.5rem; }
-            .gifts-grid { grid-template-columns: 1fr; }
+            .gifts-grid { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 0.5rem;
+            }
             .section-title { font-size: 1.8rem; }
+            .gift-info { padding: 0.8rem; }
+            .gift-name { font-size: 0.9rem; }
+            .price-current { font-size: 1.1rem; }
+            .gift-add-btn { padding: 0.6rem; font-size: 0.85rem; }
         }
     </style>
 </head>

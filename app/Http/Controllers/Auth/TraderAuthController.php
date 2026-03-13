@@ -76,8 +76,8 @@ class TraderAuthController extends Controller
     public function apiRegister(Request $request)
     {
         $validated = $request->validate([
-            'business_name_en' => 'required|string|max:255|regex:/^[a-zA-Z0-9\s]+$/',
-            'business_name_ar' => 'required|string|max:255|regex:/^[\x{0621}-\x{064A}0-9\s]+$/u',
+            'business_name_en' => 'required|string|min:3|max:255|regex:/^[a-zA-Z0-9\s]+$/',
+            'business_name_ar' => 'required|string|min:3|max:255|regex:/^[\x{0621}-\x{064A}0-9\s]+$/u',
             'email' => 'required|email|max:255|unique:users,email',
             'phone' => 'required|string|regex:/^09\d{8}$/',
             'password' => [
@@ -99,8 +99,10 @@ class TraderAuthController extends Controller
             'account_number' => 'required|string|max:100',
             'iban' => 'nullable|string|max:50',
         ], [
+            'business_name_en.min' => 'الاسم التجاري بالإنجليزية يجب أن يكون 3 محارف على الأقل',
             'business_name_en.regex' => 'الاسم التجاري بالإنجليزية يجب أن يحتوي على أحرف إنجليزية وأرقام فقط',
             'business_name_ar.required' => 'الاسم التجاري بالعربية مطلوب',
+            'business_name_ar.min' => 'الاسم التجاري بالعربية يجب أن يكون 3 محارف على الأقل',
             'business_name_ar.regex' => 'الاسم التجاري بالعربية يجب أن يحتوي على أحرف عربية وأرقام فقط',
             'phone.regex' => 'رقم الهاتف يجب أن يبدأ بـ 09 ويتكون من 10 أرقام',
             'password.min' => 'كلمة المرور يجب أن تكون 8 محارف على الأقل',
@@ -219,8 +221,8 @@ class TraderAuthController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'business_name_en' => 'required|string|max:255|regex:/^[a-zA-Z0-9\s]+$/',
-            'business_name_ar' => 'required|string|max:255|regex:/^[\x{0621}-\x{064A}0-9\s]+$/u',
+            'business_name_en' => 'required|string|min:3|max:255|regex:/^[a-zA-Z0-9\s]+$/',
+            'business_name_ar' => 'required|string|min:3|max:255|regex:/^[\x{0621}-\x{064A}0-9\s]+$/u',
             'email' => 'required|email|max:255|unique:users,email',
             'phone' => 'required|string|regex:/^09\d{8}$/',
             'password' => [
@@ -249,8 +251,10 @@ class TraderAuthController extends Controller
             'tax_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'owner_id_card' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ], [
+            'business_name_en.min' => 'الاسم التجاري بالإنجليزية يجب أن يكون 3 محارف على الأقل',
             'business_name_en.regex' => 'الاسم التجاري بالإنجليزية يجب أن يحتوي على أحرف إنجليزية وأرقام فقط',
             'business_name_ar.required' => 'الاسم التجاري بالعربية مطلوب',
+            'business_name_ar.min' => 'الاسم التجاري بالعربية يجب أن يكون 3 محارف على الأقل',
             'business_name_ar.regex' => 'الاسم التجاري بالعربية يجب أن يحتوي على أحرف عربية وأرقام فقط',
             'phone.regex' => 'رقم الهاتف يجب أن يبدأ بـ 09 ويتكون من 10 أرقام',
             'password.min' => 'كلمة المرور يجب أن تكون 8 محارف على الأقل',

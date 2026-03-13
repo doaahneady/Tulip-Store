@@ -133,7 +133,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-500 text-xs">أرباح هذا الشهر (بدون التوصيل)</p>
-                <h3 class="text-2xl font-black text-gray-800 mt-1"><?php echo e(number_format($metrics['earnings_ex_delivery_month'] ?? 0, 2)); ?>ل.س</h3>
+                <h3 class="text-2xl font-black text-gray-800 mt-1"><?php echo e(number_format($metrics['earnings_ex_delivery_month'] ?? 0, 2)); ?> ل.س</h3>
             </div>
             <div class="w-10 h-10 bg-teal-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-coins text-teal-600 text-base"></i>
@@ -144,7 +144,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-500 text-xs">الرصيد المتاح</p>
-                <h3 class="text-2xl font-black text-gray-800 mt-1"><?php echo e(number_format($metrics['available_balance'] ?? 0, 2)); ?>ل.س</h3>
+                <h3 class="text-2xl font-black text-gray-800 mt-1"><?php echo e(number_format($metrics['available_balance'] ?? 0, 2)); ?> ل.س</h3>
             </div>
             <div class="w-10 h-10 bg-purple-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-wallet text-purple-600 text-base"></i>

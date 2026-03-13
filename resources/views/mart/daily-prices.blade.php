@@ -346,8 +346,44 @@
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .hero-title { font-size: 2.2rem; }
             .hero-subtitle { font-size: 1.1rem; }
-            .products-grid { grid-template-columns: 1fr; }
+            .prices-container { padding: 0 0 5rem; }
+            .category-section { 
+                border-radius: 0; 
+                margin: 0 0 1.5rem; 
+                padding: 1.5rem 1rem;
+                width: 100%;
+                border-left: none;
+                border-right: none;
+            }
+            .products-grid { 
+                grid-template-columns: repeat(2, 1fr) !important; 
+                gap: 0.5rem !important;
+            }
             .category-header { flex-direction: column; gap: 1rem; text-align: center; }
+            
+            .price-card {
+                flex-direction: column !important;
+                text-align: center;
+            }
+            .price-card .photo-container {
+                width: 100% !important;
+                height: auto !important;
+                aspect-ratio: 1 / 1 !important;
+                border-left: none !important;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            .price-card .info {
+                padding: 0.6rem !important;
+            }
+            .price-card .prices {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            .add-btn {
+                width: 100% !important;
+                height: 40px !important;
+                border-radius: 0 !important;
+            }
         }
     </style>
 </head>

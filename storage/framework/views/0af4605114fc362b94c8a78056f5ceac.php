@@ -88,9 +88,63 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0,0,0,0.12);
         }
+
+        /* Responsive Mobile Fixes */
+        @media (max-width: 768px) {
+            #mainContainer {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            
+            #rightPanel, #formContainer {
+                height: auto !important;
+                overflow: visible !important;
+                box-shadow: none !important;
+                padding: 1rem !important;
+            }
+
+            /* Step 1: Map on top (rightPanel is map in step 1) */
+            #rightPanel {
+                height: 300px !important;
+                order: 1;
+            }
+            
+            #formContainer {
+                order: 2;
+                overflow-y: visible !important;
+            }
+
+            /* Hide order summary on mobile for steps 2-4 */
+            body.step-2 #rightPanel,
+            body.step-3 #rightPanel,
+            body.step-4 #rightPanel {
+                display: none !important;
+            }
+
+            body.step-2 #formContainer,
+            body.step-3 #formContainer,
+            body.step-4 #formContainer {
+                width: 100% !important;
+            }
+
+            /* Disable scrolls */
+            .blue-scrollbar, .orange-scrollbar {
+                overflow: visible !important;
+                max-height: none !important;
+            }
+
+            /* Smaller font sizes */
+            h1 { font-size: 1.5rem !important; }
+            h2 { font-size: 1.2rem !important; }
+            label { font-size: 0.8rem !important; }
+            input, select, textarea { padding: 0.6rem !important; font-size: 0.85rem !important; }
+            .btn, button { padding: 0.5rem !important; font-size: 0.8rem !important; }
+        }
     </style>
 </head>
-<body style="margin:0; font-family:'El Messiri',sans-serif; background:#f5f5f5;">
+<body style="margin:0; font-family:'El Messiri',sans-serif; background:#f5f5f5;" class="step-1">
 
 <?php if(View::exists('components.navbar')): ?>
     <?php echo $__env->make('components.navbar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>

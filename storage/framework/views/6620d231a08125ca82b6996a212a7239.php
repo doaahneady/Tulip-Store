@@ -2,7 +2,7 @@
 <?php $__env->startSection('content'); ?>
 <?php $title = 'لوحة المالية'; $subtitle = 'نظرة عامة على الإيرادات والتكاليف والتفصيل'; ?>
 
-<div class="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200 mb-6">
+<div class="top-0  bg-white/80 backdrop-blur-sm border-b border-gray-200 mb-6">
     <div class="px-4 py-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div class="flex items-center gap-3">
             <i class="fas fa-coins text-indigo-600"></i>

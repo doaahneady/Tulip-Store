@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $categoryName }} - هدايا توليب</title>
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title><?php echo e($categoryName); ?> - هدايا توليب</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css'])
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css']); ?>
     <style>
         * {
             margin: 0;
@@ -193,62 +193,65 @@
     </style>
 </head>
 <body>
-      @include('components.navbar')
+      <?php echo $__env->make('components.navbar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
     <div class="category-container">
         <!-- Breadcrumb -->
         <div class="breadcrumb">
-            <a href="{{ route('gifts.index') }}"><i class="fas fa-gift"></i> الهدايا</a>
+            <a href="<?php echo e(route('gifts.index')); ?>"><i class="fas fa-gift"></i> الهدايا</a>
             <i class="fas fa-chevron-left"></i>
-            <span>{{ $categoryName }}</span>
+            <span><?php echo e($categoryName); ?></span>
         </div>
 
         <!-- Category Header -->
         <div class="category-header">
             <h1>
                 <i class="fas fa-heart"></i>
-                هدايا {{ $categoryName }}
+                هدايا <?php echo e($categoryName); ?>
+
             </h1>
-            <p>اختر من مجموعتنا المميزة من هدايا {{ $categoryName }}</p>
+            <p>اختر من مجموعتنا المميزة من هدايا <?php echo e($categoryName); ?></p>
         </div>
 
         <!-- Gifts Grid -->
-        @if($gifts->count() > 0)
+        <?php if($gifts->count() > 0): ?>
             <div class="gifts-grid">
-                @foreach($gifts as $gift)
-                    <div class="gift-card" onclick="window.location.href='{{ route('gifts.show', $gift) }}'">
-                        <img src="{{ $gift->main_image }}" alt="{{ $gift->name }}" class="gift-image">
+                <?php $__currentLoopData = $gifts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $gift): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="gift-card" onclick="window.location.href='<?php echo e(route('gifts.show', $gift)); ?>'">
+                        <img src="<?php echo e($gift->main_image); ?>" alt="<?php echo e($gift->name); ?>" class="gift-image">
                         <div class="gift-content">
-                            <span class="gift-category {{ $gift->category_color }}">
-                                {{ $gift->category_name }}
+                            <span class="gift-category <?php echo e($gift->category_color); ?>">
+                                <?php echo e($gift->category_name); ?>
+
                             </span>
-                            <h3 class="gift-name">{{ $gift->name }}</h3>
-                            <p class="gift-description">{{ Str::limit($gift->description, 100) }}</p>
+                            <h3 class="gift-name"><?php echo e($gift->name); ?></h3>
+                            <p class="gift-description"><?php echo e(Str::limit($gift->description, 100)); ?></p>
                             <div class="gift-footer">
-                                <span class="gift-price">{{ $gift->formatted_price }}</span>
+                                <span class="gift-price"><?php echo e($gift->formatted_price); ?></span>
                                 <div class="gift-rating">
                                     <i class="fas fa-star"></i>
-                                    <span>{{ number_format($gift->rating, 1) }}</span>
+                                    <span><?php echo e(number_format($gift->rating, 1)); ?></span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
 
             <!-- Pagination -->
             <div style="display: flex; justify-content: center; margin-top: 2rem;">
-                {{ $gifts->links() }}
+                <?php echo e($gifts->links()); ?>
+
             </div>
-        @else
+        <?php else: ?>
             <div class="no-gifts">
                 <i class="fas fa-gift"></i>
-                <p>لا توجد هدايا متاحة حالياً في فئة {{ $categoryName }}</p>
-                <a href="{{ route('gifts.index') }}" class="back-to-gifts">
+                <p>لا توجد هدايا متاحة حالياً في فئة <?php echo e($categoryName); ?></p>
+                <a href="<?php echo e(route('gifts.index')); ?>" class="back-to-gifts">
                     <i class="fas fa-arrow-right"></i> العودة لجميع الهدايا
                 </a>
             </div>
-        @endif
+        <?php endif; ?>
     </div>
 </body>
-</html>
+</html><?php /**PATH C:\Users\Doaa\StudioProjects\Tulip-Store\resources\views/gifts/category.blade.php ENDPATH**/ ?>

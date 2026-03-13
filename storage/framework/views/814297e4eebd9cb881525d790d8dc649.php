@@ -14,11 +14,32 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: "El Messiri", sans-serif; background: #f8f9fa; min-height: 100vh; }
         
-        .profile-container { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; display: flex; gap: 2rem; }
+        .profile-container { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; display: flex; gap: 2rem; position: relative; }
         
+        /* Sidebar Toggle Button */
+        .sidebar-toggle {
+            display: none;
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            z-index: 1001;
+            background: #0f4f55;
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(15, 79, 85, 0.3);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        .sidebar-toggle:hover { background: #1a6b73; transform: scale(1.05); }
+
         .profile-sidebar {
             width: 280px; flex-shrink: 0; background: white; border-radius: 16px;
             box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; height: fit-content;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .profile-header {
@@ -43,15 +64,16 @@
         }
         
         .profile-nav-item:hover { background: #f8f9fa; color: #0f4f55; }
-        .profile-nav-item.active { background: #e8f4f8; color: #0f4f55; border-right: 3px solid #0f4f55; }
+        .profile-nav-item.active { background: #e8f4f8; color: #0f4f55; border-right: 4px solid #0f4f55; }
         .profile-nav-item i { width: 20px; text-align: center; font-size: 1.1rem; }
         
-        .profile-content { flex: 1; }
+        .profile-content { flex: 1; min-width: 0; }
         
         .content-section {
             background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            padding: 2rem; display: none;
+            padding: 2rem; display: none; animation: fadeIn 0.4s ease;
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .content-section.active { display: block; }
         
         .section-title {
@@ -189,19 +211,55 @@
         }
         .empty-state i { font-size: 4rem; margin-bottom: 1rem; opacity: 0.3; }
         .empty-state p { font-size: 1.1rem; }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(3px);
+            z-index: 999;
+            animation: fadeInOverlay 0.3s ease;
+        }
+        @keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
+        
+        @media (max-width: 992px) {
+            .sidebar-toggle { display: flex; align-items: center; justify-content: center; }
+            
+            .profile-sidebar {
+                position: fixed;
+                top: 0;
+                right: -300px;
+                bottom: 0;
+                z-index: 1000;
+                width: 280px !important;
+                border-radius: 0;
+                box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+            }
+            
+            .profile-sidebar.open { right: 0; }
+            .sidebar-overlay.active { display: block; }
+            
+            .profile-container { padding-top: 4rem; }
+        }
         
         @media (max-width: 768px) {
             .profile-container { flex-direction: column; }
-            .profile-sidebar { width: 100%; }
             .form-row { grid-template-columns: 1fr; }
+            .content-section { padding: 1.5rem; }
         }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <?php echo $__env->make('components.navbar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     
     <div class="profile-container">
-        <div class="profile-sidebar">
+        <button class="sidebar-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+        
+        <div class="profile-sidebar" id="profileSidebar">
             <div class="profile-header">
                 <div class="profile-avatar"><i class="fas fa-user"></i></div>
                 <div class="profile-name" id="userName"><?php echo e(Auth::user()->name ?? 'المستخدم'); ?></div>
@@ -418,6 +476,13 @@
             setCurrencyPreferenceUI(initial);
         });
         
+        function toggleSidebar() {
+            const sidebar = document.getElementById('profileSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
         function showSection(section) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.profile-nav-item').forEach(n => n.classList.remove('active'));
@@ -427,7 +492,21 @@
                 targetSection.classList.add('active');
             }
             
-            event.currentTarget.classList.add('active');
+            // Highlight the clicked nav item
+            const navItems = document.querySelectorAll('.profile-nav-item');
+            navItems.forEach(item => {
+                if (item.getAttribute('onclick')?.includes(`'${section}'`)) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Close sidebar on mobile after selecting a section
+            if (window.innerWidth <= 992) {
+                const sidebar = document.getElementById('profileSidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            }
             
             if (section === 'addresses') loadAddresses();
             if (section === 'orders') loadOrders();

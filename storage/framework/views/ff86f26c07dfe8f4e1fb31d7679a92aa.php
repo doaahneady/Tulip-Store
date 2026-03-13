@@ -80,10 +80,18 @@
         .section-label { font-family: 'El Messiri', sans-serif; font-size: 1.1rem; color: var(--text-dark); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
         .section-label i { color: var(--accent); }
 
-        .filter-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+        .filter-tabs { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 0.5rem; 
+            margin-bottom: 1.5rem; 
+        }
+        .filter-tabs::-webkit-scrollbar { display: none; } /* Chrome, Safari, Opera */
+
         .filter-tab {
-            padding: 0.6rem 1.2rem; border: 2px solid #eee; background: #fff; border-radius: 25px;
-            cursor: pointer; font-family:'El Messiri', sans-serif; font-size: 0.9rem; transition: all 0.3s;
+            padding: 0.4rem 1rem; border: 2px solid #eee; background: #fff; border-radius: 25px;
+            cursor: pointer; font-family:'El Messiri', sans-serif; font-size: 0.85rem; transition: all 0.3s;
+            white-space: nowrap;
         }
         .filter-tab:hover, .filter-tab.active { border-color: var(--accent); background: #fdf8e8; color: var(--primary); }
 
@@ -91,7 +99,7 @@
         
         .option-card {
             background: var(--bg-warm); border: 2px solid transparent; border-radius: 16px;
-            padding: 1.2rem; cursor: pointer; transition: all 0.3s; text-align: center; position: relative;
+            padding: 0.8rem 0.5rem; cursor: pointer; transition: all 0.3s; text-align: center; position: relative;
         }
         button.option-card { font-family:'El Messiri', sans-serif; width: 100%; }
         .option-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(139,105,20,0.12); border-color: rgba(212,175,55,0.3); }
@@ -101,11 +109,17 @@
             background: var(--gold-gradient); border-radius: 50%; color: #fff; display: flex;
             align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold;
         }
-        .option-visual { width: 100px; height: 100px; margin: 0 auto 0.8rem; border-radius: 14px; background: #fff; overflow: hidden; border: 1px solid #f0f0f0; }
+        .option-visual { width: 75px; height: 75px; margin: 0 auto 0.6rem; border-radius: 12px; background: #fff; overflow: hidden; border: 1px solid #f0f0f0; }
         .option-visual img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .option-name { font-weight: 600; color: var(--text-dark); font-size: 0.95rem; margin-bottom: 0.3rem; }
-        .option-price { color: var(--primary); font-weight: 700; font-size: 0.9rem; }
-        .option-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+        .option-name { font-weight: 600; color: var(--text-dark); font-size: 0.85rem; margin-bottom: 0.2rem; }
+        .option-price { color: var(--primary); font-weight: 700; font-size: 0.8rem; }
+        .option-meta { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.1rem; }
+
+        .three-cols-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+        }
 
         .option-card .tooltip { display: none; }
     </style>
@@ -136,7 +150,7 @@
         #totalPrice { color: var(--primary); }
 
         .cart-btn {
-            width: 100%; padding: 1rem; background: var(--gold-gradient); color: #fff; border: none;
+            width: 100%; padding: 0.6rem; background: var(--gold-gradient); color: #fff; border: none;
             border-radius: 12px; font-family: 'El Messiri', sans-serif; font-size: 1.05rem; font-weight: 700;
             cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
         }
@@ -144,21 +158,41 @@
         .cart-btn:disabled { background: #ddd; cursor: not-allowed; }
 
         .nav-buttons { display: flex; gap: 1rem; }
-        .nav-btn { flex: 1; padding: 0.9rem; border: none; border-radius: 10px; font-family: 'El Messiri', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .nav-btn { flex: 1; padding: 0.6rem; border: none; border-radius: 10px; font-family: 'El Messiri', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
         .nav-btn.prev { background: #f5f5f5; color: #666; }
         .nav-btn.prev:hover { background: #eee; }
         .nav-btn.next { background: linear-gradient(135deg, #2c2416, #4a3c28); color: #fff; }
         .nav-btn.next:hover { transform: translateY(-2px); }
 
         .message-section { margin-top: 1.5rem; }
-        .elegant-input, .elegant-textarea { width: 100%; padding: 1rem; border: 2px solid #f0ebe0; border-radius: 12px;
-             font-family:'El Messiri', sans-serif; font-size: 1rem; transition: all 0.3s; margin-bottom: 0.5rem; background: var(--bg-warm); }
+        .elegant-input, .elegant-textarea { width: 100%; padding: 1rem; border: 2px solid #f0ebe0; border-radius: 12px; font-family: inherit; font-size: 1rem; transition: all 0.3s; margin-bottom: 0.5rem; background: var(--bg-warm); }
         .elegant-input:focus, .elegant-textarea:focus { outline: none; border-color: var(--accent); background: #fff; }
         .elegant-textarea { min-height: 100px; resize: vertical; }
         .char-counter { text-align: left; color: var(--text-muted); font-size: 0.8rem; }
 
-        @media (max-width: 1024px) { .builder-layout { grid-template-columns: 1fr; } .preview-panel { position: static; } .hero-content { flex-direction: column; text-align: center; } }
-        @media (max-width: 600px) { .hero-text h1 { font-size: 2rem; } .steps-progress { flex-wrap: wrap; gap: 0.5rem; } .step { padding: 0.5rem 0.8rem; font-size: 0.85rem; } .options-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 1024px) { 
+            .builder-layout { grid-template-columns: 1fr; } 
+            .preview-panel { position: static; } 
+            .hero-content { flex-direction: column; text-align: center; } 
+        }
+        @media (max-width: 768px) {
+            .preview-card { display: none !important; }
+        }
+        @media (max-width: 600px) { 
+            .hero-text h1 { font-size: 2rem; } 
+            .steps-progress { flex-wrap: wrap; gap: 0.5rem; } 
+            .step { padding: 0.5rem 0.8rem; font-size: 0.85rem; } 
+            .options-grid, .three-cols-grid { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; } 
+            .option-card { padding: 0.5rem 0.2rem; border-radius: 12px; }
+            .option-visual { width: 45px; height: 45px; margin-bottom: 0.4rem; border-radius: 8px; }
+            .option-name { font-size: 0.65rem; }
+            .option-price { font-size: 0.6rem; }
+            .option-meta { font-size: 0.55rem; }
+            .option-card.selected::after { width: 16px; height: 16px; font-size: 0.6rem; top: 4px; left: 4px; }
+            
+            .nav-buttons { flex-direction: column; gap: 0.5rem; }
+            .nav-btn, .cart-btn { width: 100%; padding: 0.8rem; }
+        }
     </style>
 
     <div class="hero-banner">
@@ -190,10 +224,7 @@
                 <div class="step-content" id="step2" style="display:none;">
                     <div class="panel-header">
                         <div class="panel-icon"><i class="fas fa-gifts"></i></div>
-                        <div>
-                            <h2 class="panel-title">أضف محتويات الهدية</h2>
-                            <p class="panel-subtitle" id="itemsCounter">اختر العناصر المفضلة</p>
-                        </div>
+                        <div><h2 class="panel-title">أضف محتويات الهدية</h2><p class="panel-subtitle">اختر العناصر المفضلة</p></div>
                     </div>
                     <div class="filter-tabs" id="categoryTabs"></div>
                     <div class="options-grid" id="fillersGrid"></div>
@@ -204,9 +235,9 @@
                         <div><h2 class="panel-title">التغليف والشريط</h2><p class="panel-subtitle">لمسات نهائية أنيقة</p></div>
                     </div>
                     <h3 class="section-label"><i class="fas fa-scroll"></i> نوع التغليف</h3>
-                    <div class="options-grid" id="wrappingsGrid"></div>
+                    <div class="three-cols-grid" id="wrappingsGrid"></div>
                     <h3 class="section-label" style="margin-top:1.5rem;"><i class="fas fa-ribbon"></i> الشريط</h3>
-                    <div class="options-grid" id="ribbonsGrid"></div>
+                    <div class="three-cols-grid" id="ribbonsGrid"></div>
                 </div>
                 <div class="step-content" id="step4" style="display:none;">
                     <div class="panel-header">
@@ -272,7 +303,6 @@
             loadCards();
             setupMessage();
             loadStoreProducts();
-            updateCounter();
         });
 
         async function loadGiftOptions() {
@@ -420,40 +450,18 @@
         }
 
         function selectBox(id) {
-            const newBox = boxes.find(b => b.id === id);
-            if (!newBox) return;
-            giftState.box = newBox;
-            while ((giftState.fillers.length + giftState.storeProducts.length) > newBox.maxItems) {
-                if (giftState.storeProducts.length > 0) giftState.storeProducts.pop();
-                else giftState.fillers.pop();
-            }
-            loadBoxes(); updatePreview(); updateSummary(); updateCounter();
-        }
-
-        function updateCounter() {
-            const counterEl = document.getElementById('itemsCounter');
-            if (!counterEl) return;
-            if (!giftState.box) {
-                counterEl.textContent = 'اختر صندوق للبدء';
-                return;
-            }
-            const count = giftState.fillers.length + giftState.storeProducts.length;
-            const max = giftState.box.maxItems;
-            counterEl.innerHTML = `تم اختيار <span style="color:${count >= max ? '#e67e22' : 'var(--primary)'}; font-weight:800;">${count}</span> من <span style="font-weight:800;">${max}</span> عناصر`;
+            giftState.box = boxes.find(b => b.id === id);
+            if (giftState.fillers.length > giftState.box.maxItems) giftState.fillers = giftState.fillers.slice(0, giftState.box.maxItems);
+            loadBoxes(); updatePreview(); updateSummary();
         }
 
         function toggleFiller(id) {
             if (!giftState.box) { alert('اختر صندوق أولاً'); return; }
             const idx = giftState.fillers.indexOf(id);
             if (idx >= 0) { giftState.fillers.splice(idx, 1); }
-            else {
-                if ((giftState.fillers.length + giftState.storeProducts.length) >= giftState.box.maxItems) {
-                    alert(`عذراً، الصندوق يتسع لـ ${giftState.box.maxItems} عناصر فقط. قم بإلغاء عنصر لتتمكن من إضافة آخر.`);
-                    return;
-                }
-                giftState.fillers.push(id);
-            }
-            loadFillers(document.querySelector('.filter-tab.active')?.dataset.cat || 'all'); updatePreview(); updateSummary(); updateCounter();
+            else if ((giftState.fillers.length + giftState.storeProducts.length) < giftState.box.maxItems) { giftState.fillers.push(id); }
+            else { alert(`الصندوق يتسع لـ ${giftState.box.maxItems} عناصر فقط`); return; }
+            loadFillers(document.querySelector('.filter-tab.active')?.dataset.cat || 'all'); updatePreview(); updateSummary();
         }
 
         function toggleStoreProduct(id) {
@@ -462,14 +470,11 @@
             if (idx >= 0) {
                 giftState.storeProducts.splice(idx, 1);
             } else {
-                if ((giftState.fillers.length + giftState.storeProducts.length) >= giftState.box.maxItems) {
-                    alert(`عذراً، الصندوق يتسع لـ ${giftState.box.maxItems} عناصر فقط. قم بإلغاء عنصر لتتمكن من إضافة آخر.`);
-                    return;
-                }
+                if ((giftState.fillers.length + giftState.storeProducts.length) >= giftState.box.maxItems) { alert(`الصندوق يتسع لـ ${giftState.box.maxItems} عناصر فقط`); return; }
                 const p = storeProducts.find(x => x.id === id);
-                if (p) giftState.storeProducts.push({ id: p.id, name: p.name, price: p.price, image: p.image, qty: 1 });
+                if (p) giftState.storeProducts.push({ id: p.id, name: p.name, price: p.price, qty: 1 });
             }
-            loadFillers('tulip'); updateSummary(); updateCounter();
+            loadFillers('tulip'); updateSummary();
         }
 
         function filterCategory(cat) {
@@ -568,7 +573,7 @@
 
         function resetBuilder() {
             giftState = { box: null, fillers: [], storeProducts: [], wrapping: null, ribbon: null, card: null, message: '', recipientName: '' };
-            currentStep = 1; goToStep(1); loadBoxes(); loadFillers(); loadWrappings(); loadRibbons(); loadCards(); updatePreview(); updateSummary(); updateCounter();
+            currentStep = 1; goToStep(1); loadBoxes(); loadFillers(); loadWrappings(); loadRibbons(); loadCards(); updatePreview(); updateSummary();
             document.getElementById('cardMessage').value = ''; document.getElementById('recipientName').value = ''; document.getElementById('charCount').textContent = '0';
             document.getElementById('addToCartBtn').style.background = ''; document.getElementById('addToCartBtn').innerHTML = '<i class="fas fa-shopping-cart"></i> أضف للسلة';
         }

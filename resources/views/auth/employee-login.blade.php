@@ -366,8 +366,9 @@
             }
             
             .brand-side {
-                padding: 2rem;
+                padding: 3rem 1.5rem;
                 min-height: auto;
+                width: 100%;
             }
             
             .brand-features {
@@ -375,13 +376,30 @@
             }
             
             .form-side {
-                padding: 2rem;
+                padding: 3rem 1rem;
+                width: 100%;
+            }
+
+            .form-container {
+                max-width: 100%;
             }
         }
         
         @media (max-width: 576px) {
+            .form-side {
+                padding: 2rem 0;
+            }
+
+            .form-header {
+                padding: 0 1.5rem;
+            }
+
             .login-form {
-                padding: 1.5rem;
+                padding: 2.5rem 1.5rem;
+                border-radius: 0;
+                box-shadow: none;
+                border-left: none;
+                border-right: none;
             }
             
             .form-options {
@@ -487,8 +505,6 @@
                             تسجيل الدخول
                         </button>
                     </form>
-                    
-                    
                     
                     <div class="alt-links">
                         @auth('employee')

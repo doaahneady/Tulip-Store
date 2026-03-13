@@ -29,7 +29,7 @@
       Search Results
     </h2>
     
-    <div id="results-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div id="results-container" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
       <div class="card p-6 text-center col-span-full">
         <p class="text-gray-500">Enter a search term to find products</p>
       </div>
@@ -80,7 +80,7 @@
       if (products.length > 0) {
         resultsContainer.innerHTML = products.map(product => `
           <div class="card overflow-hidden hover:shadow-lg transition">
-            <div class="bg-gray-200 h-48 flex items-center justify-center">
+            <div class="bg-gray-200 aspect-square flex items-center justify-center overflow-hidden">
               ${product.image ? `<img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">` : '<i class="fas fa-image text-gray-400 text-4xl"></i>'}
             </div>
             <div class="p-4">

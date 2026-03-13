@@ -372,7 +372,9 @@
         .badge-new { background: var(--teal); color: #fff; }
         .badge-fresh { background: var(--green); color: #fff; }
         .product-image {
-            height: 140px;
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            height: auto;
             background: linear-gradient(135deg, #eaf7f8, #f8f9fa);
             display: flex;
             align-items: center;
@@ -427,7 +429,8 @@
         }
         @media (max-width: 768px) {
             .products-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 1rem !important;
             }
             .price-range {
                 gap: .4rem;
@@ -435,9 +438,9 @@
         }
         @media (max-width: 480px) {
             .products-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.5rem !important;
             }
-            .product-image { height: 120px; }
         }
         .product-body { padding: 0.8rem; display: flex; flex-direction: column; min-height: auto; }
         .product-category {

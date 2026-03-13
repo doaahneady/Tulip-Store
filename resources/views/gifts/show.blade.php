@@ -306,18 +306,71 @@
         }
 
         @media (max-width: 768px) {
+            .gift-detail-container {
+                padding: 0;
+            }
+
+            .breadcrumb {
+                margin: 1rem;
+            }
+
+            .gift-detail, .related-gifts {
+                border-radius: 0;
+                box-shadow: none;
+                margin-bottom: 1.5rem;
+            }
+
             .gift-detail-content {
                 grid-template-columns: 1fr;
-                gap: 2rem;
-                padding: 2rem;
+                gap: 1.5rem;
+                padding: 1.5rem;
+            }
+
+            .main-image {
+                height: auto;
+                aspect-ratio: 1 / 1;
+                border-radius: 0;
             }
 
             .gift-info h1 {
+                font-size: 1.8rem;
+            }
+
+            .gift-price {
                 font-size: 2rem;
             }
 
             .action-buttons {
                 flex-direction: column;
+            }
+
+            /* Related Gifts Mobile */
+            .related-gifts {
+                padding: 1.5rem 1rem;
+            }
+
+            .related-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.8rem;
+            }
+
+            .related-card {
+                border-radius: 12px;
+                transform: none !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+            }
+
+            .related-image {
+                height: auto;
+                aspect-ratio: 1 / 1;
+            }
+
+            .related-content {
+                padding: 0.8rem;
+            }
+
+            .related-name {
+                font-size: 0.9rem;
             }
         }
     </style>

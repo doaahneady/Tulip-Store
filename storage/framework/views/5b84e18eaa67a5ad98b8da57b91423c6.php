@@ -559,25 +559,111 @@
             }
         }
         @media (max-width: 768px) {
+            .cart-container {
+                padding: 1rem;
+            }
+            .cart-header {
+                padding: 1.5rem 1rem;
+            }
             .cart-header h1 {
-                font-size: 1.6rem;
+                font-size: 1.4rem;
+            }
+            .cart-items {
+                padding: 1rem;
             }
             .cart-item {
-                grid-template-columns: 100px 1fr;
-                gap: 1rem;
+                grid-template-columns: 50px 1fr auto;
+                gap: 0.5rem;
+                padding: 0.5rem;
+                align-items: center;
+                height: 50px;
+                overflow: hidden;
             }
             .cart-item-image {
-                width: 100px;
-                height: 100px;
+                width: 40px;
+                height: 40px;
             }
-            .cart-item-actions {
-                grid-column: 1 / -1;
+            .cart-item-details {
+                gap: 0.1rem;
+                overflow: hidden;
+            }
+            .cart-item-name {
+                font-size: 0.8rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .cart-item-meta, .cart-item-stock, .cart-item-savings, .cart-item-subtotal {
+                display: none;
+            }
+            .cart-item-price-section {
+                margin: 0;
                 flex-direction: row;
-                justify-content: space-between;
+                align-items: center;
+                gap: 0.3rem;
+            }
+            .cart-item-price {
+                font-size: 0.85rem;
+            }
+            .cart-item-price-old {
+                font-size: 0.7rem;
+            }
+            .cart-item-actions-column {
+                flex-direction: row;
+                gap: 0.4rem;
                 align-items: center;
             }
-            .delete-modal-content {
-                padding: 2rem;
+            .quantity-control {
+                padding: 0.1rem;
+                gap: 0.2rem;
+            }
+            .quantity-btn {
+                width: 22px;
+                height: 22px;
+                font-size: 0.7rem;
+            }
+            .quantity-value {
+                min-width: 20px;
+                font-size: 0.8rem;
+            }
+            .remove-btn {
+                padding: 0.3rem;
+                font-size: 0.7rem;
+                background: none;
+                border: none;
+            }
+            .remove-btn span {
+                display: none;
+            }
+            .cart-summary {
+                padding: 1rem;
+                margin-top: 1rem;
+            }
+            .summary-title {
+                font-size: 1.1rem;
+                margin-bottom: 0.8rem;
+                padding-bottom: 0.5rem;
+            }
+            .summary-row {
+                padding: 0.4rem 0;
+                font-size: 0.85rem;
+            }
+            .summary-row.total {
+                font-size: 1.1rem;
+                padding-top: 0.8rem;
+            }
+            .checkout-btn {
+                padding: 0.8rem;
+                font-size: 0.95rem;
+                margin-top: 1rem;
+            }
+            .security-badges {
+                gap: 0.4rem;
+                margin-top: 0.8rem;
+                padding-top: 0.8rem;
+            }
+            .security-badge {
+                font-size: 0.75rem;
             }
         }
     </style>

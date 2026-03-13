@@ -5,96 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Tulip Store - أرسل ابتسامتك أينما كنت</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .products-grid {
-            display: grid !important;
-            grid-template-columns: repeat(5, 1fr) !important;
-            gap: 1.5rem !important;
-            margin-top: 2rem !important;
-        }
-
-        @media (max-width: 1400px) {
-            .products-grid { grid-template-columns: repeat(4, 1fr) !important; }
-        }
-
-        @media (max-width: 1100px) {
-            .products-grid { grid-template-columns: repeat(3, 1fr) !important; }
-        }
-
-        @media (max-width: 768px) {
-            .products-grid { grid-template-columns: repeat(2, 1fr) !important; }
-        }
-
-        @media (max-width: 480px) {
-            .products-grid { grid-template-columns: repeat(1, 1fr) !important; }
-        }
-
+        /* These will now be handled by fluid-overrides.css but keeping specific colors/shadows if needed */
         .product-card {
             background: #fff !important;
-            border-radius: 15px !important;
-            overflow: hidden !important;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-            transition: all 0.3s ease !important;
-            position: relative !important;
         }
 
-        .product-card:hover {
-            transform: translateY(-5px) !important;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
-        }
-
-        .product-card-actions {
-            display: flex !important;
-            justify-content: flex-start !important;
-            align-items: center !important;
-            padding: 0.9rem 1rem 1.1rem !important;
-        }
-
-        .product-card-btn-cart {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            width: auto !important;
-            height: auto !important;
-            padding: 0 !important;
-        }
-
-        .product-card-btn-cart:not([disabled]) i {
+        .product-card-btn-cart i {
             font-size: 1.4rem !important;
             color: #ff6b35 !important;
         }
 
-        .product-card-btn-cart[disabled] i {
-            font-size: 1.35rem !important;
-            color: #b91c1c !important;
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 1rem !important;
+            }
+            .product-card, .product-card:hover {
+                transform: none !important;
+                transition: none !important;
+            }
         }
 
-        .product-info {
-            padding: 1rem !important;
-            text-align: right !important;
-        }
-
-        .product-name {
-            font-size: 1rem !important;
-            font-weight: 700 !important;
-            color: #1a1a1a !important;
-            margin-bottom: 0.5rem !important;
-            display: block !important;
-            text-align: right !important;
-        }
-
-        .product-price-wrapper {
-            display: flex !important;
-            align-items: center !important;
-            gap: 0.5rem !important;
-            justify-content: flex-start !important;
+        @media (max-width: 480px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.5rem !important;
+            }
         }
     </style>
 </head>
-<body style="margin:0; font-family:'El Messiri',sans-serif; background:#fff; overflow-x:hidden;">
+<body class="bg-white">
 
 @if(View::exists('components.navbar'))
     @include('components.navbar')
@@ -240,8 +186,8 @@
 </script>
 
 <!-- BANNER SLIDER - REDUCED HEIGHT, SMALLER BUTTONS -->
-<section style="position:relative; height:350px; overflow:hidden; background:white; padding:2rem 1.2rem;">
-    <div style="max-width:600px; margin:0 auto; position:relative; height:100%;">
+<section style="position:relative; height:300px; overflow:hidden; background:white; padding:1.5rem 1rem;">
+    <div style="max-width:100%; margin:0 auto; position:relative; height:100%;">
         <div id="modernSlider" style="position:relative; height:100%; display:flex; align-items:center; justify-content:center;">
             @php
                 $slidesData = is_array($slides ?? null) ? array_values($slides) : [];
@@ -270,15 +216,15 @@
         </div>
         
         <!-- Smaller Navigation Buttons -->
-        <button onclick="changeModernSlide(-1)" style="position:absolute; left:1.5rem; top:50%; transform:translateY(-50%); width:50px; height:50px; background:rgba(255,255,255,0.95); border:none; border-radius:50%; cursor:pointer; font-size:1.3rem; color:#2a7080; transition:all 0.3s; z-index:10; box-shadow:0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-50%) scale(1.1)'" onmouseout="this.style.transform='translateY(-50%) scale(1)'">
+        <button onclick="changeModernSlide(-1)" style="display:none;">
             <i class="fas fa-chevron-left"></i>
         </button>
-        <button onclick="changeModernSlide(1)" style="position:absolute; right:1.5rem; top:50%; transform:translateY(-50%); width:50px; height:50px; background:rgba(255,255,255,0.95); border:none; border-radius:50%; cursor:pointer; font-size:1.3rem; color:#2a7080; transition:all 0.3s; z-index:10; box-shadow:0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-50%) scale(1.1)'" onmouseout="this.style.transform='translateY(-50%) scale(1)'">
+        <button onclick="changeModernSlide(1)" style="display:none;">
             <i class="fas fa-chevron-right"></i>
         </button>
         
         <!-- Dots -->
-        <div id="modernSliderDots" style="position:absolute; bottom:-1.5rem; left:50%; transform:translateX(-50%); display:flex; gap:0.8rem; z-index:10;"></div>
+        <div id="modernSliderDots" style="display:none;"></div>
     </div>
 </section>
 
@@ -293,27 +239,43 @@
 }
 
 .modern-slide.active {
-    width:700px;
-    height:320px;
+    width:min(90vw, 700px);
+    height:280px;
     z-index:5;
     opacity:1;
     transform:translateX(0) translateY(0) scale(1) rotateY(0deg);
 }
 
 .modern-slide.next {
-    width:550px;
-    height:280px;
+    width:min(80vw, 550px);
+    height:240px;
     z-index:4;
     opacity:0.6;
-    transform:translateX(420px) translateY(15px) scale(0.88) rotateY(-12deg);
+    transform:translateX(min(45vw, 420px)) translateY(15px) scale(0.88) rotateY(-12deg);
 }
 
 .modern-slide.prev {
-    width:550px;
-    height:280px;
+    width:min(80vw, 550px);
+    height:240px;
     z-index:4;
     opacity:0.6;
-    transform:translateX(-420px) translateY(15px) scale(0.88) rotateY(12deg);
+    transform:translateX(max(-45vw, -420px)) translateY(15px) scale(0.88) rotateY(12deg);
+}
+
+@media (max-width: 768px) {
+    .modern-slide.next, .modern-slide.prev {
+        display: none; /* Only show active slide on mobile to avoid overlap and cut text */
+    }
+    .modern-slide.active {
+        width: 100%;
+        height: 250px;
+    }
+    .modern-slide-content h2 {
+        font-size: 1.5rem !important;
+    }
+    .modern-slide-content p {
+        font-size: 0.9rem !important;
+    }
 }
 
 .modern-slide.hidden {
@@ -359,12 +321,12 @@
         </div>
         
         <!-- Smaller Left Arrow -->
-        <button onclick="scrollCategoriesLeft()" style="position:absolute; left:-15px; top:50%; transform:translateY(-50%); width:45px; height:45px; background:#fff; border:2px solid #e0e0e0; border-radius:50%; cursor:pointer; font-size:1.1rem; color:#2a7080; transition:all 0.3s; z-index:10; box-shadow:0 3px 10px rgba(0,0,0,0.08);" onmouseover="this.style.transform='translateY(-50%) scale(1.1)'; this.style.borderColor='#2a7080'" onmouseout="this.style.transform='translateY(-50%) scale(1)'; this.style.borderColor='#e0e0e0'">
+        <button onclick="scrollCategoriesLeft()" class="category-scroll-btn category-scroll-left">
             <i class="fas fa-chevron-left"></i>
         </button>
         
         <!-- Smaller Right Arrow -->
-        <button onclick="scrollCategoriesRight()" style="position:absolute; right:-15px; top:50%; transform:translateY(-50%); width:45px; height:45px; background:#fff; border:2px solid #e0e0e0; border-radius:50%; cursor:pointer; font-size:1.1rem; color:#2a7080; transition:all 0.3s; z-index:10; box-shadow:0 3px 10px rgba(0,0,0,0.08);" onmouseover="this.style.transform='translateY(-50%) scale(1.1)'; this.style.borderColor='#2a7080'" onmouseout="this.style.transform='translateY(-50%) scale(1)'; this.style.borderColor='#e0e0e0'">
+        <button onclick="scrollCategoriesRight()" class="category-scroll-btn category-scroll-right">
             <i class="fas fa-chevron-right"></i>
         </button>
         
@@ -429,6 +391,51 @@
     box-shadow:0 4px 15px rgba(0,0,0,0.06);
     position:relative;
     overflow:hidden;
+}
+
+@media (max-width: 768px) {
+    .category-card {
+        min-width: calc(25vw - 1.5rem); /* Roughly 4 cards in viewport */
+        padding: 0.8rem;
+    }
+    .category-icon {
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 1.5rem !important;
+    }
+    .category-name {
+        font-size: 0.8rem !important;
+    }
+}
+
+.category-scroll-btn {
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    width:45px;
+    height:45px;
+    background:#fff;
+    border:2px solid #e0e0e0;
+    border-radius:50%;
+    cursor:pointer;
+    font-size:1.1rem;
+    color:#2a7080;
+    transition:all 0.3s;
+    z-index:10;
+    box-shadow:0 3px 10px rgba(0,0,0,0.08);
+}
+
+.category-scroll-left { left: -15px; }
+.category-scroll-right { right: -15px; }
+
+@media (max-width: 768px) {
+    .category-scroll-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+    .category-scroll-left { left: -5px; }
+    .category-scroll-right { right: -5px; }
 }
 
 .category-card::after {

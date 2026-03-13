@@ -36,7 +36,19 @@
         .links { margin-top: 1rem; display: flex; gap: 1rem; }
         .links a { color: #7b1fa2; text-decoration: none; }
         .links a:hover { text-decoration: underline; }
-        @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { 
+            .grid-2 { grid-template-columns: 1fr; } 
+            .container { padding: 1rem; }
+            .header { padding: 1.25rem 1rem; }
+            .header h1 { font-size: 1.4rem; }
+            .steps { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+            .step span { font-size: 0.8rem; }
+            .content { padding: 1.25rem 1rem; }
+            .actions { flex-direction: column; gap: 1rem; }
+            .actions > div { width: 100%; display: flex; flex-direction: column; gap: 0.75rem; }
+            .btn { width: 100%; display: flex; justify-content: center; align-items: center; }
+            .nav { width: 100%; justify-content: center; }
+        }
     </style>
     <script>
         function showStep(step) {
@@ -52,24 +64,58 @@
         function validateCurrentStep() {
             const current = parseInt(document.getElementById('currentStep').value);
             const pane = document.getElementById('step-' + current);
-            const requiredFields = pane.querySelectorAll('[required]');
+            const fields = pane.querySelectorAll('input[required], select[required], textarea[required]');
             let isValid = true;
+            let errorMessage = '';
             
-            requiredFields.forEach(field => {
+            fields.forEach(field => {
+                // Reset border
                 field.style.borderColor = '#e0e0e0';
-                if (!field.value.trim()) {
+                
+                const value = field.value.trim();
+                
+                // Required check
+                if (!value) {
                     field.style.borderColor = '#ff4444';
                     isValid = false;
+                    if (!errorMessage) errorMessage = 'يرجى ملء جميع الحقول المطلوبة';
+                } 
+                // Pattern check (Regex)
+                else if (field.hasAttribute('pattern')) {
+                    const regex = new RegExp(field.getAttribute('pattern'));
+                    if (!regex.test(value)) {
+                        field.style.borderColor = '#ff4444';
+                        isValid = false;
+                        if (!errorMessage) errorMessage = field.getAttribute('title') || 'تنسيق الحقل غير صحيح';
+                    }
+                }
+                // Minlength check
+                else if (field.hasAttribute('minlength')) {
+                    const min = parseInt(field.getAttribute('minlength'));
+                    if (value.length < min) {
+                        field.style.borderColor = '#ff4444';
+                        isValid = false;
+                        if (!errorMessage) errorMessage = `يجب أن يكون طول الحقل ${min} محارف على الأقل`;
+                    }
+                }
+
+                // Reset on input
+                if (!field.hasAttribute('data-has-reset-listener')) {
+                    field.addEventListener('input', function() {
+                        this.style.borderColor = '#e0e0e0';
+                    });
+                    field.setAttribute('data-has-reset-listener', 'true');
                 }
             });
 
-            if (current === 1) {
+            // Password Match Check (Step 1)
+            if (current === 1 && isValid) {
                 const pass = pane.querySelector('input[name="password"]');
                 const confirm = pane.querySelector('input[name="password_confirmation"]');
                 if (pass.value !== confirm.value) {
                     confirm.style.borderColor = '#ff4444';
                     isValid = false;
-                    alert('كلمات المرور غير متطابقة');
+                    errorMessage = 'كلمة المرور غير متطابقة';
                 }
             }
             
@@ -77,10 +123,12 @@
                 const errorDiv = document.querySelector('.error');
                 if (errorDiv) {
                     errorDiv.style.display = 'block';
-                    errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> يرجى ملء كافة الحقول المطلوبة بشكل صحيح';
-                } else {
-                    alert('يرجى ملء كافة الحقول المطلوبة');
+                    errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMessage}`;
+                    setTimeout(() => { errorDiv.style.display = 'none'; }, 5000);
                 }
+            } else {
+                const errorDiv = document.querySelector('.error');
+                if (errorDiv) errorDiv.style.display = 'none';
             }
             
             return isValid;
@@ -122,6 +170,7 @@
                     <div class="notice">
                         <i class="fas fa-check-circle"></i>
                         <?php echo e(session('success')); ?>
+
                     </div>
                 <?php endif; ?>
                 <form action="<?php echo e(route('trader.register')); ?>" method="POST" enctype="multipart/form-data">
@@ -131,11 +180,11 @@
                         <div class="grid grid-2">
                             <div class="form-group">
                                 <label>الاسم التجاري (بالإنجليزية)</label>
-                                <input type="text" name="business_name_en" class="input" required>
+                                <input type="text" name="business_name_en" class="input" required minlength="3" pattern="^[a-zA-Z0-9\s]+$" title="يجب إدخال أحرف إنجليزية وأرقام فقط، و3 محارف على الأقل">
                             </div>
                             <div class="form-group">
                                 <label>الاسم التجاري (بالعربية)</label>
-                                <input type="text" name="business_name_ar" class="input">
+                                <input type="text" name="business_name_ar" class="input" required minlength="3" pattern="^[\u0621-\u064A0-9\s]+$" title="يجب إدخال أحرف عربية وأرقام فقط، و3 محارف على الأقل">
                             </div>
                             <div class="form-group">
                                 <label>البريد الإلكتروني</label>
@@ -143,19 +192,19 @@
                             </div>
                             <div class="form-group">
                                 <label>الهاتف</label>
-                                <input type="text" name="phone" class="input" required>
+                                <input type="text" name="phone" class="input" required pattern="^09\d{8}$" title="يجب أن يبدأ بـ 09 ويتكون من 10 أرقام">
                             </div>
                             <div class="form-group">
                                 <label>كلمة المرور</label>
                                 <div style="position: relative;">
-                                    <input type="password" name="password" class="input" required style="padding-left: 45px;">
+                                    <input type="password" name="password" class="input" required minlength="8" style="padding-left: 45px;">
                                     <i class="fas fa-eye toggle-password" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 1.1rem;"></i>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label>تأكيد كلمة المرور</label>
                                 <div style="position: relative;">
-                                    <input type="password" name="password_confirmation" class="input" required style="padding-left: 45px;">
+                                    <input type="password" name="password_confirmation" class="input" required minlength="8" style="padding-left: 45px;">
                                     <i class="fas fa-eye toggle-password" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 1.1rem;"></i>
                                 </div>
                             </div>
@@ -164,27 +213,27 @@
                     <div id="step-2" class="step-pane" style="display:none">
                         <div class="grid grid-2">
                           
-                          
                             <div class="form-group">
                                 <label>اسم الشخص المسؤول</label>
-                                <input type="text" name="contact_person" class="input" required>
+                                <input type="text" name="contact_person" class="input" required minlength="3">
                             </div>
                             <div class="form-group">
                                 <label>عنوان العمل</label>
-                                <input type="text" name="business_address" class="input" required>
+                                <input type="text" name="business_address" class="input" required minlength="3">
                             </div>
+                          
                         </div>
                     </div>
                     <div id="step-3" class="step-pane" style="display:none">
                         <div class="grid grid-2">
-                                 <div class="form-group">
+                             <div class="form-group">
                                 <label>شعار العمل</label>
-                                <input type="file" name="business_logo" class="file" accept="image/*">
+                                <input type="file" name="business_logo" class="file" accept="image/*" required>
                             </div>
-                        
+
                             <div class="form-group">
                                 <label>هوية المالك</label>
-                                <input type="file" name="owner_id_card" class="file" accept=".pdf,image/*">
+                                <input type="file" name="owner_id_card" class="file" accept=".pdf,image/*" required>
                             </div>
                         </div>
                     </div>

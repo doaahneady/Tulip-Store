@@ -13,44 +13,109 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Force CSS reset and basic styling */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            overflow-x: hidden !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+            position: relative !important;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; max-width: 100% !important; }
+        
         body { 
             font-family: "El Messiri", sans-serif !important; 
             background: #fdf8f3 !important;
             line-height: 1.6 !important;
         }
         
-        /* Ensure navbar displays properly */
+        /* Ensure navbar displays properly and doesn't leak */
         .tulip-navbar {
             background: #fff !important;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
             position: sticky !important;
             top: 0 !important;
             z-index: 1000 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow-x: hidden !important;
         }
         
         /* Force main content styling */
-        .main-content {
+        .main-content, .products-container, .hero {
+            max-width: 100% !important;
+            width: 100% !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            overflow-x: hidden !important;
+        }
+
+        .products-container {
             max-width: 1400px !important;
-            margin: 0 auto !important;
-            padding: 2rem !important;
+            padding: 0 1rem !important;
+            width: 100% !important;
+        }
+        
+        @media (max-width: 768px) {
+            .products-container {
+                padding: 0 0.5rem !important;
+            }
         }
         
         /* Product grid styling */
         .products-grid {
             display: grid !important;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
-            gap: 2rem !important;
+            grid-template-columns: repeat(5, 1fr) !important;
+            gap: 1.5rem !important;
             margin-top: 2rem !important;
+            width: 100% !important;
+        }
+
+        @media (max-width: 1400px) {
+            .products-grid { grid-template-columns: repeat(4, 1fr) !important; }
+        }
+
+        @media (max-width: 1024px) {
+            .products-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 1rem !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.5rem !important;
+            }
         }
         
         /* Product card styling */
         .product-card {
             background: #fff !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
             border-radius: 15px !important;
             overflow: hidden !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
-            transition: all 0.3s ease !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        .product-image-wrapper {
+            aspect-ratio: 1 / 1 !important;
+            width: 100% !important;
+            overflow: hidden !important;
+            background: #f5f5f5;
+        }
+
+        .product-img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
         }
         
         .product-card:hover {
@@ -304,7 +369,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-family: 'El Messiri', sans-serif;
+            font-family: "El Messiri", sans-serif;
         }
         .logout-modal-btn.confirm {
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
@@ -354,6 +419,7 @@
             color: #e0e0e0;
         }
     </style>
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
 </head>
 <body>
     <!-- Logout Confirmation Modal -->
@@ -379,11 +445,11 @@
     </section>
 
     <!-- PRODUCTS SECTION -->
-    <div class="products-container" style="max-width: 1400px; margin: 2rem auto; padding: 0 2rem;">
+    <div class="products-container">
         <!-- Products Content -->
         <div class="products-content">
             <h2 id="pageTitle" style="font-family: 'El Messiri', sans-serif; font-size: 2rem; color: #0f4f55; margin: 0 0 2rem 0;">جميع المنتجات</h2>
-            <div class="products-grid" id="productsGrid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.5rem;">
+            <div class="products-grid" id="productsGrid">
                 <!-- Products will be loaded here -->
             </div>
             <div id="loadingProducts" style="text-align: center; padding: 3rem; color: #999;">
@@ -393,7 +459,7 @@
         </div>
 
         <!-- Filters Sidebar (shown only for search results) -->
-        <div class="filters-sidebar" id="filtersSidebar" style="display: none; position: fixed; left: 2rem; top: 200px; background: #fafafa; height: fit-content; width: 260px; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden;">
+        <div class="filters-sidebar" id="filtersSidebar">
             <div style="background: white; padding: 1.2rem 1.5rem; border-bottom: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: space-between;">
                 <span style="font-family: 'El Messiri', sans-serif; font-size: 1.1rem; color: #1a1a1a; font-weight: 600;">
                     <i class="fas fa-filter"></i> الفلاتر
@@ -1267,7 +1333,8 @@
     </script>
 
     <!-- FOOTER -->
-@include('components.footer')
+ 
+
 </body>
 </html>
 <?php /**PATH C:\Users\Doaa\StudioProjects\Tulip-Store\resources\views/store.blade.php ENDPATH**/ ?>

@@ -1,3 +1,84 @@
 @tailwind base;
+
+/* Global Layout Fixes */
+html,
+body {
+  overflow-x: hidden !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  position: relative !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+* {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+}
+
+/* Fix any potential 100vw issue */
+[style*="width: 100vw"], [style*="width:100vw"] {
+  width: 100% !important;
+}
+[style*="max-width: 100vw"], [style*="max-width:100vw"] {
+  max-width: 100% !important;
+}
+
+/* Global Product Grid Fixes */
+@media (max-width: 768px) {
+  .products-grid, .grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+  }
+  
+  /* Disable hover scale on mobile/tablet for all cards and product elements */
+  .product-card, .gift-card, .category-card, .premium-card, .card, 
+  [class*="product-card"], [class*="gift-card"], [class*="category-card"] {
+    transform: none !important;
+    transition: none !important;
+  }
+  
+  .product-card:hover, .gift-card:hover, .category-card:hover, .premium-card:hover, .card:hover,
+  [class*="product-card"]:hover, [class*="gift-card"]:hover, [class*="category-card"]:hover {
+    transform: none !important;
+    box-shadow: none !important; /* Optional: keep original shadow if desired, but transform must be none */
+  }
+
+  /* Disable inner image scale if any */
+  .product-card:hover img, .gift-card:hover img, .card:hover img {
+    transform: none !important;
+  }
+}
+@media (max-width: 480px) {
+  .products-grid, .grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+}
+
+/* Global Product Image Square Fixes - FOR ALL SCREEN SIZES (Mobile & Desktop) */
+.product-image-wrapper, .product-image, .gift-image, .bg-gray-200.aspect-square, .product-image-container, [class*="product-image"] {
+  aspect-ratio: 1 / 1 !important;
+  width: 100% !important;
+  height: auto !important; /* Allow aspect-ratio to control height */
+  min-height: unset !important;
+  max-height: unset !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+
+.product-image-wrapper img, .product-image img, .product-img, .gift-image img, .product-image-container img, [class*="product-image"] img {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
 @tailwind components;
 @tailwind utilities;

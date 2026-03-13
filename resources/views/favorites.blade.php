@@ -74,7 +74,7 @@
         .favorite-card-image-wrapper {
             position: relative;
             overflow: hidden;
-            height: 260px;
+            aspect-ratio: 1 / 1;
             background: #f5f5f5;
         }
         .favorite-card-image {
@@ -89,13 +89,13 @@
         }
         .remove-favorite-btn {
             position: absolute;
-            top: 0.8rem;
-            left: 0.8rem;
+            top: 0.5rem;
+            left: 0.5rem;
             background: rgba(255, 255, 255, 0.95);
             border: none;
             border-radius: 50%;
-            width: 36px;
-            height: 36px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -106,7 +106,7 @@
         }
         .remove-favorite-btn i {
             color: #ff4757;
-            font-size: 1rem;
+            font-size: 0.85rem;
         }
         .remove-favorite-btn:hover {
             background: #ff4757;
@@ -116,26 +116,26 @@
             color: white;
         }
         .favorite-card-content {
-            padding: 1.3rem;
+            padding: 0.8rem;
         }
         .favorite-card-name {
             font-family: 'El Messiri', sans-serif;
-            font-size: 1.05rem;
+            font-size: 0.95rem;
             color: #1a1a1a;
-            margin-bottom: 0.7rem;
+            margin-bottom: 0.3rem;
             font-weight: 600;
-            line-height: 1.4;
+            line-height: 1.3;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            min-height: 2.8rem;
+            min-height: 2.4rem;
         }
         .favorite-card-price {
-            font-size: 1.4rem;
+            font-size: 1.1rem;
             color: #ff4757;
             font-weight: 700;
-            margin-bottom: 1rem;
+            margin-bottom: 0.6rem;
         }
         .favorite-card-actions {
             display: flex;
@@ -215,12 +215,19 @@
             box-shadow: 0 6px 16px rgba(255, 71, 87, 0.3);
         }
         @media (max-width: 768px) {
+            .favorites-container {
+                padding: 1.5rem 1rem;
+            }
             .favorites-title {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
             .favorites-grid {
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-                gap: 1.5rem;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            .favorite-card-btn {
+                font-size: 0.7rem;
+                padding: 0.4rem 0.2rem;
             }
         }
     </style>
@@ -309,7 +316,7 @@
                             </div>
                             <div class="favorite-card-content">
                                 <h3 class="favorite-card-name">${product.name}</h3>
-                                <div class="favorite-card-price">$${parseFloat(product.price).toFixed(2)}</div>
+                                <div class="favorite-card-price">${product.price} ل.س</div>
                                 <div class="favorite-card-actions">
                                     <button class="favorite-card-btn btn-view" onclick="window.location.href='/products/${product.id}'">
                                         عرض

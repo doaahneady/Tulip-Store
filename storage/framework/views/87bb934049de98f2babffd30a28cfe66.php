@@ -18,7 +18,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'El Messiri',sans-serif;
+            font-family: "El Messiri", sans-serif;
             min-height: 100vh;
             display: flex;
             background: #f8f9fa;
@@ -183,7 +183,7 @@
             border: 2px solid #e0e0e0;
             border-radius: 12px;
             font-size: 1rem;
-            font-family: 'El Messiri',sans-serif;
+            font-family: "El Messiri", sans-serif;
             transition: all 0.3s ease;
             background: #fafafa;
         }
@@ -264,7 +264,7 @@
             border-radius: 12px;
             font-size: 1.1rem;
             font-weight: 600;
-            font-family: 'El Messiri',sans-serif;
+            font-family: "El Messiri", sans-serif;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
@@ -366,8 +366,9 @@
             }
             
             .brand-side {
-                padding: 2rem;
+                padding: 3rem 1.5rem;
                 min-height: auto;
+                width: 100%;
             }
             
             .brand-features {
@@ -375,13 +376,30 @@
             }
             
             .form-side {
-                padding: 2rem;
+                padding: 3rem 1rem;
+                width: 100%;
+            }
+
+            .form-container {
+                max-width: 100%;
             }
         }
         
         @media (max-width: 576px) {
+            .form-side {
+                padding: 2rem 0;
+            }
+
+            .form-header {
+                padding: 0 1.5rem;
+            }
+
             .login-form {
-                padding: 1.5rem;
+                padding: 2.5rem 1.5rem;
+                border-radius: 0;
+                box-shadow: none;
+                border-left: none;
+                border-right: none;
             }
             
             .form-options {
@@ -490,7 +508,6 @@
                             تسجيل الدخول
                         </button>
                     </form>
-                   
                     
                     <div class="alt-links">
                         <?php if(auth()->guard('employee')->check()): ?>
@@ -501,7 +518,7 @@
                                 </a>
                             <?php endif; ?>
                         <?php endif; ?>
-                      
+                     
                     </div>
                 </div>
             </div>

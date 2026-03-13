@@ -7,10 +7,11 @@
     <title><?php echo e($product->name); ?> - Tulip Store</title>
     <link rel="stylesheet" href="/css/store.css?v=<?php echo e(time()); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'El Messiri', sans-serif; background: #fafafa; }
+        body { font-family: 'El Messiri',sans-serif; background: #fafafa; }
         
         .page-wrapper { min-height: 100vh; padding-bottom: 3rem; }
         
@@ -74,7 +75,7 @@
         }
         .main-image {
             width: 100%;
-            height: 450px;
+            height: 350px;
             object-fit: contain;
             transition: transform 0.5s ease;
             border-radius: 20px;
@@ -189,58 +190,52 @@
 
         /* Price */
         .price-section {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border-radius: 20px;
-            padding: 1.5rem 2rem;
-            margin-bottom: 2rem;
+            background: transparent;
+            border-radius: 0;
+            padding: 0.5rem 0;
+            margin-bottom: 1.5rem;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
         }
         .price-section::before {
-            content: '💰';
-            position: absolute;
-            top: 50%;
-            left: 2rem;
-            transform: translateY(-50%);
-            font-size: 3rem;
-            opacity: 0.15;
+            display: none;
         }
         .price-row {
             display: flex;
             align-items: baseline;
-            gap: 1rem;
+            gap: 0.8rem;
             flex-wrap: wrap;
         }
         .current-price {
             font-family: 'El Messiri', sans-serif;
-            font-size: 2.8rem;
+            font-size: 1.8rem;
             font-weight: 700;
-            color: #b45309;
+            color: #ea580c;
         }
-        .currency { font-size: 1.4rem; margin-right: 0.3rem; }
+        .currency { font-size: 1rem; margin-right: 0.2rem; }
         .old-price {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             color: #9ca3af;
             text-decoration: line-through;
         }
         .save-amount {
             background: #dc2626;
             color: #fff;
-            padding: 0.4rem 1rem;
+            padding: 0.3rem 0.8rem;
             border-radius: 20px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 700;
         }
 
         /* Options */
         .option-group {
-            margin-bottom: 1.8rem;
+            margin-bottom: 1.5rem;
         }
         .option-label {
             font-family: 'El Messiri', sans-serif;
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: #333;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -249,22 +244,22 @@
         .option-label span {
             color: #ea580c;
             font-weight: 400;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
         
         .size-options {
             display: flex;
-            gap: 0.8rem;
+            gap: 0.6rem;
             flex-wrap: wrap;
         }
         .size-btn {
-            min-width: 55px;
-            height: 50px;
-            padding: 0 1.2rem;
+            min-width: 45px;
+            height: 40px;
+            padding: 0 1rem;
             border: 2px solid #e5e7eb;
-            border-radius: 12px;
+            border-radius: 10px;
             background: #fff;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 600;
             color: #555;
             cursor: pointer;
@@ -279,15 +274,15 @@
 
         .color-options {
             display: flex;
-            gap: 1rem;
+            gap: 0.8rem;
         }
         .color-btn {
-            width: 45px;
-            height: 45px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
             cursor: pointer;
             border: 3px solid #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             transition: all 0.3s;
             position: relative;
         }
@@ -308,46 +303,48 @@
         /* Quantity & Cart */
         .cart-section {
             display: flex;
-            gap: 1rem;
+            flex-direction: column;
+            gap: 1.2rem;
             margin-bottom: 1.5rem;
         }
         .qty-control {
             display: flex;
             align-items: center;
             background: #f5f5f5;
-            border-radius: 14px;
+            border-radius: 12px;
             overflow: hidden;
+            width: fit-content;
         }
         .qty-btn {
-            width: 50px;
-            height: 55px;
+            width: 40px;
+            height: 45px;
             border: none;
             background: transparent;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             color: #555;
             cursor: pointer;
             transition: all 0.2s;
         }
         .qty-btn:hover { background: #eee; color: #ea580c; }
         .qty-input {
-            width: 60px;
-            height: 55px;
+            width: 50px;
+            height: 45px;
             border: none;
             background: transparent;
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
         }
         
         .add-cart-btn {
-            flex: 1;
-            height: 55px;
+            width: 100%;
+            height: 50px;
             background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
             color: #fff;
             border: none;
-            border-radius: 14px;
+            border-radius: 12px;
             font-family: 'El Messiri', sans-serif;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
@@ -355,7 +352,7 @@
             align-items: center;
             justify-content: center;
             gap: 0.8rem;
-            box-shadow: 0 8px 30px rgba(234,88,12,0.3);
+            box-shadow: 0 6px 20px rgba(234,88,12,0.25);
         }
         .add-cart-btn:hover {
             transform: translateY(-3px);
@@ -454,17 +451,55 @@
                 gap: 2rem;
             }
             .gallery { position: static; }
-            .main-image { height: 350px; }
+            .main-image { height: 300px; }
         }
         @media (max-width: 600px) {
             .product-section { padding: 0 1rem; }
-            .product-title { font-size: 1.8rem; }
-            .current-price { font-size: 2.2rem; }
+            .product-title { font-size: 1.5rem; }
+            .current-price { font-size: 1.6rem; }
             .features-strip { grid-template-columns: repeat(2, 1fr); }
             .thumbnails { flex-wrap: wrap; }
-            .thumb { width: 70px; height: 70px; }
+            .thumb { width: 60px; height: 60px; }
+            .main-image-container { padding: 1rem; border-radius: 20px; }
+            .main-image { height: 250px; }
+        }
+
+        /* Products Grid for Related Products */
+        .products-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+            gap: 1.5rem !important;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 1rem !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.5rem !important;
+            }
+        }
+
+        .product-image-wrapper {
+            aspect-ratio: 1 / 1 !important;
+            width: 100% !important;
+            overflow: hidden !important;
+            background: #f5f5f5;
+        }
+
+        .product-img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
         }
     </style>
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
 </head>
 <body>
     <?php echo $__env->make('components.navbar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
@@ -740,13 +775,13 @@
         <div class="description-section">
             <div class="desc-card">
                 <h2 class="desc-title"><i class="fas fa-layer-group"></i> منتجات مشابهة</h2>
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
+                <div class="products-grid">
                     <?php $__currentLoopData = $relatedProducts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <a href="<?php echo e(url('/products/'.$rp->id)); ?>" style="text-decoration:none; color:inherit; background:#fff; border:1px solid #eee; border-radius:14px; overflow:hidden; display:block;">
-                            <div style="height:160px; background:#f5f5f5; display:flex; align-items:center; justify-content:center;">
-                                <img src="<?php echo e($rp->primary_image_url); ?>" srcset="<?php echo e($rp->primary_image_srcset); ?>" sizes="(max-width: 768px) 50vw, 20vw" alt="<?php echo e($rp->name); ?>" style="width:100%; height:100%; object-fit:cover;" loading="lazy" width="320" height="160" onerror="this.src='/images/gift-placeholder.svg'">
+                        <a href="<?php echo e(url('/products/'.$rp->id)); ?>" class="product-card" style="text-decoration:none; color:inherit; background:#fff; border:1px solid #eee; border-radius:14px; overflow:hidden; display:flex; flex-direction:column;">
+                            <div class="product-image-wrapper">
+                                <img src="<?php echo e($rp->primary_image_url); ?>" srcset="<?php echo e($rp->primary_image_srcset); ?>" sizes="(max-width: 768px) 50vw, 20vw" alt="<?php echo e($rp->name); ?>" class="product-img" loading="lazy" width="320" height="320" onerror="this.src='/images/gift-placeholder.svg'">
                             </div>
-                            <div style="padding:0.9rem;">
+                            <div style="padding:0.9rem; flex:1; display:flex; flex-direction:column; justify-content:space-between;">
                                 <div style="font-family:'El Messiri',sans-serif; font-weight:700; font-size:0.95rem; margin-bottom:0.4rem; line-height:1.4;">
                                     <?php echo e($rp->name); ?>
 

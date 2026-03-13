@@ -273,7 +273,7 @@
             padding: 0.7rem 1rem;
             border: 2px solid var(--border);
             border-radius: 10px;
-            font-family: 'El Messiri',sans-serif;
+            font-family:'El Messiri',sans-serif;
             font-size: 0.9rem;
             background: #fff;
             cursor: pointer;
@@ -372,7 +372,9 @@
         .badge-new { background: var(--teal); color: #fff; }
         .badge-fresh { background: var(--green); color: #fff; }
         .product-image {
-            height: 140px;
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            height: auto;
             background: linear-gradient(135deg, #eaf7f8, #f8f9fa);
             display: flex;
             align-items: center;
@@ -427,7 +429,8 @@
         }
         @media (max-width: 768px) {
             .products-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 1rem !important;
             }
             .price-range {
                 gap: .4rem;
@@ -435,9 +438,9 @@
         }
         @media (max-width: 480px) {
             .products-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.5rem !important;
             }
-            .product-image { height: 120px; }
         }
         .product-body { padding: 0.8rem; display: flex; flex-direction: column; min-height: auto; }
         .product-category {
@@ -472,7 +475,7 @@
         }
         .price-wrapper { display: flex; flex-direction: column; }
         .price-current {
-            font-family: 'El Messiri',sans-serif;
+            font-family:'El Messiri',sans-serif;
             font-size: 1.05rem;
             font-weight: 700;
             color: var(--teal-dark);
@@ -489,7 +492,7 @@
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            font-family: 'El Messiri',sans-serif;
+            font-family:'El Messiri',sans-serif;
             font-size: 0.8rem;
             font-weight: 700;
             transition: all 0.3s;
@@ -540,7 +543,7 @@
             background: var(--card);
             border-radius: 10px;
             cursor: pointer;
-            font-family:'El Messiri',sans-serif;
+            font-family: 'El Messiri',sans-serif;
             font-weight: 600;
             color: var(--text);
             transition: all 0.3s;
@@ -568,7 +571,7 @@
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            font-family: inherit;
+            font-family: 'El Messiri',sans-serif;
             font-weight: 600;
         }
         .filters-overlay {

@@ -186,6 +186,56 @@
             font-size: 1.1rem;
             font-weight: 700;
         }
+        @media (max-width: 600px) {
+            body {
+                padding: 0;
+                align-items: flex-start;
+                background: #fff; /* Use plain white background for mobile confirmation to simplify */
+                overflow-x: hidden;
+            }
+            .container {
+                padding: 1rem;
+                border-radius: 0;
+                box-shadow: none;
+                width: 100%;
+                overflow: visible !important;
+            }
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            .order-details, .products-section, .driver-info {
+                padding: 1rem;
+                margin-bottom: 1.5rem;
+            }
+            .detail-row {
+                font-size: 0.85rem;
+                padding: 0.5rem 0;
+            }
+            .product-item {
+                font-size: 0.85rem;
+                padding: 0.6rem;
+            }
+            .signature-section h3 {
+                font-size: 1rem;
+            }
+            #signatureCanvas {
+                height: 150px;
+            }
+            .btn {
+                padding: 0.7rem;
+                font-size: 0.9rem;
+            }
+            
+            /* Hide non-essential elements for confirmation view if needed */
+            .success-icon {
+                width: 60px;
+                height: 60px;
+                margin-bottom: 1rem;
+            }
+            .success-icon i {
+                font-size: 1.8rem;
+            }
+        }
     </style>
 </head>
 <body>

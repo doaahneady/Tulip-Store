@@ -23,18 +23,65 @@
 
   <!-- Related Products -->
   <div class="mt-16">
-    <h2 class="text-3xl font-bold text-gray-900 mb-8">Related Products</h2>
-    <div id="related-products" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div class="card p-6 text-center">
+    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-8">Related Products</h2>
+    <div id="related-products" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div class="col-span-full py-12 text-center">
         <i class="fas fa-spinner text-primary text-4xl mb-4 animate-spin"></i>
-        <p class="text-gray-500">Loading...</p>
+        <p class="text-gray-500">Loading related products...</p>
       </div>
     </div>
   </div>
 </div>
 
+<style>
+  @media (max-width: 768px) {
+    #related-products .card {
+      background: transparent !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      border: none !important;
+    }
+    #related-products .product-image-container {
+      border-radius: 12px !important;
+      overflow: hidden !important;
+    }
+  }
+</style>
+
 <script>
   const productId = window.location.pathname.split('/').pop();
+
+  async function loadRelatedProducts() {
+    try {
+      const response = await fetch(`/api/products?limit=4`); // Simple mock for related products
+      if (!response.ok) throw new Error('Failed to load related products');
+      
+      const data = await response.json();
+      const products = data.data.filter(p => p.id != productId).slice(0, 4);
+      const container = document.getElementById('related-products');
+      
+      if (products.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 col-span-full text-center">No related products found.</p>';
+        return;
+      }
+
+      container.innerHTML = products.map(product => `
+        <a href="/products/${product.id}" class="card group overflow-hidden hover:shadow-lg transition flex flex-col h-full">
+          <div class="product-image-container aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
+            ${product.image ? `<img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">` : '<i class="fas fa-image text-gray-400 text-4xl"></i>'}
+          </div>
+          <div class="p-3 md:p-4 flex flex-col flex-1">
+            <h3 class="font-bold text-gray-900 text-sm md:text-base mb-1 line-clamp-1">${product.name}</h3>
+            <p class="text-primary font-bold mt-auto">$${product.price}</p>
+          </div>
+        </a>
+      `).join('');
+
+    } catch (error) {
+      console.error('Error loading related products:', error);
+      document.getElementById('related-products').innerHTML = '<p class="text-red-500 col-span-full text-center">Failed to load related products</p>';
+    }
+  }
 
   async function loadProduct() {
     try {
@@ -140,5 +187,6 @@
   }
 
   loadProduct();
+  loadRelatedProducts();
 </script>
 @endsection

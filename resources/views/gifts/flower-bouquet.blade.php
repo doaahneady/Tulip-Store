@@ -96,9 +96,9 @@
         }
         .option-visual { width: 80px; height: 80px; margin: 0 auto 0.8rem; border-radius: 14px; background: #fff; overflow: hidden; }
         .option-visual img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .option-name { font-weight: 600; color: var(--text-dark); font-size: 0.95rem; margin-bottom: 0.3rem; }
-        .option-price { color: var(--primary); font-weight: 700; font-size: 0.9rem; }
-        .option-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+        .option-name { font-weight: 600; color: var(--text-dark); font-size: 0.85rem; margin-bottom: 0.2rem; }
+        .option-price { color: var(--primary); font-weight: 700; font-size: 0.8rem; }
+        .option-meta { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.1rem; }
 
         .option-card .tooltip {
             position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%) scale(0.9);
@@ -119,11 +119,12 @@
         .preview-header i, .summary-header i { color: var(--accent); }
         .preview-content { min-height: 200px; background: linear-gradient(135deg, #fce4ec, #f8bbd9); border-radius: 14px; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
         .preview-empty { text-align: center; color: var(--text-muted); }
-        .empty-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+        .empty-icon { width: 50px; height: 50px; margin-bottom: 0.5rem; }
+        .empty-icon img { width: 100%; height: 100%; object-fit: contain; }
         .preview-bouquet { text-align: center; width: 100%; }
         .bouquet-flowers { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.2rem; max-width: 180px; margin: 0 auto; }
-        .bouquet-flower { font-size: 1.8rem; }
-        .bouquet-wrap { font-size: 3.5rem; margin-top: -0.5rem; }
+        .bouquet-flower-img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; }
+        .bouquet-wrap-img { width: 80px; height: 80px; object-fit: contain; margin-top: -0.5rem; }
         .preview-label { font-weight: 600; color: var(--text-dark); margin-top: 0.5rem; font-size: 0.9rem; }
 
         .summary-items { max-height: 180px; overflow-y: auto; margin-bottom: 1rem; }
@@ -156,17 +157,35 @@
         .elegant-textarea { min-height: 100px; resize: vertical; }
         .char-counter { text-align: left; color: var(--text-muted); font-size: 0.8rem; }
 
-        @media (max-width: 1024px) { .builder-layout { grid-template-columns: 1fr; } .preview-panel { position: static; } .hero-content { flex-direction: column; text-align: center; } }
-        @media (max-width: 600px) { .hero-text h1 { font-size: 2rem; } .steps-progress { flex-wrap: wrap; gap: 0.5rem; } .step { padding: 0.5rem 0.8rem; font-size: 0.85rem; } .options-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 1024px) { 
+            .builder-layout { grid-template-columns: 1fr; } 
+            .preview-panel { position: static; } 
+            .hero-content { flex-direction: column; text-align: center; } 
+        }
+        @media (max-width: 768px) {
+            .preview-card { display: none !important; }
+        }
+        @media (max-width: 600px) { 
+            .hero-text h1 { font-size: 2rem; } 
+            .steps-progress { flex-wrap: wrap; gap: 0.5rem; } 
+            .step { padding: 0.5rem 0.8rem; font-size: 0.85rem; } 
+            .options-grid { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; } 
+            .option-card { padding: 0.5rem 0.2rem; border-radius: 12px; }
+            .option-visual { width: 45px; height: 45px; margin-bottom: 0.4rem; border-radius: 8px; }
+            .option-name { font-size: 0.65rem; }
+            .option-price { font-size: 0.6rem; }
+            .option-meta { font-size: 0.55rem; }
+            .option-card.selected::after { width: 16px; height: 16px; font-size: 0.6rem; top: 4px; left: 4px; }
+        }
     </style>
 
     <div class="hero-banner">
         <div class="hero-content">
             <div class="hero-text">
-                <h1>💐 صمم باقتك المثالية</h1>
+                <h1> صمم باقتك المثالية</h1>
                 <p>اختر من أجمل الزهور الطازجة ونسق باقتك بالألوان والتغليف الذي تفضله</p>
             </div>
-            <div class="hero-icon">🌹</div>
+            
         </div>
     </div>
 
@@ -413,13 +432,22 @@
 
         function updatePreview() {
             const preview = document.getElementById('bouquetPreview');
-            if (state.flowers.length === 0) { preview.innerHTML = '<div class="preview-empty"><div class="empty-icon">🌸</div><p>اختر الزهور للبدء</p></div>'; return; }
-            const flowerEmojis = state.flowers.map(id => flowers.find(f => f.id === id)?.emoji).filter(Boolean);
-            const wrapEmoji = state.wrap?.emoji || '📜';
+            if (state.flowers.length === 0) { 
+                preview.innerHTML = `<div class="preview-empty"><div class="empty-icon"><img src="/images/gift-placeholder.svg" alt="flower"></div><p>اختر الزهور للبدء</p></div>`; 
+                return; 
+            }
+            
+            const selectedFlowers = state.flowers.map(id => flowers.find(f => f.id === id)).filter(Boolean);
+            const wrapImg = state.wrap ? `<img src="${resolveMediaUrl(state.wrap.image)}" class="bouquet-wrap-img" alt="wrap">` : '<div style="height:80px"></div>';
+            
             preview.innerHTML = `
                 <div class="preview-bouquet">
-                    <div class="bouquet-flowers">${flowerEmojis.slice(0, 8).map(e => `<span class="bouquet-flower">${e}</span>`).join('')}</div>
-                    <div class="bouquet-wrap">${wrapEmoji}</div>
+                    <div class="bouquet-flowers">
+                        ${selectedFlowers.slice(0, 12).map(f => `<img src="${resolveMediaUrl(f.image)}" class="bouquet-flower-img" title="${f.name}" alt="${f.name}">`).join('')}
+                    </div>
+                    <div class="bouquet-wrap">
+                        ${wrapImg}
+                    </div>
                     <div class="preview-label">${state.flowers.length} نوع زهور${state.size ? ' - ' + state.size.name : ''}</div>
                 </div>
             `;
@@ -430,13 +458,33 @@
             const totalEl = document.getElementById('totalPrice');
             const btn = document.getElementById('addToCartBtn');
             let items = [], total = 0;
-            state.flowers.forEach(id => { const f = flowers.find(x => x.id === id); if (f) { items.push({ name: f.name, price: f.price }); total += f.price; } });
-            if (state.size) { items.push({ name: state.size.name, price: state.size.price }); total += state.size.price; }
-            if (state.wrap?.price > 0) { items.push({ name: state.wrap.name, price: state.wrap.price }); total += state.wrap.price; }
-            state.extras.forEach(id => { const e = extras.find(x => x.id === id); if (e) { items.push({ name: e.name, price: e.price }); total += e.price; } });
-            if (state.card?.price > 0) { items.push({ name: state.card.name, price: state.card.price }); total += state.card.price; }
-            summaryEl.innerHTML = items.length ? items.map(i => `<div class="summary-item"><span class="summary-item-name">${i.name}</span><span class="summary-item-price">${i.price}ل.س</span></div>`).join('') : '<div class="summary-empty">لم تختر أي عناصر بعد</div>';
-            totalEl.textContent = total + 'ل.س';
+            
+            state.flowers.forEach(id => { 
+                const f = flowers.find(x => x.id === id); 
+                if (f) { items.push({ name: f.name, price: f.price, image: f.image }); total += f.price; } 
+            });
+            
+            if (state.size) { items.push({ name: state.size.name, price: state.size.price, image: state.size.image }); total += state.size.price; }
+            if (state.wrap?.price > 0) { items.push({ name: state.wrap.name, price: state.wrap.price, image: state.wrap.image }); total += state.wrap.price; }
+            
+            state.extras.forEach(id => { 
+                const e = extras.find(x => x.id === id); 
+                if (e) { items.push({ name: e.name, price: e.price, image: e.image }); total += e.price; } 
+            });
+            
+            if (state.card?.price > 0) { items.push({ name: state.card.name, price: state.card.price, image: state.card.image }); total += state.card.price; }
+            
+            summaryEl.innerHTML = items.length ? items.map(i => `
+                <div class="summary-item">
+                    <div style="display:flex; align-items:center; gap:0.8rem;">
+                        <img src="${resolveMediaUrl(i.image)}" style="width:35px; height:35px; object-fit:cover; border-radius:6px; background:#fce4ec;" onerror="this.src='/images/gift-placeholder.svg'">
+                        <span class="summary-item-name">${i.name}</span>
+                    </div>
+                    <span class="summary-item-price">${i.price} ل.س</span>
+                </div>
+            `).join('') : '<div class="summary-empty">لم تختر أي عناصر بعد</div>';
+            
+            totalEl.textContent = total + ' ل.س';
             btn.disabled = state.flowers.length === 0;
         }
 

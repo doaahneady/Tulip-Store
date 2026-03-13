@@ -360,14 +360,24 @@
         }
         
         /* Responsive */
-        @media (max-width: 992px) {
+        @media (max-width: 576px) {
             .split-container {
                 flex-direction: column;
             }
             
             .brand-side {
-                padding: 2rem;
+                padding: 3rem 1.5rem;
                 min-height: auto;
+                width: 100%;
+            }
+
+            .brand-logo {
+                height: 80px !important;
+                width: 80px !important;
+            }
+
+            .brand-title {
+                font-size: 1.8rem !important;
             }
             
             .brand-features {
@@ -375,19 +385,45 @@
             }
             
             .form-side {
-                padding: 2rem;
+                padding: 2rem 0;
+                width: 100%;
             }
-        }
-        
-        @media (max-width: 576px) {
+
+            .form-container {
+                max-width: 100%;
+            }
+
+            .form-header {
+                padding: 0 1.5rem;
+            }
+
             .login-form {
-                padding: 1.5rem;
+                padding: 2.5rem 1.5rem;
+                box-shadow: none;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
             }
             
             .form-options {
                 flex-direction: column;
-                gap: 1rem;
-                align-items: flex-start;
+                gap: 1.25rem;
+                align-items: stretch;
+            }
+
+            .btn-login {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+
+            .alt-links {
+                gap: 0.75rem;
+                padding: 0 1.5rem;
+            }
+
+            .alt-link {
+                width: 100%;
             }
         }
     </style>

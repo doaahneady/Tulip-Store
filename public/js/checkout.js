@@ -721,6 +721,10 @@ function validateStep(step) {
 function updateStepUI() {
     console.log('Updating UI to step:', currentStep);
     
+    // Update body class for responsive CSS
+    document.body.classList.remove('step-1', 'step-2', 'step-3', 'step-4');
+    document.body.classList.add('step-' + currentStep);
+    
     const forms = document.querySelectorAll('.step-content');
     const mapContainer = document.getElementById('mapContainer');
     const cartSummaryContainer = document.getElementById('cartSummaryContainer');
