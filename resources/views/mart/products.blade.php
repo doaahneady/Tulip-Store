@@ -614,11 +614,7 @@
         }
     </style>
 
-    <!-- <section class="hero">
-        <div class="hero-card">
-            <img src="/images/banner.jpg" alt="Tulip Banner" class="hero-card-img">
-        </div>
-    </section> -->
+  
 
     <div class="filters-overlay" id="filtersOverlay" onclick="toggleFilters()"></div>
 

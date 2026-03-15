@@ -425,7 +425,7 @@
             <div class="premium-card flower-card" onclick="window.location.href='/gifts/flower-bouquet'">
                 <div class="card-visual">
                    
-                    <img id="bouquetCardImage" src="/images/banner-flower.jpg" alt="Rose Bouquet" class="card-image" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'">
+                    <img id="bouquetCardImage" src="/images/banner.jpg" alt="Rose Bouquet" class="card-image" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'">
                 </div>
                 <div class="card-content">
                     <span class="card-tag">  دفعة ورورد جديدة يومياً</span>
