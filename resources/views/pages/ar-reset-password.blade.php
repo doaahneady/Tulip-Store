@@ -284,7 +284,7 @@
     <div class="auth-shell">
         <div class="auth-card-wrap">
             <div class="auth-illustration">
-                <img src="/images/photo_2025-11-17_11-18-40.jpg" alt="Tulip illustration">
+                <img src="/images/logo-girl.jpg" alt="Tulip illustration">
             </div>
             <div class="auth-card">
                 <h1>إعادة تعيين كلمة المرور</h1>

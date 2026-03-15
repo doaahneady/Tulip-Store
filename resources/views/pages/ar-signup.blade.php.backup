@@ -520,8 +520,7 @@
                     <button class="action-btn" type="submit" id="submitBtn">متابعة</button>
                 </form>
             </div>
-            <div class="auth-illustration">
-                <img src="/images/photo_2025-11-17_11-18-40.jpg" alt="Tulip illustration">
+            <div class="auth-illuslogo-girl.jpg" alt="Tulip illustration">
             </div>
         </div>
     </div>

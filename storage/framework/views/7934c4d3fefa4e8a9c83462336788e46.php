@@ -114,7 +114,7 @@
     <!-- Logo RIGHT -->
     <a href="/" class="navbar-logo">
       <span class="logo-lip">LIP</span>
-      <img src="/images/photo_2025-11-17_11-18-40.jpg" alt="U" class="logo-girl">
+      <img src="/images/logo-girl.jpg" alt="U" class="logo-girl">
       <span class="logo-t">T</span>
     </a>
 
