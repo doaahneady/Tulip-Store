@@ -734,12 +734,7 @@
                     </button>
                 </div>
 
-                <div class="secondary-btns">
-                    <button class="sec-btn" onclick="addToWishlist()">
-                        <i class="far fa-heart"></i>
-                        أضف للمفضلة
-                    </button>
-                </div>
+            
 
                 <div class="features-strip">
                     <div class="feature-box">

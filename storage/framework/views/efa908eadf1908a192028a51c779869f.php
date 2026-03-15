@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
-    <title><?php echo e($product->name); ?> - Tulip Store</title>
+    <title><?php echo e($product->name); ?> - Tulip Stor</title>
     <link rel="stylesheet" href="/css/store.css?v=<?php echo e(time()); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
@@ -734,12 +734,7 @@
                     </button>
                 </div>
 
-                <div class="secondary-btns">
-                    <button class="sec-btn" onclick="addToWishlist()">
-                        <i class="far fa-heart"></i>
-                        أضف للمفضلة
-                    </button>
-                </div>
+            
 
                 <div class="features-strip">
                     <div class="feature-box">
@@ -798,20 +793,9 @@
         <?php endif; ?>
     </div>
 
-    <footer style="background:#0D464C; padding:1.8rem 2rem; margin-top:2rem;">
-        <div style="max-width:1300px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.5rem;">
-            <div style="display:flex; align-items:center; gap:1rem;">
-                <img src="/images/white_orange_logo.png" style="height:60px;">
-                <p style="color:rgba(255,255,255,0.7); font-size:0.9rem;">© 2025 Tulip Store</p>
-            </div>
-            <div style="display:flex; gap:2rem;">
-                <a href="/store" style="color:rgba(255,255,255,0.7); text-decoration:none; font-size:0.9rem;">المتجر</a>
-                <a href="/gifts" style="color:rgba(255,255,255,0.7); text-decoration:none; font-size:0.9rem;">الهدايا</a>
-                <a href="/mart" style="color:rgba(255,255,255,0.7); text-decoration:none; font-size:0.9rem;">مارت</a>
-                <a href="/contact" style="color:rgba(255,255,255,0.7); text-decoration:none; font-size:0.9rem;">تواصل معنا</a>
-            </div>
-        </div>
-    </footer>
+   <!-- Footer -->
+ <?php echo $__env->make('components.footer', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+
 
     <script>
         const productId = <?php echo e($product->id); ?>;

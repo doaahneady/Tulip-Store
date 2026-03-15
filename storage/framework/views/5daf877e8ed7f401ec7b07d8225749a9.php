@@ -319,8 +319,9 @@
     </style>
 </head>
 <body>
+    <?php if(View::exists('components.navbar')): ?>
     <?php echo $__env->make('components.navbar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-
+<?php endif; ?>
     <div class="products-container">
         <!-- Mobile Filters -->
         <div class="mobile-filters-wrapper">

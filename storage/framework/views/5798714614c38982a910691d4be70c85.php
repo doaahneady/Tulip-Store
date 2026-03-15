@@ -364,10 +364,13 @@ let html = `
     </div>
     
     <!-- Footer -->
-    <div style="text-align:center;margin-top:1.5rem;padding-top:1rem;border-top:1px solid #eee;">
-        <p style="margin:0;color:#28a745;font-weight:700;"><i class="fas fa-check-double"></i> شكراً لتسوقكم معنا!</p>
-        <p style="margin:0.5rem 0 0 0;color:#999;font-size:0.85rem;">Tulip Store - توليب ستور</p>
-    </div>
+     <div style="position:relative; z-index:1001;">
+    <?php echo $__env->make('components.footer', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+</div>
+    // <div style="text-align:center;margin-top:1.5rem;padding-top:1rem;border-top:1px solid #eee;">
+    //     <p style="margin:0;color:#28a745;font-weight:700;"><i class="fas fa-check-double"></i> شكراً لتسوقكم معنا!</p>
+    //     <p style="margin:0.5rem 0 0 0;color:#999;font-size:0.85rem;">Tulip Store - توليب ستور</p>
+    // </div>
 </div>
 `;
 

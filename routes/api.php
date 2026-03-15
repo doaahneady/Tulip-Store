@@ -116,6 +116,11 @@ Route::prefix('gifts')->group(function () {
     Route::get('/{id}', [App\Http\Controllers\Api\GiftController::class, 'show']);
     Route::get('/category/{category}', [App\Http\Controllers\Api\GiftController::class, 'byCategory']);
 });
+//net api
+// Route::prefix('net')->group(function () {
+//     Route::get('/sections/{section}', [App\Http\Controllers\NetController::class, 'getSectionProducts']);
+//     Route::get('/counts', [App\Http\Controllers\NetController::class, 'getSectionCounts']);
+// });
 
 // 3D Store API
 Route::prefix('store3d')->group(function () {

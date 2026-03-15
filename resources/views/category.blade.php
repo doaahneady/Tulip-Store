@@ -319,8 +319,9 @@
     </style>
 </head>
 <body>
+    @if(View::exists('components.navbar'))
     @include('components.navbar')
-
+@endif
     <div class="products-container">
         <!-- Mobile Filters -->
         <div class="mobile-filters-wrapper">

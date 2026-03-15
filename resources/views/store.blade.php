@@ -11,20 +11,10 @@
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Changa:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/store.css?v=999&fix=store&t={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
+   
+   <style>
         /* Force CSS reset and basic styling */
-        html, body {
-            overflow-x: hidden !important;
-            width: 100% !important;
-            max-width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            box-sizing: border-box !important;
-            position: relative !important;
-        }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; max-width: 100% !important; }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: "El Messiri", sans-serif !important; 
             background: #fdf8f3 !important;
@@ -32,36 +22,12 @@
         }
         
         /* Ensure navbar displays properly and doesn't leak */
-        .tulip-navbar {
-            background: #fff !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
-            position: sticky !important;
-            top: 0 !important;
-            z-index: 1000 !important;
-            width: 100% !important;
-            max-width: 100% !important;
-            overflow-x: hidden !important;
-        }
-        
+       
         /* Force main content styling */
-        .main-content, .products-container, .hero {
-            max-width: 100% !important;
-            width: 100% !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-            overflow-x: hidden !important;
-        }
-
-        .products-container {
+        .main-content {
             max-width: 1400px !important;
-            padding: 0 1rem !important;
-            width: 100% !important;
-        }
-        
-        @media (max-width: 768px) {
-            .products-container {
-                padding: 0 0.5rem !important;
-            }
+            margin: 0 auto !important;
+            padding: 2rem !important;
         }
         
         /* Product grid styling */
@@ -70,7 +36,6 @@
             grid-template-columns: repeat(5, 1fr) !important;
             gap: 1.5rem !important;
             margin-top: 2rem !important;
-            width: 100% !important;
         }
 
         @media (max-width: 1400px) {
@@ -437,15 +402,9 @@
     <!-- NAVBAR -->
     @include('components.navbar')
 
-    <!-- HERO SECTION - image only banner with curved card -->
-    <section class="hero">
-        <div class="hero-card">
-            <img src="/images/banner-flower.jpg" alt="Tulip Banner" class="hero-card-img">
-        </div>
-    </section>
-
+    
     <!-- PRODUCTS SECTION -->
-    <div class="products-container">
+    <div class="products-container" style="max-width: 1400px; margin: 2rem auto; padding: 0 2rem;">
         <!-- Products Content -->
         <div class="products-content">
             <h2 id="pageTitle" style="font-family: 'El Messiri', sans-serif; font-size: 2rem; color: #0f4f55; margin: 0 0 2rem 0;">جميع المنتجات</h2>
@@ -459,7 +418,7 @@
         </div>
 
         <!-- Filters Sidebar (shown only for search results) -->
-        <div class="filters-sidebar" id="filtersSidebar">
+        <div class="filters-sidebar" id="filtersSidebar" style="display: none; position: fixed; left: 2rem; top: 200px; background: #fafafa; height: fit-content; width: 260px; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden;">
             <div style="background: white; padding: 1.2rem 1.5rem; border-bottom: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: space-between;">
                 <span style="font-family: 'El Messiri', sans-serif; font-size: 1.1rem; color: #1a1a1a; font-weight: 600;">
                     <i class="fas fa-filter"></i> الفلاتر
