@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>Tulip Store - أرسل ابتسامتك أينما كنت</title>
-    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
+
     <link rel="stylesheet" href="/css/store.css?v=<?php echo e(time()); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -41,10 +41,8 @@
     </style>
 </head>
 <body class="bg-white">
-
-<?php if(View::exists('components.navbar')): ?>
     <?php echo $__env->make('components.navbar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-<?php endif; ?>
+
 
 <!-- SMOOTH INTRO ANIMATION - SHOW ONLY ONCE -->
 <div id="introAnimation" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; display:none; align-items:center; justify-content:center; overflow:hidden; background:linear-gradient(135deg, #000 0%, #1a1a1a 100%);">
@@ -213,24 +211,7 @@
                     </a>
                 </div>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        </div>
-        
-        <!-- Navigation Buttons -->
-        <button onclick="changeModernSlide(-1)"
-                style="position:absolute; top:50%; left:1.5rem; transform:translateY(-50%);
-                       width:36px; height:36px; border-radius:999px; border:none;
-                       background:rgba(0,0,0,0.35); color:#fff; display:flex;
-                       align-items:center; justify-content:center; cursor:pointer;">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-        <button onclick="changeModernSlide(1)"
-                style="position:absolute; top:50%; right:1.5rem; transform:translateY(-50%);
-                       width:36px; height:36px; border-radius:999px; border:none;
-                       background:rgba(0,0,0,0.35); color:#fff; display:flex;
-                       align-items:center; justify-content:center; cursor:pointer;">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-        
+        </div> 
         <!-- Dots -->
         <div id="modernSliderDots"
              style="position:absolute; bottom:1.25rem; left:50%; transform:translateX(-50%);

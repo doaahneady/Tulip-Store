@@ -257,11 +257,43 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Menu icon click - show categories
-    menuIcon.addEventListener('click', function() {
-        searchDropdown.classList.add('active');
-        showCategories();
-    });
+    // Mobile Menu Logic
+    const navbarIcons = document.querySelector('.navbar-icons');
+    const closeMenuBtn = document.getElementById('closeMenuBtn');
+    
+    const backdrop = document.createElement('div');
+    backdrop.className = 'mobile-menu-backdrop';
+    document.body.appendChild(backdrop);
+
+    const openMenu = () => {
+        if (navbarIcons) navbarIcons.classList.add('active');
+        backdrop.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    const closeMenu = () => {
+        if (navbarIcons) navbarIcons.classList.remove('active');
+        backdrop.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    if (menuIcon) {
+        menuIcon.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768) {
+                e.stopPropagation();
+                openMenu();
+            } else {
+                searchDropdown.classList.add('active');
+                showCategories();
+            }
+        });
+    }
+
+    if (closeMenuBtn) {
+        closeMenuBtn.addEventListener('click', closeMenu);
+    }
+
+    backdrop.addEventListener('click', closeMenu);
 
     function showRecent() {
         dropdownTitle.textContent = 'أكثر ما تم البحث عنه مؤخراً';

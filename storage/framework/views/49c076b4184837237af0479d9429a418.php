@@ -74,7 +74,7 @@
     <div style="max-width:1400px; margin:0 auto; position:relative;">
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:2.5rem; margin-bottom:2rem; justify-items:center; text-align:center;">
             <div>
-                <img src="/images/banner3jpg" style="height:130px;margin-bottom:0.8rem; display:block; margin-left:auto; margin-right:auto;">
+                <img src="/images/white_orange_logo.png" style="height:130px;margin-bottom:0.8rem; display:block; margin-left:auto; margin-right:auto;">
                 <p style="color:rgba(255,255,255,0.7); line-height:1.8; font-size:1rem; margin-bottom:1rem; max-width:480px; margin-left:auto; margin-right:auto;">
                     متجر فاخر للمنتجات المميزة. نساعدك في إرسال ابتسامتك لأحبائك أينما كانوا.
                 </p>
