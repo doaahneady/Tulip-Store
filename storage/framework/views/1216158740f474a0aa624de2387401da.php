@@ -61,7 +61,7 @@
     <div style="position:relative; z-index:2; text-align:center; max-width:900px; padding:3rem;">
         <!-- Logo - Drops from Top with Bounce -->
         <div id="mainLogo" style="margin-bottom:4rem; opacity:0; transform:translateY(-150px) scale(0.8);">
-            <img src="/images/banner3.png" style="height:120px; filter:drop-shadow(0 10px 30px rgba(255,107,53,0.5));">
+            <img src="/images/white_orange_logo.png" style="height:120px; filter:drop-shadow(0 10px 30px rgba(255,107,53,0.5));">
         </div>
         
         <!-- Text - Types Out in White -->
@@ -211,24 +211,7 @@
                     </a>
                 </div>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        </div>
-        
-        <!-- Navigation Buttons -->
-        <button onclick="changeModernSlide(-1)"
-                style="position:absolute; top:50%; left:1.5rem; transform:translateY(-50%);
-                       width:36px; height:36px; border-radius:999px; border:none;
-                       background:rgba(0,0,0,0.35); color:#fff; display:flex;
-                       align-items:center; justify-content:center; cursor:pointer;">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-        <button onclick="changeModernSlide(1)"
-                style="position:absolute; top:50%; right:1.5rem; transform:translateY(-50%);
-                       width:36px; height:36px; border-radius:999px; border:none;
-                       background:rgba(0,0,0,0.35); color:#fff; display:flex;
-                       align-items:center; justify-content:center; cursor:pointer;">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-        
+        </div> 
         <!-- Dots -->
         <div id="modernSliderDots"
              style="position:absolute; bottom:1.25rem; left:50%; transform:translateX(-50%);

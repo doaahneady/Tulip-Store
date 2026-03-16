@@ -1,0 +1,654 @@
+
+
+<?php $__env->startSection('content'); ?>
+<?php
+    $giftCollection = method_exists(($gifts ?? null), 'getCollection') ? $gifts->getCollection() : collect();
+    $giftsTotal = method_exists(($gifts ?? null), 'total') ? ($gifts->total() ?? 0) : $giftCollection->count();
+    $giftsActive = $giftCollection->where('is_active', true)->count();
+    $giftsFeatured = $giftCollection->where('is_featured', true)->count();
+?>
+
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center gap-2">
+        <a href="<?php echo e(route('dashboard.admin.index')); ?>" class="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-xl hover:bg-black transition">
+            <i class="fas fa-chart-pie"></i>
+            <span>لوحة الإدارة</span>
+        </a>
+        <a href="<?php echo e(route('dashboard.admin.gifts')); ?>" class="inline-flex items-center gap-2 bg-pink-600 text-white px-4 py-2 rounded-xl hover:bg-pink-700 transition">
+            <i class="fas fa-gift"></i>
+            <span>Tulip Gifts</span>
+        </a>
+        <a href="<?php echo e(route('dashboard.admin.mart')); ?>" class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">
+            <i class="fas fa-store"></i>
+            <span>Tulip Mart</span>
+        </a>
+        <a href="<?php echo e(route('dashboard.admin.gifts.creation')); ?>" class="inline-flex items-center gap-2 bg-rose-600 text-white px-4 py-2 rounded-xl hover:bg-rose-700 transition">
+            <i class="fas fa-hammer"></i>
+            <span>Gifts Creation Stuff</span>
+        </a>
+        <a href="<?php echo e(route('dashboard.admin.attendance')); ?>" class="inline-flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-xl hover:bg-teal-700 transition">
+            <i class="fas fa-user-clock"></i>
+            <span>حضور الموظفين</span>
+        </a>
+        <a href="<?php echo e(route('dashboard.administrative-approvals.manage')); ?>" class="inline-flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-xl hover:bg-amber-700 transition">
+            <i class="fas fa-clipboard-check"></i>
+            <span>الموافقات الإدارية</span>
+        </a>
+        <a href="<?php echo e(route('dashboard.admin.roles')); ?>" class="inline-flex items-center gap-2 bg-slate-700 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition">
+            <i class="fas fa-user-shield"></i>
+            <span>Rules</span>
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-xs">الهدايا</p>
+                <h3 class="text-3xl font-bold text-gray-800 mt-1"><?php echo e(number_format($giftsTotal)); ?></h3>
+            </div>
+            <div class="w-12 h-12 bg-pink-100 rounded-2xl flex items-center justify-center">
+                <i class="fas fa-gift text-pink-600 text-lg"></i>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-xs">نشطة</p>
+                <h3 class="text-3xl font-bold text-gray-800 mt-1"><?php echo e(number_format($giftsActive)); ?></h3>
+            </div>
+            <div class="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center">
+                <i class="fas fa-check text-emerald-600 text-lg"></i>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-xs">مميزة</p>
+                <h3 class="text-3xl font-bold text-gray-800 mt-1"><?php echo e(number_format($giftsFeatured)); ?></h3>
+            </div>
+            <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center">
+                <i class="fas fa-star text-amber-600 text-lg"></i>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-xs">خيارات التخصيص</p>
+                <h3 class="text-3xl font-bold text-gray-800 mt-1"><?php echo e(number_format((is_countable($boxes ?? null) ? count($boxes) : 0) + (is_countable($wrappings ?? null) ? count($wrappings) : 0) + (is_countable($ribbons ?? null) ? count($ribbons) : 0) + (is_countable($cards ?? null) ? count($cards) : 0) + (is_countable($fillers ?? null) ? count($fillers) : 0))); ?></h3>
+            </div>
+            <div class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center">
+                <i class="fas fa-sliders-h text-indigo-600 text-lg"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php if(false): ?>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 mb-4">
+    <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-gray-900">Gifts Creation Stuff — أدوات إنشاء الهدايا</h2>
+        <div class="text-sm text-gray-500">Boxes • Bouquet Sizes • Fillers • Wrappings • Ribbons • Cards • Ready Gifts</div>
+    </div>
+    <div class="mt-4 flex flex-wrap gap-2">
+        <a href="#section-ready-gift" class="btn btn-secondary">إضافة هدية جاهزة</a>
+        <a href="#section-box" class="btn btn-secondary">إضافة صندوق</a>
+        <a href="#section-bouquet-size" class="btn btn-secondary">إضافة حجم باقة</a>
+        <a href="#section-filler" class="btn btn-secondary">إضافة عنصر</a>
+        <a href="#section-wrapping" class="btn btn-secondary">إضافة تغليف</a>
+        <a href="#section-ribbon" class="btn btn-secondary">إضافة شريط</a>
+        <a href="#section-card" class="btn btn-secondary">إضافة بطاقة</a>
+    </div>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6">
+
+<div id="gifts-creation-stuff" class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+    <div id="section-bouquet-size" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900">إضافة حجم باقة (Bouquet Size)</h3>
+        </div>
+        <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.boxes.store')); ?>" enctype="multipart/form-data" class="space-y-3">
+            <?php echo csrf_field(); ?>
+            <input type="hidden" name="context" value="bouquet">
+            <input name="name" class="form-input w-full" placeholder="اسم الحجم (مثال: Small/Medium/Large)" required>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="size" class="form-input w-full" placeholder="الرمز (small/medium/large/xl)" required>
+                <input name="max_items" type="number" min="1" class="form-input w-full" placeholder="عدد الزهور الموصى به" required>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <input name="price" type="number" step="0.01" min="0" class="form-input w-full" placeholder="السعر" required>
+                <input name="stock" type="number" min="0" class="form-input w-full" placeholder="المخزون" required>
+                <input name="sort_order" type="number" min="0" class="form-input w-full" placeholder="الترتيب">
+            </div>
+            <textarea name="description" class="form-textarea w-full" rows="2" placeholder="الوصف (اختياري)"></textarea>
+            <input name="image" type="file" class="form-input w-full" accept="image/*">
+            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" name="is_active" value="1" checked>
+                <span>نشط</span>
+            </label>
+            <button type="submit" class="btn btn-primary w-full">حفظ</button>
+        </form>
+    </div>
+
+    <div id="section-ready-gift" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900">إضافة هدية جاهزة</h3>
+        </div>
+        <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.store')); ?>" enctype="multipart/form-data" class="space-y-3">
+            <?php echo csrf_field(); ?>
+            <input name="name" class="form-input w-full" placeholder="الاسم" required>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="price" type="number" step="0.01" min="0" class="form-input w-full" placeholder="السعر" required>
+                <input name="stock_quantity" type="number" min="0" class="form-input w-full" placeholder="المخزون" required>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="category" class="form-input w-full" placeholder="التصنيف (مثال: birthday)">
+                <input name="occasion" class="form-input w-full" placeholder="المناسبة (اختياري)">
+            </div>
+            <textarea name="description" class="form-textarea w-full" rows="3" placeholder="الوصف"></textarea>
+            <input name="image" type="file" class="form-input w-full" accept="image/*" required>
+            <div class="flex items-center gap-4">
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <input type="checkbox" name="is_active" value="1" checked>
+                    <span>نشط</span>
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <input type="checkbox" name="is_featured" value="1">
+                    <span>مميز</span>
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary w-full">حفظ</button>
+        </form>
+    </div>
+
+    <div id="section-box" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900">إضافة صندوق (Box)</h3>
+        </div>
+        <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.boxes.store')); ?>" enctype="multipart/form-data" class="space-y-3">
+            <?php echo csrf_field(); ?>
+            <input name="name" class="form-input w-full" placeholder="الاسم" required>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="size" class="form-input w-full" placeholder="الحجم (مثال: small)" required>
+                <input name="max_items" type="number" min="1" class="form-input w-full" placeholder="حد العناصر" required>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <input name="price" type="number" step="0.01" min="0" class="form-input w-full" placeholder="السعر" required>
+                <input name="stock" type="number" min="0" class="form-input w-full" placeholder="المخزون" required>
+                <input name="sort_order" type="number" min="0" class="form-input w-full" placeholder="الترتيب">
+            </div>
+            <textarea name="description" class="form-textarea w-full" rows="2" placeholder="الوصف"></textarea>
+            <input name="image" type="file" class="form-input w-full" accept="image/*" required>
+            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" name="is_active" value="1" checked>
+                <span>نشط</span>
+            </label>
+            <button type="submit" class="btn btn-primary w-full">حفظ</button>
+        </form>
+    </div>
+
+    <div id="section-filler" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900">إضافة عنصر (Flowers/Chocolate/..)</h3>
+        </div>
+        <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.fillers.store')); ?>" enctype="multipart/form-data" class="space-y-3">
+            <?php echo csrf_field(); ?>
+            <input name="name" class="form-input w-full" placeholder="الاسم" required>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <select name="category" class="form-select w-full" required>
+                    <option value="" disabled selected>القسم</option>
+                    <option value="flower">Flowers</option>
+                    <option value="chocolate">Chocolate</option>
+                    <option value="perfume">Perfume</option>
+                    <option value="accessory">Accessory</option>
+                    <option value="candy">Candy</option>
+                    <option value="other">Other</option>
+                </select>
+                <input name="sort_order" type="number" min="0" class="form-input w-full" placeholder="الترتيب">
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="price" type="number" step="0.01" min="0" class="form-input w-full" placeholder="السعر" required>
+                <input name="stock" type="number" min="0" class="form-input w-full" placeholder="المخزون" required>
+            </div>
+            <textarea name="description" class="form-textarea w-full" rows="2" placeholder="الوصف"></textarea>
+            <input name="image" type="file" class="form-input w-full" accept="image/*" required>
+            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" name="is_active" value="1" checked>
+                <span>نشط</span>
+            </label>
+            <button type="submit" class="btn btn-primary w-full">حفظ</button>
+        </form>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6" id="gifts-creation-stuff-2">
+    <div id="section-wrapping" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900">إضافة تغليف</h3>
+        </div>
+        <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.wrappings.store')); ?>" enctype="multipart/form-data" class="space-y-3">
+            <?php echo csrf_field(); ?>
+            <input name="name" class="form-input w-full" placeholder="الاسم" required>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <input name="price" type="number" step="0.01" min="0" class="form-input w-full" placeholder="السعر" required>
+                <input name="color" class="form-input w-full" placeholder="اللون">
+                <input name="pattern" class="form-input w-full" placeholder="النقشة">
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="sort_order" type="number" min="0" class="form-input w-full" placeholder="الترتيب">
+                <input name="image" type="file" class="form-input w-full" accept="image/*">
+            </div>
+            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" name="is_active" value="1" checked>
+                <span>نشط</span>
+            </label>
+            <button type="submit" class="btn btn-primary w-full">حفظ</button>
+        </form>
+    </div>
+
+    <div id="section-ribbon" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900">إضافة شريط</h3>
+        </div>
+        <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.ribbons.store')); ?>" enctype="multipart/form-data" class="space-y-3">
+            <?php echo csrf_field(); ?>
+            <input name="name" class="form-input w-full" placeholder="الاسم" required>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <input name="price" type="number" step="0.01" min="0" class="form-input w-full" placeholder="السعر" required>
+                <input name="color" class="form-input w-full" placeholder="اللون">
+                <input name="sort_order" type="number" min="0" class="form-input w-full" placeholder="الترتيب">
+            </div>
+            <input name="image" type="file" class="form-input w-full" accept="image/*">
+            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" name="is_active" value="1" checked>
+                <span>نشط</span>
+            </label>
+            <button type="submit" class="btn btn-primary w-full">حفظ</button>
+        </form>
+    </div>
+
+    <div id="section-card" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900">إضافة بطاقة</h3>
+        </div>
+        <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.cards.store')); ?>" enctype="multipart/form-data" class="space-y-3">
+            <?php echo csrf_field(); ?>
+            <input name="name" class="form-input w-full" placeholder="الاسم" required>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <input name="price" type="number" step="0.01" min="0" class="form-input w-full" placeholder="السعر" required>
+                <input name="occasion" class="form-input w-full" placeholder="المناسبة">
+                <input name="sort_order" type="number" min="0" class="form-input w-full" placeholder="الترتيب">
+            </div>
+            <input name="image" type="file" class="form-input w-full" accept="image/*">
+            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" name="is_active" value="1" checked>
+                <span>نشط</span>
+            </label>
+            <button type="submit" class="btn btn-primary w-full">حفظ</button>
+        </form>
+    </div>
+</div>
+
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-gray-900">إنشاء هدية جاهزة من العناصر</h3>
+    </div>
+    <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.assemble')); ?>" enctype="multipart/form-data" class="space-y-3">
+        <?php echo csrf_field(); ?>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input name="name" class="form-input w-full" placeholder="اسم الهدية" required>
+            <select name="box_id" class="form-select w-full" required>
+                <option value="" disabled selected>اختر الصندوق</option>
+                <?php $__currentLoopData = ($boxes ?? []); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $b): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($b->id); ?>"><?php echo e($b->name); ?> — <?php echo e(number_format((float) $b->price, 2)); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </select>
+            <input name="image" type="file" class="form-input w-full" accept="image/*">
+        </div>
+        <div>
+            <label class="block text-sm text-gray-700 mb-2">اختر العناصر</label>
+            <select name="filler_ids[]" class="form-select w-full" multiple size="8" required>
+                <?php $__currentLoopData = ($fillers ?? []); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $f): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($f->id); ?>"><?php echo e($f->name); ?> — <?php echo e($f->category); ?> — <?php echo e(number_format((float) $f->price, 2)); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </select>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input name="category" class="form-input w-full" placeholder="التصنيف (اختياري)">
+            <input name="occasion" class="form-input w-full" placeholder="المناسبة (اختياري)">
+            <div class="flex items-center gap-4">
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <input type="checkbox" name="is_active" value="1" checked>
+                    <span>نشط</span>
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <input type="checkbox" name="is_featured" value="1">
+                    <span>مميز</span>
+                </label>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">إنشاء</button>
+    </form>
+<?php endif; ?>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6">
+    <div class="p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <h3 class="text-lg font-semibold text-gray-900">الهدايا</h3>
+            <form method="GET" action="<?php echo e(route('dashboard.admin.gifts')); ?>" class="flex flex-wrap items-center gap-2">
+                <input type="text" name="search" value="<?php echo e(request('search')); ?>" placeholder="بحث بالاسم أو التصنيف" class="form-input w-48 md:w-72">
+                <select name="active" class="form-select w-44">
+                    <option value="">كل الحالات</option>
+                    <option value="1" <?php if(request('active') === '1'): echo 'selected'; endif; ?>>نشط</option>
+                    <option value="0" <?php if(request('active') === '0'): echo 'selected'; endif; ?>>غير نشط</option>
+                </select>
+                <button type="submit" class="btn btn-ghost btn-sm">
+                    <i class="fas fa-filter"></i>
+                    تصفية
+                </button>
+                <a class="btn btn-secondary btn-sm" href="<?php echo e(route('dashboard.admin.export.products', ['format' => 'csv'])); ?>">
+                    <i class="fas fa-download"></i>
+                    تصدير
+                </a>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>الاسم</th>
+                    <th>التصنيف</th>
+                    <th>السعر</th>
+                    <th>المخزون</th>
+                    <th>الحالة</th>
+                    <th>مميز</th>
+                    <th>التاريخ</th>
+                    <th>إجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if($gifts === null): ?>
+                    <tr>
+                        <td colspan="8" class="py-8 text-center text-gray-500">جدول الهدايا غير موجود</td>
+                    </tr>
+                <?php else: ?>
+                    <?php $__empty_1 = true; $__currentLoopData = $gifts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $gift): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <tr>
+                            <td class="font-semibold text-gray-900"><?php echo e($gift->name); ?></td>
+                            <td class="text-gray-600"><?php echo e($gift->category ?? '-'); ?></td>
+                            <td><?php echo e(number_format((float) $gift->price, 2)); ?></td>
+                            <td><?php echo e(number_format((int) ($gift->stock_quantity ?? 0))); ?></td>
+                            <td>
+                                <span class="px-2 py-1 rounded text-xs <?php if($gift->is_active): ?> bg-emerald-100 text-emerald-700 <?php else: ?> bg-gray-100 text-gray-700 <?php endif; ?>">
+                                    <?php echo e($gift->is_active ? 'نشط' : 'غير نشط'); ?>
+
+                                </span>
+                            </td>
+                            <td>
+                                <span class="px-2 py-1 rounded text-xs <?php if($gift->is_featured): ?> bg-amber-100 text-amber-700 <?php else: ?> bg-gray-100 text-gray-700 <?php endif; ?>">
+                                    <?php echo e($gift->is_featured ? 'نعم' : 'لا'); ?>
+
+                                </span>
+                            </td>
+                            <td class="text-gray-600"><?php echo e(optional($gift->created_at)->format('Y-m-d')); ?></td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.toggle-active', $gift)); ?>">
+                                        <?php echo csrf_field(); ?>
+                                        <button type="submit" class="btn btn-ghost btn-xs">
+                                            <?php echo e($gift->is_active ? 'تعطيل' : 'تفعيل'); ?>
+
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.toggle-featured', $gift)); ?>">
+                                        <?php echo csrf_field(); ?>
+                                        <button type="submit" class="btn btn-ghost btn-xs">
+                                            <?php echo e($gift->is_featured ? 'إلغاء تمييز' : 'تمييز'); ?>
+
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.delete', $gift)); ?>">
+                                        <?php echo csrf_field(); ?>
+                                        <?php echo method_field('DELETE'); ?>
+                                        <button type="submit" class="btn btn-ghost btn-xs text-red-600" onclick="return confirm('حذف الهدية؟')">
+                                            حذف
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                        <tr>
+                            <td colspan="8" class="py-8 text-center text-gray-500">لا توجد هدايا</td>
+                        </tr>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="p-4">
+        <?php if(method_exists(($gifts ?? null), 'links')): ?>
+            <?php echo e($gifts->links()); ?>
+
+        <?php endif; ?>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200">
+        <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="text-lg font-bold text-gray-800">الصناديق</h3>
+            <span class="text-sm text-gray-500"><?php echo e(is_countable($boxes ?? null) ? count($boxes) : 0); ?></span>
+        </div>
+        <div class="p-4">
+            <?php if($boxes === null): ?>
+                <div class="text-center text-gray-500 py-8">جدول الصناديق غير موجود</div>
+            <?php elseif(count($boxes) === 0): ?>
+                <div class="text-center text-gray-500 py-8">لا توجد بيانات</div>
+            <?php else: ?>
+                <div class="space-y-3">
+                    <?php $__currentLoopData = $boxes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $box): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                            <div class="flex flex-col">
+                                <span class="font-semibold text-gray-900"><?php echo e($box->name); ?></span>
+                                <span class="text-xs text-gray-500">الحجم: <?php echo e($box->size); ?> | حد العناصر: <?php echo e($box->max_items); ?></span>
+                            </div>
+                            <div class="text-left">
+                                <div class="font-bold text-indigo-700"><?php echo e(number_format((float) $box->price, 2)); ?></div>
+                                <div class="text-xs text-gray-500">مخزون: <?php echo e(number_format((int) $box->stock)); ?></div>
+                                <div class="mt-2 flex items-center gap-2 justify-end">
+                                    <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.boxes.toggle-active', $box)); ?>">
+                                        <?php echo csrf_field(); ?>
+                                        <button type="submit" class="btn btn-ghost btn-xs">
+                                            <?php echo e(($box->is_active ?? false) ? 'تعطيل' : 'تفعيل'); ?>
+
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.boxes.delete', $box)); ?>">
+                                        <?php echo csrf_field(); ?>
+                                        <?php echo method_field('DELETE'); ?>
+                                        <button type="submit" class="btn btn-ghost btn-xs text-red-600" onclick="return confirm('حذف الصندوق؟')">
+                                            حذف
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200">
+        <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="text-lg font-bold text-gray-800">الحشوات والخيارات</h3>
+            <span class="text-sm text-gray-500"><?php echo e(number_format((is_countable($fillers ?? null) ? count($fillers) : 0) + (is_countable($wrappings ?? null) ? count($wrappings) : 0) + (is_countable($ribbons ?? null) ? count($ribbons) : 0) + (is_countable($cards ?? null) ? count($cards) : 0))); ?></span>
+        </div>
+        <div class="p-4 space-y-6">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="font-bold text-gray-800">الحشوات</h4>
+                    <span class="text-xs text-gray-500"><?php echo e(is_countable($fillers ?? null) ? count($fillers) : 0); ?></span>
+                </div>
+                <?php if($fillers === null): ?>
+                    <div class="text-center text-gray-500 py-4">جدول الحشوات غير موجود</div>
+                <?php elseif(count($fillers) === 0): ?>
+                    <div class="text-center text-gray-500 py-4">لا توجد بيانات</div>
+                <?php else: ?>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <?php $__currentLoopData = $fillers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $filler): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <div class="p-3 bg-gray-50 rounded-xl flex items-center justify-between">
+                                <div>
+                                    <div class="font-semibold text-gray-900"><?php echo e($filler->name); ?></div>
+                                    <div class="text-xs text-gray-500"><?php echo e($filler->category); ?></div>
+                                </div>
+                                <div class="text-left">
+                                    <div class="font-bold text-indigo-700"><?php echo e(number_format((float) $filler->price, 2)); ?></div>
+                                    <div class="text-xs text-gray-500">مخزون: <?php echo e(number_format((int) $filler->stock)); ?></div>
+                                    <div class="mt-2 flex items-center gap-2 justify-end">
+                                        <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.fillers.toggle-active', $filler)); ?>">
+                                            <?php echo csrf_field(); ?>
+                                            <button type="submit" class="btn btn-ghost btn-xs">
+                                                <?php echo e(($filler->is_active ?? false) ? 'تعطيل' : 'تفعيل'); ?>
+
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.fillers.delete', $filler)); ?>">
+                                            <?php echo csrf_field(); ?>
+                                            <?php echo method_field('DELETE'); ?>
+                                            <button type="submit" class="btn btn-ghost btn-xs text-red-600" onclick="return confirm('حذف الحشوة؟')">
+                                                حذف
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="font-bold text-gray-800">التغليف</div>
+                        <div class="text-xs text-gray-500"><?php echo e(is_countable($wrappings ?? null) ? count($wrappings) : 0); ?></div>
+                    </div>
+                    <?php if($wrappings && count($wrappings) > 0): ?>
+                        <div class="space-y-2">
+                            <?php $__currentLoopData = $wrappings->take(6); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $w): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-700"><?php echo e($w->name); ?></span>
+                                    <div class="flex items-center gap-3">
+                                        <span class="font-semibold text-indigo-700"><?php echo e(number_format((float) $w->price, 2)); ?></span>
+                                        <div class="flex items-center gap-2">
+                                            <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.wrappings.toggle-active', $w)); ?>">
+                                                <?php echo csrf_field(); ?>
+                                                <button type="submit" class="btn btn-ghost btn-xs">
+                                                    <?php echo e(($w->is_active ?? false) ? 'تعطيل' : 'تفعيل'); ?>
+
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.wrappings.delete', $w)); ?>">
+                                                <?php echo csrf_field(); ?>
+                                                <?php echo method_field('DELETE'); ?>
+                                                <button type="submit" class="btn btn-ghost btn-xs text-red-600" onclick="return confirm('حذف التغليف؟')">
+                                                    حذف
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center text-gray-500 py-4 text-sm">لا توجد بيانات</div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="font-bold text-gray-800">الشرائط</div>
+                        <div class="text-xs text-gray-500"><?php echo e(is_countable($ribbons ?? null) ? count($ribbons) : 0); ?></div>
+                    </div>
+                    <?php if($ribbons && count($ribbons) > 0): ?>
+                        <div class="space-y-2">
+                            <?php $__currentLoopData = $ribbons->take(6); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-700"><?php echo e($r->name); ?></span>
+                                    <div class="flex items-center gap-3">
+                                        <span class="font-semibold text-indigo-700"><?php echo e(number_format((float) $r->price, 2)); ?></span>
+                                        <div class="flex items-center gap-2">
+                                            <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.ribbons.toggle-active', $r)); ?>">
+                                                <?php echo csrf_field(); ?>
+                                                <button type="submit" class="btn btn-ghost btn-xs">
+                                                    <?php echo e(($r->is_active ?? false) ? 'تعطيل' : 'تفعيل'); ?>
+
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.ribbons.delete', $r)); ?>">
+                                                <?php echo csrf_field(); ?>
+                                                <?php echo method_field('DELETE'); ?>
+                                                <button type="submit" class="btn btn-ghost btn-xs text-red-600" onclick="return confirm('حذف الشريط؟')">
+                                                    حذف
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center text-gray-500 py-4 text-sm">لا توجد بيانات</div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="font-bold text-gray-800">البطاقات</div>
+                        <div class="text-xs text-gray-500"><?php echo e(is_countable($cards ?? null) ? count($cards) : 0); ?></div>
+                    </div>
+                    <?php if($cards && count($cards) > 0): ?>
+                        <div class="space-y-2">
+                            <?php $__currentLoopData = $cards->take(6); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-700"><?php echo e($c->name); ?></span>
+                                    <div class="flex items-center gap-3">
+                                        <span class="font-semibold text-indigo-700"><?php echo e(number_format((float) $c->price, 2)); ?></span>
+                                        <div class="flex items-center gap-2">
+                                            <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.cards.toggle-active', $c)); ?>">
+                                                <?php echo csrf_field(); ?>
+                                                <button type="submit" class="btn btn-ghost btn-xs">
+                                                    <?php echo e(($c->is_active ?? false) ? 'تعطيل' : 'تفعيل'); ?>
+
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="<?php echo e(route('dashboard.admin.gifts.cards.delete', $c)); ?>">
+                                                <?php echo csrf_field(); ?>
+                                                <?php echo method_field('DELETE'); ?>
+                                                <button type="submit" class="btn btn-ghost btn-xs text-red-600" onclick="return confirm('حذف البطاقة؟')">
+                                                    حذف
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center text-gray-500 py-4 text-sm">لا توجد بيانات</div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('dashboards.layouts.app', ['title' => 'إدارة الهدايا', 'subtitle' => 'إدارة قسم Gifts (الهدايا وخيارات التخصيص)'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Doaa\StudioProjects\Tulip-Store\resources\views/dashboards/super-admin/gifts.blade.php ENDPATH**/ ?>
