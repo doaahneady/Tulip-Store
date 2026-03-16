@@ -43,7 +43,7 @@
     "name": "_plugin-vue_export-helper"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DzkIpmzL.css",
+    "file": "assets/test.css",
     "src": "resources/js/app.js",
     "isEntry": true
   },
@@ -335,7 +335,7 @@
       "resources/js/Pages/Welcome.vue"
     ],
     "css": [
-      "assets/app-DzkIpmzL.css"
+      "assets/test.css"
     ]
   }
 }
