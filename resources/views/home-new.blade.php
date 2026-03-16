@@ -722,7 +722,7 @@
 <section style="position:relative; height:230px; display:flex; align-items:center; justify-content:center; margin:2rem 1rem; border-radius:16px; overflow:hidden;">
 
     <!-- Background -->
-    <div style="position:absolute; inset:0; background:#0D464C url('/images/footer.png') center/cover no-repeat;"></div>
+    <div style="position:absolute; inset:0; background: url('/images/banner_ask.jpg') center/cover no-repeat;"></div>
 
     <!-- Content -->
     <div style="position:relative; text-align:center; padding:2rem; max-width:650px;">
