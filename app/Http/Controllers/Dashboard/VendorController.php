@@ -565,7 +565,7 @@ class VendorController extends Controller
             'cost_price' => 'nullable|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'low_stock_threshold' => 'required|integer|min:0',
-            'status' => 'required|in:draft,active,inactive,out_of_stock',
+            'status' => 'required|in:active,inactive,out_of_stock',
         ]);
 
         $updates = $request->only([

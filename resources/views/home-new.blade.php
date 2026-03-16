@@ -215,16 +215,26 @@
             @endforeach
         </div>
         
-        <!-- Smaller Navigation Buttons -->
-        <button onclick="changeModernSlide(-1)" style="display:none;">
+        <!-- Navigation Buttons -->
+        <button onclick="changeModernSlide(-1)"
+                style="position:absolute; top:50%; left:1.5rem; transform:translateY(-50%);
+                       width:36px; height:36px; border-radius:999px; border:none;
+                       background:rgba(0,0,0,0.35); color:#fff; display:flex;
+                       align-items:center; justify-content:center; cursor:pointer;">
             <i class="fas fa-chevron-left"></i>
         </button>
-        <button onclick="changeModernSlide(1)" style="display:none;">
+        <button onclick="changeModernSlide(1)"
+                style="position:absolute; top:50%; right:1.5rem; transform:translateY(-50%);
+                       width:36px; height:36px; border-radius:999px; border:none;
+                       background:rgba(0,0,0,0.35); color:#fff; display:flex;
+                       align-items:center; justify-content:center; cursor:pointer;">
             <i class="fas fa-chevron-right"></i>
         </button>
         
         <!-- Dots -->
-        <div id="modernSliderDots" style="display:none;"></div>
+        <div id="modernSliderDots"
+             style="position:absolute; bottom:1.25rem; left:50%; transform:translateX(-50%);
+                    display:flex; gap:0.5rem;"></div>
     </div>
 </section>
 
@@ -493,8 +503,121 @@
 }
 </style>
 
+<style>
+/* Store section: exact mart-style cards (no mart-only labels: category, origin, unit) */
+.store-section-cards .product-card {
+    border-radius: 24px;
+    border: 1px solid #e8e8e8;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: all 0.3s;
+    position: relative;
+    background: #fff;
+}
+.store-section-cards .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+    border-color: #2a7080;
+}
+.store-section-cards .product-image,
+.store-section-cards .product-image-wrapper {
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    height: auto;
+    background: linear-gradient(135deg, #eaf7f8, #f8f9fa);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+.store-section-cards .product-image img,
+.store-section-cards .product-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.store-section-cards .product-body,
+.store-section-cards .product-info {
+    padding: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    min-height: auto;
+}
+.store-section-cards .product-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.2rem;
+    font-family: 'El Messiri', sans-serif;
+}
+.store-section-cards .product-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e8e8e8;
+    margin-top: 0.5rem;
+}
+.store-section-cards .price-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+.store-section-cards .price-current,
+.store-section-cards .product-price {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f4f55;
+    font-family: 'El Messiri', sans-serif;
+}
+.store-section-cards .price-old,
+.store-section-cards .product-old-price {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-decoration: line-through;
+}
+.store-section-cards .add-cart-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0.4rem 0.8rem;
+    background: #0f4f55;
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: 'El Messiri', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(15,79,85,0.15);
+}
+.store-section-cards .add-cart-btn:hover:not(:disabled) {
+    background: #1a6b73;
+    transform: scale(1.05);
+}
+.store-section-cards .product-favorite-btn {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 5;
+    width: 28px;
+    height: 28px;
+    background: #fff;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #cbd5e1;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+</style>
 <!-- PERSONALIZED FOR YOU - NO CIRCLE, SIMPLE DESIGN -->
-<section id="personalizedSection" style="padding:2.5rem 1.5rem; background:#fff;">
+<section id="personalizedSection" class="store-section-cards" style="padding:2.5rem 1.5rem; background:#fff;">
     <div style="max-width:1400px; margin:0 auto;">
         <div style="text-align:center; margin-bottom:2.5rem;">
             <h2 style="font-family:'El Messiri',sans-serif; font-size:2rem; font-weight:900; color:#1a1a1a; margin:0 0 0.8rem 0;">
@@ -512,46 +635,37 @@
                     $stock = (int) ($product->stock_quantity ?? 0);
                     $trackInv = (bool) ($product->track_inventory ?? false);
                     $isOutOfStock = $trackInv && $stock <= 0;
-                    $stockLabel = $trackInv ? ($isOutOfStock ? 'غير متوفر' : 'متوفر: '.$stock) : 'متوفر';
                     $price = (float) ($product->discount_price ?? $product->price ?? 0);
                     $oldPrice = (float) ($product->price ?? 0);
+                    $img = $product->primary_image_url ?? '';
+                    $img = $img ?: '/images/gift-placeholder.svg';
+                    $imgUrl = (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) ? $img : url($img);
                 @endphp
                 <div class="product-card" data-product-id="{{ $product->id }}" onclick="window.location.href='/products/{{ $product->id }}'">
                     <button class="product-favorite-btn" onclick="event.stopPropagation(); toggleProductFavorite(event, {{ $product->id }})">
                         <i class="far fa-heart"></i>
                     </button>
-                    <div style="position:absolute; top: 14px; left: 14px; z-index: 3; background: {{ $isOutOfStock ? '#fee2e2' : '#dcfce7' }}; color: {{ $isOutOfStock ? '#b91c1c' : '#166534' }}; padding: 6px 10px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;">
-                        {{ $stockLabel }}
-                    </div>
-                    <div class="product-image-wrapper">
-                        @php
-                            $img = $product->primary_image_url ?: '/images/gift-placeholder.svg';
-                            $srcset = trim((string) ($product->primary_image_srcset ?? ''));
-                        @endphp
-                        <img src="{{ $img }}"
-                             @if($srcset !== '') srcset="{{ $srcset }}" sizes="(max-width: 768px) 50vw, 25vw" @endif
+                    <div class="product-image">
+                        <img src="{{ $imgUrl }}"
                              alt="{{ $product->name }}"
-                             class="product-img"
                              loading="lazy"
                              width="320"
                              height="320"
-                             onerror="this.src='/images/placeholder.jpg'">
+                             onerror="this.onerror=null; this.src='{{ url('/images/gift-placeholder.svg') }}';">
                     </div>
-                    <div class="product-info">
+                    <div class="product-body">
                         <h3 class="product-name">{{ $product->name }}</h3>
-                        <div class="product-price-rating-wrapper">
-                            <div class="product-price-wrapper">
-                                <span class="product-price">@money($price)</span>
+                        <div class="product-footer">
+                            <div class="price-wrapper">
+                                <span class="price-current">@money($price)</span>
                                 @if(!empty($product->discount_price))
-                                    <span class="product-old-price">@money($oldPrice)</span>
+                                    <span class="price-old">@money($oldPrice)</span>
                                 @endif
                             </div>
+                            <button type="button" class="add-cart-btn" onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)" data-product-id="{{ $product->id }}" {{ $isOutOfStock ? 'disabled' : '' }} style="{{ $isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : '' }}">
+                                <i class="fas fa-plus"></i> أضف
+                            </button>
                         </div>
-                    </div>
-                    <div class="product-card-actions">
-                        <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)" data-product-id="{{ $product->id }}" {{ $isOutOfStock ? 'disabled data-tooltip="لا يتوفر هذا المنتج في المخزن"' : '' }} style="{{ $isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : 'cursor: pointer;' }}">
-                            <i class="fas fa-shopping-cart"></i>
-                        </button>
                     </div>
                 </div>
             @empty
@@ -562,7 +676,7 @@
 </section>
 
 <!-- TRENDING NOW - WHITE BACKGROUND -->
-<section style="padding:2.5rem 1.5rem; background:#fff;">
+<section class="store-section-cards" style="padding:2.5rem 1.5rem; background:#fff;">
     <div style="max-width:1400px; margin:0 auto;">
         <div style="text-align:center; margin-bottom:2.5rem;">
             <h2 style="font-family:'El Messiri',sans-serif; font-size:2rem; font-weight:900; color:#1a1a1a; margin:0 0 0.8rem 0;">
@@ -583,46 +697,37 @@
                     $stock = (int) ($product->stock_quantity ?? 0);
                     $trackInv = (bool) ($product->track_inventory ?? false);
                     $isOutOfStock = $trackInv && $stock <= 0;
-                    $stockLabel = $trackInv ? ($isOutOfStock ? 'غير متوفر' : 'متوفر: '.$stock) : 'متوفر';
                     $price = (float) ($product->discount_price ?? $product->price ?? 0);
                     $oldPrice = (float) ($product->price ?? 0);
+                    $img = $product->primary_image_url ?? '';
+                    $img = $img ?: '/images/gift-placeholder.svg';
+                    $imgUrl = (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) ? $img : url($img);
                 @endphp
                 <div class="product-card" data-product-id="{{ $product->id }}" onclick="window.location.href='/products/{{ $product->id }}'">
                     <button class="product-favorite-btn" onclick="event.stopPropagation(); toggleProductFavorite(event, {{ $product->id }})">
                         <i class="far fa-heart"></i>
                     </button>
-                    <div style="position:absolute; top: 14px; left: 14px; z-index: 3; background: {{ $isOutOfStock ? '#fee2e2' : '#dcfce7' }}; color: {{ $isOutOfStock ? '#b91c1c' : '#166534' }}; padding: 6px 10px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;">
-                        {{ $stockLabel }}
-                    </div>
-                    <div class="product-image-wrapper">
-                        @php
-                            $img = $product->primary_image_url ?: '/images/gift-placeholder.svg';
-                            $srcset = trim((string) ($product->primary_image_srcset ?? ''));
-                        @endphp
-                        <img src="{{ $img }}"
-                             @if($srcset !== '') srcset="{{ $srcset }}" sizes="(max-width: 768px) 50vw, 25vw" @endif
+                    <div class="product-image">
+                        <img src="{{ $imgUrl }}"
                              alt="{{ $product->name }}"
-                             class="product-img"
                              loading="lazy"
                              width="320"
                              height="320"
-                             onerror="this.src='/images/gift-placeholder.svg'">
+                             onerror="this.onerror=null; this.src='{{ url('/images/gift-placeholder.svg') }}';">
                     </div>
-                    <div class="product-info">
+                    <div class="product-body">
                         <h3 class="product-name">{{ $product->name }}</h3>
-                        <div class="product-price-rating-wrapper">
-                            <div class="product-price-wrapper">
-                                <span class="product-price">@money($price)</span>
+                        <div class="product-footer">
+                            <div class="price-wrapper">
+                                <span class="price-current">@money($price)</span>
                                 @if(!empty($product->discount_price))
-                                    <span class="product-old-price">@money($oldPrice)</span>
+                                    <span class="price-old">@money($oldPrice)</span>
                                 @endif
                             </div>
+                            <button type="button" class="add-cart-btn" onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)" data-product-id="{{ $product->id }}" {{ $isOutOfStock ? 'disabled' : '' }} style="{{ $isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : '' }}">
+                                <i class="fas fa-plus"></i> أضف
+                            </button>
                         </div>
-                    </div>
-                    <div class="product-card-actions">
-                        <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)" data-product-id="{{ $product->id }}" {{ $isOutOfStock ? 'disabled data-tooltip="لا يتوفر هذا المنتج في المخزن"' : '' }} style="{{ $isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : 'cursor: pointer;' }}">
-                            <i class="fas fa-shopping-cart"></i>
-                        </button>
                     </div>
                 </div>
             @empty

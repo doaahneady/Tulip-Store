@@ -297,6 +297,11 @@
             <div id="mapContainer" style="width:100%; height:100%; display:block; position:relative;">
                 <div id="map" style="width:100%; height:100%; position:relative; z-index:1;"></div>
                 
+                <!-- Back to cart button -->
+                <a href="/cart" style="position:absolute; bottom:1rem; left:1rem; z-index:1000; display:inline-flex; align-items:center; gap:0.5rem; padding:0.7rem 1.2rem; background:#fff; color:#2a7080; border:2px solid #2a7080; border-radius:12px; font-family:'El Messiri',sans-serif; font-weight:700; font-size:0.9rem; text-decoration:none; box-shadow:0 4px 15px rgba(0,0,0,0.1); transition:all 0.3s;" onmouseover="this.style.background='#2a7080';this.style.color='#fff';" onmouseout="this.style.background='#fff';this.style.color='#2a7080';">
+                    <i class="fas fa-arrow-right"></i>
+                    رجوع إلى السلة
+                </a>
                 <!-- Search Box -->
                 <div style="position:absolute; top:1rem; right:1rem; left:1rem; z-index:1000;">
                     <div style="display:flex; gap:0.5rem;">

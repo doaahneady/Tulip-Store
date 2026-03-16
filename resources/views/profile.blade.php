@@ -201,10 +201,19 @@
         .notification-icon.promo { background: #fff3cd; color: #856404; }
         .notification-icon.system { background: #cce5ff; color: #004085; }
         
-        .notification-content { flex: 1; }
+        .notification-content { flex: 1; min-width: 0; }
         .notification-title { font-weight: 600; color: #333; margin-bottom: 0.3rem; }
         .notification-text { color: #666; font-size: 0.9rem; line-height: 1.5; }
         .notification-time { color: #999; font-size: 0.8rem; margin-top: 0.5rem; }
+        .notification-actions { flex-shrink: 0; }
+        .btn-seen {
+            background: #0f4f55; color: #fff; border: none; padding: 0.5rem 1rem;
+            border-radius: 8px; font-family: 'El Messiri', sans-serif; font-weight: 600;
+            font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+            transition: all 0.2s;
+        }
+        .btn-seen:hover:not(:disabled) { background: #1a6b73; }
+        .btn-seen:disabled { opacity: 0.7; cursor: not-allowed; }
         
         .empty-state {
             text-align: center; padding: 3rem; color: #999;
@@ -361,9 +370,33 @@
 
             <div class="content-section" id="section-cards">
                 <h2 class="section-title"><i class="fas fa-credit-card"></i> بطاقاتي</h2>
-                <p style="color: #666; font-family: 'El Messiri', sans-serif; margin-bottom: 1.5rem; font-size: 0.95rem;">
-                    البطاقات الائتمانية المحفوظة من عمليات الدفع السابقة:
+                <p style="color: #666; font-family: 'El Messiri', sans-serif; margin-bottom: 1rem; font-size: 0.95rem;">
+                    أضف بطاقاتك أو احذف البطاقات المحفوظة (نخزن فقط آخر 4 أرقام وعلامة البطاقة).
                 </p>
+                <div style="background: #f0f9fa; padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid #e0f2f1;">
+                    <h4 style="font-family: 'El Messiri', sans-serif; margin: 0 0 1rem 0; color: #0f4f55; font-size: 1rem;">إضافة بطاقة جديدة</h4>
+                    <form id="addCardForm" onsubmit="addCard(event)" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.75rem; align-items: end; flex-wrap: wrap;">
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; color: #555; margin-bottom: 0.3rem;">آخر 4 أرقام</label>
+                            <input type="text" id="cardLast4" maxlength="4" placeholder="4242" pattern="[0-9]{4}" required style="width: 100%; padding: 0.6rem; border: 2px solid #e0e0e0; border-radius: 8px; font-family: 'El Messiri', sans-serif;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; color: #555; margin-bottom: 0.3rem;">انتهاء الصلاحية (MM/YY)</label>
+                            <input type="text" id="cardExpiry" placeholder="12/25" maxlength="5" required style="width: 100%; padding: 0.6rem; border: 2px solid #e0e0e0; border-radius: 8px; font-family: 'El Messiri', sans-serif;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; color: #555; margin-bottom: 0.3rem;">العلامة</label>
+                            <select id="cardBrand" style="width: 100%; padding: 0.6rem; border: 2px solid #e0e0e0; border-radius: 8px; font-family: 'El Messiri', sans-serif;">
+                                <option value="Visa">Visa</option>
+                                <option value="Mastercard">Mastercard</option>
+                                <option value="Card">أخرى</option>
+                            </select>
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <button type="submit" class="btn-save" style="margin: 0;"><i class="fas fa-plus"></i> إضافة بطاقة</button>
+                        </div>
+                    </form>
+                </div>
                 <div id="cardsList">
                     <div class="empty-state">
                         <i class="fas fa-spinner fa-spin"></i>
@@ -514,37 +547,12 @@
             if (section === 'notifications') loadNotifications();
         }
 
-        async function loadAddresses() {
-            const container = document.getElementById('addressesList');
-            try {
-                const response = await fetch(API_BASE + '/profile/orders', {
-                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-                });
-                const data = await response.json();
-                const orders = data.orders || [];
-                
-                // Extract unique addresses from orders
-                const addresses = [...new Set(orders.map(o => o.address).filter(a => a))];
-                
-                if (addresses.length > 0) {
-                    container.innerHTML = addresses.map(addr => `
-                        <div style="background:white; padding:1.2rem; border-radius:12px; margin-bottom:1rem; border:1px solid #eee; display:flex; align-items:center; gap:1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                            <div style="width:40px; height:40px; background:#e8f4f8; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#2a7080;">
-                                <i class="fas fa-map-marker-alt"></i>
-                            </div>
-                            <div style="flex:1;">
-                                <p style="font-family:'El Messiri',sans-serif; font-weight:600; color:#1a1a1a; margin:0;">${addr}</p>
-                            </div>
-                        </div>
-                    `).join('');
-                } else {
-                    container.innerHTML = '<div class="empty-state"><i class="fas fa-map-marker-alt"></i><p>لا توجد عناوين مسجلة بعد</p></div>';
-                }
-            } catch (error) {
-                container.innerHTML = '<div class="empty-state"><i class="fas fa-map-marker-alt"></i><p>لا توجد عناوين مسجلة بعد</p></div>';
-            }
+        function cardBrandToIcon(brand) {
+            const b = (brand || '').toLowerCase();
+            if (b.includes('visa')) return 'fa-cc-visa';
+            if (b.includes('master')) return 'fa-cc-mastercard';
+            return 'fa-credit-card';
         }
-
         async function loadCards() {
             const container = document.getElementById('cardsList');
             try {
@@ -552,25 +560,63 @@
                     headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
                 });
                 const cards = await response.json();
-                
-                if (cards && cards.length > 0) {
+                if (!Array.isArray(cards)) { container.innerHTML = '<div class="empty-state"><i class="fas fa-credit-card"></i><p>لا توجد بطاقات محفوظة بعد</p></div>'; return; }
+                if (cards.length > 0) {
                     container.innerHTML = cards.map(card => `
-                        <div style="background:linear-gradient(135deg, #2a7080 0%, #1a5060 100%); padding:1.5rem; border-radius:15px; margin-bottom:1rem; color:white; display:flex; align-items:center; justify-content:space-between; box-shadow: 0 4px 15px rgba(42,112,128,0.2);">
+                        <div class="saved-card-item" data-id="${card.id}" style="background:linear-gradient(135deg, #2a7080 0%, #1a5060 100%); padding:1.5rem; border-radius:15px; margin-bottom:1rem; color:white; display:flex; align-items:center; justify-content:space-between; box-shadow: 0 4px 15px rgba(42,112,128,0.2);">
                             <div style="display:flex; align-items:center; gap:1.2rem;">
-                                <i class="fab fa-cc-${card.type || 'visa'}" style="font-size:2.5rem; opacity:0.9;"></i>
+                                <i class="fab ${cardBrandToIcon(card.brand)}" style="font-size:2.5rem; opacity:0.9;"></i>
                                 <div>
                                     <p style="font-family:monospace; font-size:1.1rem; letter-spacing:2px; margin:0;">•••• •••• •••• ${card.last4}</p>
-                                    <p style="font-family:'El Messiri',sans-serif; font-size:0.85rem; opacity:0.8; margin-top:0.3rem;">ينتهي في ${card.expiry}</p>
+                                    <p style="font-family:'El Messiri',sans-serif; font-size:0.85rem; opacity:0.8; margin-top:0.3rem;">ينتهي في ${card.expiry} ${card.brand ? ' · ' + card.brand : ''}</p>
                                 </div>
                             </div>
-                            <i class="fas fa-shield-alt" style="font-size:1.2rem; opacity:0.5;"></i>
+                            <div style="display:flex; align-items:center; gap:0.75rem;">
+                                <i class="fas fa-shield-alt" style="font-size:1.2rem; opacity:0.5;"></i>
+                                <button type="button" onclick="removeCard(${card.id})" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:0.5rem 0.9rem; border-radius:8px; cursor:pointer; font-family:'El Messiri',sans-serif; font-size:0.85rem;" title="حذف البطاقة"><i class="fas fa-trash-alt"></i> حذف</button>
+                            </div>
                         </div>
                     `).join('');
                 } else {
-                    container.innerHTML = '<div class="empty-state"><i class="fas fa-credit-card"></i><p>لا توجد بطاقات محفوظة بعد</p></div>';
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-credit-card"></i><p>لا توجد بطاقات محفوظة بعد. استخدم النموذج أعلاه لإضافة بطاقة.</p></div>';
                 }
             } catch (error) {
                 container.innerHTML = '<div class="empty-state"><i class="fas fa-credit-card"></i><p>لا توجد بطاقات محفوظة بعد</p></div>';
+            }
+        }
+        async function addCard(e) {
+            e.preventDefault();
+            const last4 = document.getElementById('cardLast4').value.replace(/\D/g, '').slice(0, 4);
+            let expiry = document.getElementById('cardExpiry').value.trim().replace(/\s/g, '');
+            if (/^([0-9]{2})([0-9]{2})$/.test(expiry)) expiry = expiry.replace(/^([0-9]{2})([0-9]{2})$/, '$1/$2');
+            const brand = document.getElementById('cardBrand').value;
+            if (last4.length !== 4) { alert('أدخل آخر 4 أرقام بشكل صحيح'); return; }
+            if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(expiry)) { alert('صيغة انتهاء الصلاحية: MM/YY'); return; }
+            try {
+                const response = await fetch(API_BASE + '/api/user/saved-cards', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                    body: JSON.stringify({ last4, expiry, brand })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'فشل الإضافة');
+                document.getElementById('cardLast4').value = ''; document.getElementById('cardExpiry').value = ''; document.getElementById('cardBrand').value = 'Visa';
+                loadCards();
+            } catch (err) {
+                alert(err.message || 'حدث خطأ');
+            }
+        }
+        async function removeCard(id) {
+            if (!confirm('حذف هذه البطاقة من قائمة البطاقات المحفوظة؟')) return;
+            try {
+                const response = await fetch(API_BASE + '/api/user/saved-cards/' + id, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                });
+                if (!response.ok) throw new Error('فشل الحذف');
+                loadCards();
+            } catch (err) {
+                alert(err.message || 'حدث خطأ');
             }
         }
         
@@ -802,7 +848,7 @@
                 
                 if (data.notifications && data.notifications.length > 0) {
                     container.innerHTML = data.notifications.map(notif => `
-                        <div class="notification-item ${notif.read ? '' : 'unread'}">
+                        <div class="notification-item ${notif.read ? '' : 'unread'}" id="notif-row-${notif.id}">
                             <div class="notification-icon ${notif.type || 'system'}">
                                 <i class="fas fa-${getNotifIcon(notif.type)}"></i>
                             </div>
@@ -811,6 +857,13 @@
                                 <div class="notification-text">${notif.message || ''}</div>
                                 <div class="notification-time">${timeAgo(notif.created_at)}</div>
                             </div>
+                            ${!notif.read ? `
+                            <div class="notification-actions">
+                                <button type="button" class="btn-seen" onclick="markNotificationSeen(${notif.id})" title="تمت المشاهدة">
+                                    <i class="fas fa-eye"></i> تمت المشاهدة
+                                </button>
+                            </div>
+                            ` : ''}
                         </div>
                     `).join('');
                     
@@ -825,6 +878,41 @@
             } catch (error) {
                 console.error('Error loading notifications:', error);
                 container.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><p>لا توجد إشعارات</p></div>';
+            }
+        }
+        
+        async function markNotificationSeen(id) {
+            const btn = document.querySelector(`#notif-row-${id} .btn-seen`);
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري...';
+            }
+            try {
+                const response = await fetch(API_BASE + '/notifications/' + id + '/read', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+                if (response.ok) {
+                    const row = document.getElementById('notif-row-' + id);
+                    if (row) {
+                        row.classList.remove('unread');
+                        const actions = row.querySelector('.notification-actions');
+                        if (actions) actions.remove();
+                    }
+                    loadNotifications();
+                } else if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-eye"></i> تمت المشاهدة';
+                }
+            } catch (e) {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-eye"></i> تمت المشاهدة';
+                }
             }
         }
         
@@ -857,23 +945,31 @@
                     return;
                 }
 
-                container.innerHTML = items.map(a => `
-                    <div style="background:#f8f9fa;border:1px solid #e8e8e8;border-radius:12px;padding:1rem;margin-bottom:0.8rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;">
+                container.innerHTML = items.map(a => {
+                    const fromOrder = a.from_order === true;
+                    const idQuoted = typeof a.id === 'string' ? `'${a.id}'` : a.id;
+                    const actions = fromOrder
+                        ? `<span style="font-size:0.8rem;color:#2a7080;">${a.label || 'تم الطلب إليه'}</span>`
+                        : `<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            ${a.is_default ? '' : `<button type="button" onclick="setDefaultAddress(${idQuoted})" style="background:#2a7080;color:#fff;border:none;padding:0.5rem 0.8rem;border-radius:10px;font-family:'El Messiri',sans-serif;font-weight:700;cursor:pointer;">تعيين افتراضي</button>`}
+                            <button type="button" onclick="deleteAddress(${idQuoted})" style="background:#dc3545;color:#fff;border:none;padding:0.5rem 0.8rem;border-radius:10px;font-family:'El Messiri',sans-serif;font-weight:700;cursor:pointer;">حذف</button>
+                        </div>`;
+                    return `
+                    <div style="background:${fromOrder ? '#fff9f0' : '#f8f9fa'};border:1px solid ${fromOrder ? '#ffe0c2' : '#e8e8e8'};border-radius:12px;padding:1rem;margin-bottom:0.8rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;">
                         <div style="flex:1;">
                             <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-                                <div style="font-weight:800;color:#0f4f55;">${a.label || 'عنوان'}</div>
+                                <div style="font-weight:800;color:#0f4f55;">${fromOrder ? (a.label || 'عنوان من طلب سابق') : (a.label || 'عنوان')}</div>
                                 ${a.is_default ? '<span style="background:#d4edda;color:#155724;padding:0.15rem 0.6rem;border-radius:999px;font-size:0.75rem;font-weight:700;">افتراضي</span>' : ''}
+                                ${fromOrder ? '<span style="background:#e8f4f8;color:#2a7080;padding:0.15rem 0.6rem;border-radius:999px;font-size:0.75rem;font-weight:700;">من الطلبات</span>' : ''}
                             </div>
                             <div style="color:#333;margin-top:0.35rem;">${a.line1 || ''}</div>
                             ${a.line2 ? `<div style="color:#666;margin-top:0.2rem;font-size:0.9rem;">${a.line2}</div>` : ''}
+                            ${a.contact_name ? `<div style="color:#666;margin-top:0.2rem;font-size:0.9rem;">${a.contact_name}</div>` : ''}
                             ${a.phone ? `<div style="color:#666;margin-top:0.2rem;font-size:0.9rem;"><i class="fas fa-phone"></i> ${a.phone}</div>` : ''}
                         </div>
-                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-                            ${a.is_default ? '' : `<button type="button" onclick="setDefaultAddress(${a.id})" style="background:#2a7080;color:#fff;border:none;padding:0.5rem 0.8rem;border-radius:10px;font-family:'El Messiri',sans-serif;font-weight:700;cursor:pointer;">تعيين افتراضي</button>`}
-                            <button type="button" onclick="deleteAddress(${a.id})" style="background:#dc3545;color:#fff;border:none;padding:0.5rem 0.8rem;border-radius:10px;font-family:'El Messiri',sans-serif;font-weight:700;cursor:pointer;">حذف</button>
-                        </div>
+                        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">${actions}</div>
                     </div>
-                `).join('');
+                `}).join('');
             } catch (error) {
                 container.innerHTML = '<div class="empty-state"><i class="fas fa-map-marker-alt"></i><p>تعذر تحميل العناوين</p></div>';
             }

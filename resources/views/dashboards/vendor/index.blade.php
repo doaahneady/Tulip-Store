@@ -13,14 +13,6 @@
             <i class="fas fa-boxes"></i>
             <span>المنتجات</span>
         </a>
-        <a href="{{ route('dashboard.vendor.purchase-orders') }}" class="inline-flex items-center gap-2 bg-slate-700 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition">
-            <i class="fas fa-file-invoice"></i>
-            <span>أوامر الشراء</span>
-        </a>
-        <a href="{{ route('dashboard.vendor.sales-forecasts') }}" class="inline-flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-xl hover:bg-amber-700 transition">
-            <i class="fas fa-chart-line"></i>
-            <span>توقعات المبيعات</span>
-        </a>
         <a href="{{ route('dashboard.vendor.product-performance-metrics') }}" class="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition">
             <i class="fas fa-chart-bar"></i>
             <span>أداء المنتجات</span>
@@ -216,10 +208,6 @@
         <a href="{{ route('dashboard.vendor.products') }}" class="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition flex items-center gap-3">
             <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center"><i class="fas fa-boxes"></i></div>
             <div class="font-semibold text-gray-800">إدارة المنتجات</div>
-        </a>
-        <a href="{{ route('dashboard.vendor.sales-forecasts') }}" class="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center"><i class="fas fa-chart-area"></i></div>
-            <div class="font-semibold text-gray-800">توقعات المبيعات</div>
         </a>
         <a href="{{ route('dashboard.vendor.product-performance-metrics') }}" class="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition flex items-center gap-3">
             <div class="w-10 h-10 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center"><i class="fas fa-bullseye"></i></div>

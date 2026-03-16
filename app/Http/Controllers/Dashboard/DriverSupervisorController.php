@@ -618,11 +618,37 @@ class DriverSupervisorController extends Controller
     /**
      * Order Assignment Management
      */
-    public function orderAssignment()
+    public function orderAssignment(Request $request)
     {
+        $search = trim((string) $request->input('search', ''));
+
         $pendingOrders = Order::with(['customer', 'store', 'items.product'])
             ->whereIn('status', ['pending', 'confirmed', 'processing'])
             ->whereDoesntHave('deliveryAssignment')
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($qq) use ($search) {
+                    if (Schema::hasColumn('orders', 'order_number')) {
+                        $qq->orWhere('order_number', 'like', "%{$search}%");
+                    }
+                    if (Schema::hasColumn('orders', 'recipient_name')) {
+                        $qq->orWhere('recipient_name', 'like', "%{$search}%");
+                    }
+                    if (Schema::hasColumn('orders', 'phone')) {
+                        $qq->orWhere('phone', 'like', "%{$search}%");
+                    }
+                    if (Schema::hasColumn('orders', 'village')) {
+                        $qq->orWhere('village', 'like', "%{$search}%");
+                    }
+                })
+                    ->orWhereHas('customer', function ($cq) use ($search) {
+                        $cq->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('store', function ($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%");
+                    });
+            })
             ->orderBy('created_at', 'asc')
             ->get();
 
@@ -633,6 +659,32 @@ class DriverSupervisorController extends Controller
 
         $activeAssignments = DeliveryAssignment::with(['order', 'driver.user'])
             ->whereIn('status', ['assigned', 'accepted', 'picked_up', 'in_transit'])
+            ->when($search !== '', function ($q) use ($search) {
+                $q->whereHas('order', function ($oq) use ($search) {
+                    $oq->where(function ($qq) use ($search) {
+                        if (Schema::hasColumn('orders', 'order_number')) {
+                            $qq->orWhere('order_number', 'like', "%{$search}%");
+                        }
+                        if (Schema::hasColumn('orders', 'recipient_name')) {
+                            $qq->orWhere('recipient_name', 'like', "%{$search}%");
+                        }
+                        if (Schema::hasColumn('orders', 'phone')) {
+                            $qq->orWhere('phone', 'like', "%{$search}%");
+                        }
+                        if (Schema::hasColumn('orders', 'village')) {
+                            $qq->orWhere('village', 'like', "%{$search}%");
+                        }
+                    })
+                        ->orWhereHas('customer', function ($cq) use ($search) {
+                            $cq->where('name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%")
+                                ->orWhere('phone', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('store', function ($sq) use ($search) {
+                            $sq->where('name', 'like', "%{$search}%");
+                        });
+                });
+            })
             ->orderBy('assigned_at', 'desc')
             ->get();
 

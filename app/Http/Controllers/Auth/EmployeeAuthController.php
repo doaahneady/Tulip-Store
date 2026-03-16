@@ -221,6 +221,11 @@ class EmployeeAuthController extends Controller
     {
         $employee = auth('employee')->user();
         $availableDashboards = $employee?->available_dashboards ?? [];
+        if (is_array($availableDashboards)) {
+            $availableDashboards = array_values(array_filter($availableDashboards, function ($d) {
+                return ($d['route'] ?? null) !== 'dashboard.vendor.index';
+            }));
+        }
 
         return view('auth.employee-dashboard-selection', [
             'availableDashboards' => $availableDashboards,

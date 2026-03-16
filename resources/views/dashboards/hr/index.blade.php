@@ -46,24 +46,32 @@
     <x-dashboard.stat-card title="تعيينات هذا الشهر" :value="number_format($metrics['new_hires_month'] ?? 0)" icon="fas fa-user-plus" color="purple" />
     </div>
 
+@php
+    $todayDate = today()->format('Y-m-d');
+    $presentTodayCount = \App\Models\Attendance::where('date', $todayDate)->whereIn('status', ['present', 'late'])->count();
+    $absentTodayCount = \App\Models\Attendance::where('date', $todayDate)->where('status', 'absent')->count();
+    $lateTodayCount = \App\Models\Attendance::where('date', $todayDate)->where('status', 'late')->count();
+    $onLeaveTodayCount = \App\Models\Attendance::where('date', $todayDate)->where('status', 'on_leave')->count();
+@endphp
+
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
     <div class="bg-white rounded-2xl p-6 shadow-sm">
         <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-calendar-check text-indigo-500 ml-2"></i>ملخص حضور اليوم</h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="p-4 bg-green-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-green-600">{{ $metrics['present_today'] ?? 0 }}</p>
+                <p class="text-2xl font-bold text-green-600">{{ $presentTodayCount }}</p>
                 <p class="text-xs text-gray-500">حاضر</p>
             </div>
             <div class="p-4 bg-red-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-red-600">{{ $metrics['absent_today'] ?? 0 }}</p>
+                <p class="text-2xl font-bold text-red-600">{{ $absentTodayCount }}</p>
                 <p class="text-xs text-gray-500">غائب</p>
             </div>
             <div class="p-4 bg-yellow-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-yellow-600">{{ $metrics['late_today'] ?? 0 }}</p>
+                <p class="text-2xl font-bold text-yellow-600">{{ $lateTodayCount }}</p>
                 <p class="text-xs text-gray-500">متأخر</p>
             </div>
             <div class="p-4 bg-blue-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-blue-600">{{ $metrics['on_leave_today'] ?? 0 }}</p>
+                <p class="text-2xl font-bold text-blue-600">{{ $onLeaveTodayCount }}</p>
                 <p class="text-xs text-gray-500">إجازة</p>
             </div>
         </div>

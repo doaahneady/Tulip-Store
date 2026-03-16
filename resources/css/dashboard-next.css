@@ -32,11 +32,154 @@
   font-family: var(--dx-font-sans);
   color-scheme: dark;
   --dx-sidebar-w: 320px;
+  --dx-action: var(--dx-primary);
+  --db4-primary: var(--dx-action);
+  --db4-text: var(--dx-text);
+  --db4-text-muted: var(--dx-text-muted);
+  --db4-border: var(--dx-border);
   background: radial-gradient(1200px 900px at 15% 0%, rgba(34, 195, 166, 0.22), transparent 55%),
     radial-gradient(900px 600px at 95% 15%, rgba(29, 139, 255, 0.16), transparent 55%),
     radial-gradient(900px 600px at 75% 95%, rgba(167, 139, 250, 0.14), transparent 55%),
     var(--dx-bg);
   color: var(--dx-text);
+}
+
+.db-next[data-dashboard="admin"] { --dx-action: var(--dx-primary-2); }
+.db-next[data-dashboard="cs"] { --dx-action: var(--dx-primary); }
+.db-next[data-dashboard="finance"] { --dx-action: var(--dx-success); }
+.db-next[data-dashboard="hr"] { --dx-action: var(--dx-accent); }
+.db-next[data-dashboard="it"] { --dx-action: var(--dx-primary-2); }
+.db-next[data-dashboard="supervisor"] { --dx-action: var(--dx-warning); }
+.db-next[data-dashboard="vendor"] { --dx-action: var(--dx-primary); }
+
+.db-next a.inline-flex.text-white.rounded-xl,
+.db-next button.inline-flex.text-white.rounded-xl {
+  background-color: var(--dx-action) !important;
+  border-color: transparent !important;
+}
+
+.db-next a.inline-flex.text-white.rounded-xl:hover,
+.db-next button.inline-flex.text-white.rounded-xl:hover {
+  filter: brightness(1.06);
+}
+
+.db-next a.inline-flex.text-white.rounded-xl:focus-visible,
+.db-next button.inline-flex.text-white.rounded-xl:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.14);
+}
+
+.db-next [class*="bg-white/"],
+.db-next [class*="bg-gray-50/"],
+.db-next [class*="bg-gray-100/"] {
+  background: var(--dx-panel) !important;
+  backdrop-filter: blur(18px);
+}
+
+/* Ensure stat cards and main white panels use dark surfaces */
+.db-next .stat-card,
+.db-next .bg-white.rounded-2xl,
+.db-next .bg-white.rounded-xl,
+.db-next .bg-white.rounded-lg {
+  background: var(--dx-panel) !important;
+  border-color: var(--dx-border) !important;
+  box-shadow: var(--dx-shadow-sm);
+}
+
+/* Make gray text readable on dark cards */
+.db-next .text-gray-900,
+.db-next .text-gray-800,
+.db-next .text-gray-700,
+.db-next .text-gray-600,
+.db-next .text-gray-500 {
+  color: var(--dx-text-muted) !important;
+}
+
+.db-next .bg-blue-50,
+.db-next .bg-blue-100,
+.db-next .bg-indigo-50,
+.db-next .bg-indigo-100,
+.db-next .bg-purple-50,
+.db-next .bg-purple-100,
+.db-next .bg-violet-50,
+.db-next .bg-violet-100,
+.db-next .bg-emerald-50,
+.db-next .bg-emerald-100,
+.db-next .bg-teal-50,
+.db-next .bg-teal-100,
+.db-next .bg-sky-50,
+.db-next .bg-sky-100,
+.db-next .bg-amber-50,
+.db-next .bg-amber-100,
+.db-next .bg-orange-50,
+.db-next .bg-orange-100,
+.db-next .bg-red-50,
+.db-next .bg-red-100,
+.db-next .bg-rose-50,
+.db-next .bg-rose-100,
+.db-next .bg-green-50,
+.db-next .bg-green-100 {
+  background: var(--dx-panel) !important;
+}
+
+.db-next .text-blue-700,
+.db-next .text-indigo-700,
+.db-next .text-purple-700,
+.db-next .text-violet-700,
+.db-next .text-emerald-700,
+.db-next .text-teal-700,
+.db-next .text-sky-700,
+.db-next .text-amber-700,
+.db-next .text-orange-700,
+.db-next .text-red-700,
+.db-next .text-rose-700,
+.db-next .text-green-700 {
+  color: rgba(255, 255, 255, 0.86) !important;
+}
+
+.db-next .bg-gradient-to-b {
+  background: var(--dx-panel) !important;
+  background-image: none !important;
+}
+
+.db-next input[type="date"] {
+  color-scheme: dark;
+}
+
+.db-next input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.85;
+}
+
+.db-next .stat-card {
+  background: var(--dx-panel) !important;
+}
+
+.db-next .border-gray-100,
+.db-next .border-gray-200,
+.db-next .border-gray-300 {
+  border-color: var(--dx-border) !important;
+}
+
+.db-next .text-gray-900,
+.db-next .text-gray-800,
+.db-next .text-gray-700 {
+  color: var(--dx-text) !important;
+}
+
+.db-next .text-gray-600,
+.db-next .text-gray-500 {
+  color: var(--dx-text-muted) !important;
+}
+
+.db-next .text-gray-400 {
+  color: var(--dx-text-faint) !important;
+}
+
+.db-next .shadow,
+.db-next .shadow-sm,
+.db-next .shadow-xl {
+  box-shadow: var(--dx-shadow-sm) !important;
 }
 
 .db-next.sidebar-collapsed {

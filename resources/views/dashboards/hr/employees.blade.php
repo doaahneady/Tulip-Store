@@ -46,7 +46,14 @@
             <tbody class="divide-y divide-gray-100">
                 @forelse($employees as $emp)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 text-sm text-gray-800">{{ optional($emp->user)->name ?? ('#'.$emp->id) }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-800">
+                            <a href="{{ route('dashboard.hr.employees.edit', $emp) }}" class="font-semibold text-indigo-700 hover:underline">
+                                {{ $emp->full_name ?: ('#'.$emp->id) }}
+                            </a>
+                            @if($emp->email)
+                                <div class="text-xs text-gray-500">{{ $emp->email }}</div>
+                            @endif
+                        </td>
                         <td class="px-4 py-3 text-sm">{{ $emp->department }}</td>
                         <td class="px-4 py-3 text-sm">{{ $emp->position }}</td>
                         <td class="px-4 py-3 text-sm">{{ $emp->status }}</td>

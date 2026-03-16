@@ -54,7 +54,7 @@
                         <td class="px-6 py-4">
                             @php $isOut = (bool) ($product->track_inventory ?? true) && (int) ($product->stock_quantity ?? 0) <= 0; @endphp
                             <span class="px-2 py-1 text-xs rounded {{ $isOut ? 'bg-red-100 text-red-700' : ($product->status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700') }}">
-                                {{ $isOut ? 'out_of_stock' : $product->status }}
+                                {{ $isOut ? 'out_of_stock' : ($product->status === 'draft' ? 'inactive' : $product->status) }}
                             </span>
                         </td>
                         <td class="px-6 py-4">
@@ -181,8 +181,9 @@
                 <div>
                     <label class="block text-sm text-gray-600 mb-1">Status</label>
                     <select name="status" class="border rounded-lg px-3 py-2 w-full" required>
-                        @foreach(['draft','active','inactive','out_of_stock'] as $status)
-                            <option value="{{ $status }}" @selected($product->status === $status)>{{ ucfirst(str_replace('_',' ',$status)) }}</option>
+                        @php $currentStatus = $product->status === 'draft' ? 'inactive' : $product->status; @endphp
+                        @foreach(['active','inactive','out_of_stock'] as $status)
+                            <option value="{{ $status }}" @selected($currentStatus === $status)>{{ ucfirst(str_replace('_',' ',$status)) }}</option>
                         @endforeach
                     </select>
                 </div>

@@ -59,11 +59,8 @@ class DashboardRoleMiddleware
         }
 
         $user = auth('employee')->user();
-
-        // Admin override: admins have access to all dashboard routes
-        // Requirement 2.5: Admin full access override
-        if ($this->isAdmin($user)) {
-            return $next($request);
+        if ($user) {
+            $user->refresh();
         }
 
         $dashboardKey = $this->resolveDashboardKey($request);
@@ -73,6 +70,11 @@ class DashboardRoleMiddleware
                 return $next($request);
             }
             abort(403, 'You don\'t have permission to access this resource');
+        }
+
+        // Admin override: only applies in legacy mode (no explicit dashboard permissions configured)
+        if ($this->isAdmin($user)) {
+            return $next($request);
         }
 
         // Check if user has at least one of the required roles (OR logic)

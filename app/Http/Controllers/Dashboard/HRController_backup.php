@@ -874,9 +874,20 @@ class HRController_backup extends Controller
             $leaveDays += max(0, $rangeStart->diffInDays($rangeEnd) + 1);
         }
 
-        $baseSalary = (float) ($employee->monthly_salary ?? 0);
-        $hourlyRate = (float) ($employee->hourly_rate ?? 0);
-        $overtimeRate = (float) ($employee->overtime_rate ?? ($hourlyRate > 0 ? $hourlyRate * 1.5 : 0));
+        $baseSalary = 0.0;
+        if (Schema::hasColumn('employees', 'monthly_salary')) {
+            $baseSalary = (float) ($employee->monthly_salary ?? 0);
+        }
+        if ($baseSalary <= 0 && Schema::hasColumn('employees', 'salary')) {
+            $baseSalary = (float) ($employee->salary ?? 0);
+        }
+
+        $hourlyRate = Schema::hasColumn('employees', 'hourly_rate')
+            ? (float) ($employee->hourly_rate ?? 0)
+            : 0.0;
+        $overtimeRate = Schema::hasColumn('employees', 'overtime_rate')
+            ? (float) ($employee->overtime_rate ?? 0)
+            : ($hourlyRate > 0 ? $hourlyRate * 1.5 : 0.0);
 
         $basePay = $baseSalary > 0 ? $baseSalary : round($regularHours * $hourlyRate, 2);
         $overtimePay = round($overtimeHours * $overtimeRate, 2);
@@ -1451,20 +1462,30 @@ class HRController_backup extends Controller
             }
 
             // Calculate pay
-            $basePay = 0;
-            if ($employee->monthly_salary) {
-                $basePay = $employee->monthly_salary;
-            } elseif ($employee->hourly_rate) {
-                $basePay = $regularHours * $employee->hourly_rate;
+            $monthlySalary = 0.0;
+            if (Schema::hasColumn('employees', 'monthly_salary')) {
+                $monthlySalary = (float) ($employee->monthly_salary ?? 0);
+            }
+            if ($monthlySalary <= 0 && Schema::hasColumn('employees', 'salary')) {
+                $monthlySalary = (float) ($employee->salary ?? 0);
             }
 
-            $overtimePay = $overtimeHours * ($employee->overtime_rate ?? ($employee->hourly_rate * 1.5));
+            $hourlyRate = Schema::hasColumn('employees', 'hourly_rate')
+                ? (float) ($employee->hourly_rate ?? 0)
+                : 0.0;
+            $overtimeRate = Schema::hasColumn('employees', 'overtime_rate')
+                ? (float) ($employee->overtime_rate ?? 0)
+                : ($hourlyRate > 0 ? $hourlyRate * 1.5 : 0.0);
+
+            $basePay = $monthlySalary > 0 ? $monthlySalary : ($hourlyRate > 0 ? $regularHours * $hourlyRate : 0.0);
+
+            $overtimePay = $overtimeHours * $overtimeRate;
             $grossPay = $basePay + $overtimePay;
 
             // Calculate deductions
             $deductions = 0;
-            if ($daysAbsent > 0 && $employee->monthly_salary) {
-                $dailyRate = $employee->monthly_salary / 30; // Assuming 30-day month
+            if ($daysAbsent > 0 && $monthlySalary > 0) {
+                $dailyRate = $monthlySalary / 30;
                 $deductions += $daysAbsent * $dailyRate;
             }
 

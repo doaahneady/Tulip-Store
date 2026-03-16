@@ -375,7 +375,10 @@ class OrderController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $pdf = \PDF::loadView('invoices.template-en', compact('order'));
+        $order = $this->prepareOrderForPdf($order);
+        $pdf = \PDF::loadView('invoices.template-en', compact('order'))
+            ->setOption('defaultFont', 'DejaVu Sans')
+            ->setOption('isHtml5ParserEnabled', true);
 
         return $pdf->download('invoice-'.$order->order_number.'.pdf');
     }
@@ -390,5 +393,144 @@ class OrderController extends Controller
         }
 
         return view('invoices.template', compact('order'));
+    }
+
+    private function prepareOrderForPdf(Order $order): Order
+    {
+        $order->recipient_name = $this->reshapeArabicForPdf($order->recipient_name);
+        $order->village = $this->reshapeArabicForPdf($order->village);
+        $order->address_note = $this->reshapeArabicForPdf($order->address_note);
+
+        if ($order->relationLoaded('user') && $order->user) {
+            $order->user->name = $this->reshapeArabicForPdf($order->user->name);
+        }
+
+        if ($order->relationLoaded('items')) {
+            foreach ($order->items as $item) {
+                if ($item->relationLoaded('product') && $item->product) {
+                    $item->product->name = $this->reshapeArabicForPdf($item->product->name);
+                }
+                $item->product_name = $this->reshapeArabicForPdf($item->product_name);
+            }
+        }
+
+        return $order;
+    }
+
+    private function reshapeArabicForPdf(?string $text): ?string
+    {
+        $text = $text === null ? null : trim($text);
+        if ($text === null || $text === '') {
+            return $text;
+        }
+        if (! preg_match('/[\x{0600}-\x{06FF}]/u', $text)) {
+            return $text;
+        }
+
+        $chars = preg_split('//u', $text, -1, PREG_SPLIT_NO_EMPTY);
+        if (! is_array($chars) || $chars === []) {
+            return $text;
+        }
+
+        $forms = [
+            "\u{0621}" => ["\u{FE80}", "\u{FE80}", null, null],
+            "\u{0622}" => ["\u{FE81}", "\u{FE82}", null, null],
+            "\u{0623}" => ["\u{FE83}", "\u{FE84}", null, null],
+            "\u{0624}" => ["\u{FE85}", "\u{FE86}", null, null],
+            "\u{0625}" => ["\u{FE87}", "\u{FE88}", null, null],
+            "\u{0626}" => ["\u{FE89}", "\u{FE8A}", "\u{FE8B}", "\u{FE8C}"],
+            "\u{0627}" => ["\u{FE8D}", "\u{FE8E}", null, null],
+            "\u{0628}" => ["\u{FE8F}", "\u{FE90}", "\u{FE91}", "\u{FE92}"],
+            "\u{0629}" => ["\u{FE93}", "\u{FE94}", null, null],
+            "\u{062A}" => ["\u{FE95}", "\u{FE96}", "\u{FE97}", "\u{FE98}"],
+            "\u{062B}" => ["\u{FE99}", "\u{FE9A}", "\u{FE9B}", "\u{FE9C}"],
+            "\u{062C}" => ["\u{FE9D}", "\u{FE9E}", "\u{FE9F}", "\u{FEA0}"],
+            "\u{062D}" => ["\u{FEA1}", "\u{FEA2}", "\u{FEA3}", "\u{FEA4}"],
+            "\u{062E}" => ["\u{FEA5}", "\u{FEA6}", "\u{FEA7}", "\u{FEA8}"],
+            "\u{062F}" => ["\u{FEA9}", "\u{FEAA}", null, null],
+            "\u{0630}" => ["\u{FEAB}", "\u{FEAC}", null, null],
+            "\u{0631}" => ["\u{FEAD}", "\u{FEAE}", null, null],
+            "\u{0632}" => ["\u{FEAF}", "\u{FEB0}", null, null],
+            "\u{0633}" => ["\u{FEB1}", "\u{FEB2}", "\u{FEB3}", "\u{FEB4}"],
+            "\u{0634}" => ["\u{FEB5}", "\u{FEB6}", "\u{FEB7}", "\u{FEB8}"],
+            "\u{0635}" => ["\u{FEB9}", "\u{FEBA}", "\u{FEBB}", "\u{FEBC}"],
+            "\u{0636}" => ["\u{FEBD}", "\u{FEBE}", "\u{FEBF}", "\u{FEC0}"],
+            "\u{0637}" => ["\u{FEC1}", "\u{FEC2}", "\u{FEC3}", "\u{FEC4}"],
+            "\u{0638}" => ["\u{FEC5}", "\u{FEC6}", "\u{FEC7}", "\u{FEC8}"],
+            "\u{0639}" => ["\u{FEC9}", "\u{FECA}", "\u{FECB}", "\u{FECC}"],
+            "\u{063A}" => ["\u{FECD}", "\u{FECE}", "\u{FECF}", "\u{FED0}"],
+            "\u{0641}" => ["\u{FED1}", "\u{FED2}", "\u{FED3}", "\u{FED4}"],
+            "\u{0642}" => ["\u{FED5}", "\u{FED6}", "\u{FED7}", "\u{FED8}"],
+            "\u{0643}" => ["\u{FED9}", "\u{FEDA}", "\u{FEDB}", "\u{FEDC}"],
+            "\u{0644}" => ["\u{FEDD}", "\u{FEDE}", "\u{FEDF}", "\u{FEE0}"],
+            "\u{0645}" => ["\u{FEE1}", "\u{FEE2}", "\u{FEE3}", "\u{FEE4}"],
+            "\u{0646}" => ["\u{FEE5}", "\u{FEE6}", "\u{FEE7}", "\u{FEE8}"],
+            "\u{0647}" => ["\u{FEE9}", "\u{FEEA}", "\u{FEEB}", "\u{FEEC}"],
+            "\u{0648}" => ["\u{FEED}", "\u{FEEE}", null, null],
+            "\u{0649}" => ["\u{FEEF}", "\u{FEF0}", null, null],
+            "\u{064A}" => ["\u{FEF1}", "\u{FEF2}", "\u{FEF3}", "\u{FEF4}"],
+        ];
+
+        $lamAlef = [
+            "\u{0622}" => ["\u{FEF5}", "\u{FEF6}"],
+            "\u{0623}" => ["\u{FEF7}", "\u{FEF8}"],
+            "\u{0625}" => ["\u{FEF9}", "\u{FEFA}"],
+            "\u{0627}" => ["\u{FEFB}", "\u{FEFC}"],
+        ];
+
+        $isJoiner = function (string $ch) use ($forms): bool {
+            return isset($forms[$ch]);
+        };
+        $canConnectPrev = function (string $ch) use ($forms): bool {
+            return isset($forms[$ch]) && $forms[$ch][1] !== null;
+        };
+        $canConnectNext = function (string $ch) use ($forms): bool {
+            return isset($forms[$ch]) && $forms[$ch][2] !== null;
+        };
+        $isDiacriticOrTatweel = function (string $ch): bool {
+            $cp = unpack('N', mb_convert_encoding($ch, 'UCS-4BE', 'UTF-8'))[1] ?? 0;
+            return ($cp >= 0x064B && $cp <= 0x065F) || $cp === 0x0640;
+        };
+
+        $out = '';
+        $len = count($chars);
+        for ($i = 0; $i < $len; $i++) {
+            $ch = $chars[$i];
+            if ($isDiacriticOrTatweel($ch) || ! $isJoiner($ch)) {
+                $out .= $ch;
+                continue;
+            }
+
+            if ($ch === "\u{0644}" && isset($chars[$i + 1]) && isset($lamAlef[$chars[$i + 1]])) {
+                $prev = $chars[$i - 1] ?? '';
+                $connectPrev = $prev !== '' && $isJoiner($prev) && $canConnectNext($prev) && $canConnectPrev($ch);
+                $out .= $connectPrev ? $lamAlef[$chars[$i + 1]][1] : $lamAlef[$chars[$i + 1]][0];
+                $i++;
+                continue;
+            }
+
+            $prev = $chars[$i - 1] ?? '';
+            $next = $chars[$i + 1] ?? '';
+
+            $connectPrev = $prev !== '' && $isJoiner($prev) && $canConnectNext($prev) && $canConnectPrev($ch);
+            $connectNext = $next !== '' && $isJoiner($next) && ! $isDiacriticOrTatweel($next) && $canConnectNext($ch) && $canConnectPrev($next);
+
+            if ($connectPrev && $connectNext && $forms[$ch][3] !== null) {
+                $out .= $forms[$ch][3];
+            } elseif ($connectPrev && $forms[$ch][1] !== null) {
+                $out .= $forms[$ch][1];
+            } elseif ($connectNext && $forms[$ch][2] !== null) {
+                $out .= $forms[$ch][2];
+            } else {
+                $out .= $forms[$ch][0] ?? $ch;
+            }
+        }
+
+        $rev = preg_split('//u', $out, -1, PREG_SPLIT_NO_EMPTY);
+        if (is_array($rev) && $rev !== []) {
+            $out = implode('', array_reverse($rev));
+        }
+
+        return "\u{200F}".$out."\u{200F}";
     }
 }

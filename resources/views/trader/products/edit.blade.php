@@ -4,7 +4,10 @@
 
 @php
     $status = $product->status ?? 'pending';
-    $isApproved = $status === 'approved';
+    if ($status === 'draft') {
+        $status = 'pending';
+    }
+    $isApproved = in_array($status, ['approved', 'active'], true);
 @endphp
 
 <div class="card">
@@ -77,7 +80,14 @@
                     </div>
                 </div>
                 <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-                    <span class="badge {{ $status==='approved' ? 'green' : ($status==='rejected' ? 'red' : 'orange') }}">الحالة: {{ $status }}</span>
+                    @php
+                        $statusText = $status;
+                        if ($status === 'active') $statusText = 'نشط';
+                        elseif ($status === 'pending') $statusText = 'قيد المراجعة';
+                        elseif ($status === 'rejected') $statusText = 'مرفوض';
+                        elseif ($status === 'approved') $statusText = 'مقبول';
+                    @endphp
+                    <span class="badge {{ $status==='approved' || $status==='active' ? 'green' : ($status==='rejected' ? 'red' : 'orange') }}">الحالة: {{ $statusText }}</span>
                 </div>
             </div>
         </div>

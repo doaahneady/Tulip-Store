@@ -87,6 +87,119 @@
             transform: translateY(-5px) !important;
             box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
         }
+
+        /* New card design (mart-style) for store page */
+        .store-section-cards .product-card {
+            border-radius: 24px;
+            border: 1px solid #e8e8e8;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: all 0.3s;
+            position: relative;
+            background: #fff;
+            cursor: pointer;
+        }
+        .store-section-cards .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+            border-color: #2a7080;
+        }
+        .store-section-cards .product-image,
+        .store-section-cards .product-image-wrapper {
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            height: auto;
+            background: linear-gradient(135deg, #eaf7f8, #f8f9fa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .store-section-cards .product-image img,
+        .store-section-cards .product-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .store-section-cards .product-body,
+        .store-section-cards .product-info {
+            padding: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            min-height: auto;
+        }
+        .store-section-cards .product-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.2rem;
+            font-family: 'El Messiri', sans-serif;
+        }
+        .store-section-cards .product-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.5rem;
+            border-top: 1px solid #e8e8e8;
+            margin-top: 0.5rem;
+        }
+        .store-section-cards .price-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+        .store-section-cards .price-current,
+        .store-section-cards .product-price {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #0f4f55;
+            font-family: 'El Messiri', sans-serif;
+        }
+        .store-section-cards .price-old,
+        .store-section-cards .product-old-price {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-decoration: line-through;
+        }
+        .store-section-cards .add-cart-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.8rem;
+            background: #0f4f55;
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'El Messiri', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(15,79,85,0.15);
+        }
+        .store-section-cards .add-cart-btn:hover:not(:disabled) {
+            background: #0d464c;
+            transform: scale(1.05);
+        }
+        .store-section-cards .product-favorite-btn {
+            position: absolute;
+            top: 0.6rem;
+            right: 0.6rem;
+            z-index: 2;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.95);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #cbd5e1;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
     </style>
     <style>
         .account-wrapper {
@@ -408,8 +521,10 @@
         <!-- Products Content -->
         <div class="products-content">
             <h2 id="pageTitle" style="font-family: 'El Messiri', sans-serif; font-size: 2rem; color: #0f4f55; margin: 0 0 2rem 0;">جميع المنتجات</h2>
-            <div class="products-grid" id="productsGrid">
-                <!-- Products will be loaded here -->
+            <div class="store-section-cards" style="padding: 0;">
+                <div class="products-grid" id="productsGrid">
+                    <!-- Products will be loaded here -->
+                </div>
             </div>
             <div id="loadingProducts" style="text-align: center; padding: 3rem; color: #999;">
                 <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
@@ -604,38 +719,42 @@
                     products.forEach(p => { window.__productsById[p.id] = p; });
                     
                     if (products.length > 0) {
+                        const escapeHtml = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                        const imgUrl = (p) => {
+                            const u = p.primary_image_url || p.image || (Array.isArray(p.images) && p.images[0]) || '';
+                            const s = String(u || '').trim();
+                            if (!s) return '/images/gift-placeholder.svg';
+                            if (s.startsWith('http://') || s.startsWith('https://')) return s;
+                            return s.startsWith('/') ? s : ('/storage/' + s.replace(/^storage\//, ''));
+                        };
                         productsGrid.innerHTML = products.map(product => {
                             const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
                             const isFavorite = favorites.some(p => p.id === product.id);
                             const stock = parseInt(product.stock_quantity ?? 0);
                             const isOutOfStock = !!product.track_inventory && stock <= 0;
-                            const stockLabel = product.track_inventory ? (isOutOfStock ? 'غير متوفر' : `متوفر: ${stock}`) : 'متوفر';
+                            const price = parseFloat(product.discount_price || product.price || 0);
+                            const oldPrice = parseFloat(product.price || 0);
+                            const priceStr = window.formatMoney ? window.formatMoney(price) : ('$' + price.toFixed(2));
+                            const oldPriceStr = window.formatMoney ? window.formatMoney(oldPrice) : ('$' + oldPrice.toFixed(2));
                             return `
-                            <div class="product-card" data-product-id="${product.id}">
+                            <div class="product-card" data-product-id="${product.id}" onclick="window.location.href='/products/${product.id}'">
                                 <button class="product-favorite-btn ${isFavorite ? 'active' : ''}" onclick="event.stopPropagation(); toggleProductFavorite(event, ${product.id})">
                                     <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
                                 </button>
-                                <div style="position:absolute; top: 14px; left: 14px; z-index: 3; background: ${isOutOfStock ? '#fee2e2' : '#dcfce7'}; color: ${isOutOfStock ? '#b91c1c' : '#166534'}; padding: 6px 10px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;">
-                                    ${stockLabel}
+                                <div class="product-image">
+                                    <img src="${imgUrl(product)}" alt="${escapeHtml(product.name)}" class="product-img" loading="lazy" width="320" height="320" onerror="this.onerror=null; this.src='/images/gift-placeholder.svg';">
                                 </div>
-                                <div class="product-image-wrapper" onclick='openFloatingView(${JSON.stringify(product)})'>
-                                    <img src="${product.primary_image_url || product.image || '/images/gift-placeholder.svg'}" srcset="${product.primary_image_srcset || ''}" sizes="(max-width: 768px) 50vw, 25vw" alt="${product.name}" class="product-img" loading="lazy" width="320" height="320" onerror="this.src='/images/gift-placeholder.svg'">
-                                </div>
-                                <div class="product-info">
-                                    <h3 class="product-name">${product.name}</h3>
-                                    <div class="product-price-rating-wrapper">
-                                        <div class="product-price-wrapper">
-                                            <span class="product-price">${window.formatMoney ? window.formatMoney(product.discount_price || product.price) : ('$' + parseFloat(product.discount_price || product.price).toFixed(2))}</span>
-                                            ${product.discount_price ? 
-                                                `<span class="product-old-price">${window.formatMoney ? window.formatMoney(product.price) : ('$' + parseFloat(product.price).toFixed(2))}</span>` : ''
-                                            }
+                                <div class="product-body">
+                                    <h3 class="product-name">${escapeHtml(product.name)}</h3>
+                                    <div class="product-footer">
+                                        <div class="price-wrapper">
+                                            <span class="price-current">${priceStr}</span>
+                                            ${product.discount_price ? `<span class="price-old">${oldPriceStr}</span>` : ''}
                                         </div>
+                                        <button type="button" class="add-cart-btn" onclick="event.stopPropagation(); addToCart(event, ${product.id})" data-product-id="${product.id}" ${isOutOfStock ? 'disabled' : ''} style="${isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : ''}">
+                                            <i class="fas fa-plus"></i> أضف
+                                        </button>
                                     </div>
-                                </div>
-                                <div class="product-card-actions">
-                                <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart(event, ${product.id})" data-product-id="${product.id}" ${isOutOfStock ? 'disabled data-tooltip="لا يتوفر هذا المنتج في المخزن"' : ''} style="background: transparent; border: none; box-shadow: none; width: auto; height: auto; padding: 0; display: inline-flex; align-items: center; justify-content: center; ${isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : 'cursor: pointer;'}">
-                                        <i class="fas fa-shopping-cart" style="font-size: 1.4rem; color: #ff6b35;"></i>
-                                    </button>
                                 </div>
                             </div>
                         `}).join('');
@@ -735,7 +854,7 @@
         async function addToCart(event, productId) {
             event.stopPropagation();
             
-            const btn = event.target.closest('.product-card-btn-cart');
+            const btn = event.target.closest('.product-card-btn-cart') || event.target.closest('.add-cart-btn');
             const product = window.__productsById ? window.__productsById[productId] : null;
             const stock = parseInt(product?.stock_quantity ?? 0);
             const isOutOfStock = !!product?.track_inventory && stock <= 0;
@@ -805,12 +924,12 @@
                         }, 1500);
                     }
                     
-                    // Revert back to cart icon after 2 seconds
+                    // Revert back to button label after 2 seconds (أضف for new cards)
                     setTimeout(() => {
                         btn.classList.remove('added');
                         btn.style.background = '';
                         btn.style.boxShadow = '';
-                        btn.innerHTML = '<i class="fas fa-shopping-cart" style="font-size: 1.2rem;"></i>';
+                        btn.innerHTML = btn.classList.contains('add-cart-btn') ? '<i class="fas fa-plus"></i> أضف' : '<i class="fas fa-shopping-cart" style="font-size: 1.2rem;"></i>';
                         btn.disabled = false;
                     }, 2000);
                 } else {
@@ -822,7 +941,7 @@
                 btn.style.background = '#e74c3c';
                 
                 setTimeout(() => {
-                    btn.innerHTML = '<i class="fas fa-shopping-cart" style="font-size: 1.2rem;"></i>';
+                    btn.innerHTML = btn.classList.contains('add-cart-btn') ? '<i class="fas fa-plus"></i> أضف' : '<i class="fas fa-shopping-cart" style="font-size: 1.2rem;"></i>';
                     btn.style.background = '';
                     btn.disabled = false;
                 }, 2000);
@@ -1070,7 +1189,8 @@
         function positionSearchPanel() {
             if (!searchBar || !searchPanel) return;
             const barRect = searchBar.getBoundingClientRect();
-            const shellRect = document.querySelector('.navbar-shell').getBoundingClientRect();
+            const shellEl = document.querySelector('.tulip-navbar') || document.querySelector('.navbar-wrapper');
+            const shellRect = shellEl ? shellEl.getBoundingClientRect() : barRect;
 
             const leftWithinShell = barRect.left - shellRect.left;
             searchPanel.style.left = leftWithinShell + 'px';

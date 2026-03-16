@@ -351,6 +351,15 @@ class Employee extends Authenticatable
 
     public function canAccessDashboard(string $dashboardKey): bool
     {
+        $explicit = $this->getExplicitDashboardKeys();
+        if (! empty($explicit)) {
+            if (in_array('__none__', $explicit, true)) {
+                return false;
+            }
+
+            return in_array($dashboardKey, $explicit, true);
+        }
+
         if ((bool) ($this->is_admin ?? false)) {
             return true;
         }

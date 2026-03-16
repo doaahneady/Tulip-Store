@@ -6,7 +6,23 @@
     {{-- Unassigned Orders - Card Grid --}}
     <div class="lg:col-span-2">
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">طلبات غير معينة</h3>
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <h3 class="text-lg font-bold text-gray-800">طلبات غير معينة</h3>
+                <form method="GET" action="{{ route('dashboard.supervisor.order-assignment') }}" class="flex items-center gap-2">
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="بحث بالرقم / الاسم / المتجر"
+                        class="px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm w-64"
+                    />
+                    <button type="submit" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition text-sm">
+                        <i class="fas fa-search"></i>
+                        <span>بحث</span>
+                    </button>
+                    <a href="{{ route('dashboard.supervisor.order-assignment') }}" class="inline-flex items-center px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm">مسح</a>
+                </form>
+            </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 @foreach($pendingOrders as $order)
                     <button type="button"
@@ -109,16 +125,20 @@
             <div class="px-4 py-3 max-h-[calc(100vh-12rem)] overflow-y-auto">
                 <div id="orderDetailsContent" class="mb-3 text-sm"></div>
                 <div id="orderMap" class="w-full h-40 rounded-lg border border-gray-200 dark:border-gray-600 mb-3 bg-gray-100 dark:bg-gray-700" style="min-height:160px;"></div>
-                <a id="googleMapsLink" href="#" target="_blank" class="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 mb-4">
+                <div class="flex items-center justify-between gap-3 flex-wrap mb-4">
+                    <a id="googleMapsLink" href="#" target="_blank" class="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800">
                     <i class="fab fa-google"></i> فتح في خرائط جوجل
-                </a>
+                    </a>
+                    <div id="orderCoords" class="text-xs text-gray-600 dark:text-gray-300"></div>
+                </div>
                 <div class="space-y-3">
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">اختر السائق</label>
                         <select id="driverSelect" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-700">
                             <option value="">-- اختر سائق --</option>
                             @foreach($availableDrivers as $driver)
-                                <option value="{{ $driver->id }}">{{ optional($driver->user)->name ?? optional($driver->user)->user_full_name ?? 'Driver #'.$driver->id }}</option>
+                                @php $phone = optional($driver->user)->phone ?? optional($driver->user)->mobile ?? ''; @endphp
+                                <option value="{{ $driver->id }}" data-phone="{{ $phone }}">{{ optional($driver->user)->name ?? optional($driver->user)->user_full_name ?? 'Driver #'.$driver->id }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -126,6 +146,10 @@
                         <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">ملاحظات التوصيل (اختياري)</label>
                         <textarea id="deliveryNotes" rows="2" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-700" placeholder="أضف ملاحظات للسائق..."></textarea>
                     </div>
+                    <a id="whatsAppBtn" href="#" target="_blank" class="hidden w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition text-sm font-semibold">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>إرسال الموقع على واتساب للسائق</span>
+                    </a>
                 </div>
             </div>
             <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-600 flex gap-2 justify-end">
@@ -159,6 +183,7 @@ const assignUrl = '{{ route("dashboard.supervisor.assign-order") }}';
 const defaultCoords = [32.7125, 36.5669];
 
 let currentOrderId = null;
+let currentOrderMeta = null;
 let orderMap = null;
 let orderMapMarker = null;
 
@@ -172,21 +197,43 @@ document.querySelectorAll('.js-open-assign').forEach(btn => {
 
 function openAssignModal(orderId) {
     currentOrderId = orderId;
+    currentOrderMeta = null;
     document.getElementById('assignModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     document.getElementById('driverSelect').value = '';
     document.getElementById('deliveryNotes').value = '';
+    document.getElementById('orderCoords').textContent = '';
+    document.getElementById('whatsAppBtn').classList.add('hidden');
     document.getElementById('orderDetailsContent').innerHTML = '<div class="animate-pulse py-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl"></i><p class="mt-2">جاري تحميل التفاصيل...</p></div>';
 
     fetch(`${orderDetailsUrl}/${orderId}`)
         .then(r => r.json())
         .then(order => {
-            const lat = parseFloat(order.latitude) || defaultCoords[0];
-            const lng = parseFloat(order.longitude) || defaultCoords[1];
+            const rawLat = parseFloat(order.latitude);
+            const rawLng = parseFloat(order.longitude);
+            const hasCoords = Number.isFinite(rawLat) && Number.isFinite(rawLng);
+            const lat = hasCoords ? rawLat : defaultCoords[0];
+            const lng = hasCoords ? rawLng : defaultCoords[1];
             const items = order.items || [];
             const itemsHtml = items.length
                 ? items.map(i => `<div class="flex justify-between py-1 text-sm"><span>${(i.product?.name || i.product_name || 'منتج')} × ${i.quantity}</span><span class="font-semibold">$${parseFloat(i.subtotal || i.total_price || 0).toFixed(2)}</span></div>`).join('')
                 : '<div class="text-sm text-gray-500">لا توجد منتجات</div>';
+
+            currentOrderMeta = {
+                id: order.id,
+                orderNumber: order.order_number || order.id,
+                customer: order.recipient_name || (order.customer?.name) || '—',
+                phone: order.phone || (order.customer?.phone) || '—',
+                village: order.village || '—',
+                addressNote: order.address_note || '',
+                deliveryMethod: order.delivery_method || '—',
+                estimatedDelivery: order.estimated_delivery || '',
+                hasCoords,
+                lat: hasCoords ? rawLat : null,
+                lng: hasCoords ? rawLng : null,
+                mapLat: lat,
+                mapLng: lng,
+            };
 
             document.getElementById('orderDetailsContent').innerHTML = `
                 <div class="grid grid-cols-2 gap-2 mb-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-gray-800 dark:text-gray-200">
@@ -206,10 +253,18 @@ function openAssignModal(orderId) {
                 </div>
             `;
 
-            document.getElementById('googleMapsLink').href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-            document.getElementById('googleMapsLink').classList.toggle('hidden', !order.latitude || !order.longitude);
+            if (hasCoords) {
+                const coordsText = `${rawLat.toFixed(6)}, ${rawLng.toFixed(6)}`;
+                document.getElementById('orderCoords').textContent = `الإحداثيات: ${coordsText}`;
+                document.getElementById('googleMapsLink').href = `https://www.google.com/maps/dir/?api=1&destination=${rawLat},${rawLng}`;
+                document.getElementById('googleMapsLink').classList.remove('hidden');
+            } else {
+                document.getElementById('orderCoords').textContent = 'الإحداثيات: —';
+                document.getElementById('googleMapsLink').classList.add('hidden');
+            }
 
             initMap(lat, lng, order.recipient_name || order.village || 'التوصيل');
+            updateWhatsAppLink();
         })
         .catch(err => {
             console.error(err);
@@ -239,10 +294,61 @@ function closeAssignModal() {
     document.getElementById('assignModal').classList.add('hidden');
     document.body.style.overflow = '';
     currentOrderId = null;
+    currentOrderMeta = null;
     if (orderMap) {
         orderMap.remove();
         orderMap = null;
     }
+}
+
+document.getElementById('driverSelect')?.addEventListener('change', () => {
+    updateWhatsAppLink();
+});
+
+document.getElementById('deliveryNotes')?.addEventListener('input', () => {
+    updateWhatsAppLink();
+});
+
+function normalizeWhatsAppPhone(phone) {
+    const digits = String(phone || '').replace(/[^\d]/g, '');
+    if (!digits) return '';
+    if (digits.startsWith('00')) return digits.slice(2);
+    if (digits.startsWith('0')) return digits.replace(/^0+/, '');
+    return digits;
+}
+
+function updateWhatsAppLink() {
+    const btn = document.getElementById('whatsAppBtn');
+    const select = document.getElementById('driverSelect');
+    if (!btn || !select || !currentOrderMeta) return;
+
+    const opt = select.options[select.selectedIndex];
+    const phone = opt?.getAttribute('data-phone') || '';
+    const waPhone = normalizeWhatsAppPhone(phone);
+
+    if (!waPhone || !currentOrderMeta.hasCoords) {
+        btn.classList.add('hidden');
+        btn.href = '#';
+        return;
+    }
+
+    const coordsText = `${currentOrderMeta.lat.toFixed(6)}, ${currentOrderMeta.lng.toFixed(6)}`;
+    const mapsLink = `https://www.google.com/maps?q=${currentOrderMeta.lat},${currentOrderMeta.lng}`;
+    const note = document.getElementById('deliveryNotes')?.value || '';
+    const lines = [
+        `طلب رقم: ${currentOrderMeta.orderNumber}`,
+        `العميل: ${currentOrderMeta.customer}`,
+        `هاتف العميل: ${currentOrderMeta.phone}`,
+        `المنطقة: ${currentOrderMeta.village}`,
+        `الإحداثيات: ${coordsText}`,
+        `الخريطة: ${mapsLink}`,
+    ];
+    if (currentOrderMeta.addressNote) lines.push(`ملاحظة الطلب: ${currentOrderMeta.addressNote}`);
+    if (note) lines.push(`ملاحظة المشرف: ${note}`);
+
+    const text = encodeURIComponent(lines.join('\n'));
+    btn.href = `https://wa.me/${waPhone}?text=${text}`;
+    btn.classList.remove('hidden');
 }
 
 async function submitAssign() {

@@ -806,27 +806,45 @@ Route::middleware(['web'])->group(function () {
         return response()->json(['error' => 'Not authenticated'], 401);
     });
 
-    // Saved cards API (mock data for now)
+    // Saved cards API
     Route::get('/api/user/saved-cards', function () {
-        if (Auth::check()) {
-            // Return mock saved cards - in production, fetch from database
-            return response()->json([
-                [
-                    'id' => '1',
-                    'last4' => '4242',
-                    'expiry' => '12/25',
-                    'brand' => 'Visa',
-                ],
-                [
-                    'id' => '2',
-                    'last4' => '5555',
-                    'expiry' => '08/26',
-                    'brand' => 'Mastercard',
-                ],
-            ]);
+        if (! Auth::check()) {
+            return response()->json([], 401);
         }
-
-        return response()->json([], 401);
+        $cards = \App\Models\UserSavedCard::where('user_id', Auth::id())
+            ->orderByDesc('created_at')
+            ->get(['id', 'brand', 'last4', 'expiry', 'holder_name']);
+        return response()->json($cards->toArray());
+    });
+    Route::post('/api/user/saved-cards', function (\Illuminate\Http\Request $request) {
+        if (! Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        $validated = $request->validate([
+            'last4' => 'required|string|size:4|regex:/^[0-9]+$/',
+            'expiry' => 'required|string|regex:/^(0[1-9]|1[0-2])\/([0-9]{2})$/',
+            'brand' => 'nullable|string|max:32',
+            'holder_name' => 'nullable|string|max:255',
+        ]);
+        $card = \App\Models\UserSavedCard::create([
+            'user_id' => Auth::id(),
+            'brand' => $validated['brand'] ?? 'Card',
+            'last4' => $validated['last4'],
+            'expiry' => $validated['expiry'],
+            'holder_name' => $validated['holder_name'] ?? null,
+        ]);
+        return response()->json(['success' => true, 'data' => $card], 201);
+    });
+    Route::delete('/api/user/saved-cards/{id}', function ($id) {
+        if (! Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        $card = \App\Models\UserSavedCard::where('user_id', Auth::id())->where('id', $id)->first();
+        if (! $card) {
+            return response()->json(['error' => 'Card not found'], 404);
+        }
+        $card->delete();
+        return response()->json(['success' => true]);
     });
 });
 

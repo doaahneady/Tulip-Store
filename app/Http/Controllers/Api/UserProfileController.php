@@ -351,15 +351,70 @@ class UserProfileController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        $items = Address::where('user_id', $user->id)
+        $savedItems = Address::where('user_id', $user->id)
             ->orderByDesc('is_default')
             ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($a) {
+                return array_merge($a->toArray(), ['from_order' => false]);
+            });
+
+        // Addresses from past orders (village + address_note)
+        $orderAddresses = Order::where('user_id', $user->id)
+            ->where(function ($q) {
+                $q->whereNotNull('village')->where('village', '!=', '')
+                    ->orWhereNotNull('address_note')->where('address_note', '!=', '');
+            })
+            ->select('village', 'address_note', 'latitude', 'longitude', 'recipient_name', 'phone')
             ->get();
+
+        $seenKeys = [];
+        $fromOrders = [];
+        foreach ($orderAddresses as $order) {
+            $v = trim((string) ($order->village ?? ''));
+            $n = trim((string) ($order->address_note ?? ''));
+            $key = $v.'|'.$n.'|'.(string) ($order->latitude ?? '').'|'.(string) ($order->longitude ?? '');
+            if ($key === '|||' || isset($seenKeys[$key])) {
+                continue;
+            }
+            $seenKeys[$key] = true;
+            $line1 = $v;
+            if ($n !== '') {
+                $line1 .= ($line1 !== '' ? ' - ' : '').$n;
+            }
+            if ($line1 === '') {
+                continue;
+            }
+            $orderCount = Order::where('user_id', $user->id)
+                ->where('village', $order->village)
+                ->where('address_note', $order->address_note)
+                ->count();
+
+            $fromOrders[] = [
+                'id' => 'order-'.md5($key),
+                'line1' => $line1,
+                'line2' => null,
+                'city' => $v,
+                'state' => null,
+                'postal_code' => null,
+                'country' => null,
+                'contact_name' => $order->recipient_name,
+                'phone' => $order->phone,
+                'lat' => $order->latitude ? (float) $order->latitude : null,
+                'lng' => $order->longitude ? (float) $order->longitude : null,
+                'is_default' => false,
+                'from_order' => true,
+                'order_count' => $orderCount,
+                'label' => 'تم الطلب إليه '.$orderCount.' مرة',
+            ];
+        }
+
+        $items = $savedItems->concat($fromOrders)->values()->all();
 
         return response()->json([
             'success' => true,
             'items' => $items,
-            'count' => $items->count(),
+            'count' => count($items),
         ], 200);
     }
 

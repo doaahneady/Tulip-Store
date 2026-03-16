@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdministrativeApproval;
+use App\Models\DashboardNotification;
+use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
@@ -89,6 +91,19 @@ class AdministrativeApprovalsController extends Controller
             'decided_at' => now(),
         ]);
 
+        if (Schema::hasTable('dashboard_notifications')) {
+            DashboardNotification::create([
+                'user_type' => Employee::class,
+                'user_id' => (int) $approval->requester_employee_id,
+                'title' => 'تمت الموافقة على طلبك',
+                'message' => 'نوع الطلب: '.$approval->category.($approval->details ? ' - '.$approval->details : ''),
+                'type' => 'success',
+                'is_read' => false,
+                'dashboard_type' => 'admin',
+                'action_url' => route('dashboard.administrative-approvals.index'),
+            ]);
+        }
+
         return back()->with('success', 'Request approved');
     }
 
@@ -106,6 +121,19 @@ class AdministrativeApprovalsController extends Controller
             'decided_by_role' => $role,
             'decided_at' => now(),
         ]);
+
+        if (Schema::hasTable('dashboard_notifications')) {
+            DashboardNotification::create([
+                'user_type' => Employee::class,
+                'user_id' => (int) $approval->requester_employee_id,
+                'title' => 'تم رفض طلبك',
+                'message' => 'نوع الطلب: '.$approval->category.($approval->details ? ' - '.$approval->details : ''),
+                'type' => 'error',
+                'is_read' => false,
+                'dashboard_type' => 'admin',
+                'action_url' => route('dashboard.administrative-approvals.index'),
+            ]);
+        }
 
         return back()->with('success', 'Request rejected');
     }

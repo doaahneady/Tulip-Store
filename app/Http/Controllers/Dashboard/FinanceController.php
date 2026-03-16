@@ -519,6 +519,25 @@ class FinanceController extends Controller
             }
         }
 
+        if (Schema::hasTable('dashboard_notifications')) {
+            $employeeId = (int) (data_get($transaction->metadata, 'employee_id') ?? 0);
+            if (! $employeeId && (int) ($transaction->user_id ?? 0) > 0) {
+                $employeeId = (int) (\App\Models\Employee::where('user_id', $transaction->user_id)->value('id') ?? 0);
+            }
+            if ($employeeId > 0) {
+                \App\Models\DashboardNotification::create([
+                    'user_type' => \App\Models\Employee::class,
+                    'user_id' => $employeeId,
+                    'title' => 'تمت الموافقة على طلبك',
+                    'message' => ($transaction->type ? 'النوع: '.$transaction->type.' - ' : '').'المبلغ: '.number_format((float) ($transaction->amount ?? 0), 2),
+                    'type' => 'success',
+                    'is_read' => false,
+                    'dashboard_type' => 'finance',
+                    'action_url' => url('/dashboard/finance/transactions'),
+                ]);
+            }
+        }
+
         return back()->with('success', 'Transaction approved.');
     }
 
@@ -548,6 +567,26 @@ class FinanceController extends Controller
                         'breakdown' => $breakdown,
                     ]);
                 }
+            }
+        }
+
+        if (Schema::hasTable('dashboard_notifications')) {
+            $employeeId = (int) (data_get($transaction->metadata, 'employee_id') ?? 0);
+            if (! $employeeId && (int) ($transaction->user_id ?? 0) > 0) {
+                $employeeId = (int) (\App\Models\Employee::where('user_id', $transaction->user_id)->value('id') ?? 0);
+            }
+            if ($employeeId > 0) {
+                $reason = trim((string) $request->input('notes', ''));
+                \App\Models\DashboardNotification::create([
+                    'user_type' => \App\Models\Employee::class,
+                    'user_id' => $employeeId,
+                    'title' => 'تم رفض طلبك',
+                    'message' => ($transaction->type ? 'النوع: '.$transaction->type.' - ' : '').'السبب: '.($reason !== '' ? $reason : '—'),
+                    'type' => 'error',
+                    'is_read' => false,
+                    'dashboard_type' => 'finance',
+                    'action_url' => url('/dashboard/finance/transactions'),
+                ]);
             }
         }
 
@@ -717,7 +756,9 @@ class FinanceController extends Controller
      */
     public function expenses(Request $request)
     {
-        $expenses = FinancialTransaction::where('type', 'expense')
+        $expenses = FinancialTransaction::query()
+            ->where('type', 'expense')
+            ->with(['store:id,name'])
             ->when($request->category, function ($query, $category) {
                 $query->whereJsonContains('metadata->category', $category);
             })
@@ -726,7 +767,11 @@ class FinanceController extends Controller
             })
             ->when($request->employee_id, function ($query, $employeeId) {
                 if (Schema::hasColumn('financial_transactions', 'metadata')) {
-                    $query->whereJsonContains('metadata->employee_id', (int) $employeeId);
+                    $employeeId = (int) $employeeId;
+                    $query->where(function ($q) use ($employeeId) {
+                        $q->whereJsonContains('metadata->employee_id', $employeeId)
+                            ->orWhereJsonContains('metadata->employee_id', (string) $employeeId);
+                    });
                 }
             })
             ->when($request->date_from, function ($query, $date) {
@@ -748,7 +793,23 @@ class FinanceController extends Controller
         $stores = Store::select(['id', 'name'])->orderBy('name')->get();
         $employees = Employee::select(['id', 'first_name', 'last_name'])->orderBy('first_name')->orderBy('last_name')->get();
 
-        return view('dashboards.finance.expenses', compact('expenses', 'expenseStats', 'stores', 'employees'));
+        $employeeMap = collect();
+        if (Schema::hasColumn('financial_transactions', 'metadata')) {
+            $employeeIds = $expenses->getCollection()
+                ->map(fn ($tx) => (int) data_get($tx->metadata, 'employee_id'))
+                ->filter()
+                ->unique()
+                ->values();
+
+            if ($employeeIds->isNotEmpty()) {
+                $employeeMap = Employee::query()
+                    ->whereIn('id', $employeeIds)
+                    ->get(['id', 'first_name', 'last_name', 'email'])
+                    ->keyBy('id');
+            }
+        }
+
+        return view('dashboards.finance.expenses', compact('expenses', 'expenseStats', 'stores', 'employees', 'employeeMap'));
     }
 
     public function createExpense(Request $request)
@@ -1455,12 +1516,23 @@ class FinanceController extends Controller
     {
         $days = $this->getPeriodDays($period);
 
-        return Order::where('payment_status', 'paid')
+        $sumExpr = $this->getOrderSumExpression();
+
+        $row = Order::where('payment_status', 'paid')
             ->where('created_at', '>=', now()->subDays($days))
-            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as revenue')
+            ->selectRaw('DATE(created_at) as date, SUM('.$sumExpr.') as revenue')
             ->groupBy('date')
-            ->orderBy('revenue', 'desc')
+            ->orderByDesc('revenue')
             ->first();
+
+        if (! $row) {
+            return '-';
+        }
+
+        $date = (string) ($row->date ?? '-');
+        $rev = number_format((float) ($row->revenue ?? 0), 2);
+
+        return $date.' ($'.$rev.')';
     }
 
     /**

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice - {{ $order->order_number }}</title>
     <style>
-        body { font-family:  'El Messiri', sans-serif; margin: 0; padding: 24px; color: #111827; }
+        body { font-family: DejaVu Sans, sans-serif; margin: 0; padding: 24px; color: #111827; }
         .header { display:flex; justify-content:space-between; align-items:flex-start; gap: 16px; margin-bottom: 18px; }
         .brand { font-weight: 800; letter-spacing: 0.5px; color: #0f766e; font-size: 18px; }
         .muted { color:#6b7280; font-size: 12px; }
@@ -24,6 +24,9 @@
         .totals .row { font-size: 13px; }
         .totals .row strong { font-size: 14px; }
         .right { text-align:right; }
+        .bidi { unicode-bidi: isolate; }
+        .rtl { direction: rtl; text-align: right; unicode-bidi: isolate; }
+        .arabic { direction: rtl; text-align: right; unicode-bidi: isolate; }
         .footer { margin-top: 18px; padding-top: 12px; border-top:1px dashed #e5e7eb; font-size: 11px; color:#6b7280; }
     </style>
 </head>
@@ -35,6 +38,7 @@
         $paymentStatus = (string) ($order->payment_status ?? 'pending');
         $payMethod = (string) ($order->payment_method ?? '-');
         $customer = $order->user?->name ?? $order->recipient_name ?? 'Customer';
+        $currencySymbol = '$';
     @endphp
 
     <div class="header">
@@ -56,15 +60,15 @@
     <div class="grid">
         <div class="card">
             <h3>Customer</h3>
-            <div class="row"><span>Name</span><span>{{ $customer }}</span></div>
-            <div class="row"><span>Phone</span><span>{{ $order->phone ?? '-' }}</span></div>
-            <div class="row"><span>Email</span><span>{{ $order->user?->email ?? '-' }}</span></div>
+            <div class="row"><span>Name :</span><span class="bidi"><bdi class="arabic" dir="rtl" lang="ar">{{ $customer }}</bdi></span></div>
+            <div class="row"><span>Phone :</span><span class="bidi">{{ $order->phone ?? '-' }}</span></div>
+            <div class="row"><span>Email :</span><span class="bidi">{{ $order->user?->email ?? '-' }}</span></div>
         </div>
         <div class="card">
             <h3>Delivery</h3>
-            <div class="row"><span>Delivery type</span><span>{{ $order->delivery_method ?? '-' }}</span></div>
-            <div class="row"><span>Estimated delivery</span><span>{{ $order->estimated_delivery ? \Carbon\Carbon::parse($order->estimated_delivery)->format('Y-m-d') : '-' }}</span></div>
-            <div class="row"><span>Address</span><span>{{ $order->village ?? '-' }} {{ $order->address_note ? ' - '.$order->address_note : '' }}</span></div>
+            <div class="row"><span>Delivery type :</span><span class="bidi">{{ $order->delivery_method ?? '-' }}</span></div>
+            <div class="row"><span>Estimated delivery :</span><span class="bidi">{{ $order->estimated_delivery ? \Carbon\Carbon::parse($order->estimated_delivery)->format('Y-m-d') : '-' }}</span></div>
+            <div class="row"><span>Address :</span><span class="bidi"><bdi class="arabic" dir="rtl" lang="ar">{{ $order->village ?? '-' }}{{ $order->address_note ? ' - '.$order->address_note : '' }}</bdi></span></div>
         </div>
     </div>
 
@@ -84,22 +88,22 @@
                     $line = (float) ($item->total_price ?? $item->subtotal ?? ($unit * (int) ($item->quantity ?? 0)));
                 @endphp
                 <tr>
-                    <td>{{ $item->product->name ?? $item->product_name ?? ('Product #'.$item->product_id) }}</td>
+                    <td class="bidi"><bdi class="arabic" dir="rtl" lang="ar">{{ $item->product->name ?? $item->product_name ?? ('Product #'.$item->product_id) }}</bdi></td>
                     <td>{{ (int) ($item->quantity ?? 0) }}</td>
-                    <td class="right">${{ number_format($unit, 2) }}</td>
-                    <td class="right">${{ number_format($line, 2) }}</td>
+                    <td class="right">{{ number_format($unit, 2) }} {{ $currencySymbol }}</td>
+                    <td class="right">{{ number_format($line, 2) }} {{ $currencySymbol }}</td>
                 </tr>
             @endforeach
         </tbody>
     </table>
 
     <div class="totals">
-        <div class="row"><span>Subtotal</span><span>${{ number_format($subtotal, 2) }}</span></div>
-        <div class="row"><span>Delivery fee</span><span>${{ number_format($delivery, 2) }}</span></div>
-        <div class="row"><span>Payment method</span><span>{{ $payMethod === 'payroll' ? 'Payroll' : ucfirst($payMethod) }}</span></div>
+        <div class="row"><span>Subtotal :</span><span>{{ number_format($subtotal, 2) }} {{ $currencySymbol }}</span></div>
+        <div class="row"><span>Delivery fee :</span><span>{{ number_format($delivery, 2) }} {{ $currencySymbol }}</span></div>
+        <div class="row"><span>Payment method :</span><span class="bidi">{{ $payMethod === 'payroll' ? 'Payroll' : ucfirst($payMethod) }}</span></div>
         <div class="row" style="border-top:1px solid #e5e7eb; padding-top:10px; margin-top:10px;">
-            <span><strong>Grand total</strong></span>
-            <span><strong>${{ number_format($total, 2) }}</strong></span>
+            <span><strong>Grand total :</strong></span>
+            <span><strong>{{ number_format($total, 2) }} {{ $currencySymbol }}</strong></span>
         </div>
     </div>
 

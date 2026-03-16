@@ -48,7 +48,7 @@
         </a>
         <a href="{{ route('dashboard.cs.payrolls') }}" class="inline-flex items-center gap-2 bg-sky-600 text-white px-4 py-2 rounded-xl hover:bg-sky-700 transition">
             <i class="fas fa-file-invoice-dollar"></i>
-            <span>Payrolls</span>
+            <span>Invoices</span>
         </a>
         <a href="{{ route('dashboard.administrative-approvals.index') }}" class="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition">
             <i class="fas fa-clipboard-check"></i>

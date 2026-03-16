@@ -79,6 +79,8 @@
                 <tr class="text-gray-500">
                     <th class="text-right py-2">المعرف</th>
                     <th class="text-right py-2">الوصف</th>
+                    <th class="text-right py-2">المتجر</th>
+                    <th class="text-right py-2">الموظف</th>
                     <th class="text-right py-2">المبلغ</th>
                     <th class="text-right py-2">الحالة</th>
                     <th class="text-right py-2">تاريخ</th>
@@ -86,15 +88,26 @@
             </thead>
             <tbody>
                 @forelse($expenses as $e)
+                    @php
+                        $storeName = data_get($e->store, 'name');
+                        $employeeId = (int) data_get($e->metadata, 'employee_id');
+                        $emp = $employeeId ? ($employeeMap[$employeeId] ?? null) : null;
+                        $empName = $emp ? trim(($emp->first_name ?? '').' '.($emp->last_name ?? '')) : null;
+                        $empName = $empName ?: ($emp?->email ?? null);
+                    @endphp
                     <tr class="border-t border-gray-100">
                         <td class="py-3 text-gray-900 font-semibold">{{ $e->transaction_id }}</td>
                         <td class="py-3 text-gray-700">{{ $e->description }}</td>
+                        <td class="py-3 text-gray-700">
+                            {{ is_array($storeName) ? json_encode($storeName, JSON_UNESCAPED_UNICODE) : ($storeName ?: '-') }}
+                        </td>
+                        <td class="py-3 text-gray-700">{{ $empName ?: '-' }}</td>
                         <td class="py-3 text-gray-900 font-semibold">{{ number_format((float) ($e->amount ?? 0), 2) }} {{ $e->currency ?? 'USD' }}</td>
                         <td class="py-3 text-gray-700">{{ $e->status }}</td>
                         <td class="py-3 text-gray-500">{{ $e->created_at?->format('Y-m-d H:i') }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="py-10 text-center text-gray-500">لا توجد بيانات</td></tr>
+                    <tr><td colspan="7" class="py-10 text-center text-gray-500">لا توجد بيانات</td></tr>
                 @endforelse
             </tbody>
         </table>

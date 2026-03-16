@@ -195,11 +195,6 @@
     </div>
 
     <div id="userMenu" class="db4-menu" hidden>
-        <a href="{{ route('dashboard.locale.set', ['locale' => $dashboardLocale === 'ar' ? 'en' : 'ar']) }}">
-            <i class="fas fa-language w-5" aria-hidden="true"></i>
-            {{ $dashboardLocale === 'ar' ? 'English' : 'العربية' }}
-        </a>
-        <hr class="my-2" style="border-color: rgba(15, 23, 42, 0.10);">
         <form method="POST" action="{{ $isTraderSession ? route('trader.logout') : route('employee.logout') }}">
             @csrf
             <button type="submit">

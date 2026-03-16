@@ -48,8 +48,8 @@ body{font-family:'El Messiri',sans-serif;background:#f5f5f5;margin:0;padding:0}
 <p style="font-family:'El Messiri',sans-serif;color:#666;margin:0">
 <strong>{{ $notifications->total() }}</strong> إشعار
 </p>
-<button onclick="markAllAsRead()" class="mark-read-btn">
-<i class="fas fa-check-double"></i> تعليم الكل كمقروء
+<button onclick="markAllAsRead()" class="mark-read-btn" title="تعليم الكل كمقروء / تمت المشاهدة">
+<i class="fas fa-eye"></i> تمت المشاهدة (الكل)
 </button>
 </div>
 @foreach($notifications as $notification)
@@ -77,9 +77,9 @@ body{font-family:'El Messiri',sans-serif;background:#f5f5f5;margin:0;padding:0}
 </span>
 </div>
 @if(!$notification->is_read)
-<button class="mark-single-btn" onclick="markAsRead({{ $notification->id }})">
-<i class="fas fa-check"></i>
-<span>تعليم كمقروء</span>
+<button class="mark-single-btn" onclick="markAsRead({{ $notification->id }})" title="تمت المشاهدة">
+<i class="fas fa-eye"></i>
+<span>تمت المشاهدة</span>
 </button>
 @endif
 </div>

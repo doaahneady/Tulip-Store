@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\DashboardNotification;
+use App\Models\Notification;
 use App\Models\Product;
 use App\Models\Trader;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
@@ -26,6 +29,28 @@ class SupportApprovalsController extends Controller
         $trader->update(['status' => Trader::STATUS_APPROVED]);
         AuditLog::log('support_trader_approved', $trader);
 
+        if (Schema::hasTable('notifications') && $trader->user_id) {
+            Notification::create([
+                'user_id' => $trader->user_id,
+                'type' => 'support_trader_approved',
+                'message' => 'تمت الموافقة على حساب التاجر الخاص بك.',
+                'data' => ['trader_id' => $trader->id],
+            ]);
+        }
+
+        if (Schema::hasTable('dashboard_notifications') && $trader->user_id) {
+            DashboardNotification::create([
+                'user_type' => User::class,
+                'user_id' => $trader->user_id,
+                'title' => 'تمت الموافقة على حسابك',
+                'message' => 'يمكنك الآن استخدام لوحة التاجر.',
+                'type' => 'success',
+                'is_read' => false,
+                'dashboard_type' => 'cs',
+                'action_url' => url('/dashboard/vendor'),
+            ]);
+        }
+
         return response()->json(['success' => true]);
     }
 
@@ -37,6 +62,29 @@ class SupportApprovalsController extends Controller
 
         $trader->update(['status' => Trader::STATUS_REJECTED]);
         AuditLog::log('support_trader_rejected', $trader, null, $payload);
+
+        $reason = trim((string) ($payload['reason'] ?? ''));
+        if (Schema::hasTable('notifications') && $trader->user_id) {
+            Notification::create([
+                'user_id' => $trader->user_id,
+                'type' => 'support_trader_rejected',
+                'message' => 'تم رفض حساب التاجر الخاص بك.'.($reason !== '' ? ' السبب: '.$reason : ''),
+                'data' => ['trader_id' => $trader->id, 'reason' => $reason],
+            ]);
+        }
+
+        if (Schema::hasTable('dashboard_notifications') && $trader->user_id) {
+            DashboardNotification::create([
+                'user_type' => User::class,
+                'user_id' => $trader->user_id,
+                'title' => 'تم رفض حسابك',
+                'message' => $reason !== '' ? $reason : '—',
+                'type' => 'error',
+                'is_read' => false,
+                'dashboard_type' => 'cs',
+                'action_url' => url('/dashboard/vendor'),
+            ]);
+        }
 
         return response()->json(['success' => true]);
     }

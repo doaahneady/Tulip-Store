@@ -496,11 +496,13 @@ async function loadCategories() {
 
 async function loadPersonalizedProducts() {
     try {
-        const recommendations = await activityTracker.getRecommendations();
-        const personalizedProducts = recommendations.personalized_products || [];
         const container = document.getElementById('personalizedProducts');
         if (!container) return;
-        
+        // Keep server-rendered new cards (mart-style); do not replace with old card markup
+        if (container.querySelector('.product-card .product-body')) return;
+
+        const recommendations = await activityTracker.getRecommendations();
+        const personalizedProducts = recommendations.personalized_products || [];
         window.__productsById = window.__productsById || {};
 
         let products = personalizedProducts;
@@ -539,13 +541,16 @@ async function loadPersonalizedProducts() {
 
 async function loadTrendingProducts() {
     try {
+        const container = document.getElementById('trendingProducts');
+        if (!container) return;
+        // Keep server-rendered new cards (mart-style); do not replace with old card markup
+        if (container.querySelector('.product-card .product-body')) return;
+
         const response = await fetch(`${API_BASE}/products`, { headers: { 'Accept': 'application/json' } });
         if (!response.ok) throw new Error('Failed to load products');
         const data = await response.json();
         const productsRaw = Array.isArray(data) ? data : (data.data || []);
         const products = productsRaw.slice(0, 5);
-        const container = document.getElementById('trendingProducts');
-        if (!container) return;
 
         if (!products.length) {
             container.innerHTML = `
@@ -970,13 +975,13 @@ async function addToCart(productId, button) {
                 activityTracker.trackCartAdd(productId);
             }
             
-            // Reset button back to cart icon after 2 seconds
+            // Reset button back to cart icon after 2 seconds (new cards use "أضف")
             setTimeout(() => {
                 button.classList.remove('added');
                 button.style.background = '#ff6b35';
                 button.style.boxShadow = 'none';
                 button.style.transform = 'scale(1)';
-                button.innerHTML = '<i class="fas fa-shopping-cart"></i>';
+                button.innerHTML = button.classList.contains('add-cart-btn') ? '<i class="fas fa-plus"></i> أضف' : '<i class="fas fa-shopping-cart"></i>';
                 button.disabled = false;
             }, 2000);
         } else {
@@ -988,7 +993,7 @@ async function addToCart(productId, button) {
         button.style.background = '#e74c3c';
         
         setTimeout(() => {
-            button.innerHTML = '<i class="fas fa-shopping-cart"></i>';
+            button.innerHTML = button.classList.contains('add-cart-btn') ? '<i class="fas fa-plus"></i> أضف' : '<i class="fas fa-shopping-cart"></i>';
             button.style.background = '#ff6b35';
             button.disabled = false;
         }, 2000);

@@ -7,7 +7,7 @@
         @page { size: A4; margin: 15mm; }
         * { box-sizing: border-box; }
         body { 
-            font-family: 'El Messiri', sans-serif; 
+            font-family: DejaVu Sans, sans-serif; 
             font-size: 12px; 
             line-height: 1.5;
             color: #333;
@@ -84,12 +84,19 @@
             background-color: #f8f9fa;
         }
         .totals-table {
-            width: 300px;
+            width: 350px;
             margin-right: auto;
             margin-left: 0;
         }
         .totals-table td {
             padding: 8px 10px;
+        }
+        .totals-table tr td:first-child {
+            text-align: right;
+            padding-left: 20px;
+        }
+        .totals-table tr td:last-child {
+            text-align: left;
         }
         .total-row { 
             font-weight: bold; 
@@ -252,19 +259,19 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width:50%">المنتج</th>
-                    <th style="width:15%">الكمية</th>
-                    <th style="width:15%">السعر</th>
-                    <th style="width:20%">المجموع</th>
+                    <th style="width:50%; text-align: right;">المنتج</th>
+                    <th style="width:15%; text-align: center;">الكمية</th>
+                    <th style="width:15%; text-align: left;">السعر</th>
+                    <th style="width:20%; text-align: left;">المجموع</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($order->items as $item)
                 <tr>
-                    <td>{{ $item->product->name ?? $item->product_name }}</td>
-                    <td>{{ $item->quantity }}</td>
-                    <td>@money($item->price)</td>
-                    <td>@money($item->subtotal)</td>
+                    <td style="text-align: right;">{{ $item->product->name ?? $item->product_name }}</td>
+                    <td style="text-align: center;">{{ $item->quantity }}</td>
+                    <td style="text-align: left;">@money($item->price)</td>
+                    <td style="text-align: left;">@money($item->subtotal)</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -272,16 +279,16 @@
 
         <table class="totals-table">
             <tr>
-                <td><strong>المجموع الفرعي:</strong></td>
-                <td>@money($order->subtotal)</td>
+                <td style="text-align: right; width: 60%;"><strong>المجموع الفرعي:</strong></td>
+                <td style="text-align: left;">@money($order->subtotal)</td>
             </tr>
             <tr>
-                <td><strong>تكلفة التوصيل:</strong></td>
-                <td>@money($order->delivery_cost)</td>
+                <td style="text-align: right;"><strong>تكلفة التوصيل:</strong></td>
+                <td style="text-align: left;">@money($order->delivery_cost)</td>
             </tr>
             <tr class="total-row">
-                <td>المجموع الكلي:</td>
-                <td>@money($order->total)</td>
+                <td style="text-align: right; color: #fff;">المجموع الكلي:</td>
+                <td style="text-align: left; color: #fff;">@money($order->total)</td>
             </tr>
         </table>
 

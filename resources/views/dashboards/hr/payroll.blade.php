@@ -88,8 +88,13 @@
                         <td class="px-6 py-4 text-gray-900 font-medium">
                             {{ optional($employee->user)->name ?? trim(($employee->first_name ?? '').' '.($employee->last_name ?? '')) ?? ('Employee #'.$employee->id) }}
                         </td>
-                        <td class="px-6 py-4 text-gray-700">@if($employee->monthly_salary) @money($employee->monthly_salary) @else - @endif</td>
-                        <td class="px-6 py-4 text-gray-700">@if($employee->hourly_rate) @money($employee->hourly_rate) @else - @endif</td>
+                        @php
+                            $monthly = (float) ($employee->monthly_salary ?? 0);
+                            $salary = (float) ($employee->salary ?? 0);
+                            $hourly = (float) ($employee->hourly_rate ?? 0);
+                        @endphp
+                        <td class="px-6 py-4 text-gray-700">@if($monthly > 0) @money($monthly) @elseif($salary > 0) @money($salary) @else - @endif</td>
+                        <td class="px-6 py-4 text-gray-700">@if($hourly > 0) @money($hourly) @else - @endif</td>
                         <td class="px-6 py-4 text-gray-700">@if($rec?->net_pay) @money($rec->net_pay) @else - @endif</td>
                         <td class="px-6 py-4 text-gray-700">{{ $rec?->status ?? '-' }}</td>
                         <td class="px-6 py-4">

@@ -577,23 +577,25 @@ class CartController extends Controller
     }
 
     /**
-     * Get cart items for checkout
+     * Get cart items for checkout (includes store products, mart products, and custom gifts).
      */
     public function getItems()
     {
+        $items = [];
+
         if (Auth::check() && $this->canUseDatabaseCart()) {
             $this->mergeSessionCartIntoDatabaseCart();
             $dbCart = $this->getOrCreateDatabaseCart();
             $dbCart?->load(['items.product']);
 
-            $items = [];
             if ($dbCart) {
                 foreach ($dbCart->items as $item) {
                     if (! $item->product) {
                         continue;
                     }
-
                     $items[] = [
+                        'id' => $item->product->id,
+                        'type' => 'product',
                         'product' => [
                             'id' => $item->product->id,
                             'name' => $item->product->name,
@@ -606,16 +608,50 @@ class CartController extends Controller
                 }
             }
 
+            $customGifts = Session::get('custom_gifts', []);
+            foreach ($customGifts as $giftId => $gift) {
+                $items[] = [
+                    'id' => $giftId,
+                    'type' => 'custom_gift',
+                    'product' => [
+                        'id' => $giftId,
+                        'name' => $gift['name'] ?? 'هدية مخصصة',
+                        'image' => null,
+                        'price' => (float) ($gift['price'] ?? 0),
+                        'discount_price' => null,
+                    ],
+                    'quantity' => 1,
+                ];
+            }
+
+            $martProducts = Session::get('mart_products', []);
+            foreach ($martProducts as $productId => $product) {
+                $items[] = [
+                    'id' => $productId,
+                    'type' => 'mart',
+                    'product' => [
+                        'id' => $productId,
+                        'name' => $product['name'] ?? 'منتج',
+                        'image' => $product['image'] ?? null,
+                        'price' => (float) ($product['price'] ?? 0),
+                        'discount_price' => null,
+                        'unit' => $product['unit'] ?? 'قطعة',
+                        'emoji' => $product['emoji'] ?? null,
+                    ],
+                    'quantity' => (int) ($product['quantity'] ?? 0),
+                ];
+            }
+
             return response()->json($items);
         }
 
         $cart = Session::get('cart', []);
-        $cartItems = [];
-
         foreach ($cart as $productId => $quantity) {
             $product = Product::find($productId);
             if ($product) {
-                $cartItems[] = [
+                $items[] = [
+                    'id' => $product->id,
+                    'type' => 'product',
                     'product' => [
                         'id' => $product->id,
                         'name' => $product->name,
@@ -628,6 +664,38 @@ class CartController extends Controller
             }
         }
 
-        return response()->json($cartItems);
+        $martProducts = Session::get('mart_products', []);
+        foreach ($martProducts as $productId => $product) {
+            $items[] = [
+                'id' => $productId,
+                'type' => 'mart',
+                'product' => [
+                    'id' => $productId,
+                    'name' => $product['name'] ?? 'منتج',
+                    'image' => $product['image'] ?? null,
+                    'price' => (float) ($product['price'] ?? 0),
+                    'discount_price' => null,
+                ],
+                'quantity' => (int) ($product['quantity'] ?? 0),
+            ];
+        }
+
+        $customGifts = Session::get('custom_gifts', []);
+        foreach ($customGifts as $giftId => $gift) {
+            $items[] = [
+                'id' => $giftId,
+                'type' => 'custom_gift',
+                'product' => [
+                    'id' => $giftId,
+                    'name' => $gift['name'] ?? 'هدية مخصصة',
+                    'image' => null,
+                    'price' => (float) ($gift['price'] ?? 0),
+                    'discount_price' => null,
+                ],
+                'quantity' => 1,
+            ];
+        }
+
+        return response()->json($items);
     }
 }

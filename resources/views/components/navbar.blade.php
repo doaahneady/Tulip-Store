@@ -317,13 +317,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 searchResults.innerHTML = categories.map(cat => {
                     const icon = getCategoryIcon(cat.name, cat.slug || '');
+                    const slug = (cat.slug != null && cat.slug !== '') ? encodeURIComponent(cat.slug) : (cat.id ? encodeURIComponent(String(cat.id)) : '');
+                    if (!slug) return '';
+                    const href = window.location.pathname.startsWith('/mart')
+                        ? '/mart/products?category=' + slug
+                        : '/category/' + slug;
                     return `
-                        <div class="search-result-item" onclick="window.location.href='/category/' + encodeURIComponent(cat.slug)">
+                        <a href="${href}" class="search-result-item" style="text-decoration:none;color:inherit;">
                             <i class="fas ${icon} search-result-icon"></i>
                             <div class="search-result-info">
                                 <div class="search-result-name">${cat.name}</div>
                             </div>
-                        </div>
+                        </a>
                     `;
                 }).join('');
             })

@@ -42,6 +42,46 @@ Route::get('/locale/{locale}', function (string $locale) {
     return back();
 })->name('locale.set');
 
+Route::prefix('notifications')->name('notifications.')->group(function () {
+    Route::post('/read-all', function () {
+        $actor = auth('employee')->user() ?: auth('trader')->user();
+        if (! $actor) {
+            abort(403);
+        }
+
+        if (! \Illuminate\Support\Facades\Schema::hasTable('dashboard_notifications')) {
+            return back();
+        }
+
+        \App\Models\DashboardNotification::query()
+            ->where('user_type', get_class($actor))
+            ->where('user_id', $actor->id)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        return back();
+    })->name('readAll');
+
+    Route::post('/{id}/read', function (int $id) {
+        $actor = auth('employee')->user() ?: auth('trader')->user();
+        if (! $actor) {
+            abort(403);
+        }
+
+        if (! \Illuminate\Support\Facades\Schema::hasTable('dashboard_notifications')) {
+            return back();
+        }
+
+        \App\Models\DashboardNotification::query()
+            ->where('id', $id)
+            ->where('user_type', get_class($actor))
+            ->where('user_id', $actor->id)
+            ->update(['is_read' => true]);
+
+        return back();
+    })->name('read');
+});
+
 // General Employee Routes (Flow 12 - Attendance)
 Route::prefix('my-attendance')->name('my-attendance.')->middleware('auth:employee')->group(function () {
     Route::get('/', [\App\Http\Controllers\Dashboard\AttendanceController::class, 'index'])->name('index');
@@ -75,6 +115,7 @@ Route::prefix('cs')->name('cs.')->middleware('dashboard.role:cs')->group(functio
     Route::post('/orders/{order}/status', [SupportDashboardController::class, 'changeOrderStatus'])->name('orders.change-status');
 
     Route::get('/payrolls', [SupportDashboardController::class, 'payrolls'])->name('payrolls');
+    Route::get('/payrolls/{order}/invoice', [SupportDashboardController::class, 'downloadInvoice'])->name('payrolls.invoice');
 
     Route::get('/trader-products', [SupportDashboardController::class, 'traderProducts'])->name('trader-products');
     Route::post('/trader-products/{product}/approve', [SupportDashboardController::class, 'approveTraderProduct'])->name('trader-products.approve');

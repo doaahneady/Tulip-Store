@@ -31,16 +31,16 @@
                             <td class="py-3 text-gray-700">{{ optional($t->order)->order_number ?? '-' }}</td>
                             <td class="py-3 text-gray-500">{{ $t->created_at?->diffForHumans() }}</td>
                             <td class="py-3">
-                                <div class="space-y-2">
-                                    <form method="POST" action="{{ route('dashboard.finance.approvals.transactions.approve', $t->id) }}" class="flex items-center gap-2">
+                                <div class="grid grid-cols-2 gap-2 min-w-[220px]">
+                                    <form method="POST" action="{{ route('dashboard.finance.approvals.transactions.approve', $t->id) }}" class="flex flex-col gap-2">
                                         @csrf
-                                        <input name="notes" placeholder="ملاحظة" class="w-32 px-3 py-1.5 rounded-lg border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-200">
-                                        <button class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs hover:bg-emerald-700">موافقة</button>
+                                        <button type="submit" class="w-full px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs hover:bg-emerald-700">موافقة</button>
+                                        <input name="notes" placeholder="ملاحظة (اختياري)" class="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-200">
                                     </form>
-                                    <form method="POST" action="{{ route('dashboard.finance.approvals.transactions.reject', $t->id) }}" class="flex items-center gap-2">
+                                    <form method="POST" action="{{ route('dashboard.finance.approvals.transactions.reject', $t->id) }}" class="flex flex-col gap-2">
                                         @csrf
-                                        <input name="notes" placeholder="سبب الرفض" class="w-32 px-3 py-1.5 rounded-lg border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-200">
-                                        <button class="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs hover:bg-red-700">رفض</button>
+                                        <button type="submit" class="w-full px-3 py-2 rounded-lg bg-red-600 text-white text-xs hover:bg-red-700">رفض</button>
+                                        <input name="notes" placeholder="سبب الرفض" class="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-200">
                                     </form>
                                 </div>
                             </td>
@@ -80,16 +80,16 @@
                             <td class="py-3 text-gray-900 font-semibold">{{ number_format((float) ($p->amount ?? 0), 2) }}</td>
                             <td class="py-3 text-gray-500">{{ $p->created_at?->diffForHumans() }}</td>
                             <td class="py-3">
-                                <div class="space-y-2">
-                                    <form method="POST" action="{{ route('dashboard.finance.approvals.payouts.approve', $p->id) }}" class="flex items-center gap-2">
+                                <div class="grid grid-cols-2 gap-2 min-w-[220px]">
+                                    <form method="POST" action="{{ route('dashboard.finance.approvals.payouts.approve', $p->id) }}" class="flex flex-col gap-2">
                                         @csrf
-                                        <input name="notes" placeholder="ملاحظة" class="w-32 px-3 py-1.5 rounded-lg border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-200">
-                                        <button class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs hover:bg-emerald-700">موافقة</button>
+                                        <button type="submit" class="w-full px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs hover:bg-emerald-700">موافقة</button>
+                                        <input name="notes" placeholder="ملاحظة (اختياري)" class="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-200">
                                     </form>
-                                    <form method="POST" action="{{ route('dashboard.finance.approvals.payouts.reject', $p->id) }}" class="flex items-center gap-2">
+                                    <form method="POST" action="{{ route('dashboard.finance.approvals.payouts.reject', $p->id) }}" class="flex flex-col gap-2">
                                         @csrf
-                                        <input name="notes" placeholder="سبب الرفض" class="w-32 px-3 py-1.5 rounded-lg border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-200">
-                                        <button class="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs hover:bg-red-700">رفض</button>
+                                        <button type="submit" class="w-full px-3 py-2 rounded-lg bg-red-600 text-white text-xs hover:bg-red-700">رفض</button>
+                                        <input name="notes" placeholder="سبب الرفض" class="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-200">
                                     </form>
                                 </div>
                             </td>
