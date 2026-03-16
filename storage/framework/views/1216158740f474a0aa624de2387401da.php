@@ -719,17 +719,27 @@
 </section>
 
 <!-- MERCHANT SECTION - PHOTO ONLY BACKGROUND -->
-<section style="position:relative; height:230px; display:flex; align-items:center; justify-content:center;margin:2rem 1rem;  border-radius:16px; overflow:hidden;">
-    <div style="position:absolute; inset:0; background-image:url('/images/footer.jpg'); background-size:stretch
-    ; background-position:center;"></div>
+<section style="position:relative; height:230px; display:flex; align-items:center; justify-content:center; margin:2rem 1rem; border-radius:16px; overflow:hidden;">
+
+    <!-- Background -->
+    <div style="position:absolute; inset:0; background:#0D464C url('/images/footer.png') center/cover no-repeat;"></div>
+
+    <!-- Content -->
     <div style="position:relative; text-align:center; padding:2rem; max-width:650px;">
-        <h2 style="font-size:2rem; font-weight:700; color:#fff; margin:0 0 1rem 0; text-shadow:0 4px 15px rgba(0,0,0,0.6);"> كن تاجر معنا</h2>
-        <p style="font-size:1.1rem; color:#fff; text-shadow:0 3px 12px rgba(0,0,0,0.6); margin:0 0 1.5rem 0;"></p>
+        <h2 style="font-size:2rem; font-weight:700; color:#fff; margin:0 0 1rem 0; text-shadow:0 4px 15px rgba(0,0,0,0.6);">
+            كن تاجر معنا
+        </h2>
+
+        <p style="font-size:1.1rem; color:#fff; text-shadow:0 3px 12px rgba(0,0,0,0.6); margin:0 0 1.5rem 0;">
+            إبدأ بعرض منتجاتك لدينا لربح أكثر.. نظام الكتروني سهل الاستخدام.. متابعة للأرباح و المبيعات من خلال حسابك
+        </p>
+
         <a href="/trader/login" style="display:inline-flex; align-items:center; gap:0.6rem; background:#ff6b35; color:#fff; padding:0.7rem 1.9rem; border-radius:999px; text-decoration:none; font-size:1rem; font-weight:700; box-shadow:0 8px 20px rgba(0,0,0,0.25); transition:all 0.3s;">
             بوابة التجار
             <i class="fas fa-store"></i>
         </a>
     </div>
+
 </section>
 
 <!-- FOOTER -->

@@ -11,6 +11,186 @@
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Changa:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/store.css?v=999&fix=store&t=<?php echo e(time()); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Force main content styling */
+        .main-content {
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: 2rem !important;
+        }
+        
+        /* Product grid styling */
+        .products-grid {
+            display: grid !important;
+            grid-template-columns: repeat(5, 1fr) !important;
+            gap: 1.5rem !important;
+            margin-top: 2rem !important;
+        }
+
+        @media (max-width: 1400px) {
+            .products-grid { grid-template-columns: repeat(4, 1fr) !important; }
+        }
+
+        @media (max-width: 1024px) {
+            .products-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 1rem !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.5rem !important;
+            }
+        }
+        
+        /* Product card styling */
+        .product-card {
+            background: #fff !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+            border-radius: 15px !important;
+            overflow: hidden !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        .product-image-wrapper {
+            aspect-ratio: 1 / 1 !important;
+            width: 100% !important;
+            overflow: hidden !important;
+            background: #f5f5f5;
+        }
+
+        .product-img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px) !important;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        }
+
+        /* New card design (mart-style) for store page */
+        .store-section-cards .product-card {
+            border-radius: 24px;
+            border: 1px solid #e8e8e8;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: all 0.3s;
+            position: relative;
+            background: #fff;
+            cursor: pointer;
+        }
+        .store-section-cards .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+            border-color: #2a7080;
+        }
+        .store-section-cards .product-image,
+        .store-section-cards .product-image-wrapper {
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            height: auto;
+            background: linear-gradient(135deg, #eaf7f8, #f8f9fa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .store-section-cards .product-image img,
+        .store-section-cards .product-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .store-section-cards .product-body,
+        .store-section-cards .product-info {
+            padding: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            min-height: auto;
+        }
+        .store-section-cards .product-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.2rem;
+            font-family: 'El Messiri', sans-serif;
+        }
+        .store-section-cards .product-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.5rem;
+            border-top: 1px solid #e8e8e8;
+            margin-top: 0.5rem;
+        }
+        .store-section-cards .price-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+        .store-section-cards .price-current,
+        .store-section-cards .product-price {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #0f4f55;
+            font-family: 'El Messiri', sans-serif;
+        }
+        .store-section-cards .price-old,
+        .store-section-cards .product-old-price {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-decoration: line-through;
+        }
+        .store-section-cards .add-cart-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.8rem;
+            background: #0f4f55;
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'El Messiri', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(15,79,85,0.15);
+        }
+        .store-section-cards .add-cart-btn:hover:not(:disabled) {
+            background: #0d464c;
+            transform: scale(1.05);
+        }
+        .store-section-cards .product-favorite-btn {
+            position: absolute;
+            top: 0.6rem;
+            right: 0.6rem;
+            z-index: 2;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.95);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #cbd5e1;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 <body>
    

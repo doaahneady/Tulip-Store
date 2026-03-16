@@ -58,21 +58,21 @@
     <div class="bg-white rounded-2xl p-6 shadow-sm">
         <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-calendar-check text-indigo-500 ml-2"></i>ملخص حضور اليوم</h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="p-4 bg-green-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-green-600">{{ $presentTodayCount }}</p>
-                <p class="text-xs text-gray-500">حاضر</p>
+            <div class="p-4 bg-green-800 rounded-xl text-center border border-gray-600">
+                <p class="text-2xl font-bold text-white">{{ $presentTodayCount }}</p>
+                <p class="text-xs text-green-200">حاضر</p>
             </div>
-            <div class="p-4 bg-red-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-red-600">{{ $absentTodayCount }}</p>
-                <p class="text-xs text-gray-500">غائب</p>
+            <div class="p-4 bg-red-800 rounded-xl text-center border border-gray-600">
+                <p class="text-2xl font-bold text-white">{{ $absentTodayCount }}</p>
+                <p class="text-xs text-red-200">غائب</p>
             </div>
-            <div class="p-4 bg-yellow-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-yellow-600">{{ $lateTodayCount }}</p>
-                <p class="text-xs text-gray-500">متأخر</p>
+            <div class="p-4 bg-yellow-600 rounded-xl text-center border border-gray-600">
+                <p class="text-2xl font-bold text-white">{{ $lateTodayCount }}</p>
+                <p class="text-xs text-yellow-100">متأخر</p>
             </div>
-            <div class="p-4 bg-blue-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-blue-600">{{ $onLeaveTodayCount }}</p>
-                <p class="text-xs text-gray-500">إجازة</p>
+            <div class="p-4 bg-blue-800 rounded-xl text-center border border-gray-600">
+                <p class="text-2xl font-bold text-white">{{ $onLeaveTodayCount }}</p>
+                <p class="text-xs text-blue-200">إجازة</p>
             </div>
         </div>
     </div>

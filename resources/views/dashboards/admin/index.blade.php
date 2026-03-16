@@ -248,38 +248,38 @@
 <!-- Tables Row -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Recent Orders -->
-    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-        <div class="p-6 border-b border-gray-100">
-            <h3 class="text-lg font-bold text-gray-800">أحدث الطلبات</h3>
+    <div class="bg-gray-800 rounded-2xl shadow-sm overflow-hidden border border-gray-700">
+        <div class="p-6 border-b border-gray-700">
+            <h3 class="text-lg font-bold text-white">أحدث الطلبات</h3>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
-                <thead class="bg-gray-50">
+                <thead class="bg-gray-700">
                     <tr>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500">رقم الطلب</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500">العميل</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500">المبلغ</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500">الحالة</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-300">رقم الطلب</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-300">العميل</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-300">المبلغ</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-300">الحالة</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-gray-700">
                     @forelse($recentOrders as $order)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 text-sm font-medium text-gray-800">#{{ $order->id }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-600">{{ $order->user->name ?? 'غير معروف' }}</td>
-                        <td class="px-6 py-4 text-sm font-semibold text-gray-800">{{ number_format($order->total, 2) }} ل.س</td>
+                    <tr class="hover:bg-gray-700">
+                        <td class="px-6 py-4 text-sm font-medium text-white">#{{ $order->id }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-300">{{ $order->user->name ?? 'غير معروف' }}</td>
+                        <td class="px-6 py-4 text-sm font-semibold text-white">{{ number_format($order->total, 2) }} ل.س</td>
                         <td class="px-6 py-4">
                             @php
                                 $statusColors = ['pending' => 'yellow', 'confirmed' => 'blue', 'processing' => 'indigo', 'shipped' => 'purple', 'delivered' => 'green', 'cancelled' => 'red'];
                                 $statusNames = ['pending' => 'قيد الانتظار', 'confirmed' => 'مؤكد', 'processing' => 'قيد التجهيز', 'shipped' => 'تم الشحن', 'delivered' => 'تم التوصيل', 'cancelled' => 'ملغي'];
                             @endphp
-                            <span class="px-2 py-1 text-xs rounded-full bg-{{ $statusColors[$order->status] ?? 'gray' }}-100 text-{{ $statusColors[$order->status] ?? 'gray' }}-700">
+                            <span class="px-2 py-1 text-xs rounded-full bg-{{ $statusColors[$order->status] ?? 'gray' }}-200 text-{{ $statusColors[$order->status] ?? 'gray' }}-800">
                                 {{ $statusNames[$order->status] ?? $order->status }}
                             </span>
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">لا توجد طلبات</td></tr>
+                    <tr><td colspan="4" class="px-6 py-4 text-center text-gray-400">لا توجد طلبات</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -287,24 +287,24 @@
     </div>
     
     <!-- Top Products -->
-    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-        <div class="p-6 border-b border-gray-100">
-            <h3 class="text-lg font-bold text-gray-800">المنتجات الأكثر مبيعاً</h3>
+    <div class="bg-gray-800 rounded-2xl shadow-sm overflow-hidden border border-gray-700">
+        <div class="p-6 border-b border-gray-700">
+            <h3 class="text-lg font-bold text-white">المنتجات الأكثر مبيعاً</h3>
         </div>
         <div class="p-6 space-y-4">
             @forelse($topProducts as $index => $product)
             <div class="flex items-center gap-4">
-                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">
+                <div class="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center text-purple-800 font-bold text-sm">
                     {{ $index + 1 }}
                 </div>
                 <div class="flex-1">
-                    <p class="font-semibold text-gray-800">{{ $product->name }}</p>
-                    <p class="text-sm text-gray-500">{{ $product->order_items_count ?? 0 }} مبيعات</p>
+                    <p class="font-semibold text-white">{{ $product->name }}</p>
+                    <p class="text-sm text-gray-400">{{ $product->order_items_count ?? 0 }} مبيعات</p>
                 </div>
-                <p class="font-bold text-gray-800">{{ number_format($product->price, 2) }}ل.س</p>
+                <p class="font-bold text-white">{{ number_format($product->price, 2) }}ل.س</p>
             </div>
             @empty
-            <p class="text-center text-gray-500">لا توجد منتجات</p>
+            <p class="text-center text-gray-400">لا توجد منتجات</p>
             @endforelse
         </div>
     </div>

@@ -188,17 +188,17 @@
     <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100" role="region" aria-labelledby="growthHeading">
         <h3 id="growthHeading" class="text-base font-black text-gray-900 mb-3"><i class="fas fa-chart-line text-blue-600 ml-2" aria-hidden="true"></i>نمو النظام</h3>
         <div class="grid grid-cols-3 gap-3">
-            <div class="p-4 rounded-2xl text-center border border-blue-100 bg-gradient-to-b from-blue-50 to-white" aria-label="نمو المستخدمين">
-                <p class="text-2xl font-extrabold text-blue-700 leading-none"><span dir="ltr"><?php echo e(number_format($metrics['user_growth'] ?? 0, 1)); ?>%</span></p>
-                <p class="text-xs text-gray-600 mt-1">نمو المستخدمين</p>
+            <div class="p-4 rounded-2xl text-center border border-gray-600 bg-blue-800" aria-label="نمو المستخدمين">
+                <p class="text-2xl font-extrabold text-white leading-none"><span dir="ltr"><?php echo e(number_format($metrics['user_growth'] ?? 0, 1)); ?>%</span></p>
+                <p class="text-xs text-blue-200 mt-1">نمو المستخدمين</p>
             </div>
-            <div class="p-4 rounded-2xl text-center border border-emerald-100 bg-gradient-to-b from-emerald-50 to-white" aria-label="نمو الإيرادات">
-                <p class="text-2xl font-extrabold text-emerald-700 leading-none"><span dir="ltr"><?php echo e(number_format($metrics['revenue_growth'] ?? 0, 1)); ?>%</span></p>
-                <p class="text-xs text-gray-600 mt-1">نمو الإيرادات</p>
+            <div class="p-4 rounded-2xl text-center border border-gray-600 bg-emerald-800" aria-label="نمو الإيرادات">
+                <p class="text-2xl font-extrabold text-white leading-none"><span dir="ltr"><?php echo e(number_format($metrics['revenue_growth'] ?? 0, 1)); ?>%</span></p>
+                <p class="text-xs text-emerald-200 mt-1">نمو الإيرادات</p>
             </div>
-            <div class="p-4 rounded-2xl text-center border border-orange-100 bg-gradient-to-b from-orange-50 to-white" aria-label="نمو الطلبات">
-                <p class="text-2xl font-extrabold text-orange-700 leading-none"><span dir="ltr"><?php echo e(number_format($metrics['order_growth'] ?? 0, 1)); ?>%</span></p>
-                <p class="text-xs text-gray-600 mt-1">نمو الطلبات</p>
+            <div class="p-4 rounded-2xl text-center border border-gray-600 bg-orange-800" aria-label="نمو الطلبات">
+                <p class="text-2xl font-extrabold text-white leading-none"><span dir="ltr"><?php echo e(number_format($metrics['order_growth'] ?? 0, 1)); ?>%</span></p>
+                <p class="text-xs text-orange-200 mt-1">نمو الطلبات</p>
             </div>
         </div>
     </div>

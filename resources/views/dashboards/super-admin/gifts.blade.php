@@ -42,44 +42,44 @@
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+    <div class="bg-pink-800 rounded-2xl shadow-sm border border-gray-600 p-5">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-500 text-xs">الهدايا</p>
-                <h3 class="text-3xl font-bold text-gray-800 mt-1">{{ number_format($giftsTotal) }}</h3>
+                <p class="text-pink-100 text-xs">الهدايا</p>
+                <h3 class="text-3xl font-bold text-white mt-1">{{ number_format($giftsTotal) }}</h3>
             </div>
             <div class="w-12 h-12 bg-pink-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-gift text-pink-600 text-lg"></i>
             </div>
         </div>
     </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+    <div class="bg-emerald-800 rounded-2xl shadow-sm border border-gray-600 p-5">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-500 text-xs">نشطة</p>
-                <h3 class="text-3xl font-bold text-gray-800 mt-1">{{ number_format($giftsActive) }}</h3>
+                <p class="text-emerald-100 text-xs">نشطة</p>
+                <h3 class="text-3xl font-bold text-white mt-1">{{ number_format($giftsActive) }}</h3>
             </div>
             <div class="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-check text-emerald-600 text-lg"></i>
             </div>
         </div>
     </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+    <div class="bg-amber-700 rounded-2xl shadow-sm border border-gray-600 p-5">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-500 text-xs">مميزة</p>
-                <h3 class="text-3xl font-bold text-gray-800 mt-1">{{ number_format($giftsFeatured) }}</h3>
+                <p class="text-amber-100 text-xs">مميزة</p>
+                <h3 class="text-3xl font-bold text-white mt-1">{{ number_format($giftsFeatured) }}</h3>
             </div>
             <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-star text-amber-600 text-lg"></i>
             </div>
         </div>
     </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+    <div class="bg-indigo-800 rounded-2xl shadow-sm border border-gray-600 p-5">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-500 text-xs">خيارات التخصيص</p>
-                <h3 class="text-3xl font-bold text-gray-800 mt-1">{{ number_format((is_countable($boxes ?? null) ? count($boxes) : 0) + (is_countable($wrappings ?? null) ? count($wrappings) : 0) + (is_countable($ribbons ?? null) ? count($ribbons) : 0) + (is_countable($cards ?? null) ? count($cards) : 0) + (is_countable($fillers ?? null) ? count($fillers) : 0)) }}</h3>
+                <p class="text-indigo-100 text-xs">خيارات التخصيص</p>
+                <h3 class="text-3xl font-bold text-white mt-1">{{ number_format((is_countable($boxes ?? null) ? count($boxes) : 0) + (is_countable($wrappings ?? null) ? count($wrappings) : 0) + (is_countable($ribbons ?? null) ? count($ribbons) : 0) + (is_countable($cards ?? null) ? count($cards) : 0) + (is_countable($fillers ?? null) ? count($fillers) : 0)) }}</h3>
             </div>
             <div class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-sliders-h text-indigo-600 text-lg"></i>

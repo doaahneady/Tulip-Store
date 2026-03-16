@@ -31,44 +31,44 @@
 </div>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+    <div class="bg-amber-700 rounded-2xl shadow-sm border border-gray-600 p-4">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-500 text-xs">إجمالي الطلبات</p>
-                <h3 class="text-2xl font-black text-gray-800 mt-1">{{ number_format($metrics['total_orders'] ?? 0) }}</h3>
+                <p class="text-amber-100 text-xs">إجمالي الطلبات</p>
+                <h3 class="text-2xl font-black text-white mt-1">{{ number_format($metrics['total_orders'] ?? 0) }}</h3>
             </div>
             <div class="w-10 h-10 bg-amber-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-shopping-cart text-amber-600 text-base"></i>
             </div>
         </div>
     </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+    <div class="bg-indigo-800 rounded-2xl shadow-sm border border-gray-600 p-4">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-500 text-xs">طلبات هذا الشهر</p>
-                <h3 class="text-2xl font-black text-gray-800 mt-1">{{ number_format($metrics['monthly_orders'] ?? 0) }}</h3>
+                <p class="text-indigo-100 text-xs">طلبات هذا الشهر</p>
+                <h3 class="text-2xl font-black text-white mt-1">{{ number_format($metrics['monthly_orders'] ?? 0) }}</h3>
             </div>
             <div class="w-10 h-10 bg-indigo-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-calendar-alt text-indigo-600 text-base"></i>
             </div>
         </div>
     </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+    <div class="bg-blue-800 rounded-2xl shadow-sm border border-gray-600 p-4">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-500 text-xs">طلبات قيد المعالجة</p>
-                <h3 class="text-2xl font-black text-gray-800 mt-1">{{ number_format($metrics['pending_orders'] ?? 0) }}</h3>
+                <p class="text-blue-100 text-xs">طلبات قيد المعالجة</p>
+                <h3 class="text-2xl font-black text-white mt-1">{{ number_format($metrics['pending_orders'] ?? 0) }}</h3>
             </div>
             <div class="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-hourglass-half text-blue-600 text-base"></i>
             </div>
         </div>
     </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+    <div class="bg-emerald-800 rounded-2xl shadow-sm border border-gray-600 p-4">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-500 text-xs">طلبات مكتملة</p>
-                <h3 class="text-2xl font-black text-gray-800 mt-1">{{ number_format($metrics['completed_orders'] ?? 0) }}</h3>
+                <p class="text-emerald-100 text-xs">طلبات مكتملة</p>
+                <h3 class="text-2xl font-black text-white mt-1">{{ number_format($metrics['completed_orders'] ?? 0) }}</h3>
             </div>
             <div class="w-10 h-10 bg-emerald-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-check-circle text-emerald-600 text-base"></i>

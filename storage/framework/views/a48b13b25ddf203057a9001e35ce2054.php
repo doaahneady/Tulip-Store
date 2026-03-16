@@ -1,6 +1,5 @@
-@extends('dashboards.layouts.app')
-@section('content')
-@php($title = 'لوحة خدمة العملاء')
+<?php $__env->startSection('content'); ?>
+<?php($title = 'لوحة خدمة العملاء')
 @php($subtitle = 'إدارة التذاكر والردود والمرتجعات')
 @php($resolvedGrowth = '')
 @php($ticketsGrowth = '')
@@ -26,35 +25,35 @@
     if (is_array($avgFormatted)) {
         $avgFormatted = $avgFormatted['value'] ?? 'N/A';
     }
-@endphp
+?>
 
 <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
     <div class="flex flex-wrap items-center gap-2">
-        <a href="{{ route('dashboard.cs.orders') }}" class="inline-flex items-center gap-2 bg-green-700 text-white px-4 py-2 rounded-xl hover:bg-green-800 transition">
+        <a href="<?php echo e(route('dashboard.cs.orders')); ?>" class="inline-flex items-center gap-2 bg-green-700 text-white px-4 py-2 rounded-xl hover:bg-green-800 transition">
             <i class="fas fa-receipt"></i>
             <span>الطلبات</span>
         </a>
-        <a href="{{ route('dashboard.cs.tickets') }}" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition">
+        <a href="<?php echo e(route('dashboard.cs.tickets')); ?>" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition">
             <i class="fas fa-inbox"></i>
             <span>التذاكر</span>
         </a>
-        <a href="{{ route('dashboard.cs.tickets') }}?assigned_to={{ auth('employee')->id() }}" class="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition">
+        <a href="<?php echo e(route('dashboard.cs.tickets')); ?>?assigned_to=<?php echo e(auth('employee')->id()); ?>" class="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition">
             <i class="fas fa-user-check"></i>
             <span>تذاكري</span>
         </a>
-        <a href="{{ route('dashboard.cs.trader-products') }}" class="inline-flex items-center gap-2 bg-slate-700 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition">
+        <a href="<?php echo e(route('dashboard.cs.trader-products')); ?>" class="inline-flex items-center gap-2 bg-slate-700 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition">
             <i class="fas fa-clipboard-check"></i>
             <span>مراجعة المنتجات</span>
         </a>
-        <a href="{{ route('dashboard.cs.payrolls') }}" class="inline-flex items-center gap-2 bg-sky-600 text-white px-4 py-2 rounded-xl hover:bg-sky-700 transition">
+        <a href="<?php echo e(route('dashboard.cs.payrolls')); ?>" class="inline-flex items-center gap-2 bg-sky-600 text-white px-4 py-2 rounded-xl hover:bg-sky-700 transition">
             <i class="fas fa-file-invoice-dollar"></i>
             <span>Invoices</span>
         </a>
-        <a href="{{ route('dashboard.administrative-approvals.index') }}" class="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition">
+        <a href="<?php echo e(route('dashboard.administrative-approvals.index')); ?>" class="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition">
             <i class="fas fa-clipboard-check"></i>
             <span>الموافقات الإدارية</span>
         </a>
-        <a href="{{ route('dashboard.my-attendance.index') }}" class="inline-flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-xl hover:bg-teal-700 transition">
+        <a href="<?php echo e(route('dashboard.my-attendance.index')); ?>" class="inline-flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-xl hover:bg-teal-700 transition">
             <i class="fas fa-user-clock"></i>
             <span>حضوري</span>
         </a>
@@ -65,34 +64,34 @@
     <div class="stat-card bg-indigo-800 rounded-2xl p-4 shadow-sm border border-gray-600">
         <div class="flex items-start justify-between gap-3">
             <p class="text-indigo-100 text-xs font-semibold">التذاكر المفتوحة</p>
-            <h3 class="text-xl font-black text-white leading-tight">{{ number_format($kpi['open_tickets']['value'] ?? 0) }}</h3>
+            <h3 class="text-xl font-black text-white leading-tight"><?php echo e(number_format($kpi['open_tickets']['value'] ?? 0)); ?></h3>
         </div>
     </div>
     <div class="stat-card bg-blue-800 rounded-2xl p-4 shadow-sm border border-gray-600">
         <div class="flex items-start justify-between gap-3">
             <p class="text-blue-100 text-xs font-semibold">قيد المعالجة</p>
-            <h3 class="text-xl font-black text-white leading-tight">{{ number_format($kpi['pending_tickets']['value'] ?? 0) }}</h3>
+            <h3 class="text-xl font-black text-white leading-tight"><?php echo e(number_format($kpi['pending_tickets']['value'] ?? 0)); ?></h3>
         </div>
     </div>
     <div class="stat-card bg-green-800 rounded-2xl p-4 shadow-sm border border-gray-600">
         <div class="flex items-start justify-between gap-3">
             <p class="text-green-100 text-xs font-semibold">تم الحل اليوم</p>
-            <h3 class="text-xl font-black text-white leading-tight">{{ number_format($kpi['resolved_today']['value'] ?? 0) }}</h3>
+            <h3 class="text-xl font-black text-white leading-tight"><?php echo e(number_format($kpi['resolved_today']['value'] ?? 0)); ?></h3>
         </div>
-        <p class="text-xs text-green-200 mt-1">{{ $resolvedGrowth ?? '' }}</p>
+        <p class="text-xs text-green-200 mt-1"><?php echo e($resolvedGrowth ?? ''); ?></p>
     </div>
     <div class="stat-card bg-purple-800 rounded-2xl p-4 shadow-sm border border-gray-600">
         <div class="flex items-start justify-between gap-3">
             <p class="text-purple-100 text-xs font-semibold">متوسط وقت الاستجابة</p>
-            <h3 class="text-xl font-black text-white leading-tight">{{ $avgFormatted ?? 'N/A' }}</h3>
+            <h3 class="text-xl font-black text-white leading-tight"><?php echo e($avgFormatted ?? 'N/A'); ?></h3>
         </div>
     </div>
     <div class="stat-card bg-emerald-800 rounded-2xl p-4 shadow-sm border border-gray-600">
         <div class="flex items-start justify-between gap-3">
             <p class="text-emerald-100 text-xs font-semibold">تذاكر هذا الشهر</p>
-            <h3 class="text-xl font-black text-white leading-tight">{{ number_format($kpi['tickets_this_month']['value'] ?? 0) }}</h3>
+            <h3 class="text-xl font-black text-white leading-tight"><?php echo e(number_format($kpi['tickets_this_month']['value'] ?? 0)); ?></h3>
         </div>
-        <p class="text-xs text-emerald-200 mt-1">{{ $ticketsGrowth ?? '' }}</p>
+        <p class="text-xs text-emerald-200 mt-1"><?php echo e($ticketsGrowth ?? ''); ?></p>
     </div>
 </div>
 
@@ -100,8 +99,8 @@
     <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 xl:col-span-6">
         <h3 class="text-base font-black text-gray-900 mb-3"><i class="fas fa-bolt text-red-600 ml-2"></i>تذاكر عاجلة</h3>
         <div class="space-y-2 max-h-[340px] overflow-y-auto">
-            @forelse($urgentTickets as $t)
-                @php
+            <?php $__empty_1 = true; $__currentLoopData = $urgentTickets; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <?php
                     $ticketSubject = $t->subject ?? '';
                     if (is_array($ticketSubject)) {
                         $ticketSubject = $ticketSubject['ar'] ?? ($ticketSubject['en'] ?? '');
@@ -111,20 +110,20 @@
                         $userName = $userName['ar'] ?? ($userName['en'] ?? '');
                     }
                     $userLabel = $userName ?: ('User #'.$t->user_id);
-                @endphp
+                ?>
                 <div class="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl">
                     <div class="min-w-0">
-                        <p class="text-sm font-semibold text-gray-900 truncate">{{ $t->ticket_number }} — {{ $ticketSubject }}</p>
-                        <p class="text-xs text-gray-600 truncate">{{ $userLabel }} • {{ $t->created_at?->diffForHumans() }}</p>
+                        <p class="text-sm font-semibold text-gray-900 truncate"><?php echo e($t->ticket_number); ?> — <?php echo e($ticketSubject); ?></p>
+                        <p class="text-xs text-gray-600 truncate"><?php echo e($userLabel); ?> • <?php echo e($t->created_at?->diffForHumans()); ?></p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="px-2 py-1 rounded text-xs bg-red-100 text-red-700">{{ $t->priority }}</span>
-                        <a href="{{ route('dashboard.cs.tickets.show', $t->id) }}" class="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-xs text-gray-700 hover:bg-gray-100">فتح</a>
+                        <span class="px-2 py-1 rounded text-xs bg-red-100 text-red-700"><?php echo e($t->priority); ?></span>
+                        <a href="<?php echo e(route('dashboard.cs.tickets.show', $t->id)); ?>" class="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-xs text-gray-700 hover:bg-gray-100">فتح</a>
                     </div>
                 </div>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <p class="text-center text-gray-500 py-6">لا توجد تذاكر عاجلة</p>
-            @endforelse
+            <?php endif; ?>
         </div>
     </div>
 
@@ -139,18 +138,18 @@
     </div>
 </div>
 
-@php
+<?php
     $priorityLabels = array_keys($priority ?? []);
     $priorityValues = array_values($priority ?? []);
     $statusLabels = array_keys($statusDist ?? []);
     $statusValues = array_values($statusDist ?? []);
-@endphp
+?>
 
 <script>
-    const priorityLabels = @json($priorityLabels);
-    const priorityValues = @json($priorityValues);
-    const statusLabels = @json($statusLabels);
-    const statusValues = @json($statusValues);
+    const priorityLabels = <?php echo json_encode($priorityLabels, 15, 512) ?>;
+    const priorityValues = <?php echo json_encode($priorityValues, 15, 512) ?>;
+    const statusLabels = <?php echo json_encode($statusLabels, 15, 512) ?>;
+    const statusValues = <?php echo json_encode($statusValues, 15, 512) ?>;
 
     const pctx = document.getElementById('priorityChart');
     if (pctx) {
@@ -189,4 +188,6 @@
         });
     }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('dashboards.layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Doaa\StudioProjects\Tulip-Store\resources\views/dashboards/cs/index.blade.php ENDPATH**/ ?>

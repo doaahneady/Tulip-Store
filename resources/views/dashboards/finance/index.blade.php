@@ -207,28 +207,28 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
-                <div class="p-4 border-b border-gray-200 flex items-center justify-between">
-                    <h3 class="text-sm font-black text-gray-900">تكلفة الرواتب حسب الموظف</h3>
-                    <span class="text-xs text-gray-500">الشهر الحالي</span>
+            <div class="bg-gray-800 rounded-2xl shadow-sm border border-gray-700">
+                <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+                    <h3 class="text-sm font-black text-white">تكلفة الرواتب حسب الموظف</h3>
+                    <span class="text-xs text-gray-400">الشهر الحالي</span>
                 </div>
                 <div class="p-4">
             <div class="overflow-auto max-h-[340px]">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="min-w-full divide-y divide-gray-700">
+                    <thead class="bg-gray-700">
                         <tr>
-                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">الموظف</th>
-                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">الصافي</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-300">الموظف</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-300">الصافي</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
+                    <tbody class="divide-y divide-gray-700">
                         @forelse(($metrics['money_by_employee'] ?? []) as $employee)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2.5 text-sm text-gray-800">{{ ($employee->first_name ?? '') . ' ' . ($employee->last_name ?? '') }}</td>
-                                <td class="px-4 py-2.5 text-sm font-semibold text-gray-900">@money($employee->total_pay ?? 0)</td>
+                            <tr class="hover:bg-gray-700">
+                                <td class="px-4 py-2.5 text-sm text-white">{{ ($employee->first_name ?? '') . ' ' . ($employee->last_name ?? '') }}</td>
+                                <td class="px-4 py-2.5 text-sm font-semibold text-white">@money($employee->total_pay ?? 0)</td>
                             </tr>
                         @empty
-                            <tr><td colspan="2" class="px-4 py-6 text-center text-gray-500">لا توجد بيانات</td></tr>
+                            <tr><td colspan="2" class="px-4 py-6 text-center text-gray-400">لا توجد بيانات</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -242,30 +242,30 @@
 
 <x-dashboard.collapsible title="طلبات قيد الانتظار" icon="fas fa-hourglass-half" subtitle="الموافقات والتحويلات">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div class="p-4 border-b border-gray-200 flex items-center justify-between">
-            <h3 class="text-sm font-black text-gray-900">طلبات الاسترداد / الموافقات</h3>
-            <a href="{{ route('dashboard.finance.approvals') }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">عرض الكل</a>
+    <div class="bg-gray-800 rounded-2xl shadow-sm border border-gray-700">
+        <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+            <h3 class="text-sm font-black text-white">طلبات الاسترداد / الموافقات</h3>
+            <a href="{{ route('dashboard.finance.approvals') }}" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300">عرض الكل</a>
         </div>
         <div class="p-4">
             <div class="overflow-auto max-h-[360px]">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="min-w-full divide-y divide-gray-700">
+                    <thead class="bg-gray-700">
                         <tr>
-                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">النوع</th>
-                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">المبلغ</th>
-                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">الطلب</th>
-                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">تاريخ</th>
-                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">إجراء</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-300">النوع</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-300">المبلغ</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-300">الطلب</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-300">تاريخ</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-300">إجراء</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
+                    <tbody class="divide-y divide-gray-700">
                         @forelse(($metrics['pending_approvals_list'] ?? []) as $t)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2.5 text-sm text-gray-800">{{ $t->type }}</td>
-                                <td class="px-4 py-2.5 text-sm font-semibold text-gray-900">@money($t->amount ?? 0)</td>
-                                <td class="px-4 py-2.5 text-sm text-gray-700">{{ optional($t->order)->order_number ?? '-' }}</td>
-                                <td class="px-4 py-2.5 text-sm text-gray-500">{{ $t->created_at?->diffForHumans() }}</td>
+                            <tr class="hover:bg-gray-700">
+                                <td class="px-4 py-2.5 text-sm text-white">{{ $t->type }}</td>
+                                <td class="px-4 py-2.5 text-sm font-semibold text-white">@money($t->amount ?? 0)</td>
+                                <td class="px-4 py-2.5 text-sm text-gray-300">{{ optional($t->order)->order_number ?? '-' }}</td>
+                                <td class="px-4 py-2.5 text-sm text-gray-400">{{ $t->created_at?->diffForHumans() }}</td>
                                 <td class="px-4 py-2.5">
                                     <div class="flex items-center gap-2">
                                         <form method="POST" action="{{ route('dashboard.finance.approvals.transactions.approve', $t->id) }}">
@@ -280,7 +280,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="px-4 py-6 text-center text-gray-500">لا توجد طلبات</td></tr>
+                            <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400">لا توجد طلبات</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -288,28 +288,28 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div class="p-4 border-b border-gray-200 flex items-center justify-between">
-            <h3 class="text-sm font-black text-gray-900">طلبات تحويل المتاجر</h3>
-            <a href="{{ route('dashboard.finance.payouts') }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">عرض الكل</a>
+    <div class="bg-gray-800 rounded-2xl shadow-sm border border-gray-700">
+        <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+            <h3 class="text-sm font-black text-white">طلبات تحويل المتاجر</h3>
+            <a href="{{ route('dashboard.finance.payouts') }}" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300">عرض الكل</a>
         </div>
         <div class="p-4">
             <div class="overflow-auto max-h-[360px]">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="min-w-full divide-y divide-gray-700">
+                    <thead class="bg-gray-700">
                         <tr>
-                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">المتجر</th>
-                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">المبلغ</th>
-                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">تاريخ</th>
-                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-600">إجراء</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-300">المتجر</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-300">المبلغ</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-300">تاريخ</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-300">إجراء</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
+                    <tbody class="divide-y divide-gray-700">
                         @forelse(($metrics['pending_payouts_list'] ?? []) as $p)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2.5 text-sm text-gray-800">{{ optional($p->store)->name ?? ('Store #'.$p->store_id) }}</td>
-                                <td class="px-4 py-2.5 text-sm font-semibold text-gray-900">@money($p->amount ?? 0)</td>
-                                <td class="px-4 py-2.5 text-sm text-gray-500">{{ $p->created_at?->diffForHumans() }}</td>
+                            <tr class="hover:bg-gray-700">
+                                <td class="px-4 py-2.5 text-sm text-white">{{ optional($p->store)->name ?? ('Store #'.$p->store_id) }}</td>
+                                <td class="px-4 py-2.5 text-sm font-semibold text-white">@money($p->amount ?? 0)</td>
+                                <td class="px-4 py-2.5 text-sm text-gray-400">{{ $p->created_at?->diffForHumans() }}</td>
                                 <td class="px-4 py-2.5">
                                     <div class="flex items-center gap-2">
                                         <form method="POST" action="{{ route('dashboard.finance.approvals.payouts.approve', $p->id) }}">
@@ -324,7 +324,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="4" class="px-4 py-6 text-center text-gray-500">لا توجد طلبات</td></tr>
+                            <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400">لا توجد طلبات</td></tr>
                         @endforelse
                     </tbody>
                 </table>

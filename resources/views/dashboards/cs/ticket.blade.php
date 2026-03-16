@@ -42,18 +42,18 @@
             <h4 class="text-sm font-semibold text-gray-900 mb-3">المحادثة</h4>
             <div class="space-y-3">
                 @forelse($ticket->replies->sortBy('created_at') as $reply)
-                    <div class="p-4 rounded-2xl border {{ $reply->is_internal ? 'border-amber-200 bg-amber-50' : 'border-gray-100 bg-white' }}">
+                    <div class="p-4 rounded-2xl border {{ $reply->is_internal ? 'border-gray-600 bg-amber-700 text-white' : 'border-gray-100 bg-white' }}">
                         <div class="flex items-center justify-between gap-3 mb-2">
-                            <div class="text-sm font-semibold text-gray-900">
+                            <div class="text-sm font-semibold {{ $reply->is_internal ? 'text-white' : 'text-gray-900' }}">
                                 {{ $reply->author_name ?? 'Unknown' }}
-                                <span class="text-xs text-gray-500">({{ $reply->author_type_display ?? '' }})</span>
+                                <span class="text-xs {{ $reply->is_internal ? 'text-amber-100' : 'text-gray-500' }}">({{ $reply->author_type_display ?? '' }})</span>
                                 @if($reply->is_internal)
                                     <span class="text-xs px-2 py-0.5 rounded bg-amber-200 text-amber-900">ملاحظة داخلية</span>
                                 @endif
                             </div>
-                            <div class="text-xs text-gray-500">{{ $reply->created_at?->diffForHumans() }}</div>
+                            <div class="text-xs {{ $reply->is_internal ? 'text-amber-200' : 'text-gray-500' }}">{{ $reply->created_at?->diffForHumans() }}</div>
                         </div>
-                        <div class="text-sm text-gray-700 whitespace-pre-line">{{ $reply->message }}</div>
+                        <div class="text-sm {{ $reply->is_internal ? 'text-white' : 'text-gray-700' }} whitespace-pre-line">{{ $reply->message }}</div>
                     </div>
                 @empty
                     <p class="text-sm text-gray-500">لا توجد ردود بعد</p>

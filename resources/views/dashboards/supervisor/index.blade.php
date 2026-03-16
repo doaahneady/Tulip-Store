@@ -77,21 +77,21 @@
 
     <x-dashboard.collapsible title="توصيلات اليوم" icon="fas fa-truck-fast" subtitle="نظرة عامة سريعة" :open="true">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div class="p-3 border rounded-xl bg-white">
-                <div class="text-xs text-gray-500 font-semibold">إجمالي</div>
-                <div class="mt-1 text-2xl font-black text-gray-900">{{ number_format($metrics['deliveries_today_total'] ?? 0) }}</div>
+            <div class="p-3 border border-gray-600 rounded-xl bg-gray-800">
+                <div class="text-xs text-gray-300 font-semibold">إجمالي</div>
+                <div class="mt-1 text-2xl font-black text-white">{{ number_format($metrics['deliveries_today_total'] ?? 0) }}</div>
             </div>
-            <div class="p-3 border rounded-xl bg-white">
-                <div class="text-xs text-gray-500 font-semibold">قيد التنفيذ</div>
-                <div class="mt-1 text-2xl font-black text-blue-600">{{ number_format($metrics['in_progress_today'] ?? 0) }}</div>
+            <div class="p-3 border border-gray-600 rounded-xl bg-blue-800">
+                <div class="text-xs text-blue-100 font-semibold">قيد التنفيذ</div>
+                <div class="mt-1 text-2xl font-black text-white">{{ number_format($metrics['in_progress_today'] ?? 0) }}</div>
             </div>
-            <div class="p-3 border rounded-xl bg-white">
-                <div class="text-xs text-gray-500 font-semibold">مكتمل</div>
-                <div class="mt-1 text-2xl font-black text-green-600">{{ number_format($metrics['completed_today'] ?? 0) }}</div>
+            <div class="p-3 border border-gray-600 rounded-xl bg-green-800">
+                <div class="text-xs text-green-100 font-semibold">مكتمل</div>
+                <div class="mt-1 text-2xl font-black text-white">{{ number_format($metrics['completed_today'] ?? 0) }}</div>
             </div>
-            <div class="p-3 border rounded-xl bg-white">
-                <div class="text-xs text-gray-500 font-semibold">قيد التعيين</div>
-                <div class="mt-1 text-2xl font-black text-orange-600">{{ number_format($metrics['pending_today'] ?? 0) }}</div>
+            <div class="p-3 border border-gray-600 rounded-xl bg-orange-700">
+                <div class="text-xs text-orange-100 font-semibold">قيد التعيين</div>
+                <div class="mt-1 text-2xl font-black text-white">{{ number_format($metrics['pending_today'] ?? 0) }}</div>
             </div>
         </div>
     </x-dashboard.collapsible>

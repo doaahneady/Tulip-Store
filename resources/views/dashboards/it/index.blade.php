@@ -58,21 +58,22 @@
     <div class="bg-white rounded-2xl p-6 shadow-sm">
         <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-chart-line text-blue-500 ml-2"></i>نشاط اليوم</h3>
         <div class="space-y-4">
-            <div class="flex items-center justify-between p-3 bg-blue-50 rounded-xl">
-                <span class="text-gray-600">تسجيلات جديدة</span>
-                <span class="font-bold text-blue-600">{{ $userActivity['new_registrations'] }}</span>
+            <div class="flex items-center justify-between p-3 bg-blue-800 rounded-xl border border-gray-600">
+                <span class="text-blue-100">تسجيلات جديدة</span>
+
+                <span class="font-bold text-white">{{ $userActivity['new_registrations'] }}</span>
             </div>
-            <div class="flex items-center justify-between p-3 bg-green-50 rounded-xl">
-                <span class="text-gray-600">تسجيلات هذا الأسبوع</span>
-                <span class="font-bold text-green-600">{{ $userActivity['new_this_week'] }}</span>
+            <div class="flex items-center justify-between p-3 bg-green-800 rounded-xl border border-gray-600">
+                <span class="text-green-100">تسجيلات هذا الأسبوع</span>
+                <span class="font-bold text-white">{{ $userActivity['new_this_week'] }}</span>
             </div>
-            <div class="flex items-center justify-between p-3 bg-purple-50 rounded-xl">
-                <span class="text-gray-600">موظفين نشطين اليوم</span>
-                <span class="font-bold text-purple-600">{{ $userActivity['active_employees'] }}</span>
+            <div class="flex items-center justify-between p-3 bg-purple-800 rounded-xl border border-gray-600">
+                <span class="text-purple-100">موظفين نشطين اليوم</span>
+                <span class="font-bold text-white">{{ $userActivity['active_employees'] }}</span>
             </div>
-            <div class="flex items-center justify-between p-3 bg-orange-50 rounded-xl">
-                <span class="text-gray-600">طلبات اليوم</span>
-                <span class="font-bold text-orange-600">{{ $userActivity['orders_today'] }}</span>
+            <div class="flex items-center justify-between p-3 bg-orange-700 rounded-xl border border-gray-600">
+                <span class="text-orange-100">طلبات اليوم</span>
+                <span class="font-bold text-white">{{ $userActivity['orders_today'] }}</span>
             </div>
         </div>
     </div>
@@ -103,17 +104,17 @@
         <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-cloud-upload-alt text-indigo-500 ml-2"></i>النسخ الاحتياطية</h3>
         <div class="space-y-4">
             <div class="grid grid-cols-3 gap-3 text-center">
-                <div class="p-3 bg-blue-50 rounded-xl">
-                    <p class="text-2xl font-bold text-blue-600">{{ $backupStats['total'] }}</p>
-                    <p class="text-xs text-gray-500">الإجمالي</p>
+                <div class="p-3 bg-blue-800 rounded-xl border border-gray-600">
+                    <p class="text-2xl font-bold text-white">{{ $backupStats['total'] }}</p>
+                    <p class="text-xs text-blue-200">الإجمالي</p>
                 </div>
-                <div class="p-3 bg-green-50 rounded-xl">
-                    <p class="text-2xl font-bold text-green-600">{{ $backupStats['completed'] }}</p>
-                    <p class="text-xs text-gray-500">مكتمل</p>
+                <div class="p-3 bg-green-800 rounded-xl border border-gray-600">
+                    <p class="text-2xl font-bold text-white">{{ $backupStats['completed'] }}</p>
+                    <p class="text-xs text-green-200">مكتمل</p>
                 </div>
-                <div class="p-3 bg-red-50 rounded-xl">
-                    <p class="text-2xl font-bold text-red-600">{{ $backupStats['failed'] }}</p>
-                    <p class="text-xs text-gray-500">فشل</p>
+                <div class="p-3 bg-red-800 rounded-xl border border-gray-600">
+                    <p class="text-2xl font-bold text-white">{{ $backupStats['failed'] }}</p>
+                    <p class="text-xs text-red-200">فشل</p>
                 </div>
             </div>
             @if($backupStats['last_backup'])
@@ -146,18 +147,18 @@
     <div class="bg-white rounded-2xl p-6 shadow-sm">
         <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-tachometer-alt text-orange-500 ml-2"></i>أداء واجهة API</h3>
         <div class="grid grid-cols-3 gap-3">
-            <div class="p-3 bg-purple-50 rounded-xl text-center">
-                <p class="text-xl font-bold text-purple-600">{{ number_format($apiStats['avg_response_time'] ?? 0, 0) }}ms</p>
-                <p class="text-xs text-gray-500">متوسط الاستجابة</p>
+            <div class="p-3 bg-purple-800 rounded-xl text-center border border-gray-600">
+                <p class="text-xl font-bold text-white">{{ number_format($apiStats['avg_response_time'] ?? 0, 0) }}ms</p>
+                <p class="text-xs text-purple-200">متوسط الاستجابة</p>
             </div>
-            <div class="p-3 bg-green-50 rounded-xl text-center">
+            <div class="p-3 bg-green-800 rounded-xl text-center border border-gray-600">
                 @php $success = isset($metrics['error_rate_24h']) ? max(0, 100 - $metrics['error_rate_24h']) : null; @endphp
-                <p class="text-xl font-bold text-green-600">{{ $success !== null ? (number_format($success, 1).'%') : 'N/A' }}</p>
-                <p class="text-xs text-gray-500">نسبة النجاح</p>
+                <p class="text-xl font-bold text-white">{{ $success !== null ? (number_format($success, 1).'%') : 'N/A' }}</p>
+                <p class="text-xs text-green-200">نسبة النجاح</p>
             </div>
-            <div class="p-3 bg-red-50 rounded-xl text-center">
-                <p class="text-xl font-bold text-red-600">{{ $metrics['slow_queries_today'] ?? 0 }}</p>
-                <p class="text-xs text-gray-500">استعلامات بطيئة اليوم</p>
+            <div class="p-3 bg-red-800 rounded-xl text-center border border-gray-600">
+                <p class="text-xl font-bold text-white">{{ $metrics['slow_queries_today'] ?? 0 }}</p>
+                <p class="text-xs text-red-200">استعلامات بطيئة اليوم</p>
             </div>
         </div>
     </div>
@@ -183,17 +184,17 @@
     <div class="bg-white rounded-2xl p-6 shadow-sm">
         <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-code-branch text-indigo-500 ml-2"></i>النشر والإصدارات</h3>
         <div class="grid grid-cols-3 gap-3">
-            <div class="p-3 bg-blue-50 rounded-xl text-center">
-                <p class="text-xl font-bold text-blue-600">{{ $metrics['deployments_this_month'] ?? 0 }}</p>
-                <p class="text-xs text-gray-500">نشـر هذا الشهر</p>
+            <div class="p-3 bg-blue-800 rounded-xl text-center border border-gray-600">
+                <p class="text-xl font-bold text-white">{{ $metrics['deployments_this_month'] ?? 0 }}</p>
+                <p class="text-xs text-blue-200">نشـر هذا الشهر</p>
             </div>
-            <div class="p-3 bg-green-50 rounded-xl text-center">
-                <p class="text-xl font-bold text-green-600">{{ isset($metrics['deployment_success_rate']) ? (number_format($metrics['deployment_success_rate'],1).'%') : 'N/A' }}</p>
-                <p class="text-xs text-gray-500">معدل النجاح</p>
+            <div class="p-3 bg-green-800 rounded-xl text-center border border-gray-600">
+                <p class="text-xl font-bold text-white">{{ isset($metrics['deployment_success_rate']) ? (number_format($metrics['deployment_success_rate'],1).'%') : 'N/A' }}</p>
+                <p class="text-xs text-green-200">معدل النجاح</p>
             </div>
-            <div class="p-3 bg-gray-50 rounded-xl text-center">
-                <p class="text-sm font-semibold text-gray-700">{{ optional($metrics['last_deployment'])->diffForHumans() ?? 'N/A' }}</p>
-                <p class="text-xs text-gray-500">آخر نشر</p>
+            <div class="p-3 bg-gray-800 rounded-xl text-center border border-gray-600">
+                <p class="text-sm font-semibold text-white">{{ optional($metrics['last_deployment'])->diffForHumans() ?? 'N/A' }}</p>
+                <p class="text-xs text-gray-200">آخر نشر</p>
             </div>
         </div>
     </div>
@@ -204,21 +205,21 @@
     <div class="bg-white rounded-2xl p-6 shadow-sm">
         <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-shield-alt text-red-500 ml-2"></i>إحصائيات الأمان</h3>
         <div class="grid grid-cols-2 gap-4 mb-4">
-            <div class="p-4 bg-blue-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-blue-600">{{ number_format($securityStats['total_events']) }}</p>
-                <p class="text-xs text-gray-500">إجمالي الأحداث</p>
+            <div class="p-4 bg-blue-800 rounded-xl text-center border border-gray-600">
+                <p class="text-2xl font-bold text-white">{{ number_format($securityStats['total_events']) }}</p>
+                <p class="text-xs text-blue-200">إجمالي الأحداث</p>
             </div>
-            <div class="p-4 bg-green-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-green-600">{{ $securityStats['today_events'] }}</p>
-                <p class="text-xs text-gray-500">أحداث اليوم</p>
+            <div class="p-4 bg-green-800 rounded-xl text-center border border-gray-600">
+                <p class="text-2xl font-bold text-white">{{ $securityStats['today_events'] }}</p>
+                <p class="text-xs text-green-200">أحداث اليوم</p>
             </div>
-            <div class="p-4 bg-yellow-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-yellow-600">{{ $securityStats['failed_logins'] }}</p>
-                <p class="text-xs text-gray-500">محاولات فاشلة</p>
+            <div class="p-4 bg-yellow-600 rounded-xl text-center border border-gray-600">
+                <p class="text-2xl font-bold text-white">{{ $securityStats['failed_logins'] }}</p>
+                <p class="text-xs text-yellow-100">محاولات فاشلة</p>
             </div>
-            <div class="p-4 bg-red-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-red-600">{{ $securityStats['high_risk'] }}</p>
-                <p class="text-xs text-gray-500">مخاطر عالية</p>
+            <div class="p-4 bg-red-800 rounded-xl text-center border border-gray-600">
+                <p class="text-2xl font-bold text-white">{{ $securityStats['high_risk'] }}</p>
+                <p class="text-xs text-red-200">مخاطر عالية</p>
             </div>
         </div>
     </div>
@@ -227,21 +228,21 @@
     <div class="bg-white rounded-2xl p-6 shadow-sm">
         <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-file-alt text-orange-500 ml-2"></i>إحصائيات السجلات</h3>
         <div class="grid grid-cols-2 gap-4 mb-4">
-            <div class="p-4 bg-blue-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-blue-600">{{ number_format($logStats['total']) }}</p>
-                <p class="text-xs text-gray-500">إجمالي السجلات</p>
+            <div class="p-4 bg-blue-800 rounded-xl text-center border border-gray-600">
+                <p class="text-2xl font-bold text-white">{{ number_format($logStats['total']) }}</p>
+                <p class="text-xs text-blue-200">إجمالي السجلات</p>
             </div>
-            <div class="p-4 bg-green-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-green-600">{{ $logStats['today'] }}</p>
-                <p class="text-xs text-gray-500">سجلات اليوم</p>
+            <div class="p-4 bg-green-800 rounded-xl text-center border border-gray-600">
+                <p class="text-2xl font-bold text-white">{{ $logStats['today'] }}</p>
+                <p class="text-xs text-green-200">سجلات اليوم</p>
             </div>
-            <div class="p-4 bg-yellow-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-yellow-600">{{ $logStats['warnings'] }}</p>
-                <p class="text-xs text-gray-500">تحذيرات</p>
+            <div class="p-4 bg-yellow-600 rounded-xl text-center border border-gray-600">
+                <p class="text-2xl font-bold text-white">{{ $logStats['warnings'] }}</p>
+                <p class="text-xs text-yellow-100">تحذيرات</p>
             </div>
-            <div class="p-4 bg-red-50 rounded-xl text-center">
-                <p class="text-2xl font-bold text-red-600">{{ $logStats['errors'] }}</p>
-                <p class="text-xs text-gray-500">أخطاء</p>
+            <div class="p-4 bg-red-800 rounded-xl text-center border border-gray-600">
+                <p class="text-2xl font-bold text-white">{{ $logStats['errors'] }}</p>
+                <p class="text-xs text-red-200">أخطاء</p>
             </div>
         </div>
     </div>
@@ -302,27 +303,27 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
     <!-- API Errors -->
-    <div class="bg-white rounded-2xl p-6 shadow-sm">
-        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-exclamation-triangle text-yellow-500 ml-2"></i>أخطاء API</h3>
+    <div class="bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-700">
+        <h3 class="text-lg font-bold text-white mb-4"><i class="fas fa-exclamation-triangle text-yellow-500 ml-2"></i>أخطاء API</h3>
         <div class="grid grid-cols-3 gap-3 mb-4">
-            <div class="p-3 bg-blue-50 rounded-xl text-center">
-                <p class="text-xl font-bold text-blue-600">{{ $apiStats['total_errors'] }}</p>
-                <p class="text-xs text-gray-500">الإجمالي</p>
+            <div class="p-3 bg-blue-800 rounded-xl text-center border border-gray-600">
+                <p class="text-xl font-bold text-white">{{ $apiStats['total_errors'] }}</p>
+                <p class="text-xs text-blue-200">الإجمالي</p>
             </div>
-            <div class="p-3 bg-orange-50 rounded-xl text-center">
-                <p class="text-xl font-bold text-orange-600">{{ $apiStats['today_errors'] }}</p>
-                <p class="text-xs text-gray-500">اليوم</p>
+            <div class="p-3 bg-orange-700 rounded-xl text-center border border-gray-600">
+                <p class="text-xl font-bold text-white">{{ $apiStats['today_errors'] }}</p>
+                <p class="text-xs text-orange-200">اليوم</p>
             </div>
-            <div class="p-3 bg-purple-50 rounded-xl text-center">
-                <p class="text-xl font-bold text-purple-600">{{ number_format($apiStats['avg_response_time'], 0) }}ms</p>
-                <p class="text-xs text-gray-500">متوسط الاستجابة</p>
+            <div class="p-3 bg-purple-800 rounded-xl text-center border border-gray-600">
+                <p class="text-xl font-bold text-white">{{ number_format($apiStats['avg_response_time'], 0) }}ms</p>
+                <p class="text-xs text-purple-200">متوسط الاستجابة</p>
             </div>
         </div>
         <div class="space-y-2 max-h-48 overflow-y-auto">
             @forelse($apiErrors as $error)
-            <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-sm">
-                <span class="text-gray-700">{{ Str::limit($error->endpoint, 30) }}</span>
-                <span class="px-2 py-1 text-xs rounded bg-red-100 text-red-700">{{ $error->status_code }}</span>
+            <div class="flex items-center justify-between p-2 bg-gray-700 rounded-lg text-sm">
+                <span class="text-gray-200">{{ Str::limit($error->endpoint, 30) }}</span>
+                <span class="px-2 py-1 text-xs rounded bg-red-200 text-red-800">{{ $error->status_code }}</span>
             </div>
             @empty
             <p class="text-center text-gray-500 py-4">لا توجد أخطاء</p>
@@ -331,29 +332,29 @@
     </div>
 
     <!-- Slow Queries -->
-    <div class="bg-white rounded-2xl p-6 shadow-sm">
-        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-clock text-red-500 ml-2"></i>الاستعلامات البطيئة</h3>
+    <div class="bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-700">
+        <h3 class="text-lg font-bold text-white mb-4"><i class="fas fa-clock text-red-500 ml-2"></i>الاستعلامات البطيئة</h3>
         <div class="grid grid-cols-3 gap-3 mb-4">
-            <div class="p-3 bg-blue-50 rounded-xl text-center">
-                <p class="text-xl font-bold text-blue-600">{{ $queryStats['total'] }}</p>
-                <p class="text-xs text-gray-500">الإجمالي</p>
+            <div class="p-3 bg-blue-800 rounded-xl text-center border border-gray-600">
+                <p class="text-xl font-bold text-white">{{ $queryStats['total'] }}</p>
+                <p class="text-xs text-blue-200">الإجمالي</p>
             </div>
-            <div class="p-3 bg-yellow-50 rounded-xl text-center">
-                <p class="text-xl font-bold text-yellow-600">{{ $queryStats['unoptimized'] }}</p>
-                <p class="text-xs text-gray-500">غير محسّن</p>
+            <div class="p-3 bg-yellow-600 rounded-xl text-center border border-gray-600">
+                <p class="text-xl font-bold text-white">{{ $queryStats['unoptimized'] }}</p>
+                <p class="text-xs text-yellow-100">غير محسّن</p>
             </div>
-            <div class="p-3 bg-red-50 rounded-xl text-center">
-                <p class="text-xl font-bold text-red-600">{{ $queryStats['critical'] }}</p>
-                <p class="text-xs text-gray-500">حرج</p>
+            <div class="p-3 bg-red-800 rounded-xl text-center border border-gray-600">
+                <p class="text-xl font-bold text-white">{{ $queryStats['critical'] }}</p>
+                <p class="text-xs text-red-200">حرج</p>
             </div>
         </div>
         <div class="space-y-2 max-h-48 overflow-y-auto">
             @forelse($slowQueries as $query)
-            <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-sm">
-                <span class="text-gray-700">{{ Str::limit($query->table_name ?? $query->query, 25) }}</span>
+            <div class="flex items-center justify-between p-2 bg-gray-700 rounded-lg text-sm">
+                <span class="text-gray-200">{{ Str::limit($query->table_name ?? $query->query, 25) }}</span>
                 <div class="flex items-center gap-2">
-                    <span class="text-xs text-gray-500">{{ number_format($query->execution_time, 0) }}ms</span>
-                    <span class="px-2 py-1 text-xs rounded {{ $query->is_optimized ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
+                    <span class="text-xs text-gray-400">{{ number_format($query->execution_time, 0) }}ms</span>
+                    <span class="px-2 py-1 text-xs rounded {{ $query->is_optimized ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800' }}">
                         {{ $query->is_optimized ? 'محسّن' : 'معلق' }}
                     </span>
                 </div>
