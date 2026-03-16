@@ -15,10 +15,11 @@
       </div>
 
       <!-- User Icon -->
-      @auth
+      <?php if(auth()->guard()->check()): ?>
       <div class="nav-icon-item user-logged-in" id="userMenu">
         <span class="user-name-pill" style="position:relative">
-          {{ is_array(data_get(Auth::user(),'name')) ? json_encode(data_get(Auth::user(),'name')) : data_get(Auth::user(),'name') }}
+          <?php echo e(is_array(data_get(Auth::user(),'name')) ? json_encode(data_get(Auth::user(),'name')) : data_get(Auth::user(),'name')); ?>
+
           <span id="notificationBadge" style="display:none;position:absolute;top:-5px;right:-5px;width:10px;height:10px;background:#ff6b35;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 8px rgba(255,107,53,0.4)"></span>
         </span>
         
@@ -40,7 +41,7 @@
           </div>
         </div>
       </div>
-      @else
+      <?php else: ?>
       <div class="nav-icon-item" onclick="window.location.href='/ar-login'">
         <i class="fas fa-user icon-user"></i>
         <span class="icon-label user-label">
@@ -48,7 +49,7 @@
           <span>تسجيل الدخول</span>
         </span>
       </div>
-      @endauth
+      <?php endif; ?>
 
       <!-- Cart Icon -->
       <div class="nav-icon-item cart-icon-container" onclick="window.location.href='/cart'">
@@ -124,7 +125,7 @@
 <script>
 (function () {
   const USD_TO_SYP = 117;
-  const serverCurrency = @json(auth()->check() ? (strtoupper((string) (auth()->user()->currency ?: 'USD'))) : (strtoupper((string) (session('currency') ?: 'USD'))));
+  const serverCurrency = <?php echo json_encode(auth()->check() ? (strtoupper((string) (auth()->user()->currency ?: 'USD'))) : (strtoupper((string) (session('currency') ?: 'USD'))), 15, 512) ?>;
   const safeServerCurrency = (serverCurrency === 'SYP' || serverCurrency === 'USD') ? serverCurrency : 'USD';
   let preferred = safeServerCurrency;
 
@@ -144,7 +145,7 @@
     try { localStorage.setItem('tulip_currency', cur); } catch (_) {}
 
     const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-    if (csrf && @json(auth()->check())) {
+    if (csrf && <?php echo json_encode(auth()->check(), 15, 512) ?>) {
       try {
         await fetch('/profile/update', {
           method: 'PUT',
@@ -405,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // User dropdown toggle
-@auth
+<?php if(auth()->guard()->check()): ?>
 const userMenu = document.getElementById('userMenu');
 const userDropdown = document.getElementById('userDropdown');
 
@@ -607,7 +608,7 @@ function translateNavbar(lang) {
     const loginLabel = document.querySelector('.user-label > span:last-child');
     if (loginLabel) loginLabel.textContent = t.login;
 }
-@endauth
+<?php endif; ?>
 
 // Global function to update cart count (can be called from any page)
 window.updateCartCount = function(count) {
@@ -753,7 +754,7 @@ window.addEventListener('DOMContentLoaded', loadNavbarCartCount);
 </script>
 
 <script>
-@auth
+<?php if(auth()->guard()->check()): ?>
 window.addEventListener('DOMContentLoaded', function() {
     fetch('/api/wishlist')
         .then(r => r.json())
@@ -766,7 +767,7 @@ window.addEventListener('DOMContentLoaded', function() {
         })
         .catch(() => {});
 });
-@endauth
+<?php endif; ?>
 </script>
 
 
@@ -797,3 +798,4 @@ if (document.getElementById('notificationBadge')) {
     setInterval(checkUnreadNotifications, 30000);
 }
 </script>
+<?php /**PATH C:\Users\Doaa\StudioProjects\Tulip-Store\resources\views/components/navbar.blade.php ENDPATH**/ ?>

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $category->name }} - Tulip Store</title>
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title><?php echo e($category->name); ?> - Tulip Store</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Changa:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -319,33 +319,33 @@
     </style>
 </head>
 <body>
-    @if(View::exists('components.navbar'))
-    @include('components.navbar')
-@endif
+    <?php if(View::exists('components.navbar')): ?>
+    <?php echo $__env->make('components.navbar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+<?php endif; ?>
     <div class="products-container">
         <!-- Mobile Filters -->
         <div class="mobile-filters-wrapper">
             <div class="mobile-filters-list">
-                @php
+                <?php
                     $brands = $products->pluck('brand')->unique()->filter()->sort()->values()->take(12);
-                @endphp
+                ?>
                 
-                @if($brands->count() > 0)
+                <?php if($brands->count() > 0): ?>
                 <div class="mobile-filter-dropdown" id="brandDropdown">
                     <button class="mobile-filter-btn" onclick="toggleMobileDropdown('brandDropdown')">
                         <span>العلامة التجارية</span>
                         <i class="fas fa-chevron-down"></i>
                     </button>
                     <div class="mobile-filter-content">
-                        @foreach($brands as $brand)
+                        <?php $__currentLoopData = $brands; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $brand): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="mobile-filter-option">
-                            <input type="checkbox" id="m-brand-{{ $loop->index }}" value="{{ $brand }}" onchange="applyFilters(); syncDesktopFilters('brand-{{ $loop->index }}', this.checked)">
-                            <label for="m-brand-{{ $loop->index }}">{{ $brand }}</label>
+                            <input type="checkbox" id="m-brand-<?php echo e($loop->index); ?>" value="<?php echo e($brand); ?>" onchange="applyFilters(); syncDesktopFilters('brand-<?php echo e($loop->index); ?>', this.checked)">
+                            <label for="m-brand-<?php echo e($loop->index); ?>"><?php echo e($brand); ?></label>
                         </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?>
 
                 <div class="mobile-filter-dropdown" id="priceDropdown">
                     <button class="mobile-filter-btn" onclick="toggleMobileDropdown('priceDropdown')">
@@ -383,70 +383,71 @@
 
         <!-- Products Content -->
         <div class="products-content">
-            <h2 style="font-family: 'El Messiri', sans-serif; font-size: 2rem; color: #0f4f55; margin: 0 0 2rem 0;">{{ $category->name }}</h2>
-            @if($products->count() > 0)
+            <h2 style="font-family: 'El Messiri', sans-serif; font-size: 2rem; color: #0f4f55; margin: 0 0 2rem 0;"><?php echo e($category->name); ?></h2>
+            <?php if($products->count() > 0): ?>
                 <div class="products-grid">
-                    @foreach($products as $product)
-                        <div class="product-card" data-product-id="{{ $product->id }}" data-product="{{ rawurlencode($product->toJson()) }}">
-                            <button class="product-favorite-btn" onclick="event.stopPropagation(); toggleProductFavorite(event, {{ $product->id }})">
+                    <?php $__currentLoopData = $products; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <div class="product-card" data-product-id="<?php echo e($product->id); ?>" data-product="<?php echo e(rawurlencode($product->toJson())); ?>">
+                            <button class="product-favorite-btn" onclick="event.stopPropagation(); toggleProductFavorite(event, <?php echo e($product->id); ?>)">
                                 <i class="far fa-heart"></i>
                             </button>
                             <div class="product-image-wrapper" onclick="openFloatingViewFromCard(this)">
-                                <img src="{{ $product->primary_image_url }}" srcset="{{ $product->primary_image_srcset }}" sizes="(max-width: 768px) 50vw, 25vw" alt="{{ $product->name }}" class="product-img" loading="lazy" width="320" height="320" onerror="this.src='/images/gift-placeholder.svg'">
+                                <img src="<?php echo e($product->primary_image_url); ?>" srcset="<?php echo e($product->primary_image_srcset); ?>" sizes="(max-width: 768px) 50vw, 25vw" alt="<?php echo e($product->name); ?>" class="product-img" loading="lazy" width="320" height="320" onerror="this.src='/images/gift-placeholder.svg'">
                             </div>
                             <div class="product-info">
-                                <h3 class="product-name">{{ $product->name }}</h3>
+                                <h3 class="product-name"><?php echo e($product->name); ?></h3>
                                 <div class="product-price-rating-wrapper">
                                     <div class="product-price-wrapper">
-                                        <span class="product-price">${{ number_format($product->discount_price ?? $product->price, 2) }}</span>
-                                        @if($product->discount_price)
-                                            <span class="product-old-price">${{ number_format($product->price, 2) }}</span>
-                                        @endif
+                                        <span class="product-price">$<?php echo e(number_format($product->discount_price ?? $product->price, 2)); ?></span>
+                                        <?php if($product->discount_price): ?>
+                                            <span class="product-old-price">$<?php echo e(number_format($product->price, 2)); ?></span>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
                             <div class="product-card-actions">
-                                <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart(event, {{ $product->id }})">
+                                <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart(event, <?php echo e($product->id); ?>)">
                                     إضافة للسلة
                                 </button>
-                                <button class="product-card-btn product-card-btn-share" onclick="event.stopPropagation(); shareProduct(event, '{{ $product->name }}')">
+                                <button class="product-card-btn product-card-btn-share" onclick="event.stopPropagation(); shareProduct(event, '<?php echo e($product->name); ?>')">
                                     شاركه الآن
                                 </button>
                             </div>
                         </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
 
                 <!-- Pagination -->
                 <div style="margin-top: 3rem; text-align: center;">
-                    {{ $products->links() }}
+                    <?php echo e($products->links()); ?>
+
                 </div>
-            @else
+            <?php else: ?>
                 <div class="no-products">
                     <i class="fas fa-box-open"></i>
                     <h2>لا توجد منتجات في هذا القسم حالياً</h2>
                     <p>نعمل على إضافة منتجات جديدة قريباً</p>
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
 
         <!-- Filters Sidebar -->
         <div class="filters-sidebar">
-            @php
+            <?php
                 $brands = $products->pluck('brand')->unique()->filter()->sort()->values()->take(12);
-            @endphp
+            ?>
 
-            @if($brands->count() > 0)
+            <?php if($brands->count() > 0): ?>
                 <div class="filter-section">
                     <div class="filter-section-title">العلامة التجارية</div>
-                    @foreach($brands as $brand)
+                    <?php $__currentLoopData = $brands; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $brand): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="filter-option">
-                            <input type="checkbox" id="brand-{{ $loop->index }}" value="{{ $brand }}" onchange="applyFilters()">
-                            <label for="brand-{{ $loop->index }}">{{ $brand }}</label>
+                            <input type="checkbox" id="brand-<?php echo e($loop->index); ?>" value="<?php echo e($brand); ?>" onchange="applyFilters()">
+                            <label for="brand-<?php echo e($loop->index); ?>"><?php echo e($brand); ?></label>
                         </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
-            @endif
+            <?php endif; ?>
 
             <div class="filter-section">
                 <div class="filter-section-title">نطاق السعر (ل.س)</div>
@@ -1021,3 +1022,4 @@
     </div>
 </body>
 </html>
+<?php /**PATH C:\Users\Doaa\StudioProjects\Tulip-Store\resources\views/category.blade.php ENDPATH**/ ?>

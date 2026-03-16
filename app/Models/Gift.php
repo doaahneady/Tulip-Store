@@ -76,7 +76,7 @@ class Gift extends Model
         $candidate = trim($candidate);
 
         if ($candidate === '') {
-            return '/images/gift-placeholder.svg';
+            return '/images/birthday_card.jpeg';
         }
 
         if (Str::startsWith($candidate, ['http://', 'https://'])) {
@@ -87,7 +87,7 @@ class Gift extends Model
 
         if (Str::startsWith($candidate, '/storage/')) {
             $relative = ltrim(Str::after($candidate, '/storage/'), '/');
-            return $relative !== '' ? '/storage/'.$relative : '/images/gift-placeholder.svg';
+            return $relative !== '' ? '/storage/'.$relative : '/images/birthday_card.jpeg';
         }
 
         if (Str::startsWith($candidate, '/images/')) {
@@ -105,7 +105,7 @@ class Gift extends Model
 
         $relative = ltrim(preg_replace('#^(public/|storage/)#', '', $candidate), '/');
         if ($relative === '') {
-            return '/images/gift-placeholder.svg';
+            return '/images/birthday_card.jpeg';
         }
 
         return Storage::disk('public')->url($relative);

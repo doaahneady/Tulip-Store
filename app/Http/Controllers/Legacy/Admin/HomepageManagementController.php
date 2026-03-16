@@ -36,17 +36,17 @@ class HomepageManagementController extends Controller
 
         $defaultSlides = [
             [
-                'image' => '/images/footer.jpg',
+                'image' => '/images/banner1.jpg',
                 'title' => 'أرسل ابتسامتك أينما كنت',
                 'subtitle' => 'تسوق معنا أفضل المنتجات والعروض',
             ],
             [
-                'image' => '/images/logo-girl.jpg',
+                'image' => '/images/banner2.jpg',
                 'title' => 'هدايا توليب',
                 'subtitle' => 'لحظات استثنائية تستحق هدايا مميزة',
             ],
             [
-                'image' => '/images/white_orange_logo.png',
+                'image' => '/images/banner3.png',
                 'title' => 'وصل حديثاً',
                 'subtitle' => 'اكتشف أحدث المنتجات في متجرنا',
             ],
@@ -73,17 +73,17 @@ class HomepageManagementController extends Controller
         if (empty($slides)) {
             $slides = [
                 [
-                    'image' => '/images/footer.jpg',
+                    'image' => 'public\images\banner1.jpg',
                     'title' => 'أرسل ابتسامتك أينما كنت',
                     'subtitle' => 'تسوق معنا أفضل المنتجات والعروض',
                 ],
                 [
-                    'image' => '/images/logo-girl.jpg',
+                    'image' => 'public\images\banner2.jpg',
                     'title' => 'هدايا توليب',
                     'subtitle' => 'لحظات استثنائية تستحق هدايا مميزة',
                 ],
                 [
-                    'image' => '/images/white_orange_logo.png',
+                    'image' => 'public\images\banner3.jpg',
                     'title' => 'وصل حديثاً',
                     'subtitle' => 'اكتشف أحدث المنتجات في متجرنا',
                 ],

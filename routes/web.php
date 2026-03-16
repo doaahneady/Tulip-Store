@@ -79,19 +79,19 @@ Route::get('/', function () {
     $slides = PublicSetting::get('homepage_slider_slides', []);
     $defaultSlides = [
         [
-            'image' => '/images/footer.jpg',
-            'title' => 'أرسل ابتسامتك أينما كنت',
+            'image' => 'public\images\banner1.jpg',
+            'title' => 'أرسل',
             'subtitle' => 'تسوق معنا أفضل المنتجات والعروض',
             'link' => '/store',
         ],
         [
-            'image' => '/images/logo-girl.jpg',
+            'image' => '/images/banner2.jpg',
             'title' => 'عروض وخصومات',
             'subtitle' => 'اكتشف عروضنا المميزة وتوفير أكبر على مشترياتك',
             'link' => '/store?on_sale=1',
         ],
         [
-            'image' => '/images/white_orange_logo.png',
+            'image' => '/images/banner3.jpg',
             'title' => 'وصل حديثاً',
             'subtitle' => 'اكتشف أحدث المنتجات في متجرنا',
             'link' => '/store?sort=newest',

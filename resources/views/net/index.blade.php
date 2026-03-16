@@ -867,7 +867,7 @@
           <a href="#booking" class="nav-link">إحجز الآن</a>
         </nav>
         <div class="header-center">
-          <img src="public\images\logo_net.jpeg" alt="Tulip Logo Center" class="logo-center-img">
+          <img src="public\images\tulip_tulip.png" alt="Tulip Logo Center" class="logo-center-img">
         </div>
         <div class="header-left">
           <img src="public\images\tulip_net.png" alt="Tulip Net Logo" class="logo-left-img">
