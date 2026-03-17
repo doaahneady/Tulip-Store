@@ -38,6 +38,33 @@
                 gap: 0.5rem !important;
             }
         }
+
+        /* Intro Animation Responsive Text */
+        @media (max-width: 768px) {
+            #animatedText {
+                font-size: 3.5rem !important;
+                min-height: 4.5rem !important;
+            }
+            .intro-content-wrapper {
+                padding: 2rem !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #animatedText {
+                font-size: 2.5rem !important;
+                min-height: 3.5rem !important;
+            }
+            .intro-content-wrapper {
+                padding: 1.5rem !important;
+            }
+            #mainLogo {
+                margin-bottom: 2rem !important;
+            }
+            #mainLogo img {
+                height: 80px !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-white">
@@ -58,7 +85,7 @@
     <div style="position:absolute; inset:0; background-image:radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size:50px 50px; opacity:0.15; animation:particleFloat 20s linear infinite;"></div>
     
     <!-- Content -->
-    <div style="position:relative; z-index:2; text-align:center; max-width:900px; padding:3rem;">
+    <div class="intro-content-wrapper" style="position:relative; z-index:2; text-align:center; max-width:900px; padding:3rem;">
         <!-- Logo - Drops from Top with Bounce -->
         <div id="mainLogo" style="margin-bottom:4rem; opacity:0; transform:translateY(-150px) scale(0.8);">
             <img src="/images/white_orange_logo.png" style="height:120px; filter:drop-shadow(0 10px 30px rgba(255,107,53,0.5));">
