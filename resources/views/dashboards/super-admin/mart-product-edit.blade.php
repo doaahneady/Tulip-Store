@@ -24,10 +24,7 @@
                     @endforeach
                 </select>
             </div>
-            <div>
-                <label class="block text-sm text-gray-600 mb-1">SKU</label>
-                <input name="sku" value="{{ old('sku', $product->sku) }}" class="form-input w-full">
-            </div>
+            <input type="hidden" name="sku" value="{{ old('sku', $product->sku) }}">
             <div>
                 <label class="block text-sm text-gray-600 mb-1">السعر</label>
                 <input type="number" step="0.01" min="0" name="price" value="{{ old('price', $product->price) }}" class="form-input w-full">
@@ -99,7 +96,7 @@
         </div>
 
         <div class="flex items-center justify-between gap-2 flex-wrap">
-            <a href="{{ route('dashboard.admin.mart') }}" class="btn btn-secondary">رجوع</a>
+            <a href="{{ route('dashboard.admin.mart.index') }}" class="btn btn-secondary">رجوع</a>
             <div class="flex items-center gap-2">
                 <button type="submit" class="btn btn-primary">حفظ</button>
             </div>

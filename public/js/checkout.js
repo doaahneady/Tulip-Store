@@ -827,7 +827,7 @@ async function loadCartSummary() {
 
                 itemsHtml += `
                     <div style="display:flex; gap:1rem; padding:1rem; background:${isMart ? '#fff9f0' : '#f8f9fa'}; border-radius:10px; margin-bottom:0.8rem; border-right:4px solid ${isMart ? '#ff6b35' : 'transparent'};">
-                        <img src="${img || '/images/gift-placeholder.svg'}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;" onerror="this.src='/images/gift-placeholder.svg'">
+                        <img src="${img || '/images/tulip_store.jpg'}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;" onerror="this.src='/images/tulip_store.jpg'">
                         <div style="flex:1;">
                             <h5 style="font-family:'El Messiri',sans-serif; font-size:0.95rem; font-weight:700; color:#1a1a1a; margin:0 0 0.3rem 0;">
                                 ${item.product.name}

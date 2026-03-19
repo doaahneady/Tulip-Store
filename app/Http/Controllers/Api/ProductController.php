@@ -41,7 +41,7 @@ class ProductController extends Controller
     {
         $market = $this->resolveMarket($request);
 
-        $query = $this->applyMarketFilter(Product::query()->active(), $market);
+        $query = $this->applyMarketFilter(Product::query()->active()->available(), $market);
 
         if (Schema::hasTable('categories')) {
             $categoryIds = null;
@@ -187,6 +187,8 @@ class ProductController extends Controller
         $market = $this->resolveMarket($request);
 
         $product = Product::query()
+            ->active()
+            ->available()
             ->tap(fn ($q) => $this->applyMarketFilter($q, $market))
             ->whereKey($id)
             ->with([

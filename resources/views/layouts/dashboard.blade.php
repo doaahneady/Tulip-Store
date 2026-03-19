@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'لوحة التحكم') - {{ config('app.name') }}</title>
-    
+      <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -225,6 +226,38 @@
                 setTimeout(() => alert.remove(), 500);
             });
         }, 5000);
+
+        // Global date input validation (ensure 4-digit year)
+        document.addEventListener('DOMContentLoaded', function() {
+            function enforceDateLimit(input) {
+                if (!input.getAttribute('min')) input.setAttribute('min', '1000-01-01');
+                if (!input.getAttribute('max')) input.setAttribute('max', '9999-12-31');
+                
+                input.addEventListener('input', function() {
+                    if (this.value && this.value.length > 10) {
+                        this.value = this.value.slice(0, 10);
+                    }
+                });
+            }
+
+            // Apply to existing inputs
+            document.querySelectorAll('input[type="date"]').forEach(enforceDateLimit);
+
+            // Watch for dynamically added inputs
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) {
+                            if (node.tagName === 'INPUT' && node.type === 'date') {
+                                enforceDateLimit(node);
+                            }
+                            node.querySelectorAll('input[type="date"]').forEach(enforceDateLimit);
+                        }
+                    });
+                });
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        });
     </script>
     
     @stack('scripts')

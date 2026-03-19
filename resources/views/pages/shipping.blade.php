@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>معلومات الشحن والتوصيل - متجر توليب</title>
+     <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -65,7 +67,7 @@
                     <ul style="color:#666; line-height:2; margin-left:1.5rem; font-size:1.05rem;">
                         <li><strong>داخل المدينة:</strong> من ٣ إلى ٧ أيام عمل (مع عروض شحن مجاني لبعض الطلبات)</li>
                         <li><strong>المدن الأخرى:</strong> من ٧ إلى ١٤ يوم عمل حسب شركة الشحن</li>
-                        <li><strong>دولي:</strong> متوفر لبعض الدول، والمدة تعتمد على شركة الشحن والجمارك</li>
+                        <!-- <li><strong>دولي:</strong> متوفر لبعض الدول، والمدة تعتمد على شركة الشحن والجمارك</li> -->
                     </ul>
                 </section>
 
@@ -74,7 +76,7 @@
                         <i class="fas fa-box" style="color:#0D464C;"></i>
                         وقت تجهيز الطلب
                     </h2>
-                    <p style="color:#666; line-height:1.8; font-size:1.05rem;">يتم عادةً تجهيز الطلبات خلال <strong>١–٢ يوم عمل</strong> (باستثناء العطل الرسمية). بعد شحن الطلب، سيصلك رقم التتبع عبر البريد الإلكتروني أو الرسائل النصية.</p>
+                    <p style="color:#666; line-height:1.8; font-size:1.05rem;">يتم عادةً تجهيز الطلبات خلال <strong>١–٢ يوم عمل</strong> (باستثناء العطل الرسمية). بعد شحن الطلب سيتم تحديث حالة الطلب داخل طلباتي و يتم ارسال اشعار لك .</p>
                 </section>
 
                 <section style="background:#fff; padding:2rem; border-radius:12px; border:2px solid #e9ecef; margin-bottom:2rem;">
@@ -87,9 +89,9 @@
                         <li>رسالة تأكيد تحتوي على رقم تتبع الشحنة</li>
                         <li>تحديثات لحالة الشحن وموقعها</li>
                         <li>تقدير مبدئي لتاريخ الوصول</li>
-                        <li>إشعارات عبر الرسائل النصية (في حال تفعيلها)</li>
+                        <!-- <li>إشعارات عبر الرسائل النصية (في حال تفعيلها)</li> -->
                     </ul>
-                    <p style="color:#666; line-height:1.8; font-size:1.05rem; margin-top:1rem;">يمكنك تتبع طلبك من خلال حسابك في الموقع أو باستخدام رقم التتبع المرسل لك.</p>
+                    <p style="color:#666; line-height:1.8; font-size:1.05rem; margin-top:1rem;">يمكنك تتبع طلبك من خلال حسابك في الموقع أو من خلال تفعيل اشعارات التطبيق. .</p>
                 </section>
 
                 <section style="background:#fff; padding:2rem; border-radius:12px; border:2px solid #e9ecef; margin-bottom:2rem;">
@@ -100,7 +102,7 @@
                     <div style="color:#666; line-height:1.8; font-size:1.05rem;">
                         <p style="margin-bottom:1rem;"><strong>الشحن العادي:</strong> قد يكون مجانياً أو برسوم رمزية حسب قيمة الطلب والعروض المتاحة.</p>
                         <p style="margin-bottom:1rem;"><strong>الشحن السريع / نفس اليوم:</strong> برسوم إضافية تُحدد عند إتمام الطلب.</p>
-                        <p><strong>الشحن الدولي:</strong> تُحتسب الرسوم عند إنهاء الطلب حسب الدولة والوزن.</p>
+                        <!-- <p><strong>الشحن الدولي:</strong> تُحتسب الرسوم عند إنهاء الطلب حسب الدولة والوزن.</p> -->
                     </div>
                 </section>
 
@@ -112,8 +114,8 @@
                     <ul style="color:#666; line-height:2; margin-left:1.5rem; font-size:1.05rem;">
                         <li>أوقات التوصيل تقديرية وقد تتأثر بالظروف الجوية أو ضغط العمل أو سياسات شركة الشحن.</li>
                         <li>من مسؤولية العميل التأكد من صحة عنوان الشحن وبيانات التواصل.</li>
-                        <li>الطلبات تُشحن عادةً من الأحد إلى الخميس، باستثناء العطل الرسمية.</li>
-                        <li>للشحن الدولي، يتحمل العميل أي رسوم جمركية أو ضرائب محلية.</li>
+                        <!-- <li>الطلبات تُشحن عادةً من الأحد إلى الخميس، باستثناء العطل الرسمية.</li> -->
+                        <!-- <li>للشحن الدولي، يتحمل العميل أي رسوم جمركية أو ضرائب محلية.</li> -->
                     </ul>
                 </section>
 

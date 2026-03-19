@@ -272,7 +272,7 @@ class CartController extends Controller
         // Handle mart products (virtual products)
         if ($productType === 'mart') {
             $request->validate([
-                'product_id' => 'required|string',
+                'product_id' => 'required',
                 'name' => 'required|string',
                 'price' => 'required|numeric',
                 'quantity' => 'integer|min:1',
@@ -280,10 +280,24 @@ class CartController extends Controller
                 'unit' => 'nullable|string',
             ]);
 
+            $product = Product::find($productId);
             $martProducts = Session::get('mart_products', []);
+            $existingQty = isset($martProducts[$productId]) ? $martProducts[$productId]['quantity'] : 0;
+            $newQty = $existingQty + $quantity;
+
+            if ($product && $product->track_inventory) {
+                $available = (int) ($product->stock_quantity ?? 0);
+                if ($newQty > $available) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'الكمية المطلوبة تتجاوز المخزون المتاح للمنتج ' . $product->name,
+                        'available' => $available,
+                    ], 422);
+                }
+            }
 
             if (isset($martProducts[$productId])) {
-                $martProducts[$productId]['quantity'] += $quantity;
+                $martProducts[$productId]['quantity'] = $newQty;
             } else {
                 $martProducts[$productId] = [
                     'id' => $productId,
@@ -342,7 +356,7 @@ class CartController extends Controller
                     }
                     return response()->json([
                         'success' => false,
-                        'message' => 'الكمية المطلوبة غير متوفرة',
+                        'message' => 'الكمية المطلوبة تتجاوز المخزون المتاح للمنتج',
                         'available' => $available,
                     ], 422);
                 }
@@ -375,7 +389,7 @@ class CartController extends Controller
                     }
                     return response()->json([
                         'success' => false,
-                        'message' => 'الكمية المطلوبة غير متوفرة',
+                        'message' => 'الكمية المطلوبة تتجاوز المخزون المتاح للمنتج   ',
                         'available' => $available,
                     ], 422);
                 }
@@ -408,7 +422,38 @@ class CartController extends Controller
         ]);
 
         $cart = Session::get('cart', []);
+        $martProducts = Session::get('mart_products', []);
         $productId = $request->item_id;
+
+        // Check if it's a Mart product in session
+        if (isset($martProducts[$productId])) {
+            $qty = (int) $request->quantity;
+            $product = Product::find($productId);
+            
+            if ($product && $product->track_inventory && $qty > (int) ($product->stock_quantity ?? 0)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'الكمية المطلوبة تتجاوز المخزون المتاح للمنتج ' . $product->name,
+                    'available' => (int) ($product->stock_quantity ?? 0),
+                ], 422);
+            }
+
+            if ($qty === 0) {
+                unset($martProducts[$productId]);
+            } else {
+                $martProducts[$productId]['quantity'] = $qty;
+            }
+            Session::put('mart_products', $martProducts);
+
+            $cartCount = array_sum($cart) + count(Session::get('custom_gifts', [])) + array_sum(array_column($martProducts, 'quantity'));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم تحديث السلة',
+                'cart_count' => $cartCount,
+                'count' => $cartCount,
+            ]);
+        }
 
         if (Auth::check() && $this->canUseDatabaseCart() && is_numeric($productId)) {
             $this->mergeSessionCartIntoDatabaseCart();
@@ -420,7 +465,7 @@ class CartController extends Controller
             if ($product && $product->track_inventory && $qty > (int) ($product->stock_quantity ?? 0)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'الكمية المطلوبة غير متوفرة',
+                    'message' => 'الكمية المطلوبة تتجاوز المخزون المتاح للمنتج ',
                     'available' => (int) ($product->stock_quantity ?? 0),
                 ], 422);
             }
@@ -459,7 +504,7 @@ class CartController extends Controller
             if ($product && $product->track_inventory && (int) $request->quantity > (int) ($product->stock_quantity ?? 0)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'الكمية المطلوبة غير متوفرة',
+                    'message' =>   'الكمية المطلوبة تتجاوز المخزون المتاح للمنتج  ',
                     'available' => (int) ($product->stock_quantity ?? 0),
                 ], 422);
             }

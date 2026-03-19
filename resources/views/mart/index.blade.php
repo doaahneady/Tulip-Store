@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>توليب مارت - Tulip Mart</title>
+   
+      <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <link rel="stylesheet" href="/css/store.css?v=999&fix=store&t={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -313,6 +316,27 @@
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             border-radius: 2px;
         }
+          @media (max-width: 768px) {
+            .section-title {
+            font-family: 'El Messiri', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+          }
         .section-subtitle {
             font-size: 1.1rem;
             color: var(--text-light);
@@ -593,42 +617,47 @@
             transform: scale(1.1);
         }
         .product-body {
-            padding: 1rem;
+            padding: 0.8rem;
         }
         .product-category {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--primary);
             font-weight: 600;
             text-transform: uppercase;
-            margin-bottom: 0.2rem;
+            margin-bottom: 0.1rem;
             letter-spacing: 0.5px;
         }
         .product-name {
             font-family: 'El Messiri', sans-serif;
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: var(--text);
-            margin-bottom: 0.2rem;
+            margin-bottom: 0.1rem;
             font-weight: 600;
-            line-height: 1.3;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .product-origin {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--text-light);
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.5rem;
             display: flex;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.3rem;
         }
         .product-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            display: block;
             padding-top: 0.75rem;
             border-top: 1px solid var(--border);
         }
         .price-info {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            align-items: baseline;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.5rem;
         }
         .price-current {
             font-family:'El Messiri',sans-serif;
@@ -640,27 +669,28 @@
             font-size: 0.8rem;
             color: #9ca3af;
             text-decoration: line-through;
-            margin-top: 0.1rem;
         }
         .price-unit {
             font-size: 0.75rem;
             color: var(--text-light);
-            margin-top: 0.1rem;
+            margin-inline-start: auto;
         }
         .add-to-cart {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
+            padding: 0.6rem 1rem;
             background: var(--primary);
             color: #fff;
             border: none;
-            border-radius: 25px;
+            border-radius: 12px;
             cursor: pointer;
             font-family: 'El Messiri', sans-serif;
             font-size: 0.9rem;
             font-weight: 600;
             transition: all 0.3s ease;
+            width: 100%;
         }
         .add-to-cart:hover {
             background: var(--primary-dark);
@@ -793,14 +823,14 @@
                 <div class="price-category" style="--category-color: #f97316; --category-border: #F05928; --category-gradient: linear-gradient(90deg, #F05928, #fb923c);">
                     <div class="price-category-header">
                         
-                        <h3 class="price-category-title">الفواكه الطازجة</h3>
+                        <h3 class="price-category-title">الفواكه </h3>
                     </div>
                     <div class="price-items" id="fruitsSpecialPrices"></div>
                 </div>
                 <div class="price-category" style="--category-color: #0D464C; --category-border: #0D464C; --category-gradient: linear-gradient(90deg, #0D464C, #408C94);">
                     <div class="price-category-header">
                       
-                        <h3 class="price-category-title">الخضروات الطازجة</h3>
+                        <h3 class="price-category-title">الخضروات </h3>
                     </div>
                     <div class="price-items" id="vegetablesSpecialPrices"></div>
                 </div>
@@ -832,8 +862,8 @@
         <section class="section">
             <div class="section-header" style="display:flex; align-items:center; gap:1rem;">
                 <div>
-                    <h2 class="section-title">طازج اليوم</h2>
-                    <p class="section-subtitle">منتجات طازجة وصلت اليوم مباشرة من المزارع إلى مطبخك</p>
+                    <h2 class="section-title"> آخر الإضافات</h2>
+                    <p class="section-subtitle">منتجات وصلت اليوم</p>
                 </div>
                 <a href="/mart/products" class="view-all-btn" style="margin-inline-start:auto; display:inline-flex; align-items:center; gap:.5rem;">
                     <i class="fas fa-arrow-left"></i>
@@ -853,12 +883,17 @@
         let allProductsFlat = [];
         const categoryImageBySlug = {};
 
-        function resolvePublicImage(path) {
+        function resolvePublicImage(p) {
+            if (!p) return null;
+            // Handle if p is an object with path or url
+            const path = typeof p === 'object' ? (p.path || p.url || p.image_url || '') : String(p);
             if (!path) return null;
-            const p = String(path);
-            if (p.startsWith('http://') || p.startsWith('https://')) return p;
-            if (p.startsWith('/')) return p;
-            return `/storage/${p}`;
+            
+            const trimmed = path.trim();
+            if (!trimmed || trimmed === '/images/grocery.jpg') return null;
+            if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+            if (trimmed.startsWith('/')) return trimmed;
+            return `/storage/${trimmed}`;
         }
 
         function guessEmoji(slug, name) {
@@ -888,6 +923,10 @@
             else if (String(origin).includes('محلي')) badge = 'fresh';
             else if (p.is_featured) badge = 'new';
 
+            // Try various image fields from the API
+            const imagePath = p.primary_image_url || p.image || p.photo || 
+                             (Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : null) || '';
+
             return {
                 id: p.id,
                 name: p.name || '',
@@ -899,8 +938,8 @@
                 badge,
                 category: categoryName,
                 categorySlug,
-                imageUrl: resolvePublicImage(p.image) || (Array.isArray(p.images) && p.images[0])
-                 || null,
+                imageUrl: resolvePublicImage(imagePath),
+                fallbackImage: '/images/grocery.jpg'
             };
         }
 
@@ -990,7 +1029,9 @@
             const fruitsSpecial = first ? (products[first.id] || []).slice(0, 4) : [];
             document.getElementById('fruitsSpecialPrices').innerHTML = fruitsSpecial.map(p => `
                 <div class="price-item" onclick="addToCart('${p.id}', event)" style="--category-color: ${first?.color || '#0D464C'};">
-                    <img src="${getProductImage(p)}" alt="${p.name}" class="price-item-photo">
+                    <div class="price-item-photo" style="background-image: url('${p.fallbackImage}'); background-size: cover; background-position: center; position: relative; width: 60px; height: 60px; border-radius: 12px; overflow: hidden; flex-shrink: 0;">
+                        ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover;">` : ''}
+                    </div>
                     <div class="price-item-info">
                         <div class="price-item-name">${p.name}</div>
                         <div class="price-item-value">${p.price} ل.س لكل 1 كغ</div>
@@ -1001,7 +1042,9 @@
             const vegetablesSpecial = second ? (products[second.id] || []).slice(0, 4) : [];
             document.getElementById('vegetablesSpecialPrices').innerHTML = vegetablesSpecial.map(p => `
                 <div class="price-item" onclick="addToCart('${p.id}', event)" style="--category-color: ${second?.color || '#0D464C'};">
-                    <img src="${getProductImage(p)}" alt="${p.name}" class="price-item-photo">
+                    <div class="price-item-photo" style="background-image: url('${p.fallbackImage}'); background-size: cover; background-position: center; position: relative; width: 60px; height: 60px; border-radius: 12px; overflow: hidden; flex-shrink: 0;">
+                        ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover;">` : ''}
+                    </div>
                     <div class="price-item-info">
                         <div class="price-item-name">${p.name}</div>
                         <div class="price-item-value">${p.price} ل.س لكل 1 كغ</div>
@@ -1030,11 +1073,11 @@
                         ${p.badge === 'new' ? '<span class="badge badge-new">جديد</span>' : ''}
                         ${p.badge === 'fresh' ? '<span class="badge badge-fresh">طازج</span>' : ''}
                     </div>
-                    <div class="product-image">
+                    <div class="product-image" style="background-image: url('${p.fallbackImage}'); background-size: cover; background-position: center;">
                         <button class="product-favorite" onclick="toggleFavorite('${p.id}', event)">
                             <i class="far fa-heart"></i>
                         </button>
-                        <img src="${getProductImage(p)}" alt="${p.name}">
+                        ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}">` : ''}
                     </div>
                     <div class="product-body">
                         <div class="product-category">${p.category}</div>
@@ -1060,7 +1103,7 @@
         }
         function getProductImage(p) {
             if (p.imageUrl) return p.imageUrl;
-            return categoryImageBySlug[p.categorySlug] || '/images/grocery.jpg';
+            return categoryImageBySlug[p.categorySlug] || '';
         }
 
         function toggleFavorite(productId, event) {
@@ -1229,7 +1272,9 @@
                 
                 searchResults.innerHTML = results.slice(0, 8).map(p => `
                     <div class="search-result-item" onclick="addToCart('${p.id}', event)" style="cursor:pointer;padding:1rem;border-bottom:1px solid #f1f5f9;transition:all 0.3s;display:flex;align-items:center;gap:1rem;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
-                        <img src="${getProductImage(p)}" alt="${p.name}" style="width:42px;height:42px;border-radius:10px;object-fit:cover;box-shadow:0 4px 10px rgba(0,0,0,0.08);">
+                        <div class="search-result-image" style="background-image: url('${p.fallbackImage}'); background-size: cover; background-position: center; width:42px; height:42px; border-radius:10px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.08); flex-shrink:0;">
+                            ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}" style="width:100%; height:100%; object-fit:cover;">` : ''}
+                        </div>
                         <div class="search-result-info" style="flex:1;">
                             <div class="search-result-name" style="font-weight:600;color:#1f2937;margin-bottom:0.3rem;">${p.name}</div>
                             <div style="display:flex;align-items:center;gap:1rem;font-size:0.85rem;color:#6b7280;">

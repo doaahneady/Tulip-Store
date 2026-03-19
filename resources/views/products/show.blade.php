@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $product->name }} - Tulip Store</title>
+     <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'El Messiri',sans-serif; background: #fafafa; }
         
         .page-wrapper { min-height: 100vh; padding-bottom: 3rem; }
@@ -110,7 +111,7 @@
         .img-action-btn i { font-size: 1.2rem; color: #666; transition: all 0.3s; }
         .img-action-btn:hover { transform: scale(1.1); }
         .img-action-btn:hover i { color: #ea580c; }
-        .img-action-btn.fav-btn.active i { color: #ef4444; }
+        .img-action-btn.fav-btn.active i { color: #ef4444 !important; }
         
         .discount-tag {
             position: absolute;
@@ -126,7 +127,7 @@
         }
 
         .thumbnails {
-            display: flex;
+            display: none;
             gap: 1rem;
             justify-content: center;
         }
@@ -458,48 +459,189 @@
             .product-title { font-size: 1.5rem; }
             .current-price { font-size: 1.6rem; }
             .features-strip { grid-template-columns: repeat(2, 1fr); }
-            .thumbnails { flex-wrap: wrap; }
+            /* .thumbnails { flex-wrap: wrap; } */
             .thumb { width: 60px; height: 60px; }
             .main-image-container { padding: 1rem; border-radius: 20px; }
             .main-image { height: 250px; }
         }
 
         /* Products Grid for Related Products */
-        .products-grid {
+        .related-products-section {
+            max-width: 1300px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .related-products-section .products-grid {
             display: grid !important;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
             gap: 1.5rem !important;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Related Product Card Styling to match home-new */
+        .related-products-section .product-card {
+            border-radius: 24px;
+            border: 1px solid #e8e8e8;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: all 0.3s;
+            position: relative;
+            background: #fff;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .related-products-section .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+            border-color: #2a7080;
+        }
+
+        .related-products-section .product-image-wrapper {
+            aspect-ratio: 1 / 1 !important;
+            width: 100% !important;
+            height: auto !important;
+            background: linear-gradient(135deg, #eaf7f8, #f8f9fa);
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+
+        .related-products-section .product-img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            display: block !important;
+        }
+
+        .related-products-section .product-info-box {
+            padding: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .related-products-section .product-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.2rem;
+            font-family: 'El Messiri', sans-serif;
+            line-height: 1.4;
+        }
+
+        .related-products-section .product-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.5rem;
+            border-top: 1px solid #e8e8e8;
+            margin-top: 0.5rem;
+        }
+
+        .related-products-section .price-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .related-products-section .price-current {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #0f4f55;
+            font-family: 'El Messiri', sans-serif;
+        }
+
+        .related-products-section .price-old {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-decoration: line-through;
+        }
+
+        .related-products-section .add-cart-btn-small {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.8rem;
+            background: #0f4f55;
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'El Messiri', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(15,79,85,0.15);
+        }
+
+        .related-products-section .add-cart-btn-small:hover {
+            background: #1a6b73;
+            transform: scale(1.05);
+        }
+
+        .related-products-section .product-favorite-btn {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 5;
+            width: 32px;
+            height: 32px;
+            background: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #cbd5e1;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .related-products-section .product-favorite-btn:hover i {
+            color: #ef4444;
+        }
+        .related-products-section .product-favorite-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .related-products-section .product-favorite-btn.active i {
+            color: #ef4444 !important;
         }
 
         @media (max-width: 768px) {
-            .products-grid {
+            .related-products-section {
+                padding: 0 1rem;
+            }
+            .related-products-section .products-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
                 gap: 1rem !important;
             }
         }
 
         @media (max-width: 480px) {
-            .products-grid {
+            .related-products-section .products-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
                 gap: 0.5rem !important;
             }
-        }
-
-        .product-image-wrapper {
-            aspect-ratio: 1 / 1 !important;
-            width: 100% !important;
-            overflow: hidden !important;
-            background: #f5f5f5;
-        }
-
-        .product-img {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
+            .related-products-section .product-name {
+                font-size: 0.85rem;
+            }
+            .related-products-section .price-current {
+                font-size: 0.9rem;
+            }
+            .related-products-section .add-cart-btn-small {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.7rem;
+            }
         }
     </style>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
     @include('components.navbar')
@@ -548,12 +690,12 @@
                     }
                     $galleryImages = array_values(array_unique(array_filter($galleryImages)));
                     if (empty($galleryImages)) {
-                        $galleryImages = ['/images/gift-placeholder.svg'];
+                        $galleryImages = ['/images/tulip_store.jpg'];
                     }
                     $galleryImages = array_map(function ($p) {
                         $path = trim((string) $p);
                         if ($path === '') {
-                            return '/images/gift-placeholder.svg';
+                            return '/images/tulip_store.jpg';
                         }
                         if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
                             return $path;
@@ -577,16 +719,16 @@
                         if ($clean !== '') {
                             return '/storage/'.ltrim($clean, '/');
                         }
-                        return '/images/gift-placeholder.svg';
+                        return '/images/tulip_store.jpg';
                     }, $galleryImages);
                 @endphp
-                <div class="thumbnails">
+                <!-- <div class="thumbnails">
                     @foreach(array_slice($galleryImages, 0, 4) as $idx => $imgUrl)
                         <div class="thumb {{ $idx === 0 ? 'active' : '' }}" onclick="changeImage(this, '{{ $imgUrl }}')">
                             <img src="{{ $imgUrl }}" alt="صورة {{ $idx + 1 }}" loading="lazy" width="70" height="70" data-image-context="product-thumb-{{ $idx + 1 }}">
                         </div>
                     @endforeach
-                </div>
+                </div> -->
             </div>
 
             <!-- Product Info -->
@@ -673,7 +815,7 @@
                                             @endforeach
                                         </select>
                                     @elseif($type === 'date')
-                                        <input id="{{ $fieldId }}" type="date" value="{{ $attr->value }}" style="width:100%; height:55px; padding:0 1rem; border-radius:14px; border:2px solid #e5e7eb; background:#fff;" aria-label="{{ $attr->name }}">
+                                        <input id="{{ $fieldId }}" type="date" value="{{ $attr->value }}" style="width:100%; height:55px; padding:0 1rem; border-radius:14px; border:2px solid #e5e7eb; background:#fff;" aria-label="{{ $attr->name }}" min="1000-01-01" max="9999-12-31" oninput="if(this.value.length > 10) this.value=this.value.slice(0,10)">
                                     @elseif($type === 'checkbox')
                                         <div style="display:flex; align-items:center; gap:0.6rem; height:55px; padding:0 1rem; border-radius:14px; border:2px solid #e5e7eb; background:#fff;">
                                             <input id="{{ $fieldId }}" type="checkbox" aria-label="{{ $attr->name }}" @checked(filter_var($attr->value, FILTER_VALIDATE_BOOLEAN))>
@@ -767,26 +909,42 @@
         @endif
 
         @if(($relatedProducts ?? collect())->count() > 0)
-        <div class="description-section">
-            <div class="desc-card">
-                <h2 class="desc-title"><i class="fas fa-layer-group"></i> منتجات مشابهة</h2>
-                <div class="products-grid">
-                    @foreach($relatedProducts as $rp)
-                        <a href="{{ url('/products/'.$rp->id) }}" class="product-card" style="text-decoration:none; color:inherit; background:#fff; border:1px solid #eee; border-radius:14px; overflow:hidden; display:flex; flex-direction:column;">
-                            <div class="product-image-wrapper">
-                                <img src="{{ $rp->primary_image_url }}" srcset="{{ $rp->primary_image_srcset }}" sizes="(max-width: 768px) 50vw, 20vw" alt="{{ $rp->name }}" class="product-img" loading="lazy" width="320" height="320" onerror="this.src='/images/gift-placeholder.svg'">
+        <div class="related-products-section">
+            <h2 class="desc-title"><i class="fas fa-layer-group"></i> منتجات مشابهة</h2>
+            <div class="products-grid">
+                @foreach($relatedProducts as $rp)
+                    @php
+                        $price = (float) ($rp->discount_price ?? $rp->price ?? 0);
+                        $oldPrice = (float) ($rp->price ?? 0);
+                        $stock = (int) ($rp->stock_quantity ?? 0);
+                        $trackInv = (bool) ($rp->track_inventory ?? false);
+                        $isOutOfStock = $trackInv && $stock <= 0;
+                    @endphp
+                    <div class="product-card" data-product-id="{{ $rp->id }}" onclick="window.location.href='/products/{{ $rp->id }}'">
+                        <button class="product-favorite-btn" onclick="event.stopPropagation(); toggleProductFavorite(event, {{ $rp->id }}, this)">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        <div class="product-image-wrapper">
+                            <img src="{{ $rp->primary_image_url }}" srcset="{{ $rp->primary_image_srcset }}" sizes="(max-width: 768px) 50vw, 20vw" alt="{{ $rp->name }}" class="product-img" loading="lazy" width="320" height="320" onerror="this.src='/images/tulip_store.jpg'">
+                        </div>
+                        <div class="product-info-box">
+                            <div class="product-name">
+                                {{ $rp->name }}
                             </div>
-                            <div style="padding:0.9rem; flex:1; display:flex; flex-direction:column; justify-content:space-between;">
-                                <div style="font-family:'El Messiri',sans-serif; font-weight:700; font-size:0.95rem; margin-bottom:0.4rem; line-height:1.4;">
-                                    {{ $rp->name }}
+                            <div class="product-footer">
+                                <div class="price-wrapper">
+                                    <span class="price-current">@money($price)</span>
+                                    @if(!empty($rp->discount_price))
+                                        <span class="price-old">@money($oldPrice)</span>
+                                    @endif
                                 </div>
-                                <div style="font-weight:800; color:#ea580c;">
-                                    {{ number_format($rp->discount_price ?? $rp->price, 0) }} ل.س
-                                </div>
+                                <button type="button" class="add-cart-btn-small" onclick="event.stopPropagation(); addToCartFromList({{ $rp->id }}, this)" data-product-id="{{ $rp->id }}" {{ $isOutOfStock ? 'disabled' : '' }} style="{{ $isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : '' }}">
+                                    <i class="fas fa-plus"></i> أضف
+                                </button>
                             </div>
-                        </a>
-                    @endforeach
-                </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
         </div>
         @endif
@@ -810,6 +968,30 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             checkFavoriteStatus();
+            // Check favorites for related products
+            document.querySelectorAll('.related-products-section .product-card').forEach(card => {
+                const rpId = parseInt(card.dataset.productId);
+                const favBtn = card.querySelector('.product-favorite-btn');
+                if (isAuthenticated) {
+                    fetch('/api/wishlist', { credentials: 'same-origin' })
+                        .then(r => r.json())
+                        .then(d => {
+                            const exists = Array.isArray(d.items) && d.items.some(p => p.id === rpId);
+                            if (exists) {
+                                favBtn.classList.add('active');
+                                favBtn.querySelector('i').classList.replace('far', 'fas');
+                            }
+                        })
+                        .catch(() => {});
+                } else {
+                    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                    if (favorites.some(p => p.id === rpId)) {
+                        favBtn.classList.add('active');
+                        favBtn.querySelector('i').classList.replace('far', 'fas');
+                    }
+                }
+            });
+            
             const formatter = window.formatDualMoney || function (amountUsd) {
                 const n = Number(amountUsd || 0);
                 const rate = Number(window.TULIP_USD_TO_SYP || 0);
@@ -834,6 +1016,82 @@
                 saveEl.textContent = 'وفر ' + formatter(saveEl.dataset.usd);
             }
         });
+
+        function toggleProductFavorite(event, pid, btn) {
+            event.stopPropagation();
+            const icon = btn.querySelector('i');
+            if (isAuthenticated) {
+                fetch('/api/wishlist/toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ product_id: pid })
+                })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.action === 'added') {
+                        btn.classList.add('active');
+                        icon.classList.replace('far', 'fas');
+                    } else {
+                        btn.classList.remove('active');
+                        icon.classList.replace('fas', 'far');
+                    }
+                })
+                .catch(() => {});
+            } else {
+                let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                if (favorites.some(p => p.id === pid)) {
+                    favorites = favorites.filter(p => p.id !== pid);
+                    btn.classList.remove('active');
+                    icon.classList.replace('fas', 'far');
+                } else {
+                    // Note: We'd need the full product data here for local storage to be fully functional
+                    // For now, we'll just store the ID to show the heart is active
+                    favorites.push({id: pid});
+                    btn.classList.add('active');
+                    icon.classList.replace('far', 'fas');
+                }
+                localStorage.setItem('favorites', JSON.stringify(favorites));
+            }
+        }
+
+        async function addToCartFromList(pid, btn) {
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ product_id: pid, quantity: 1 })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    btn.innerHTML = '<i class="fas fa-check"></i>';
+                    btn.style.background = '#16a34a';
+                    if (window.updateCartCount) window.updateCartCount(data.cart_count || 0);
+                    setTimeout(() => { btn.innerHTML = originalHTML; btn.style.background = ''; btn.disabled = false; }, 2000);
+                } else {
+                    const msg = data && data.message ? data.message : 'فشل إضافة المنتج للسلة';
+                    if (window.showToast) window.showToast(msg, 3500);
+                    setTimeout(() => { btn.innerHTML = originalHTML; btn.disabled = false; }, 2000);
+                }
+            } catch (e) {
+                btn.innerHTML = '<i class="fas fa-times"></i>';
+                btn.style.background = '#dc2626';
+                setTimeout(() => { btn.innerHTML = originalHTML; btn.style.background = ''; btn.disabled = false; }, 2000);
+            }
+        }
 
         function checkFavoriteStatus() {
             const btn = document.getElementById('favBtn');
@@ -902,7 +1160,7 @@
         function changeImage(thumb, src) {
             const img = document.getElementById('mainImage');
             if (img && window.setImageWithFallback) {
-                window.setImageWithFallback(img, src, [], '/images/gift-placeholder.svg', 2000);
+                window.setImageWithFallback(img, src, [], '/images/tulip_store.jpg', 2000);
             } else if (img) {
                 img.src = src;
             }
@@ -978,7 +1236,7 @@
         window.IMAGE_FALLBACK_LOG_URL = '/api/image-fallback/log';
 
         document.addEventListener('DOMContentLoaded', function () {
-            const placeholder = '/images/gift-placeholder.svg';
+            const placeholder = '/images/tulip_store.jpg';
             const main = document.getElementById('mainImage');
             if (main && window.setImageWithFallback) {
                 window.setImageWithFallback(main, main.getAttribute('src'), [], placeholder, 2000);

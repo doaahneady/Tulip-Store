@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>سلة التسوق - Tulip Store</title>
+    <!-- fav icon -->
+    <link rel="icon" type="image/png" href="/images/fav_icon.png">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Changa:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -769,7 +772,7 @@
                 const oldPrice = item.product.discount_price ? parseFloat(item.product.price) : null;
                 const savings = oldPrice ? (oldPrice - price) * item.quantity : 0;
                 const itemTotal = price * item.quantity;
-                const placeholderImage = '/images/gift-placeholder.svg';
+                const placeholderImage = '/images/tulip_store.jpg';
                 
                 // Check if this is a custom gift/bouquet (string ID)
                 const isCustom = typeof item.id === 'string' && (item.id.startsWith('custom_gift_') || item.id.startsWith('custom_bouquet_'));
@@ -920,11 +923,18 @@
 
                 const data = await response.json();
                 
-                if (data.success) {
+                if (response.ok && data.success) {
                     loadCart();
                     updateCartCount(data.cart_count);
                     // Trigger update event
                     window.dispatchEvent(new Event('cart-updated'));
+                } else {
+                    // Show error message (e.g., stock limit)
+                    if (window.showToast) {
+                        window.showToast(data.message || 'حدث خطأ أثناء تحديث الكمية');
+                    } else {
+                        alert(data.message || 'حدث خطأ أثناء تحديث الكمية');
+                    }
                 }
             } catch (error) {
                 console.error('Error updating quantity:', error);

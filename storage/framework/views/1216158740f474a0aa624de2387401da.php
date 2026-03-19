@@ -6,6 +6,10 @@
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>Tulip Store - أرسل ابتسامتك أينما كنت</title>
 
+    <!-- fav icon -->
+    <link rel="icon" type="image/png" href="/images/fav_icon.png">
+    
+    <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <link rel="stylesheet" href="/css/store.css?v=<?php echo e(time()); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -338,27 +342,19 @@
             </a>
         </div>
         
-        <!-- Smaller Left Arrow -->
-        <button onclick="scrollCategoriesLeft()" class="category-scroll-btn category-scroll-left">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-        
-        <!-- Smaller Right Arrow -->
-        <button onclick="scrollCategoriesRight()" class="category-scroll-btn category-scroll-right">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-        
-        <div style="position:relative; overflow:hidden;">
-            <div id="categoriesScroll" style="display:flex; gap:1.5rem; overflow-x:auto; scroll-behavior:smooth; padding:0.8rem 0; scrollbar-width:none; -ms-overflow-style:none;">
-                <div id="categoriesGrid" style="display:flex; gap:1.5rem; min-width:max-content;">
-                    <?php
-                        $categoryColors = [
-                            '#ff6b35', '#2a7080', '#9b59b6', '#e74c3c', '#3498db',
-                            '#f39c12', '#1abc9c', '#e91e63', '#00bcd4', '#ff5722',
-                        ];
-                        $categoriesData = $categories ?? collect();
-                    ?>
-                    <?php $__empty_1 = true; $__currentLoopData = $categoriesData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+        <div class="marquee-container">
+            <div class="marquee-track">
+                <?php
+                    $categoryColors = [
+                        '#ff6b35', '#2a7080', '#9b59b6', '#e74c3c', '#3498db',
+                        '#f39c12', '#1abc9c', '#e91e63', '#00bcd4', '#ff5722',
+                    ];
+                    $categoriesData = ($categories && $categories->count() > 0) ? $categories : collect();
+                ?>
+                
+                <?php if($categoriesData->isNotEmpty()): ?>
+                    
+                    <?php $__currentLoopData = $categoriesData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <?php
                             $name = (string) ($category->name ?? '');
                             $slug = (string) ($category->slug ?? '');
@@ -382,20 +378,80 @@
                             </div>
                             <p class="category-name"><?php echo e($name); ?></p>
                         </div>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                        <p style="text-align:center;color:#666;font-family:'El Messiri',sans-serif;font-size:0.95rem;margin:1.5rem 0;">لا توجد تصنيفات متاحة حالياً.</p>
-                    <?php endif; ?>
-                </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+                    
+                    <?php $__currentLoopData = $categoriesData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
+                            $name = (string) ($category->name ?? '');
+                            $slug = (string) ($category->slug ?? '');
+                            $color = $categoryColors[$index % count($categoryColors)];
+                            $icon = 'fa-box';
+                            if (str_contains($name, 'ورد') || str_contains($name, 'زهور')) {
+                                $icon = 'fa-seedling';
+                            } elseif (str_contains($name, 'شوكولات')) {
+                                $icon = 'fa-cookie-bite';
+                            } elseif (str_contains($name, 'عطر')) {
+                                $icon = 'fa-spray-can-sparkles';
+                            } elseif (str_contains($name, 'مجوهر') || str_contains($name, 'اكسسو') || str_contains($name, 'إكسسو')) {
+                                $icon = 'fa-gem';
+                            } elseif (str_contains($name, 'هدايا') || str_contains($name, 'هدية')) {
+                                $icon = 'fa-gift';
+                            }
+                        ?>
+                        <div class="category-card" onclick="window.location.href='/category/<?php echo e($slug); ?>'" style="--cat-color:<?php echo e($color); ?>;">
+                            <div class="category-icon">
+                                <i class="fas <?php echo e($icon); ?>"></i>
+                            </div>
+                            <p class="category-name"><?php echo e($name); ?></p>
+                        </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php else: ?>
+                    <p style="text-align:center;width:100%;color:#666;font-family:'El Messiri',sans-serif;font-size:0.95rem;margin:1.5rem 0;">لا توجد تصنيفات متاحة حالياً.</p>
+                <?php endif; ?>
             </div>
+        </div>
             
             <!-- Gradient Overlays -->
-            <div style="position:absolute; left:0; top:0; bottom:0; width:80px; background:linear-gradient(to left, transparent, #fff); pointer-events:none; z-index:2;"></div>
-            <div style="position:absolute; right:0; top:0; bottom:0; width:80px; background:linear-gradient(to right, transparent, #fff); pointer-events:none; z-index:2;"></div>
+            <div style="position:absolute; left:0; top:0; bottom:0; width:120px; background:linear-gradient(to right, #fff, transparent); pointer-events:none; z-index:2;"></div>
+            <div style="position:absolute; right:0; top:0; bottom:0; width:120px; background:linear-gradient(to left, #fff, transparent); pointer-events:none; z-index:2;"></div>
         </div>
     </div>
 </section>
 
 <style>
+.marquee-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    padding: 0.1rem 0;
+}
+
+.marquee-track {
+    display: flex;
+    gap: 1.2rem;
+    width: max-content;
+    flex-wrap: nowrap;
+    animation: marquee 50s linear infinite;
+}
+
+.marquee-track:hover {
+    animation-play-state: paused;
+}
+
+@keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(50%); }
+}
+
+/* Ensure consistent spacing on mobile */
+@media (max-width: 768px) {
+    .marquee-track {
+        gap: 0.3rem;
+        animation-duration: 40s;
+    }
+}
+
 #categoriesScroll::-webkit-scrollbar { display: none; }
 
 .category-card {
@@ -646,7 +702,7 @@
                     $price = (float) ($product->discount_price ?? $product->price ?? 0);
                     $oldPrice = (float) ($product->price ?? 0);
                     $img = $product->primary_image_url ?? '';
-                    $img = $img ?: '/images/gift-placeholder.svg';
+                    $img = $img ?: '/images/tulip_store.jpg';
                     $imgUrl = (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) ? $img : url($img);
                 ?>
                 <div class="product-card" data-product-id="<?php echo e($product->id); ?>" onclick="window.location.href='/products/<?php echo e($product->id); ?>'">
@@ -659,7 +715,7 @@
                              loading="lazy"
                              width="320"
                              height="320"
-                             onerror="this.onerror=null; this.src='<?php echo e(url('/images/gift-placeholder.svg')); ?>';">
+                             onerror="this.onerror=null; this.src='<?php echo e(url('/images/tulip_store.jpg')); ?>';">
                     </div>
                     <div class="product-body">
                         <h3 class="product-name"><?php echo e($product->name); ?></h3>
@@ -708,7 +764,7 @@
                     $price = (float) ($product->discount_price ?? $product->price ?? 0);
                     $oldPrice = (float) ($product->price ?? 0);
                     $img = $product->primary_image_url ?? '';
-                    $img = $img ?: '/images/gift-placeholder.svg';
+                    $img = $img ?: '/images/tulip_store.jpg';
                     $imgUrl = (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) ? $img : url($img);
                 ?>
                 <div class="product-card" data-product-id="<?php echo e($product->id); ?>" onclick="window.location.href='/products/<?php echo e($product->id); ?>'">
@@ -721,7 +777,7 @@
                              loading="lazy"
                              width="320"
                              height="320"
-                             onerror="this.onerror=null; this.src='<?php echo e(url('/images/gift-placeholder.svg')); ?>';">
+                             onerror="this.onerror=null; this.src='<?php echo e(url('/images/tulip_store.jpg')); ?>';">
                     </div>
                     <div class="product-body">
                         <h3 class="product-name"><?php echo e($product->name); ?></h3>
@@ -761,7 +817,7 @@
             إبدأ بعرض منتجاتك لدينا لربح أكثر.. نظام الكتروني سهل الاستخدام.. متابعة للأرباح و المبيعات من خلال حسابك
         </p>
 
-        <a href="/trader/login" style="display:inline-flex; align-items:center; gap:0.6rem; background:#ff6b35; color:#fff; padding:0.7rem 1.9rem; border-radius:999px; text-decoration:none; font-size:1rem; font-weight:700; box-shadow:0 8px 20px rgba(0,0,0,0.25); transition:all 0.3s;">
+        <a href="/trader/login" target="_blank" style="display:inline-flex; align-items:center; gap:0.6rem; background:#ff6b35; color:#fff; padding:0.7rem 1.9rem; border-radius:999px; text-decoration:none; font-size:1rem; font-weight:700; box-shadow:0 8px 20px rgba(0,0,0,0.25); transition:all 0.3s;">
             بوابة التجار
             <i class="fas fa-store"></i>
         </a>

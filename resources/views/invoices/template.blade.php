@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <title>فاتورة #{{ $order->order_number }}</title>
     <style>
+          <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
         @page { size: A4; margin: 15mm; }
         * { box-sizing: border-box; }
         body { 

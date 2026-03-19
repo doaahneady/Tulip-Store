@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>سياسة الخصوصية - متجر توليب</title>
+     <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -47,7 +49,7 @@
                         <li>إنشاء حساب جديد في الموقع</li>
                         <li>إتمام عملية شراء أو إضافة طلب جديد</li>
                         <li>التواصل معنا عبر نموذج الاتصال أو خدمة الدعم</li>
-                        <li>الاشتراك في النشرة البريدية أو العروض الترويجية</li>
+                        <!-- <li>الاشتراك في النشرة البريدية أو العروض الترويجية</li> -->
                     </ul>
                     <p style="margin-bottom:1rem;">وقد تشمل هذه البيانات على سبيل المثال لا الحصر:</p>
                     <ul style="margin-left:1.5rem;">
@@ -56,7 +58,7 @@
                         <li>بيانات الدخول إلى الحساب</li>
                     </ul>
 
-                    <h3 style="font-size:1.3rem; font-weight:600; color:#0D464C; margin-top:1.5rem; margin-bottom:0.75rem;">ثانياً: البيانات التي تُجمع تلقائياً</h3>
+                    <!-- <h3 style="font-size:1.3rem; font-weight:600; color:#0D464C; margin-top:1.5rem; margin-bottom:0.75rem;">ثانياً: البيانات التي تُجمع تلقائياً</h3>
                     <p style="margin-bottom:0.75rem;">
                         عند زيارتك لموقعنا، قد نقوم تلقائياً بجمع بعض المعلومات التقنية مثل:
                     </p>
@@ -65,7 +67,7 @@
                         <li>نوع المتصفح ونظام التشغيل</li>
                         <li>الصفحات التي تزورها ومدة بقائك فيها</li>
                         <li>ملفات تعريف الارتباط (الكوكيز) ومعرّفات الجلسات</li>
-                    </ul>
+                    </ul> -->
                 </section>
 
                 <section style="margin-bottom:2.5rem;">
@@ -133,13 +135,13 @@
                     </p>
                 </section>
 
-                <section style="margin-bottom:2.5rem;">
+                <!-- <section style="margin-bottom:2.5rem;">
                     <h2 style="font-size:1.8rem; font-weight:600; color:#0D464C; margin-bottom:1rem;">٨. خصوصية الأطفال</h2>
                     <p>
                         خدماتنا موجهة للأفراد البالغين. لا نقوم عمداً بجمع بيانات شخصية عن الأطفال دون سن ١٨ عاماً،
                         وفي حال اكتشفنا ذلك فسنقوم بحذف هذه البيانات فوراً.
                     </p>
-                </section>
+                </section> -->
 
                 <section style="margin-bottom:2.5rem; background:#f8f9fa; padding:2rem; border-radius:12px; border:2px solid #0D464C;">
                     <h2 style="font-size:1.8rem; font-weight:600; color:#0D464C; margin-bottom:1rem;">٩. التواصل معنا</h2>
@@ -147,9 +149,9 @@
                         في حال كان لديك أي استفسار بخصوص سياسة الخصوصية أو كيفية استخدام بياناتك، يمكنك التواصل معنا عبر:
                     </p>
                     <ul style="margin-left:1.5rem; line-height:2;">
-                        <li><strong>البريد الإلكتروني:</strong> privacy@tulipstore.com</li>
-                        <li><strong>العنوان:</strong> دمشق، سوريا – منطقة الأعمال</li>
-                        <li><strong>الهاتف:</strong> ‎+963 11 123 4567</li>
+                        <!-- <li><strong>البريد الإلكتروني:</strong> privacy@tulip-os.com</li> -->
+                        <li><strong>العنوان:</strong> السويداء- ساحة تشرين   </li>
+                        <li><strong>الهاتف:</strong> ‎+963 968 355 553</li>
                     </ul>
                     <a href="/contact" style="display:inline-block; margin-top:1rem; background:#0D464C; color:#fff; padding:0.75rem 1.5rem; border-radius:8px; text-decoration:none; font-weight:600; transition:background 0.3s;" onmouseover="this.style.background='#0a3538'" onmouseout="this.style.background='#0D464C'">
                         تواصل مع الدعم

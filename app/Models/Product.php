@@ -101,7 +101,7 @@ class Product extends Model
 
         $path = trim((string) ($raw ?? ''));
         if ($path === '') {
-            return '/images/gift-placeholder.svg';
+            return '';
         }
 
         if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
@@ -129,7 +129,7 @@ class Product extends Model
             return '/storage/'.$clean;
         }
 
-        return '/images/gift-placeholder.svg';
+        return '/images/tulip_gift.jpg';
     }
 
     public function getPrimaryImageSrcsetAttribute(): string
@@ -193,6 +193,18 @@ class Product extends Model
             } else {
                 $query->whereIn('status', ['approved', 'active']);
             }
+        }
+
+        return $query;
+    }
+
+    public function scopeAvailable($query)
+    {
+        if (Schema::hasColumn('products', 'track_inventory') && Schema::hasColumn('products', 'stock_quantity')) {
+            return $query->where(function ($q) {
+                $q->where('track_inventory', false)
+                    ->orWhere('stock_quantity', '>', 0);
+            });
         }
 
         return $query;

@@ -44,7 +44,7 @@
         <div class="flex items-center justify-between gap-2 flex-wrap">
             <button form="delete-category-form" type="submit" class="btn btn-ghost text-red-600" onclick="return confirm('حذف التصنيف؟')">حذف</button>
             <div class="flex items-center gap-2">
-                <a href="{{ route('dashboard.admin.mart') }}" class="btn btn-secondary">رجوع</a>
+                <a href="{{ route('dashboard.admin.mart.index') }}" class="btn btn-secondary">رجوع</a>
                 <button type="submit" class="btn btn-primary">حفظ</button>
             </div>
         </div>

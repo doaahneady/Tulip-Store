@@ -9,7 +9,7 @@ class GiftController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Gift::active();
+        $query = Gift::active()->inStock();
 
         // Filter by category
         if ($request->has('category') && $request->category) {
@@ -53,18 +53,19 @@ class GiftController extends Controller
 
         $gifts = $query->paginate(12);
         $categories = $this->getCategories();
-        $featuredGifts = Gift::active()->featured()->take(6)->get();
+        $featuredGifts = Gift::active()->inStock()->featured()->take(6)->get();
 
         return view('gifts.index', compact('gifts', 'categories', 'featuredGifts'));
     }
 
     public function show(Gift $gift)
     {
-        if (! $gift->is_active) {
+        if (! $gift->is_active || $gift->stock_quantity <= 0) {
             abort(404);
         }
 
         $relatedGifts = Gift::active()
+            ->inStock()
             ->where('category', $gift->category)
             ->where('id', '!=', $gift->id)
             ->take(4)
@@ -76,6 +77,7 @@ class GiftController extends Controller
     public function category($category)
     {
         $gifts = Gift::active()
+            ->inStock()
             ->where('category', $category)
             ->orderBy('is_featured', 'desc')
             ->orderBy('created_at', 'desc')

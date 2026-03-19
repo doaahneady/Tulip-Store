@@ -987,6 +987,7 @@ class SuperAdminController extends Controller
     {
         $definitions = [
             'admin' => 'Super Admin',
+            'mart' => 'Tulip Mart',
             'it' => 'IT/DevOps',
             'hr' => 'Human Resources',
             'finance' => 'Finance',
@@ -1010,7 +1011,7 @@ class SuperAdminController extends Controller
     {
         $validated = $request->validate([
             'dashboards' => 'array',
-            'dashboards.*' => 'in:admin,it,hr,finance,supervisor,vendor',
+            'dashboards.*' => 'in:admin,mart,it,hr,finance,supervisor,vendor',
         ]);
 
         $keys = array_values(array_unique($validated['dashboards'] ?? []));
@@ -1454,11 +1455,23 @@ class SuperAdminController extends Controller
             $imagePath = Storage::disk('public')->putFile('products', $request->file('image'));
         }
 
+        $sku = $validated['sku'] ?? null;
+        if (empty($sku) && !empty($validated['category_id'])) {
+            $cat = Category::find($validated['category_id']);
+            if ($cat) {
+                $count = Product::where('category_id', $cat->id)->count();
+                $prefix = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $cat->name), 0, 3));
+                if (empty($prefix)) { $prefix = 'PRD'; }
+                $sku = $prefix . '-' . str_pad($count + 1, 5, '0', STR_PAD_LEFT);
+            }
+        }
+
         $data = [
             'name' => $validated['name'],
             'slug' => $slug,
+            'sku' => $sku,
         ];
-        foreach (['description','details','category_id','sku'] as $col) {
+        foreach (['description','details','category_id'] as $col) {
             if (Schema::hasColumn('products', $col) && array_key_exists($col, $validated)) {
                 $data[$col] = $validated[$col];
             }
@@ -1490,7 +1503,7 @@ class SuperAdminController extends Controller
             $product->attributes()->create(['name' => 'origin', 'value' => $validated['origin']]);
         }
 
-        return redirect()->route('dashboard.admin.mart')->with('success', 'Product created');
+        return redirect()->route('dashboard.admin.mart.index')->with('success', 'Product created');
     }
 
     public function editMartProduct(Product $product)
@@ -1546,7 +1559,21 @@ class SuperAdminController extends Controller
             'name' => $validated['name'],
             'slug' => $slug,
         ];
-        foreach (['description','details','category_id','sku'] as $col) {
+
+        $sku = $validated['sku'] ?? $product->sku;
+        $categoryChanged = isset($validated['category_id']) && (int)$validated['category_id'] !== (int)$product->category_id;
+        if ((empty($sku) || $categoryChanged) && !empty($validated['category_id'])) {
+            $cat = Category::find($validated['category_id']);
+            if ($cat) {
+                $count = Product::where('category_id', $cat->id)->count();
+                $prefix = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $cat->name), 0, 3));
+                if (empty($prefix)) { $prefix = 'PRD'; }
+                $sku = $prefix . '-' . str_pad($count + ($categoryChanged ? 1 : 0), 5, '0', STR_PAD_LEFT);
+            }
+        }
+        $updates['sku'] = $sku;
+
+        foreach (['description','details','category_id'] as $col) {
             if (Schema::hasColumn('products', $col) && array_key_exists($col, $validated)) {
                 $updates[$col] = $validated[$col];
             }
@@ -1575,7 +1602,7 @@ class SuperAdminController extends Controller
             $product->attributes()->updateOrCreate(['name'=>'origin'], ['value'=>$validated['origin']]);
         }
 
-        return redirect()->route('dashboard.admin.mart')->with('success', 'Product updated');
+        return redirect()->route('dashboard.admin.mart.index')->with('success', 'Product updated');
     }
 
     public function createMartCategory()
@@ -1635,7 +1662,7 @@ class SuperAdminController extends Controller
 
         Category::create($data);
 
-        return redirect()->route('dashboard.admin.mart')->with('success', 'Category created');
+        return redirect()->route('dashboard.admin.mart.index')->with('success', 'Category created');
     }
 
     public function editMartCategory(Category $category)
@@ -1694,7 +1721,7 @@ class SuperAdminController extends Controller
 
         $category->update($updates);
 
-        return redirect()->route('dashboard.admin.mart')->with('success', 'Category updated');
+        return redirect()->route('dashboard.admin.mart.index')->with('success', 'Category updated');
     }
 
     public function toggleGiftActive(Gift $gift)

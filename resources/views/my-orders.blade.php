@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <!-- fav icon -->
+     <link rel="icon" type="image/png" href="/images/fav_icon.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -258,7 +260,7 @@ const name = item.product_name || p?.name || 'منتج';
 const unit = (item.price ?? item.unit_price ?? 0);
 const sub = (item.subtotal ?? item.total_price ?? (n(unit) * n(item.quantity)));
 html+='<div style="display:flex;align-items:center;gap:1rem;background:#fff;padding:1rem;border-radius:10px">';
-if(img)html+='<img src="'+(String(img).startsWith('http')?img:'/storage/'+img)+'" alt="'+name+'" style="width:70px;height:70px;object-fit:cover;border-radius:8px" onerror="this.src=\'/images/gift-placeholder.svg\'">';
+if(img)html+='<img src="'+(String(img).startsWith('http')?img:'/storage/'+img)+'" alt="'+name+'" style="width:70px;height:70px;object-fit:cover;border-radius:8px" onerror="this.src=\'/images/tulip_store.jpg\'">';
 else html+='<div style="width:70px;height:70px;background:#e0e0e0;border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="fas fa-image" style="color:#999;font-size:1.5rem"></i></div>';
 html+='<div style="flex:1"><p style="margin:0 0 0.3rem 0;font-weight:700;color:#1a1a1a;font-size:1rem">'+name+'</p>';
 html+='<p style="margin:0;font-size:0.85rem;color:#666">الكمية: '+safeText(item.quantity,'0')+' × '+money(unit)+'</p></div>';
@@ -388,6 +390,8 @@ printWindow.document.write(`
     <html lang="ar" dir="rtl">
     <head>
         <meta charset="UTF-8">
+        <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
         <title>فاتورة التوصيل</title>
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">

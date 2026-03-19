@@ -38,7 +38,7 @@
         </div>
 
         <div class="flex items-center justify-end gap-2">
-            <a href="{{ route('dashboard.admin.mart') }}" class="btn btn-secondary">إلغاء</a>
+            <a href="{{ route('dashboard.admin.mart.index') }}" class="btn btn-secondary">إلغاء</a>
             <button type="submit" class="btn btn-primary">حفظ</button>
         </div>
     </form>

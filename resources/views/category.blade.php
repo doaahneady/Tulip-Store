@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $category->name }} - Tulip Store</title>
+
+    <!-- fav icon -->
+     <link rel="icon" type="image/png" href="/images/fav_icon.png">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Changa:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -171,95 +175,87 @@
                 grid-template-columns: 1fr;
                 padding: 1rem;
                 gap: 1rem;
-            }
-            .filters-sidebar {
-                display: none;
-            }
-            .mobile-filters-wrapper {
-                display: block;
-                margin-bottom: 1.5rem;
-                width: 100%;
-                overflow-x: auto;
-                white-space: nowrap;
-                padding: 0.5rem 0;
-                scrollbar-width: none; /* Firefox */
-                -ms-overflow-style: none;  /* IE and Edge */
-            }
-            .mobile-filters-wrapper::-webkit-scrollbar {
-                display: none; /* Hide scrollbar for Chrome, Safari and Opera */
-            }
-            .mobile-filters-list {
-                display: flex;
-                gap: 0.6rem;
-                padding: 0 0.5rem;
-            }
-            .mobile-filter-dropdown {
                 position: relative;
-                display: inline-block;
             }
-            .mobile-filter-btn {
+            
+            /* Sidebar Styles for Mobile */
+            .filters-sidebar {
+                display: block; /* Change from none to block but position it off-screen */
+                position: fixed;
+                top: 0;
+                right: -300px; /* Start off-screen */
+                width: 280px;
+                height: 100vh;
                 background: white;
-                border: 1px solid #d1e7e9;
-                padding: 0.5rem 1rem;
-                border-radius: 50px;
-                font-family: 'El Messiri', sans-serif;
-                font-size: 0.85rem;
-                color: #0f4f55;
-                display: flex;
-                align-items: center;
-                gap: 0.4rem;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-                white-space: nowrap;
+                z-index: 10001;
+                transition: right 0.3s ease;
+                box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+                padding: 1.5rem;
+                overflow-y: auto;
             }
-            .mobile-filter-btn.active {
-                background: #0f4f55;
-                color: white;
-                border-color: #0f4f55;
-            }
-            .mobile-filter-content {
-                display: none;
-                position: absolute;
-                top: 100%;
+
+            .filters-sidebar.active {
                 right: 0;
-                background: white;
-                min-width: 200px;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-                border-radius: 12px;
-                z-index: 1000;
-                margin-top: 0.5rem;
-                padding: 0.8rem 0;
             }
-            .mobile-filter-dropdown.active .mobile-filter-content {
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 10000;
+            }
+
+            .sidebar-overlay.active {
                 display: block;
             }
-            .mobile-filter-option {
+
+            .sidebar-header {
                 display: flex;
+                justify-content: space-between;
                 align-items: center;
-                gap: 0.8rem;
-                padding: 0.6rem 1.2rem;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid #eee;
+            }
+
+            .sidebar-header h3 {
+                font-family: 'El Messiri', sans-serif;
+                font-size: 1.2rem;
+                color: #0f4f55;
+                margin: 0;
+            }
+
+            .close-sidebar {
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                color: #666;
                 cursor: pointer;
             }
-            .mobile-filter-option:hover {
-                background: #f0f9fa;
-            }
-            .mobile-filter-option input {
-                width: 18px;
-                height: 18px;
-                accent-color: #0f4f55;
-            }
-            .mobile-filter-option label {
-                font-size: 0.9rem;
-                color: #2c3e50;
-                font-family: 'El Messiri', sans-serif;
-            }
-            .mobile-price-filter {
-                padding: 1rem;
-                min-width: 250px;
-            }
-            .mobile-price-inputs {
+
+            .mobile-filter-trigger {
                 display: flex;
                 align-items: center;
+                justify-content: center;
                 gap: 0.5rem;
+                background: white;
+                border: 1px solid #d1e7e9;
+                padding: 0.6rem 1.2rem;
+                border-radius: 50px;
+                font-family: 'El Messiri', sans-serif;
+                font-size: 0.9rem;
+                color: #0f4f55;
+                margin-bottom: 1.5rem;
+                width: fit-content;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            }
+
+            .mobile-filters-wrapper {
+                display: none; /* Hide the old horizontal filters */
             }
         }
         @media (min-width: 769px) {
@@ -322,68 +318,18 @@
     @if(View::exists('components.navbar'))
     @include('components.navbar')
 @endif
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <div class="products-container">
-        <!-- Mobile Filters -->
-        <div class="mobile-filters-wrapper">
-            <div class="mobile-filters-list">
-                @php
-                    $brands = $products->pluck('brand')->unique()->filter()->sort()->values()->take(12);
-                @endphp
-                
-                @if($brands->count() > 0)
-                <div class="mobile-filter-dropdown" id="brandDropdown">
-                    <button class="mobile-filter-btn" onclick="toggleMobileDropdown('brandDropdown')">
-                        <span>العلامة التجارية</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <div class="mobile-filter-content">
-                        @foreach($brands as $brand)
-                        <div class="mobile-filter-option">
-                            <input type="checkbox" id="m-brand-{{ $loop->index }}" value="{{ $brand }}" onchange="applyFilters(); syncDesktopFilters('brand-{{ $loop->index }}', this.checked)">
-                            <label for="m-brand-{{ $loop->index }}">{{ $brand }}</label>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-
-                <div class="mobile-filter-dropdown" id="priceDropdown">
-                    <button class="mobile-filter-btn" onclick="toggleMobileDropdown('priceDropdown')">
-                        <span>السعر</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <div class="mobile-filter-content mobile-price-filter">
-                        <div class="mobile-price-inputs">
-                            <input type="number" class="price-input" id="m-minPrice" placeholder="من" oninput="syncDesktopPrice('minPrice', this.value)">
-                            <span class="price-separator">-</span>
-                            <input type="number" class="price-input" id="m-maxPrice" placeholder="إلى" oninput="syncDesktopPrice('maxPrice', this.value)">
-                        </div>
-                        <button class="btn-primary" style="margin-top: 1rem; width: 100%; padding: 0.6rem; font-size: 0.85rem;" onclick="applyFilters(); toggleMobileDropdown('priceDropdown')">تطبيق</button>
-                    </div>
-                </div>
-
-                <div class="mobile-filter-dropdown" id="stockDropdown">
-                    <button class="mobile-filter-btn" onclick="toggleMobileDropdown('stockDropdown')">
-                        <span>التوفر</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <div class="mobile-filter-content">
-                        <div class="mobile-filter-option">
-                            <input type="checkbox" id="m-inStock" onchange="toggleAvailabilityFilter('in-stock'); syncDesktopFilters('inStock', this.checked)">
-                            <label for="m-inStock">متوفر</label>
-                        </div>
-                        <div class="mobile-filter-option">
-                            <input type="checkbox" id="m-includeOutOfStock" onchange="toggleAvailabilityFilter('include-out'); syncDesktopFilters('includeOutOfStock', this.checked)">
-                            <label for="m-includeOutOfStock">تضمين غير المتوفر</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Products Content -->
         <div class="products-content">
             <h2 style="font-family: 'El Messiri', sans-serif; font-size: 2rem; color: #0f4f55; margin: 0 0 2rem 0;">{{ $category->name }}</h2>
+            
+            <!-- Mobile Filter Trigger -->
+            <button class="mobile-filter-trigger" onclick="toggleSidebar()">
+                <i class="fas fa-filter"></i>
+                <span>تصفية النتائج</span>
+            </button>
+
             @if($products->count() > 0)
                 <div class="products-grid">
                     @foreach($products as $product)
@@ -392,7 +338,7 @@
                                 <i class="far fa-heart"></i>
                             </button>
                             <div class="product-image-wrapper" onclick="openFloatingViewFromCard(this)">
-                                <img src="{{ $product->primary_image_url }}" srcset="{{ $product->primary_image_srcset }}" sizes="(max-width: 768px) 50vw, 25vw" alt="{{ $product->name }}" class="product-img" loading="lazy" width="320" height="320" onerror="this.src='/images/gift-placeholder.svg'">
+                                <img src="{{ $product->primary_image_url }}" srcset="{{ $product->primary_image_srcset }}" sizes="(max-width: 768px) 50vw, 25vw" alt="{{ $product->name }}" class="product-img" loading="lazy" width="320" height="320" onerror="this.src='/images/tulip_store.jpg'">
                             </div>
                             <div class="product-info">
                                 <h3 class="product-name">{{ $product->name }}</h3>
@@ -431,7 +377,11 @@
         </div>
 
         <!-- Filters Sidebar -->
-        <div class="filters-sidebar">
+        <div class="filters-sidebar" id="filtersSidebar">
+            <div class="sidebar-header">
+                <h3>تصفية المنتجات</h3>
+                <button class="close-sidebar" onclick="toggleSidebar()">×</button>
+            </div>
             @php
                 $brands = $products->pluck('brand')->unique()->filter()->sort()->values()->take(12);
             @endphp
@@ -490,7 +440,7 @@
                 <span id="floatingOldPrice" class="floating-old-price" style="display: none;"></span>
                 <span id="floatingPrice" class="floating-price"></span>
             </div>
-            <div id="floatingRating" class="floating-rating" style="display: none;"></div>
+            <!-- <div id="floatingRating" class="floating-rating" style="display: none;"></div> -->
             <div class="floating-actions">
                 <button id="floatingCartBtn" class="floating-btn floating-btn-cart">
                     <i class="fas fa-shopping-cart"></i> أضف للسلة
@@ -519,7 +469,7 @@
         function openFloatingView(product) {
             currentProductId = product.id;
             
-            document.getElementById('floatingImage').src = product.primary_image_url || product.image || (Array.isArray(product.images) ? product.images[0] : null) || '/images/gift-placeholder.svg';
+            document.getElementById('floatingImage').src = product.primary_image_url || product.image || (Array.isArray(product.images) ? product.images[0] : null) || '/images/tulip_store.jpg';
             document.getElementById('floatingName').textContent = product.name;
             document.getElementById('floatingDescription').textContent = product.description || 'منتج رائع من Tulip Store';
             
@@ -655,45 +605,18 @@
             }
         }
 
-        // Mobile Filter Logic
-        function toggleMobileDropdown(id) {
-            const dropdown = document.getElementById(id);
-            const isActive = dropdown.classList.contains('active');
+        // Sidebar Toggle Function
+        function toggleSidebar() {
+            const sidebar = document.getElementById('filtersSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
             
-            // Close all dropdowns
-            document.querySelectorAll('.mobile-filter-dropdown').forEach(d => {
-                d.classList.remove('active');
-                d.querySelector('.mobile-filter-btn').classList.remove('active');
-            });
-
-            if (!isActive) {
-                dropdown.classList.add('active');
-                dropdown.querySelector('.mobile-filter-btn').classList.add('active');
-            }
-        }
-
-        // Close mobile dropdowns when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.mobile-filter-dropdown')) {
-                document.querySelectorAll('.mobile-filter-dropdown').forEach(d => {
-                    d.classList.remove('active');
-                    d.querySelector('.mobile-filter-btn').classList.remove('active');
-                });
-            }
-        });
-
-        function syncDesktopFilters(desktopId, isChecked) {
-            const desktopEl = document.getElementById(desktopId);
-            if (desktopEl) {
-                desktopEl.checked = isChecked;
-                // applyFilters is usually called from the onchange of the mobile input
-            }
-        }
-
-        function syncDesktopPrice(desktopId, value) {
-            const desktopEl = document.getElementById(desktopId);
-            if (desktopEl) {
-                desktopEl.value = value;
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            if (sidebar.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
             }
         }
 
@@ -877,7 +800,7 @@
                                 <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
                             </button>
                             <div class="product-image-wrapper" onclick="openFloatingViewFromCard(this)">
-                                <img src="${product.primary_image_url || product.image || (Array.isArray(product.images) ? product.images[0] : null) || '/images/gift-placeholder.svg'}" srcset="${product.primary_image_srcset || ''}" sizes="(max-width: 768px) 50vw, 25vw" alt="${product.name}" class="product-img" loading="lazy" width="320" height="320" onerror="this.src='/images/gift-placeholder.svg'">
+                                <img src="${product.primary_image_url || product.image || (Array.isArray(product.images) ? product.images[0] : null) || '/images/tulip_store.jpg'}" srcset="${product.primary_image_srcset || ''}" sizes="(max-width: 768px) 50vw, 25vw" alt="${product.name}" class="product-img" loading="lazy" width="320" height="320" onerror="this.src='/images/tulip_store.jpg'">
                             </div>
                             <div class="product-info">
                                 <h3 class="product-name">${product.name}</h3>
@@ -937,11 +860,6 @@
         
         document.getElementById('minPrice').addEventListener('input', debouncedApplyFilters);
         document.getElementById('maxPrice').addEventListener('input', debouncedApplyFilters);
-        
-        const mMinPrice = document.getElementById('m-minPrice');
-        const mMaxPrice = document.getElementById('m-maxPrice');
-        if (mMinPrice) mMinPrice.addEventListener('input', debouncedApplyFilters);
-        if (mMaxPrice) mMaxPrice.addEventListener('input', debouncedApplyFilters);
 
         function decodeProductFromCard(card) {
             const raw = card?.dataset?.product || '';
@@ -1019,5 +937,10 @@
         });
     </script>
     </div>
+    <!-- FOOTER -->
+<div style="position:relative; z-index:1001;">
+    @include('components.footer')
+</div>
+
 </body>
 </html>

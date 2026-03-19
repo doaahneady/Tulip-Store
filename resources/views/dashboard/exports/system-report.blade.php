@@ -3,6 +3,8 @@
 <head>
     <meta charset="utf-8">
     <title>System Report - {{ config('app.name') }}</title>
+    <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <style>
         body {
             font-family: "El Messiri", sans-serif;

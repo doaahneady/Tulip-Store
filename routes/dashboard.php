@@ -183,30 +183,12 @@ Route::prefix('admin')->name('admin.')->middleware('dashboard.role:admin')->grou
     Route::post('/gifts/{gift}/toggle-active', [SuperAdminController::class, 'toggleGiftActive'])->name('gifts.toggle-active');
     Route::post('/gifts/{gift}/toggle-featured', [SuperAdminController::class, 'toggleGiftFeatured'])->name('gifts.toggle-featured');
     Route::delete('/gifts/{gift}', [SuperAdminController::class, 'deleteGift'])->name('gifts.delete');
-    Route::get('/mart', [SuperAdminController::class, 'mart'])->name('mart');
-    Route::get('/mart/products/create', [SuperAdminController::class, 'createMartProduct'])->name('mart.products.create');
-    Route::post('/mart/products', [SuperAdminController::class, 'storeMartProduct'])->name('mart.products.store');
-    Route::get('/mart/products/{product}/edit', [SuperAdminController::class, 'editMartProduct'])->name('mart.products.edit');
-    Route::put('/mart/products/{product}', [SuperAdminController::class, 'updateMartProduct'])->name('mart.products.update');
-    Route::post('/mart/products/{product}/toggle-active', [SuperAdminController::class, 'toggleMartProductActive'])->name('mart.products.toggle-active');
-    Route::post('/mart/products/{product}/toggle-featured', [SuperAdminController::class, 'toggleMartProductFeatured'])->name('mart.products.toggle-featured');
-    Route::get('/mart/categories/create', [SuperAdminController::class, 'createMartCategory'])->name('mart.categories.create');
-    Route::post('/mart/categories', [SuperAdminController::class, 'storeMartCategory'])->name('mart.categories.store');
-    Route::get('/mart/categories/{category}/edit', [SuperAdminController::class, 'editMartCategory'])->name('mart.categories.edit');
-    Route::put('/mart/categories/{category}', [SuperAdminController::class, 'updateMartCategory'])->name('mart.categories.update');
-    Route::post('/mart/categories/{category}/toggle-active', [SuperAdminController::class, 'toggleMartCategoryActive'])->name('mart.categories.toggle-active');
-    Route::delete('/mart/categories/{category}', [SuperAdminController::class, 'deleteMartCategory'])->name('mart.categories.delete');
-    Route::get('/mart/daily-prices', [SuperAdminController::class, 'manageDailyPrices'])->name('mart.daily-prices.manage');
-    Route::post('/mart/daily-prices', [SuperAdminController::class, 'saveDailyPrices'])->name('mart.daily-prices.save');
-
     // Inventory Alerts & Restock (Flow 11)
     Route::get('/inventory/alerts', [\App\Http\Controllers\Dashboard\InventoryController::class, 'alerts'])->name('inventory.alerts');
     Route::get('/inventory/history/{id}', [\App\Http\Controllers\Dashboard\InventoryController::class, 'history'])->name('inventory.history');
     Route::post('/inventory/restock/{id}', [\App\Http\Controllers\Dashboard\InventoryController::class, 'restock'])->name('inventory.restock');
 
     Route::get('/attendance', [SuperAdminController::class, 'attendance'])->name('attendance');
-
-    Route::delete('/mart/products/{product}', [SuperAdminController::class, 'deleteMartProduct'])->name('mart.products.delete');
     Route::prefix('export')->name('export.')->group(function () {
         Route::get('/users', [SuperAdminController::class, 'exportUsers'])->name('users');
         Route::get('/orders', [SuperAdminController::class, 'exportOrders'])->name('orders');
@@ -376,4 +358,24 @@ Route::prefix('reviews')->name('reviews.')->middleware('dashboard.role:admin')->
     Route::get('/pending', [ReviewModerationController::class, 'index'])->name('pending');
     Route::post('/{review}/approve', [ReviewModerationController::class, 'approve'])->name('approve');
     Route::post('/{review}/reject', [ReviewModerationController::class, 'reject'])->name('reject');
+});
+
+// Tulip Mart Dashboard
+Route::prefix('admin/mart')->name('admin.mart.')->middleware('dashboard.role:mart,admin')->group(function () {
+    Route::get('/', [SuperAdminController::class, 'mart'])->name('index');
+    Route::get('/products/create', [SuperAdminController::class, 'createMartProduct'])->name('products.create');
+    Route::post('/products', [SuperAdminController::class, 'storeMartProduct'])->name('products.store');
+    Route::get('/products/{product}/edit', [SuperAdminController::class, 'editMartProduct'])->name('products.edit');
+    Route::put('/products/{product}', [SuperAdminController::class, 'updateMartProduct'])->name('products.update');
+    Route::post('/products/{product}/toggle-active', [SuperAdminController::class, 'toggleMartProductActive'])->name('products.toggle-active');
+    Route::post('/products/{product}/toggle-featured', [SuperAdminController::class, 'toggleMartProductFeatured'])->name('products.toggle-featured');
+    Route::delete('/products/{product}', [SuperAdminController::class, 'deleteMartProduct'])->name('products.delete');
+    Route::get('/categories/create', [SuperAdminController::class, 'createMartCategory'])->name('categories.create');
+    Route::post('/categories', [SuperAdminController::class, 'storeMartCategory'])->name('categories.store');
+    Route::get('/categories/{category}/edit', [SuperAdminController::class, 'editMartCategory'])->name('categories.edit');
+    Route::put('/categories/{category}', [SuperAdminController::class, 'updateMartCategory'])->name('categories.update');
+    Route::post('/categories/{category}/toggle-active', [SuperAdminController::class, 'toggleMartCategoryActive'])->name('categories.toggle-active');
+    Route::delete('/categories/{category}', [SuperAdminController::class, 'deleteMartCategory'])->name('categories.delete');
+    Route::get('/daily-prices', [SuperAdminController::class, 'manageDailyPrices'])->name('daily-prices.manage');
+    Route::post('/daily-prices', [SuperAdminController::class, 'saveDailyPrices'])->name('daily-prices.save');
 });

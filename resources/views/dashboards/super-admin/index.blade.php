@@ -40,10 +40,6 @@
             <i class="fas fa-hammer"></i>
             <span>Gifts Creation Stuff</span>
         </a>
-        <a href="{{ route('dashboard.admin.mart') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">
-            <i class="fas fa-store"></i>
-            <span>Tulip Mart</span>
-        </a>
         <a href="{{ route('dashboard.admin.roles') }}" class="inline-flex items-center gap-2 bg-slate-700 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition">
             <i class="fas fa-user-shield"></i>
             <span>Rules</span>

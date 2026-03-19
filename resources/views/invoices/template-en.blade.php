@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice - {{ $order->order_number }}</title>
+      <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <style>
         body { font-family: DejaVu Sans, sans-serif; margin: 0; padding: 24px; color: #111827; }
         .header { display:flex; justify-content:space-between; align-items:flex-start; gap: 16px; margin-bottom: 18px; }

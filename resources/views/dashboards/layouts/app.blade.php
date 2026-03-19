@@ -19,6 +19,8 @@
 <!DOCTYPE html>
 <html lang="{{ $dashboardLocale }}" dir="{{ $dashboardDir }}">
 <head>
+       <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -59,13 +61,26 @@
                     <div class="db4-nav-title">{{ $dashboardLocale === 'ar' ? 'لوحات التحكم' : 'Dashboards' }}</div>
 
                     @if(! $isTraderSession && $canAccess('dashboard.admin.index'))
-                        <a href="{{ route('dashboard.admin.index') }}" class="db4-nav-link {{ request()->routeIs('dashboard.admin.*') ? 'is-active' : '' }}">
+                        <a href="{{ route('dashboard.admin.index') }}" class="db4-nav-link {{ request()->routeIs('dashboard.admin.index') ? 'is-active' : '' }}">
                             <span class="db4-nav-icon" aria-hidden="true"><i class="fas fa-chart-pie"></i></span>
                             <span class="db4-nav-meta">
                                 <span class="db4-nav-label">{{ $dashboardLocale === 'ar' ? 'لوحة الإدارة' : 'Admin' }}</span>
                                 <span class="db4-nav-hint">{{ $dashboardLocale === 'ar' ? 'نظرة عامة وإدارة المنصة' : 'Overview and platform controls' }}</span>
                             </span>
                         </a>
+                    @endif
+
+                    @if(! $isTraderSession && ($canAccess('dashboard.admin.mart') || $canAccess('dashboard.admin.mart.index')))
+                        <a href="{{ route('dashboard.admin.mart.index') }}" class="db4-nav-link {{ request()->routeIs('dashboard.admin.mart.*') ? 'is-active' : '' }}">
+                            <span class="db4-nav-icon" aria-hidden="true"><i class="fas fa-store"></i></span>
+                            <span class="db4-nav-meta">
+                                <span class="db4-nav-label">{{ $dashboardLocale === 'ar' ? 'توليب مارت' : 'Tulip Mart' }}</span>
+                                <span class="db4-nav-hint">{{ $dashboardLocale === 'ar' ? 'إدارة المنتجات والتصنيفات' : 'Products and categories' }}</span>
+                            </span>
+                        </a>
+                    @endif
+
+                    @if(! $isTraderSession && $canAccess('dashboard.admin.index'))
                         <a href="{{ route('dashboard.admin.style-guide') }}" class="db4-nav-link {{ request()->routeIs('dashboard.admin.style-guide') ? 'is-active' : '' }}">
                             <span class="db4-nav-icon" aria-hidden="true"><i class="fas fa-palette"></i></span>
                             <span class="db4-nav-meta">

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>الشروط والأحكام - متجر توليب</title>
+     <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -91,9 +93,9 @@
                         في حال وجود أي استفسارات بخصوص هذه الشروط والأحكام، يمكنك التواصل معنا عبر:
                     </p>
                     <ul style="margin-left:1.5rem; line-height:2;">
-                        <li><strong>البريد الإلكتروني:</strong> legal@tulipstore.com</li>
-                        <li><strong>العنوان:</strong> دمشق، سوريا – منطقة الأعمال</li>
-                        <li><strong>الهاتف:</strong> ‎+963 11 123 4567</li>
+                        <!-- <li><strong>البريد الإلكتروني:</strong> legal@tulip-os.com</li> -->
+                        <li><strong>العنوان:</strong> السويداء ساحة تشرين  </li>
+                        <li><strong>الهاتف:</strong> ‎+963 968 355 553</li>
                     </ul>
                     <a href="/contact" style="display:inline-block; margin-top:1rem; background:#0D464C; color:#fff; padding:0.75rem 1.5rem; border-radius:8px; text-decoration:none; font-weight:600; transition:background 0.3s;" onmouseover="this.style.background='#0a3538'" onmouseout="this.style.background='#0D464C'">
                         تواصل مع الدعم

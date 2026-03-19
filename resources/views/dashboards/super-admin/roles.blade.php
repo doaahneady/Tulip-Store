@@ -52,6 +52,7 @@
                                     'cs' => 'CS',
                                     'finance' => 'Finance',
                                     'supervisor' => 'Supervisor',
+                                    
                                     'vendor' => 'Trader',
                                 ];
                             @endphp

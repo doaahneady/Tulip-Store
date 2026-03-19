@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $gift->name }} - هدايا توليب</title>
+    <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -87,12 +89,12 @@
             margin-bottom: 1rem;
         }
 
-        .gift-rating {
+        /* .gift-rating {
             display: flex;
             align-items: center;
             gap: 0.5rem;
             margin-bottom: 1rem;
-        }
+        } */
 
         .stars {
             color: #ffa500;
@@ -393,7 +395,7 @@
             <div class="gift-detail-content">
                 <!-- Images -->
                 <div class="gift-images">
-                    <img src="{{ $gift->main_image }}" alt="{{ $gift->name }}" class="main-image" loading="eager" width="900" height="500" onerror="this.src='/images/gift-placeholder.svg'">
+                    <img src="{{ $gift->main_image }}" alt="{{ $gift->name }}" class="main-image" loading="eager" width="900" height="500" onerror="this.src='/images/tulip_gift.jpg'">
                 </div>
 
                 <!-- Info -->
@@ -404,14 +406,14 @@
                         {{ $gift->category_name }}
                     </span>
 
-                    <div class="gift-rating">
+                    <!-- <div class="gift-rating">
                         <div class="stars">
                             @for($i = 1; $i <= 5; $i++)
                                 <i class="fas fa-star {{ $i <= $gift->rating ? '' : 'star-off' }}"></i>
                             @endfor
                         </div>
                         <span>({{ $gift->reviews_count }} تقييم)</span>
-                    </div>
+                    </div> -->
 
                     <div class="gift-price">{{ $gift->formatted_price }}</div>
 
@@ -488,7 +490,7 @@
                 <div class="related-grid">
                     @foreach($relatedGifts as $relatedGift)
                         <div class="related-card" onclick="window.location.href='{{ route('gifts.show', $relatedGift) }}'">
-                            <img src="{{ $relatedGift->main_image }}" alt="{{ $relatedGift->name }}" class="related-image" loading="lazy" width="320" height="200" onerror="this.src='/images/gift-placeholder.svg'">
+                            <img src="{{ $relatedGift->main_image }}" alt="{{ $relatedGift->name }}" class="related-image" loading="lazy" width="320" height="200" onerror="this.src='/images/tulip_gift.jpg'">
                             <div class="related-content">
                                 <div class="related-name">{{ $relatedGift->name }}</div>
                                 <div class="related-price">{{ $relatedGift->formatted_price }}</div>

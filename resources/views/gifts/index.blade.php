@@ -8,6 +8,8 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>هدايا توليب - Tulip Gifts</title>
+    <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}&fix=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -289,13 +291,13 @@
             font-weight: 600;
         }
         .gift-rating {
-            display: flex;
+            display: none;
             align-items: center;
             gap: 0.3rem;
             margin-bottom: 0.8rem;
         }
-        .gift-rating i { color: #f1c40f; font-size: 0.85rem; }
-        .gift-rating span { color: #95a5a6; font-size: 0.85rem; margin-right: 0.3rem; }
+        /* .gift-rating i { color: #f1c40f; font-size: 0.85rem; }
+        .gift-rating span { color: #95a5a6; font-size: 0.85rem; margin-right: 0.3rem; } */
         .gift-price {
             display: flex;
             align-items: center;
@@ -403,7 +405,7 @@
             <div class="premium-card box-card" onclick="window.location.href='/gifts/box-arrangement'">
                 <div class="card-visual">
                    
-                    <img id="boxCardImage" src="/images/mistery_box.jpg" alt="Gift Box" class="card-image" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'">
+                    <img id="boxCardImage" src="/images/mistery_box.jpg" alt="Gift Box" class="card-image" loading="lazy" >
                 </div>
                 <div class="card-content">
                     <span class="card-tag">الأكثر طلباً</span>
@@ -425,7 +427,7 @@
             <div class="premium-card flower-card" onclick="window.location.href='/gifts/flower-bouquet'">
                 <div class="card-visual">
                    
-                    <img id="bouquetCardImage" src="/images/banner.jpg" alt="Rose Bouquet" class="card-image" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'">
+                    <img id="bouquetCardImage" src="/images/banner.jpg" alt="Rose Bouquet" class="card-image" loading="lazy">
                 </div>
                 <div class="card-content">
                     <span class="card-tag">  دفعة ورورد جديدة يومياً</span>
@@ -447,7 +449,7 @@
             <div class="premium-card ready-card" onclick="document.getElementById('readyGifts').scrollIntoView({behavior: 'smooth'})">
                 <div class="card-visual">
                   
-                    <img id="readyCardImage" src="/images/footer.jpg" alt="Ready Gifts" class="card-image" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'">
+                    <img id="readyCardImage" src="/images/" alt="Ready Gifts" class="card-image" loading="lazy" onerror="this.src=''">
                 </div>
                 <div class="card-content">
                     <span class="card-tag">جاهزة للتوصيل</span>
@@ -476,12 +478,12 @@
             
             <div class="gifts-grid" id="giftsGrid"></div>
 
-            <div class="view-all-container">
+            <!-- <div class="view-all-container">
                 <button class="view-all-btn" onclick="window.location.href='/store?category=gifts'">
                     عرض جميع الهدايا
                     <i class="fas fa-arrow-left"></i>
                 </button>
-            </div>
+            </div> -->
         </section>
     </div>
 
@@ -492,7 +494,7 @@
     <script>
         function resolveMediaUrl(path) {
             const p = String(path || '').trim();
-            if (!p) return '/images/gift-placeholder.svg';
+            if (!p) return '/images/tulip_gift.jpg';
             if (p.startsWith('http://') || p.startsWith('https://')) return p;
             if (p.startsWith('/')) return p;
             const cleaned = p.replace(/^storage\//, '');
@@ -504,7 +506,7 @@
                 const res = await fetch('/api/gifts/featured');
                 const payload = await res.json();
                 const gifts = Array.isArray(payload.data) ? payload.data : [];
-                const fallback = '/images/gift-placeholder.svg';
+                const fallback = '/images/tulip_gift.jpg';
                 const img1 = document.getElementById('boxCardImage');
                 const img2 = document.getElementById('bouquetCardImage');
                 const img3 = document.getElementById('readyCardImage');
@@ -544,7 +546,7 @@
                 }
 
                 grid.innerHTML = gifts.map(gift => {
-                    const image = resolveMediaUrl(gift.main_image || (gift.images && gift.images[0]) || gift.image || '') || '/images/gift-placeholder.svg';
+                    const image = resolveMediaUrl(gift.main_image || (gift.images && gift.images[0]) || gift.image || '') || '/images/tulip_gift.jpg';
                     const rating = Number(gift.rating ?? 0);
                     const reviews = Number(gift.reviews_count ?? 0);
                     const badgeText = gift.is_featured ? 'مميز' : '';
@@ -553,7 +555,7 @@
                         <div class="gift-card" onclick="window.location.href='/gifts/${gift.id}'">
                             <div class="gift-image">
                                 ${badgeText ? `<span class="gift-badge ${badgeClass}">${badgeText}</span>` : ''}
-                                <img src="${image}" alt="${gift.name || ''}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'">
+                                <img src="${image}" alt="${gift.name || ''}" loading="lazy" onerror="this.src='/images/tulip_gift.jpg'">
                             </div>
                             <div class="gift-info">
                                 <h3 class="gift-name">${gift.name || ''}</h3>

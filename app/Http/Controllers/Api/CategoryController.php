@@ -55,7 +55,7 @@ class CategoryController extends Controller
             ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', $market))
             ->when($market === 'store' && Schema::hasColumn('categories', 'slug'), fn ($q) => $q->whereNotIn('slug', $martSlugs))
             ->with(['products' => function ($query) use ($market) {
-                $query->active();
+                $query->active()->available();
                 if (Schema::hasColumn('products', 'market')) {
                     $query->where('market', $market);
                 }
@@ -82,6 +82,7 @@ class CategoryController extends Controller
 
         $products = $category->products()
             ->active()
+            ->available()
             ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', $market))
             ->get();
 

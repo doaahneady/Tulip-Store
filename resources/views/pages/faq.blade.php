@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>الأسئلة الشائعة - متجر توليب</title>
+     <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -43,7 +45,7 @@
                     </button>
                     <div class="faq-answer" style="max-height:0; overflow:hidden; transition:max-height 0.3s;">
                         <div style="padding:1.5rem; color:#666; line-height:1.8;">
-                            <p>نوفر عدة خيارات للدفع مثل البطاقات البنكية، الدفع عند الاستلام، والتحويل البنكي حسب المتاح في مدينتك. جميع المعاملات تتم عبر بوابات دفع آمنة ومشفرة.</p>
+                            <p>نوفر عدة خيارات للدفع مثل الدفع الالكتروني visa و master  الدفع عند الاستلام. جميع المعاملات تتم عبر بوابات دفع آمنة ومشفرة.</p>
                         </div>
                     </div>
                 </div>
@@ -79,8 +81,9 @@
                     </button>
                     <div class="faq-answer" style="max-height:0; overflow:hidden; transition:max-height 0.3s;">
                         <div style="padding:1.5rem; color:#666; line-height:1.8;">
-                            <p>بعد شحن طلبك، ستصلك رسالة تحتوي على رقم تتبع. يمكنك استخدام هذا الرقم لمتابعة حالة الشحنة إما من خلال موقعنا (في حال توفر الخدمة) أو عبر موقع شركة الشحن.</p>
-                        </div>
+<p>
+    بعد شحن الطلب يمكنك تتبع حالة الطلب من خلال طلباتي ضمن بروفايلك و معرفة متى يصل .
+</p>                        </div>
                     </div>
                 </div>
 
@@ -103,7 +106,7 @@
                     </button>
                     <div class="faq-answer" style="max-height:0; overflow:hidden; transition:max-height 0.3s;">
                         <div style="padding:1.5rem; color:#666; line-height:1.8;">
-                            <p>إنشاء حساب جديد سهل جداً، فقط اضغط على خيار التسجيل في أعلى الموقع، ثم أدخل بياناتك الأساسية وقم بتأكيد رقم هاتفك أو بريدك الإلكتروني حسب النظام المعتمد.</p>
+                            <p>إنشاء حساب جديد سهل جداً، فقط اضغط على خيار التسجيل في أعلى الموقع، ثم أدخل بياناتك الأساسية وقم بتأكيد العملية و الانتظار حتى يتم الموافقة على انشاء حسابك و ثم يمكنك البدء بالتجارة . .</p>
                         </div>
                     </div>
                 </div>

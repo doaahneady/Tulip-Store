@@ -25,6 +25,8 @@ final class HtmlRenderer
 <!doctype html>
 <html lang="en">
     <head>
+     <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
         <meta charset="utf-8"/>
         <title>Test Documentation</title>
         <style>

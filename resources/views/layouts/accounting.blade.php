@@ -6,6 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'نظام المحاسبة') - Tulip Store</title>
     <link rel="stylesheet" href="/css/store.css">
+      <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -336,6 +338,38 @@
             const submenu = document.getElementById(menuId);
             submenu.classList.toggle('open');
         }
+
+        // Global date input validation (ensure 4-digit year)
+        document.addEventListener('DOMContentLoaded', function() {
+            function enforceDateLimit(input) {
+                if (!input.getAttribute('min')) input.setAttribute('min', '1000-01-01');
+                if (!input.getAttribute('max')) input.setAttribute('max', '9999-12-31');
+                
+                input.addEventListener('input', function() {
+                    if (this.value && this.value.length > 10) {
+                        this.value = this.value.slice(0, 10);
+                    }
+                });
+            }
+
+            // Apply to existing inputs
+            document.querySelectorAll('input[type="date"]').forEach(enforceDateLimit);
+
+            // Watch for dynamically added inputs
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) {
+                            if (node.tagName === 'INPUT' && node.type === 'date') {
+                                enforceDateLimit(node);
+                            }
+                            node.querySelectorAll('input[type="date"]').forEach(enforceDateLimit);
+                        }
+                    });
+                });
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        });
     </script>
     <script src="/js/accounting-interactions.js"></script>
     @stack('scripts')

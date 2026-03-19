@@ -8,33 +8,15 @@
 
 <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
     <div class="flex flex-wrap items-center gap-2">
-        <a href="{{ route('dashboard.admin.index') }}" class="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-xl hover:bg-black transition">
-            <i class="fas fa-chart-pie"></i>
-            <span>لوحة الإدارة</span>
-        </a>
-        <a href="{{ route('dashboard.admin.gifts') }}" class="inline-flex items-center gap-2 bg-pink-600 text-white px-4 py-2 rounded-xl hover:bg-pink-700 transition">
-            <i class="fas fa-gift"></i>
-            <span>Tulip Gifts</span>
-        </a>
-        <a href="{{ route('dashboard.admin.mart') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">
+       
+       
+        <a href="{{ route('dashboard.admin.mart.index') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">
             <i class="fas fa-store"></i>
             <span>Tulip Mart</span>
         </a>
         <a href="{{ route('dashboard.admin.mart.daily-prices.manage') }}" class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition">
             <i class="fas fa-tags"></i>
             <span>أسعار يومية</span>
-        </a>
-        <a href="{{ route('dashboard.admin.attendance') }}" class="inline-flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-xl hover:bg-teal-700 transition">
-            <i class="fas fa-user-clock"></i>
-            <span>حضور الموظفين</span>
-        </a>
-        <a href="{{ route('dashboard.administrative-approvals.manage') }}" class="inline-flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-xl hover:bg-amber-700 transition">
-            <i class="fas fa-clipboard-check"></i>
-            <span>الموافقات الإدارية</span>
-        </a>
-        <a href="{{ route('dashboard.admin.roles') }}" class="inline-flex items-center gap-2 bg-slate-700 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition">
-            <i class="fas fa-user-shield"></i>
-            <span>Rules</span>
         </a>
     </div>
 </div>
@@ -108,61 +90,53 @@
                     @foreach($categories as $cat)
                         @php $selected = (string) request('category_id') === (string) $cat->id; @endphp
                         <div class="block p-3 rounded-xl border @if($selected) border-indigo-400 bg-indigo-50 @else border-gray-200 hover:bg-gray-50 @endif">
-                            <div class="flex items-center justify-between">
-                                <a href="{{ route('dashboard.admin.mart', array_merge(request()->query(), ['category_id' => $cat->id])) }}" class="font-semibold text-gray-900">
+                            <div class="flex items-center justify-between gap-2 mb-2">
+                                <a href="{{ route('dashboard.admin.mart.index', array_merge(request()->query(), ['category_id' => $cat->id])) }}" class="font-bold text-gray-900">
                                     {{ $cat->name }}
+                                    <span class="text-xs text-gray-400 font-normal ms-1">({{ $cat->slug }})</span>
                                 </a>
-                                <div class="flex items-center gap-2">
-                                    <a href="{{ route('dashboard.admin.mart.categories.edit', $cat) }}" class="btn btn-ghost btn-xs">
-                                        تعديل
-                                    </a>
-                                    @if(\Illuminate\Support\Facades\Schema::hasColumn('categories', 'is_active'))
-                                        <form method="POST" action="{{ route('dashboard.admin.mart.categories.toggle-active', $cat) }}">
-                                            @csrf
-                                            <button type="submit" class="btn btn-ghost btn-xs">
-                                                {{ ($cat->is_active ?? false) ? 'تعطيل' : 'تفعيل' }}
-                                            </button>
-                                        </form>
-                                    @endif
-                                    <form method="POST" action="{{ route('dashboard.admin.mart.categories.delete', $cat) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-ghost btn-xs text-red-600" onclick="return confirm('حذف التصنيف؟')">
-                                            حذف
-                                        </button>
-                                    </form>
-                                </div>
                             </div>
-                            <div class="text-xs text-gray-500 mt-1">{{ $cat->slug }}</div>
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('dashboard.admin.mart.categories.edit', $cat) }}" class="btn btn-primary btn-sm flex-1">
+                                    <i class="fas fa-edit me-1"></i> تعديل
+                                </a>
+                                <form method="POST" action="{{ route('dashboard.admin.mart.categories.delete', $cat) }}" class="flex-1">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-outline btn-error btn-sm w-full" onclick="return confirm('حذف التصنيف؟')">
+                                        <i class="fas fa-trash me-1"></i> حذف
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     @endforeach
-                    <a href="{{ route('dashboard.admin.mart', array_diff_key(request()->query(), ['category_id' => true])) }}" class="block text-center text-sm text-indigo-600 mt-3">عرض الكل</a>
+                    <a href="{{ route('dashboard.admin.mart.index', array_diff_key(request()->query(), ['category_id' => true])) }}" class="block text-center text-sm text-indigo-600 mt-3">عرض الكل</a>
                 </div>
             @endif
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 xl:col-span-3">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 xl:col-span-3 text-sm">
         <div class="p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
             <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <h3 class="text-lg font-semibold text-gray-900">المنتجات</h3>
-                <form method="GET" action="{{ route('dashboard.admin.mart') }}" class="flex flex-wrap items-center gap-2">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="بحث بالاسم أو SKU" class="form-input w-48 md:w-72">
-                    <select name="category_id" class="form-select w-44">
+                <h3 class="text-base font-bold text-gray-900">المنتجات</h3>
+                <form method="GET" action="{{ route('dashboard.admin.mart.index') }}" class="flex flex-wrap items-center gap-2">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="بحث بالاسم أو SKU" class="form-input text-xs w-48 md:w-64">
+                    <select name="category_id" class="form-select text-xs w-40">
                         <option value="">كل التصنيفات</option>
                         @foreach(($categories ?? []) as $cat)
                             <option value="{{ $cat->id }}" @selected((string) request('category_id') === (string) $cat->id)>{{ $cat->name }}</option>
                         @endforeach
                     </select>
-                    <button type="submit" class="btn btn-ghost btn-sm">
+                    <button type="submit" class="btn btn-ghost btn-xs text-[10px]">
                         <i class="fas fa-filter"></i>
                         تصفية
                     </button>
-                    <a class="btn btn-secondary btn-sm" href="{{ route('dashboard.admin.export.products', array_merge(request()->query(), ['format' => 'csv'])) }}">
+                    <a class="btn btn-secondary btn-xs text-[10px]" href="{{ route('dashboard.admin.export.products', array_merge(request()->query(), ['format' => 'csv'])) }}">
                         <i class="fas fa-download"></i>
                         تصدير
                     </a>
-                    <a href="{{ route('dashboard.admin.mart.products.create') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('dashboard.admin.mart.products.create') }}" class="btn btn-primary btn-xs text-[10px]">
                         <i class="fas fa-plus"></i>
                         إضافة منتج
                     </a>
@@ -170,8 +144,8 @@
             </div>
         </div>
 
-        <div class="table-container">
-            <table class="table">
+        <div class="table-container text-xs">
+            <table class="table table-compact">
                 <thead>
                     <tr>
                         <th>المنتج</th>
@@ -199,31 +173,20 @@
                                 <td>{{ number_format((int) ($p->stock_quantity ?? 0)) }}</td>
                                 <td>
                                     @php $active = (bool) ($p->is_active ?? true); @endphp
-                                    <span class="px-2 py-1 rounded text-xs @if($active) bg-emerald-100 text-emerald-700 @else bg-gray-100 text-gray-700 @endif">
+                                    <span class="px-2 py-0.5 rounded text-[10px] @if($active) bg-emerald-100 text-emerald-700 @else bg-gray-100 text-gray-700 @endif">
                                         {{ $active ? 'نشط' : 'غير نشط' }}
                                     </span>
                                 </td>
                                 <td class="text-gray-600">{{ optional($p->created_at)->format('Y-m-d') }}</td>
                                 <td>
-                                    <div class="flex items-center gap-2">
-                                        <form method="POST" action="{{ route('dashboard.admin.mart.products.toggle-active', $p) }}">
-                                            @csrf
-                                            <button type="submit" class="btn btn-ghost btn-xs">
-                                                {{ $active ? 'تعطيل' : 'تفعيل' }}
-                                            </button>
-                                        </form>
-                                        @if(\Illuminate\Support\Facades\Schema::hasColumn('products', 'is_featured'))
-                                            <form method="POST" action="{{ route('dashboard.admin.mart.products.toggle-featured', $p) }}">
-                                                @csrf
-                                                <button type="submit" class="btn btn-ghost btn-xs">
-                                                    {{ ($p->is_featured ?? false) ? 'إلغاء تمييز' : 'تمييز' }}
-                                                </button>
-                                            </form>
-                                        @endif
+                                    <div class="flex items-center gap-1">
+                                        <a href="{{ route('dashboard.admin.mart.products.edit', $p) }}" class="btn btn-ghost btn-xs text-[10px] px-1 h-6 min-h-0">
+                                            تعديل
+                                        </a>
                                         <form method="POST" action="{{ route('dashboard.admin.mart.products.delete', $p) }}">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-ghost btn-xs text-red-600" onclick="return confirm('حذف المنتج؟')">
+                                            <button type="submit" class="btn btn-ghost btn-xs text-[10px] px-1 h-6 min-h-0 text-red-600" onclick="return confirm('حذف المنتج؟')">
                                                 حذف
                                             </button>
                                         </form>

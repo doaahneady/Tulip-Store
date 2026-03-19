@@ -289,6 +289,13 @@ class Employee extends Authenticatable
                 'route' => 'dashboard.vendor.index',
                 'color' => 'indigo',
             ],
+            'mart' => [
+                'name' => 'Tulip Mart',
+                'description' => 'Mart products and categories management',
+                'icon' => 'fa-store-alt',
+                'route' => 'dashboard.admin.mart',
+                'color' => 'blue',
+            ],
         ];
 
         $dashboards = [];

@@ -23,6 +23,7 @@ class ProductController extends Controller
 
         $products = Product::with('category')
             ->active()
+            ->available()
             ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
             ->where('name', 'LIKE', "%{$query}%")
             ->limit(10)
@@ -39,6 +40,7 @@ class ProductController extends Controller
         $categorySlug = $request->input('category');
 
         $baseQuery = Product::with('category')
+            ->available()
             ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'));
         $query = (clone $baseQuery)->active();
 
@@ -88,6 +90,7 @@ class ProductController extends Controller
         $query = Product::with('category')
             ->where('category_id', $category->id)
             ->active()
+            ->available()
             ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'));
 
         // Apply price filters
@@ -222,6 +225,7 @@ class ProductController extends Controller
 
         $product = Product::with($with)
             ->active()
+            ->available()
             ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
             ->findOrFail($id);
 
@@ -234,6 +238,7 @@ class ProductController extends Controller
 
         $relatedProducts = Product::query()
             ->active()
+            ->available()
             ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
             ->where('id', '!=', $product->id)
             ->when($product->category_id, fn ($q) => $q->where('category_id', $product->category_id))

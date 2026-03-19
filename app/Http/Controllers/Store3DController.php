@@ -19,7 +19,7 @@ class Store3DController extends Controller
 
         switch ($section) {
             case 'gifts':
-                $gifts = Gift::active()->take(20)->get();
+                $gifts = Gift::active()->inStock()->take(20)->get();
                 $products = $gifts->map(function ($gift) {
                     return (object) [
                         'id' => $gift->id,
@@ -83,8 +83,8 @@ class Store3DController extends Controller
 
             default:
                 // Get all products
-                $allProducts = Product::take(50)->get();
-                $allGifts = Gift::active()->take(10)->get();
+                $allProducts = Product::active()->available()->take(50)->get();
+                $allGifts = Gift::active()->inStock()->take(10)->get();
 
                 $products = $allProducts->map(function ($product) {
                     return (object) [
@@ -140,8 +140,8 @@ class Store3DController extends Controller
     public function getSectionCounts()
     {
         $counts = [
-            'gifts' => Gift::active()->count(),
-            'total' => Product::count() + Gift::active()->count(),
+            'gifts' => Gift::active()->inStock()->count(),
+            'total' => Product::active()->available()->count() + Gift::active()->inStock()->count(),
             'flowers' => rand(20, 70),
             'electronics' => rand(50, 150),
             'fashion' => rand(30, 110),

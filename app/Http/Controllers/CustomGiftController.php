@@ -20,7 +20,7 @@ class CustomGiftController extends Controller
     {
         $p = trim((string) $path);
         if ($p === '') {
-            return '/images/gift-placeholder.svg';
+            return '/images/tulip_gift.jpg';
         }
 
         if (Str::startsWith($p, ['http://', 'https://'])) {
@@ -31,7 +31,7 @@ class CustomGiftController extends Controller
 
         if (Str::startsWith($p, '/storage/')) {
             $relative = ltrim(Str::after($p, '/storage/'), '/');
-            return $relative !== '' ? '/storage/'.$relative : '/images/gift-placeholder.svg';
+            return $relative !== '' ? '/storage/'.$relative : '/images/tulip_gift.jpg';
         }
 
         if (Str::startsWith($p, '/images/')) {
@@ -49,7 +49,7 @@ class CustomGiftController extends Controller
 
         $relative = ltrim(preg_replace('#^(public/|storage/)#', '', $p), '/');
         if ($relative === '') {
-            return '/images/gift-placeholder.svg';
+            return '/images/tulip_gift.jpg';
         }
 
         return Storage::disk('public')->url($relative);
@@ -311,9 +311,10 @@ class CustomGiftController extends Controller
             foreach ($request->store_products as $pData) {
                 $p = Product::query()
                     ->active()
+                    ->available()
                     ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
                     ->find($pData['product_id'] ?? 0);
-                if ($p && ($p->stock === null || $p->stock > 0)) {
+                if ($p) {
                     $qty = max(1, (int) ($pData['qty'] ?? 1));
                     $price = (float) ($p->discount_price ?? $p->price);
                     $totalPrice += $price * $qty;

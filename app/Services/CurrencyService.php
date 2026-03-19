@@ -12,7 +12,16 @@ class CurrencyService
 
     public function preferredCurrency(?User $user = null): string
     {
+        // Force USD for dashboard and accounting routes
+        if (request()->is('dashboard*') || request()->is('accounting*')) {
+            return 'USD';
+        }
+
         $user = $user ?: Auth::user();
+        if ($user && (method_exists($user, 'hasRole') && ($user->hasRole('employee') || $user->hasRole('admin') || $user->hasRole('super_admin')))) {
+             return 'USD';
+        }
+
         $cur = strtoupper((string) ($user?->currency ?: session('currency') ?: 'USD'));
         return in_array($cur, ['USD', 'SYP'], true) ? $cur : 'USD';
     }

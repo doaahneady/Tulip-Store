@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>سياسة الإرجاع والاسترداد - متجر توليب</title>
+     <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -71,7 +73,7 @@
                     <div style="color:#666; line-height:1.8; font-size:1.05rem;">
                         <p style="margin-bottom:1rem;">لإتمام طلب إرجاع، يرجى اتباع الخطوات التالية:</p>
                         <ol style="margin-left:1.5rem; line-height:2.5;">
-                            <li><strong>التواصل معنا:</strong> قم بالتواصل مع خدمة العملاء أو عبر البريد returns@tulipstore.com مع ذكر رقم الطلب.</li>
+                            <li><strong>التواصل معنا:</strong> قم بالتواصل مع خدمة العملاء أو عبر البريد returns@tulip-os.com مع ذكر رقم الطلب.</li>
                             <li><strong>الحصول على الموافقة:</strong> سنزوّدك برقم لطلب الإرجاع وتعليمات الإرسال.</li>
                             <li><strong>تغليف المنتج:</strong> ضع المنتج في عبوته الأصلية مع جميع الملحقات والملصقات.</li>
                             <li><strong>إرفاق البيانات:</strong> أرفق رقم طلب الإرجاع ونسخة من فاتورة الشراء إن أمكن.</li>
@@ -116,9 +118,7 @@
                         <a href="/contact" style="display:inline-block; background:#0D464C; color:#fff; padding:0.75rem 1.5rem; border-radius:8px; text-decoration:none; font-weight:600; transition:background 0.3s;" onmouseover="this.style.background='#0a3538'" onmouseout="this.style.background='#0D464C'">
                             تواصل مع الدعم
                         </a>
-                        <a href="mailto:returns@tulipstore.com" style="display:inline-block; background:#fff; color:#0D464C; padding:0.75rem 1.5rem; border-radius:8px; text-decoration:none; font-weight:600; border:2px solid #0D464C; transition:all 0.3s;" onmouseover="this.style.background='#0D464C'; this.style.color='#fff'" onmouseout="this.style.background='#fff'; this.style.color='#0D464C'">
-                            راسلنا عبر البريد
-                        </a>
+                      
                     </div>
                 </section>
             </div>

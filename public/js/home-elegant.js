@@ -12,8 +12,8 @@ function createProductCardElegant(product) {
             <div class="product-info-elegant">
                 <div class="product-name-elegant">${product.name}</div>
                 <div class="product-price-elegant">
-                    <span class="price-current-elegant">${product.price} ل.س</span>
-                    ${hasDiscount ? `<span class="price-old-elegant">${product.discount_price} ل.س</span>` : ''}
+                    <span class="price-current-elegant">${product.price} </span>
+                    ${hasDiscount ? `<span class="price-old-elegant">${product.discount_price} </span>` : ''}
                 </div>
                 <div class="product-actions-elegant">
                     <button class="btn-add-cart-elegant" onclick="event.stopPropagation(); addToCart(${product.id})">

@@ -19,6 +19,8 @@
 <!DOCTYPE html>
 <html lang="<?php echo e($dashboardLocale); ?>" dir="<?php echo e($dashboardDir); ?>">
 <head>
+       <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
@@ -59,13 +61,26 @@
                     <div class="db4-nav-title"><?php echo e($dashboardLocale === 'ar' ? 'لوحات التحكم' : 'Dashboards'); ?></div>
 
                     <?php if(! $isTraderSession && $canAccess('dashboard.admin.index')): ?>
-                        <a href="<?php echo e(route('dashboard.admin.index')); ?>" class="db4-nav-link <?php echo e(request()->routeIs('dashboard.admin.*') ? 'is-active' : ''); ?>">
+                        <a href="<?php echo e(route('dashboard.admin.index')); ?>" class="db4-nav-link <?php echo e(request()->routeIs('dashboard.admin.index') ? 'is-active' : ''); ?>">
                             <span class="db4-nav-icon" aria-hidden="true"><i class="fas fa-chart-pie"></i></span>
                             <span class="db4-nav-meta">
                                 <span class="db4-nav-label"><?php echo e($dashboardLocale === 'ar' ? 'لوحة الإدارة' : 'Admin'); ?></span>
                                 <span class="db4-nav-hint"><?php echo e($dashboardLocale === 'ar' ? 'نظرة عامة وإدارة المنصة' : 'Overview and platform controls'); ?></span>
                             </span>
                         </a>
+                    <?php endif; ?>
+
+                    <?php if(! $isTraderSession && ($canAccess('dashboard.admin.mart') || $canAccess('dashboard.admin.mart.index'))): ?>
+                        <a href="<?php echo e(route('dashboard.admin.mart.index')); ?>" class="db4-nav-link <?php echo e(request()->routeIs('dashboard.admin.mart.*') ? 'is-active' : ''); ?>">
+                            <span class="db4-nav-icon" aria-hidden="true"><i class="fas fa-store"></i></span>
+                            <span class="db4-nav-meta">
+                                <span class="db4-nav-label"><?php echo e($dashboardLocale === 'ar' ? 'توليب مارت' : 'Tulip Mart'); ?></span>
+                                <span class="db4-nav-hint"><?php echo e($dashboardLocale === 'ar' ? 'إدارة المنتجات والتصنيفات' : 'Products and categories'); ?></span>
+                            </span>
+                        </a>
+                    <?php endif; ?>
+
+                    <?php if(! $isTraderSession && $canAccess('dashboard.admin.index')): ?>
                         <a href="<?php echo e(route('dashboard.admin.style-guide')); ?>" class="db4-nav-link <?php echo e(request()->routeIs('dashboard.admin.style-guide') ? 'is-active' : ''); ?>">
                             <span class="db4-nav-icon" aria-hidden="true"><i class="fas fa-palette"></i></span>
                             <span class="db4-nav-meta">

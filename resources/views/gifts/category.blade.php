@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <title>{{ $categoryName }} - هدايا توليب</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -138,12 +140,12 @@
             color: #2a7080;
         }
 
-        .gift-rating {
+        /* .gift-rating {
             display: flex;
             align-items: center;
             gap: 0.5rem;
             color: #ffa500;
-        }
+        } */
 
         .no-gifts {
             text-align: center;
@@ -226,10 +228,10 @@
                             <p class="gift-description">{{ Str::limit($gift->description, 100) }}</p>
                             <div class="gift-footer">
                                 <span class="gift-price">{{ $gift->formatted_price }}</span>
-                                <div class="gift-rating">
+                                <!-- <div class="gift-rating">
                                     <i class="fas fa-star"></i>
                                     <span>{{ number_format($gift->rating, 1) }}</span>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </div>

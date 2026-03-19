@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>تنسيق صندوق هدية - Tulip Gift</title>
+    <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <link rel="stylesheet" href="/css/store.css?v=<?php echo e(time()); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -99,7 +101,8 @@
         
         .option-card {
             background: var(--bg-warm); border: 2px solid transparent; border-radius: 16px;
-            padding: 0.8rem 0.5rem; cursor: pointer; transition: all 0.3s; text-align: center; position: relative;
+            padding: 0; cursor: pointer; transition: all 0.3s; text-align: center; position: relative;
+            overflow: hidden;
         }
         button.option-card { font-family:'El Messiri', sans-serif; width: 100%; }
         .option-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(139,105,20,0.12); border-color: rgba(212,175,55,0.3); }
@@ -107,13 +110,13 @@
         .option-card.selected::after {
             content: '✓'; position: absolute; top: 8px; left: 8px; width: 24px; height: 24px;
             background: var(--gold-gradient); border-radius: 50%; color: #fff; display: flex;
-            align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold;
+            align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; z-index: 10;
         }
-        .option-visual { width: 75px; height: 75px; margin: 0 auto 0.6rem; border-radius: 12px; background: #fff; overflow: hidden; border: 1px solid #f0f0f0; }
+        .option-visual { width: 100%; height: 160px; margin-bottom: 0.6rem; background: #fff; overflow: hidden; border-bottom: 1px solid #f0f0f0; }
         .option-visual img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .option-name { font-weight: 600; color: var(--text-dark); font-size: 0.85rem; margin-bottom: 0.2rem; }
-        .option-price { color: var(--primary); font-weight: 700; font-size: 0.8rem; }
-        .option-meta { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.1rem; }
+        .option-name { font-weight: 600; color: var(--text-dark); font-size: 0.85rem; margin-bottom: 0.2rem; padding: 0 0.5rem; }
+        .option-price { color: var(--primary); font-weight: 700; font-size: 0.8rem; padding: 0 0.5rem; }
+        .option-meta { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.1rem; padding: 0 0.5rem 0.8rem; }
 
         .three-cols-grid {
             display: grid;
@@ -183,11 +186,11 @@
             .steps-progress { flex-wrap: wrap; gap: 0.5rem; } 
             .step { padding: 0.5rem 0.8rem; font-size: 0.85rem; } 
             .options-grid, .three-cols-grid { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; } 
-            .option-card { padding: 0.5rem 0.2rem; border-radius: 12px; }
-            .option-visual { width: 45px; height: 45px; margin-bottom: 0.4rem; border-radius: 8px; }
-            .option-name { font-size: 0.65rem; }
-            .option-price { font-size: 0.6rem; }
-            .option-meta { font-size: 0.55rem; }
+            .option-card { padding: 0; border-radius: 12px; }
+            .option-visual { width: 100%; height: 80px; margin-bottom: 0.4rem; border-radius: 0; }
+            .option-name { font-size: 0.6rem; padding: 0 0.2rem; }
+            .option-price { font-size: 0.55rem; padding: 0 0.2rem; }
+            .option-meta { font-size: 0.5rem; padding: 0 0.2rem 0.4rem; }
             .option-card.selected::after { width: 16px; height: 16px; font-size: 0.6rem; top: 4px; left: 4px; }
             
             .nav-buttons { flex-direction: column; gap: 0.5rem; }
@@ -287,7 +290,7 @@
 
         function resolveMediaUrl(path) {
             const p = String(path || '').trim();
-            if (!p) return '/images/gift-placeholder.svg';
+            if (!p) return '/images/tulip_gift.jpg';
             if (p.startsWith('http://') || p.startsWith('https://')) return p;
             if (p.startsWith('/')) return `${window.location.origin}${p}`;
             const cleaned = p.replace(/^storage\//, '');
@@ -313,10 +316,10 @@
                 fillers = Array.isArray(data.fillers) ? data.fillers : [];
                 wrappings = Array.isArray(data.wrappings) ? data.wrappings : [];
                 ribbons = Array.isArray(data.ribbons) ? data.ribbons : [];
-                cards = Array.isArray(data.cards) ? data.cards : [];
-
-                cards.push({id: 1001, name: 'بطاقة عيد ميلاد', price: 0, image: '/images/birthday_card.jpeg'});
-                cards.push({id: 1002, name: 'بطاقة تهنئة', price: 0, image: '/images/f_card.png'});
+                cards = [
+                    {id: 1001, name: 'بطاقة عيد ميلاد', price: 0, image: '/images/birthday_card.jpeg'},
+                    {id: 1002, name: 'بطاقة تهنئة', price: 0, image: '/images/f_card.png'}
+                ];
 
                 const emojiByCategory = {
                     chocolate: '🍫',
@@ -348,7 +351,7 @@
             }
             document.getElementById('boxesGrid').innerHTML = boxes.map(b => `
                 <button type="button" class="option-card ${giftState.box?.id === b.id ? 'selected' : ''}" onclick="selectBox(${b.id})" aria-label="اختر ${b.name}">
-                    <div class="option-visual"><img src="${resolveMediaUrl(b.image)}" alt="${b.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                    <div class="option-visual"><img src="${resolveMediaUrl(b.image)}" alt="${b.name}" loading="lazy" onerror="this.src='/images/tulip_gift.jpg'"></div>
                     <div class="option-name">${b.name}</div>
                     <div class="option-price">${b.price} ل.س</div>
                     <div class="option-meta">حتى ${b.maxItems} عناصر</div>
@@ -367,7 +370,7 @@
                 const selectedIds = giftState.storeProducts.map(p => p.id);
                 document.getElementById('fillersGrid').innerHTML = storeProducts.length ? storeProducts.map(p => `
                     <button type="button" class="option-card ${selectedIds.includes(p.id) ? 'selected' : ''}" onclick="toggleStoreProduct(${p.id})" aria-label="أضف ${p.name}">
-                        <div class="option-visual"><img src="${resolveMediaUrl(p.image)}" alt="${p.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                        <div class="option-visual"><img src="${resolveMediaUrl(p.image)}" alt="${p.name}" loading="lazy" onerror="this.src='/images/-tulip_gift.jpg'"></div>
                         <div class="option-name">${p.name}</div>
                         <div class="option-price">${p.price} ل.س</div>
                     </button>
@@ -381,7 +384,7 @@
             }
             document.getElementById('fillersGrid').innerHTML = filtered.map(f => `
                 <button type="button" class="option-card ${giftState.fillers.includes(f.id) ? 'selected' : ''}" onclick="toggleFiller(${f.id})" aria-label="أضف ${f.name}">
-                    <div class="option-visual"><img src="${resolveMediaUrl(f.image)}" alt="${f.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                    <div class="option-visual"><img src="${resolveMediaUrl(f.image)}" alt="${f.name}" loading="lazy" onerror="this.src='/images/tulip_gift.jpg'"></div>
                     <div class="option-name">${f.name}</div>
                     <div class="option-price">${f.price} ل.س</div>
                 </button>
@@ -412,7 +415,7 @@
             }
             document.getElementById('wrappingsGrid').innerHTML = wrappings.map(w => `
                 <button type="button" class="option-card ${giftState.wrapping?.id === w.id ? 'selected' : ''}" onclick="selectWrapping(${w.id})" aria-label="اختر ${w.name}">
-                    <div class="option-visual"><img src="${resolveMediaUrl(w.image)}" alt="${w.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                    <div class="option-visual"><img src="${resolveMediaUrl(w.image)}" alt="${w.name}" loading="lazy" onerror="this.src='/images/tulip_gift.jpg'"></div>
                     <div class="option-name">${w.name}</div>
                     <div class="option-price">${w.price > 0 ? w.price + ' ل.س' : 'مجاني'}</div>
                 </button>
@@ -426,7 +429,7 @@
             }
             document.getElementById('ribbonsGrid').innerHTML = ribbons.map(r => `
                 <button type="button" class="option-card ${giftState.ribbon?.id === r.id ? 'selected' : ''}" onclick="selectRibbon(${r.id})" aria-label="اختر ${r.name}">
-                    <div class="option-visual"><img src="${resolveMediaUrl(r.image)}" alt="${r.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                    <div class="option-visual"><img src="${resolveMediaUrl(r.image)}" alt="${r.name}" loading="lazy" onerror="this.src='/images/tulip_gift.jpg'"></div>
                     <div class="option-name">${r.name}</div>
                     <div class="option-price">${r.price > 0 ? r.price + ' ل.س' : 'مجاني'}</div>
                 </button>
@@ -440,7 +443,7 @@
             }
             document.getElementById('cardsGrid').innerHTML = cards.map(c => `
                 <button type="button" class="option-card ${giftState.card?.id === c.id ? 'selected' : ''}" onclick="selectCard(${c.id})" aria-label="اختر ${c.name}">
-                    <div class="option-visual"><img src="${resolveMediaUrl(c.image)}" alt="${c.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                    <div class="option-visual"><img src="${resolveMediaUrl(c.image)}" alt="${c.name}" loading="lazy" onerror="this.src='/images/tulip_gift.jpg'"></div>
                     <div class="option-name">${c.name}</div>
                     <div class="option-price">${c.price > 0 ? c.price + ' ل.س' : 'مجاني'}</div>
                 </button>
@@ -509,7 +512,7 @@
                     ${allItems.length > 0 ? `
                         <div class="preview-items">
                             ${allItems.map(item => `
-                                <img src="${resolveMediaUrl(item.image)}" class="preview-item-img" title="${item.name}" alt="${item.name}" onerror="this.src='/images/gift-placeholder.svg'">
+                                <img src="${resolveMediaUrl(item.image)}" class="preview-item-img" title="${item.name}" alt="${item.name}" onerror="this.src='/images/tulip_gift.jpg'">
                             `).join('')}
                         </div>
                     ` : '<p style="color:var(--text-muted);font-size:0.85rem;margin-top:0.5rem;">أضف محتويات للهدية</p>'}

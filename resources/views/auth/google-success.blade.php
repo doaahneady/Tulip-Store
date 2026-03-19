@@ -2,6 +2,8 @@
 <html>
 <head>
     <title>تسجيل الدخول بنجاح</title>
+    <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <style>
         body {
             font-family: "El Messiri", sans-serif;

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>من نحن - متجر توليب</title>
+     <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -145,14 +147,14 @@
 <section class="hero-section">
     <div class="hero-content">
         <h1 class="hero-title">من نحن</h1>
-        <p class="hero-subtitle">متجر توليب - وجهتك المثالية للهدايا الفاخرة والمنتجات المميزة في المملكة العربية السعودية</p>
+        <p class="hero-subtitle">متجر توليب - وجهتك المثالية للتسوق الالكتروني من داخل السويداء</p>
     </div>
 </section>
 
 <div class="container">
     <div class="about-content">
         <p class="about-text">
-            تأسس متجر توليب بهدف تقديم تجربة تسوق استثنائية لعملائنا الكرام. نحن نؤمن بأن كل هدية تحمل معها قصة ومشاعر، ولذلك نحرص على اختيار أجود المنتجات وتقديمها بأفضل طريقة ممكنة. من الهدايا الفاخرة إلى المنتجات اليومية، نسعى دائماً لتلبية احتياجاتكم وتجاوز توقعاتكم.
+            تأسس متجر توليب بهدف تقديم تجربة تسوق استثنائية لعملائنا الكرام و توفير تجربة تسوق مريحة و توصيل طلباتكم لبيتكم . 
         </p>
     </div>
 
@@ -172,7 +174,7 @@
                 <i class="fas fa-truck"></i>
             </div>
             <h3 class="feature-title">توصيل سريع</h3>
-            <p class="feature-desc">خدمة توصيل سريعة وموثوقة لجميع مناطق المملكة</p>
+            <p class="feature-desc">خدمة توصيل سريعة وموثوقة للمدينة و جميع قرى المحافظة</p>
         </div>
         
         <div class="feature-card">
@@ -192,7 +194,7 @@
         </div>
     </div>
 
-    <div class="stats-section">
+    <!-- <div class="stats-section">
         <div class="stats-grid">
             <div class="stat-item">
                 <div class="stat-number">+10,000</div>
@@ -211,7 +213,7 @@
                 <div class="stat-label">دعم متواصل</div>
             </div>
         </div>
-    </div>
+    </div> -->
 </div>
 
 <!-- Footer -->

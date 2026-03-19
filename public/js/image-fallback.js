@@ -77,7 +77,7 @@
     async function setImageWithFallback(img, primary, variants, placeholder, timeoutMs) {
         if (!img) return;
         const base = String(primary || '').trim();
-        const placeholderUrl = String(placeholder || '').trim() || '/images/gift-placeholder.svg';
+        const placeholderUrl = String(placeholder || '').trim() || '/images/tulip_store.jpg';
         const list = uniqueList([
             base,
             normalizeHttps(base),

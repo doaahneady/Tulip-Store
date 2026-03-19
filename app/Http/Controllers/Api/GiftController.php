@@ -10,7 +10,7 @@ class GiftController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Gift::active();
+        $query = Gift::active()->inStock();
 
         // Filter by category
         if ($request->has('category') && $request->category) {
@@ -63,16 +63,17 @@ class GiftController extends Controller
 
     public function show($id)
     {
-        $gift = Gift::active()->find($id);
+        $gift = Gift::active()->inStock()->find($id);
 
         if (! $gift) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gift not found',
+                'message' => 'Gift not found or out of stock',
             ], 404);
         }
 
         $relatedGifts = Gift::active()
+            ->inStock()
             ->where('category', $gift->category)
             ->where('id', '!=', $gift->id)
             ->take(4)
@@ -87,9 +88,9 @@ class GiftController extends Controller
 
     public function featured()
     {
-        $gifts = Gift::active()->featured()->take(6)->get();
+        $gifts = Gift::active()->inStock()->featured()->take(6)->get();
         if ($gifts->isEmpty()) {
-            $gifts = Gift::active()->orderBy('created_at', 'desc')->take(6)->get();
+            $gifts = Gift::active()->inStock()->orderBy('created_at', 'desc')->take(6)->get();
         }
 
         return response()->json([

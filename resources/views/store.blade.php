@@ -6,6 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Tulip Store</title>
     <!-- Google Fonts: El Messiri and Changa (same as auth pages) -->
+     <!-- fav icon -->
+    <link rel="icon" type="image/png" href="/images/fav_icon.png">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Changa:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -405,7 +408,7 @@
                         const imgUrl = (p) => {
                             const u = p.primary_image_url || p.image || (Array.isArray(p.images) && p.images[0]) || '';
                             const s = String(u || '').trim();
-                            if (!s) return '/images/gift-placeholder.svg';
+                            if (!s) return '/images/tulip_store.jpg';
                             if (s.startsWith('http://') || s.startsWith('https://')) return s;
                             return s.startsWith('/') ? s : ('/storage/' + s.replace(/^storage\//, ''));
                         };
@@ -424,7 +427,7 @@
                                     <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
                                 </button>
                                 <div class="product-image">
-                                    <img src="${imgUrl(product)}" alt="${escapeHtml(product.name)}" class="product-img" loading="lazy" width="320" height="320" onerror="this.onerror=null; this.src='/images/gift-placeholder.svg';">
+                                    <img src="${imgUrl(product)}" alt="${escapeHtml(product.name)}" class="product-img" loading="lazy" width="320" height="320" onerror="this.onerror=null; this.src='/images/tulip_store.jpg';">
                                 </div>
                                 <div class="product-body">
                                     <h3 class="product-name">${escapeHtml(product.name)}</h3>
@@ -458,7 +461,7 @@
             currentProductId = product.id;
             
             // Set product data
-            document.getElementById('floatingImage').src = product.primary_image_url || product.image || '/images/gift-placeholder.svg';
+            document.getElementById('floatingImage').src = product.primary_image_url || product.image || '/images/tulip_store.jpg';
             document.getElementById('floatingName').textContent = product.name;
             document.getElementById('floatingDescription').textContent = product.description || 'منتج رائع من Tulip Store';
             

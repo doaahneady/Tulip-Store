@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <!-- fav icon -->
+        <link rel="icon" type="image/png" href="/images/fav_icon.png">
     <title>تنسيق باقة ورد - Tulip Flowers</title>
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -85,20 +87,21 @@
         
         .option-card {
             background: var(--bg-warm); border: 2px solid transparent; border-radius: 16px;
-            padding: 1.2rem; cursor: pointer; transition: all 0.3s; text-align: center; position: relative;
+            padding: 0; cursor: pointer; transition: all 0.3s; text-align: center; position: relative;
+            overflow: hidden;
         }
         button.option-card { font-family:  'El Messiri', sans-serif; width: 100%; }
         .option-card.selected { border-color: var(--accent); background: linear-gradient(135deg, #fff5f7, #fce4ec); }
         .option-card.selected::after {
             content: '✓'; position: absolute; top: 8px; left: 8px; width: 24px; height: 24px;
             background: var(--pink-gradient); border-radius: 50%; color: #fff; display: flex;
-            align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold;
+            align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; z-index: 10;
         }
-        .option-visual { width: 80px; height: 80px; margin: 0 auto 0.8rem; border-radius: 14px; background: #fff; overflow: hidden; }
+        .option-visual { width: 100%; height: 160px; margin-bottom: 0.8rem; background: #fff; overflow: hidden; border-bottom: 1px solid #fce4ec; }
         .option-visual img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .option-name { font-weight: 600; color: var(--text-dark); font-size: 0.85rem; margin-bottom: 0.2rem; }
-        .option-price { color: var(--primary); font-weight: 700; font-size: 0.8rem; }
-        .option-meta { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.1rem; }
+        .option-name { font-weight: 600; color: var(--text-dark); font-size: 0.85rem; margin-bottom: 0.2rem; padding: 0 0.5rem; }
+        .option-price { color: var(--primary); font-weight: 700; font-size: 0.8rem; padding: 0 0.5rem; }
+        .option-meta { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.1rem; padding: 0 0.5rem 0.8rem; }
 
         .option-card .tooltip {
             position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%) scale(0.9);
@@ -170,11 +173,11 @@
             .steps-progress { flex-wrap: wrap; gap: 0.5rem; } 
             .step { padding: 0.5rem 0.8rem; font-size: 0.85rem; } 
             .options-grid { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; } 
-            .option-card { padding: 0.5rem 0.2rem; border-radius: 12px; }
-            .option-visual { width: 45px; height: 45px; margin-bottom: 0.4rem; border-radius: 8px; }
-            .option-name { font-size: 0.65rem; }
-            .option-price { font-size: 0.6rem; }
-            .option-meta { font-size: 0.55rem; }
+            .option-card { padding: 0; border-radius: 12px; }
+            .option-visual { width: 100%; height: 80px; margin-bottom: 0.4rem; border-radius: 0; }
+            .option-name { font-size: 0.6rem; padding: 0 0.2rem; }
+            .option-price { font-size: 0.55rem; padding: 0 0.2rem; }
+            .option-meta { font-size: 0.5rem; padding: 0 0.2rem 0.4rem; }
             .option-card.selected::after { width: 16px; height: 16px; font-size: 0.6rem; top: 4px; left: 4px; }
         }
     </style>
@@ -232,8 +235,8 @@
                     <div class="message-section">
                         <h3 class="section-label"><i class="fas fa-pen-fancy"></i> رسالتك</h3>
                         <input type="text" id="recipientName" class="elegant-input" placeholder="اسم المستلم (اختياري)">
-                        <textarea id="cardMessage" class="elegant-textarea" placeholder="اكتب رسالتك هنا..." maxlength="150"></textarea>
-                        <div class="char-counter"><span id="charCount">0</span>/150</div>
+                        <textarea id="cardMessage" class="elegant-textarea" placeholder="اكتب رسالتك هنا..." maxlength="200"></textarea>
+                        <div class="char-counter"><span id="charCount">0</span>/200</div>
                     </div>
                 </div>
             </div>
@@ -268,7 +271,7 @@
 
         function resolveMediaUrl(path) {
             const p = String(path || '').trim();
-            if (!p) return '/images/gift-placeholder.svg';
+            if (!p) return '/images/tulip_gift.jpg';
             if (p.startsWith('http://') || p.startsWith('https://')) return p;
             if (p.startsWith('/')) return `${window.location.origin}${p}`;
             const cleaned = p.replace(/^storage\//, '');
@@ -295,14 +298,14 @@
                         id: f.id,
                         name: f.name,
                         price: Number(f.price || 0),
-                        image: f.image || '/images/gift-placeholder.svg'
+                        image: f.image || '/images/tulip_gift.jpg'
                     }));
 
                 wraps = wrps.map(w => ({
                     id: w.id,
                     name: w.name,
                     price: Number(w.price || 0),
-                    image: w.image || '/images/gift-placeholder.svg'
+                    image: w.image || '/images/tulip_gift.jpg'
                 }));
 
                 extras = fillers
@@ -311,15 +314,13 @@
                         id: f.id,
                         name: f.name,
                         price: Number(f.price || 0),
-                        image: f.image || '/images/gift-placeholder.svg'
+                        image: f.image || '/images/tulip_gift.jpg'
                     }));
 
-                cards = crds.map(c => ({
-                    id: c.id,
-                    name: c.name,
-                    price: Number(c.price || 0),
-                    image: c.image || '/images/gift-placeholder.svg'
-                }));
+                cards = [
+                    {id: 1001, name: 'بطاقة عيد ميلاد', price: 0, image: '/images/birthday_card.jpeg'},
+                    {id: 1002, name: 'بطاقة تهنئة', price: 0, image: '/images/f_card.png'}
+                ];
 
                 const sizeDesc = (size) => {
                     switch ((size || '').toLowerCase()) {
@@ -344,7 +345,7 @@
                     name: b.name || (b.size ? ('باقة ' + b.size) : 'حجم باقة'),
                     emoji: sizeEmoji(b.size),
                     price: Number(b.price || 0),
-                    image: b.image || '/images/gift-placeholder.svg',
+                    image: b.image || '/images/tulip_gift.jpg',
                     desc: sizeDesc(b.size)
                 }));
             } catch (e) {
@@ -356,11 +357,11 @@
             document.getElementById('flowersGrid').innerHTML = flowers.map(f => `
                 <button type="button" class="option-card ${state.flowers.includes(f.id) ? 'selected' : ''}" onclick="toggleFlower(${f.id})" aria-label="أضف ${f.name}">
                     <div class="tooltip">
-                        <div class="tooltip-img"><img src="${resolveMediaUrl(f.image)}" alt="${f.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                        <div class="tooltip-img"><img src="${resolveMediaUrl(f.image)}" alt="${f.name}" loading="lazy" onerror="this.src='/images/tulip_gift.jpg'"></div>
                         <div class="tooltip-name">${f.name}</div>
                         <div class="tooltip-price">${f.price} ل.س / وردة</div>
                     </div>
-                    <div class="option-visual"><img src="${resolveMediaUrl(f.image)}" alt="${f.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                    <div class="option-visual"><img src="${resolveMediaUrl(f.image)}" alt="${f.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/tulip_gift.jpg'"></div>
                     <div class="option-name">${f.name}</div>
                     <div class="option-price">${f.price} ل.س</div>
                 </button>
@@ -370,7 +371,7 @@
         function loadSizes() {
             document.getElementById('sizesGrid').innerHTML = sizes.map(s => `
                 <button type="button" class="option-card ${state.size?.id === s.id ? 'selected' : ''}" onclick="selectSize(${s.id})" aria-label="اختر ${s.name}">
-                    <div class="option-visual"><img src="${resolveMediaUrl(s.image)}" alt="${s.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                    <div class="option-visual"><img src="${resolveMediaUrl(s.image)}" alt="${s.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/tulip_gift.jpg'"></div>
                     <div class="option-name">${s.name}</div>
                     <div class="option-price">${s.price} ل.س</div>
                     <div class="option-meta">${s.desc}</div>
@@ -382,11 +383,11 @@
             document.getElementById('wrapsGrid').innerHTML = wraps.map(w => `
                 <button type="button" class="option-card ${state.wrap?.id === w.id ? 'selected' : ''}" onclick="selectWrap(${w.id})" aria-label="اختر ${w.name}">
                     <div class="tooltip">
-                        <div class="tooltip-img"><img src="${resolveMediaUrl(w.image)}" alt="${w.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                        <div class="tooltip-img"><img src="${resolveMediaUrl(w.image)}" alt="${w.name}" loading="lazy" onerror="this.src='/images/tulip_gift.jpg'"></div>
                         <div class="tooltip-name">${w.name}</div>
                         <div class="tooltip-price">${w.price > 0 ? w.price + ' ل.س' : 'مجاني'}</div>
                     </div>
-                    <div class="option-visual"><img src="${resolveMediaUrl(w.image)}" alt="${w.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                    <div class="option-visual"><img src="${resolveMediaUrl(w.image)}" alt="${w.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/tulip_gift.jpg'"></div>
                     <div class="option-name">${w.name}</div>
                     <div class="option-price">${w.price > 0 ? w.price + 'ل.س' : 'مجاني'}</div>
                 </button>
@@ -396,7 +397,7 @@
         function loadExtras() {
             document.getElementById('extrasGrid').innerHTML = extras.map(e => `
                 <button type="button" class="option-card ${state.extras.includes(e.id) ? 'selected' : ''}" onclick="toggleExtra(${e.id})" aria-label="أضف ${e.name}">
-                    <div class="option-visual"><img src="${resolveMediaUrl(e.image)}" alt="${e.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                    <div class="option-visual"><img src="${resolveMediaUrl(e.image)}" alt="${e.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/tulip_gift.jpg'"></div>
                     <div class="option-name">${e.name}</div>
                     <div class="option-price">${e.price} ل.س</div>
                 </button>
@@ -406,7 +407,7 @@
         function loadCards() {
             document.getElementById('cardsGrid').innerHTML = cards.map(c => `
                 <button type="button" class="option-card ${state.card?.id === c.id ? 'selected' : ''}" onclick="selectCard(${c.id})" aria-label="اختر ${c.name}">
-                    <div class="option-visual"><img src="${resolveMediaUrl(c.image)}" alt="${c.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/gift-placeholder.svg'"></div>
+                    <div class="option-visual"><img src="${resolveMediaUrl(c.image)}" alt="${c.name}" loading="lazy" width="80" height="80" onerror="this.src='/images/tulip_gift.jpg'"></div>
                     <div class="option-name">${c.name}</div>
                     <div class="option-price">${c.price > 0 ? c.price + ' ل.س' : 'مجاني'}</div>
                 </button>
@@ -414,8 +415,23 @@
         }
 
         function setupMessage() {
-            document.getElementById('cardMessage').addEventListener('input', e => { document.getElementById('charCount').textContent = e.target.value.length; state.message = e.target.value; });
-            document.getElementById('recipientName').addEventListener('input', e => { state.recipientName = e.target.value; });
+            const cardMsg = document.getElementById('cardMessage');
+            const recipName = document.getElementById('recipientName');
+            const charCount = document.getElementById('charCount');
+
+            cardMsg.addEventListener('input', e => {
+                state.message = e.target.value;
+                charCount.textContent = e.target.value.length;
+            });
+
+            recipName.addEventListener('input', e => {
+                state.recipientName = e.target.value;
+            });
+
+            // Sync initial state in case of browser autofill
+            state.message = cardMsg.value;
+            state.recipientName = recipName.value;
+            charCount.textContent = cardMsg.value.length;
         }
 
         function toggleFlower(id) {
@@ -433,7 +449,7 @@
         function updatePreview() {
             const preview = document.getElementById('bouquetPreview');
             if (state.flowers.length === 0) { 
-                preview.innerHTML = `<div class="preview-empty"><div class="empty-icon"><img src="/images/gift-placeholder.svg" alt="flower"></div><p>اختر الزهور للبدء</p></div>`; 
+                preview.innerHTML = `<div class="preview-empty"><div class="empty-icon"><img src="/images/tulip_gift.jpg" alt="flower"></div><p>اختر الزهور للبدء</p></div>`; 
                 return; 
             }
             
@@ -477,7 +493,7 @@
             summaryEl.innerHTML = items.length ? items.map(i => `
                 <div class="summary-item">
                     <div style="display:flex; align-items:center; gap:0.8rem;">
-                        <img src="${resolveMediaUrl(i.image)}" style="width:35px; height:35px; object-fit:cover; border-radius:6px; background:#fce4ec;" onerror="this.src='/images/gift-placeholder.svg'">
+                        <img src="${resolveMediaUrl(i.image)}" style="width:35px; height:35px; object-fit:cover; border-radius:6px; background:#fce4ec;" onerror="this.src='/images/tulip_gift.jpg'">
                         <span class="summary-item-name">${i.name}</span>
                     </div>
                     <span class="summary-item-price">${i.price} ل.س</span>

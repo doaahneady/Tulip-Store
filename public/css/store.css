@@ -5,7 +5,8 @@
 @font-face {
   font-family: "Montserrat-Alt1 SemBd";
   src: url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.eot");
-  src: url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.eot?#iefix")
+  src:
+    url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.eot?#iefix")
       format("embedded-opentype"),
     url("https://db.onlinewebfonts.com/t/ba155473d72fb574bd945b20f4598560.woff2")
       format("woff2"),
@@ -20,7 +21,8 @@
 @font-face {
   font-family: "Montserrat-Alt";
   src: url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.eot");
-  src: url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.eot?#iefix")
+  src:
+    url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.eot?#iefix")
       format("embedded-opentype"),
     url("https://db.onlinewebfonts.com/t/29295d2928c6bd76a76c9e789982bc85.woff2")
       format("woff2"),
@@ -680,6 +682,102 @@ h6 {
 
 /* Footer */
 
+/* User Dropdown Global Styles */
+.user-logged-in {
+  position: relative;
+  cursor: pointer;
+}
+
+.user-name-pill {
+  display: flex;
+  align-items: center;
+  background: #2a7080;
+  color: white;
+  padding: 0.5rem 1.2rem;
+  border-radius: 20px;
+  font-family: "El Messiri", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: #e8f4f6;
+  border-radius: 20px;
+  min-width: 220px;
+  padding: 0.8rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  direction: rtl;
+}
+
+.user-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Keep dropdown RTL in both languages */
+[dir="ltr"] .user-dropdown {
+  direction: rtl;
+}
+
+[dir="ltr"] .user-dropdown .dropdown-item {
+  text-align: right;
+}
+
+.user-dropdown .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-family: "El Messiri", sans-serif;
+  font-size: 0.9rem;
+  color: #2a7080;
+  margin-bottom: 0.3rem;
+}
+
+.user-dropdown .dropdown-item:hover {
+  background: rgba(42, 112, 128, 0.1);
+}
+
+.user-dropdown .dropdown-item i {
+  width: 20px;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.user-dropdown .logout-item {
+  color: #ef4444;
+  border-top: 1px solid rgba(42, 112, 128, 0.2);
+  margin-top: 0.5rem;
+  padding-top: 0.8rem;
+}
+
+.user-dropdown .logout-item:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.user-dropdown .dropdown-item.disabled {
+  color: #999;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.user-dropdown .dropdown-item.disabled:hover {
+  background: transparent;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
   .nav-wrapper {
@@ -782,7 +880,6 @@ h6 {
     padding: 0.4rem 1rem;
     gap: 1rem;
     overflow: hidden;
-    
   }
 
   .navbar-logo {
@@ -815,14 +912,12 @@ h6 {
     display: none;
   }
 
-
   .navbar-icons {
     gap: 1rem;
   }
 
   .nav-icon-item > i {
     font-size: 1.2rem;
-    
   }
 
   /* Disable hover hiding on mobile */
@@ -847,7 +942,6 @@ h6 {
   /* Search Dropdown */
   .search-dropdown {
     max-height: 300px;
-    
   }
 
   .search-chip {
@@ -877,7 +971,7 @@ h6 {
   .tulip-navbar {
     padding: 0.3rem 0;
     width: 100%;
-    overflow-x: hidden;
+    overflow: visible;
   }
 
   .navbar-wrapper {
@@ -888,10 +982,25 @@ h6 {
     width: 96%;
     max-width: 100%;
     border-radius: 20px;
+    overflow: visible;
+  }
+  .user-dropdown {
+    right: 0;
+    left: auto;
+    transform: translateX(0) translateY(-10px);
+    min-width: 200px;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
   }
 
+  .user-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0) translateY(0);
+  }
   .navbar-logo {
-    font-size: 1.2rem;
+    font-size: 1.9rem;
     order: 2;
     flex-shrink: 1;
   }
@@ -1005,103 +1114,6 @@ h6 {
   .hero-card {
     border-radius: 20px;
   }
-}
-
-/* Logged-in User Name Pill */
-.user-logged-in {
-  position: relative;
-  cursor: pointer;
-}
-
-.user-name-pill {
-  display: flex;
-  align-items: center;
-  background: #2a7080;
-  color: white;
-  padding: 0.5rem 1.2rem;
-  border-radius: 20px;
-  font-family: "El Messiri", sans-serif;
-  font-size: 0.85rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-/* User Dropdown */
-.user-dropdown {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  left: 50%;
-  transform: translateX(-50%) translateY(-10px);
-  background: #e8f4f6;
-  border-radius: 20px;
-  min-width: 220px;
-  padding: 0.8rem;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
-  z-index: 1000;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  direction: rtl;
-}
-
-.user-dropdown.show {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(0);
-}
-
-/* Keep dropdown RTL in both languages */
-[dir="ltr"] .user-dropdown {
-  direction: rtl;
-}
-
-[dir="ltr"] .user-dropdown .dropdown-item {
-  text-align: right;
-}
-
-.user-dropdown .dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  padding: 0.7rem 1rem;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  font-family: "El Messiri", sans-serif;
-  font-size: 0.9rem;
-  color: #2a7080;
-  margin-bottom: 0.3rem;
-}
-
-.user-dropdown .dropdown-item:hover {
-  background: rgba(42, 112, 128, 0.1);
-}
-
-.user-dropdown .dropdown-item i {
-  width: 20px;
-  text-align: center;
-  font-size: 1rem;
-}
-
-.user-dropdown .logout-item {
-  color: #ef4444;
-  border-top: 1px solid rgba(42, 112, 128, 0.2);
-  margin-top: 0.5rem;
-  padding-top: 0.8rem;
-}
-
-.user-dropdown .logout-item:hover {
-  background: rgba(239, 68, 68, 0.1);
-}
-
-.user-dropdown .dropdown-item.disabled {
-  color: #999;
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.user-dropdown .dropdown-item.disabled:hover {
-  background: transparent;
 }
 
 /* Language Submenu */
@@ -1403,7 +1415,8 @@ body.dark-mode .product-close-btn:hover {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .product-card, .product-card:hover {
+  .product-card,
+  .product-card:hover {
     transform: none !important;
     transition: none !important;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
@@ -1457,7 +1470,10 @@ body.dark-mode .product-close-btn:hover {
   z-index: 9998;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.5s ease, visibility 0.5s ease, backdrop-filter 0.5s ease;
+  transition:
+    opacity 0.5s ease,
+    visibility 0.5s ease,
+    backdrop-filter 0.5s ease;
   backdrop-filter: blur(0px);
   pointer-events: none;
 }
@@ -1481,7 +1497,8 @@ body.dark-mode .product-close-btn:hover {
   width: 90%;
   opacity: 0;
   visibility: hidden;
-  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+  transition:
+    all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
     visibility 0s linear 0.6s;
   pointer-events: none;
 }
@@ -1490,7 +1507,8 @@ body.dark-mode .product-close-btn:hover {
   opacity: 1;
   visibility: visible;
   transform: translate(-50%, -50%) scale(1) translateY(0);
-  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+  transition:
+    all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
     visibility 0s linear 0s;
   pointer-events: auto;
 }
@@ -1916,7 +1934,7 @@ body.dark-mode .floating-view-details {
   padding: 6px 12px;
   background: rgba(42, 112, 128, 0.98);
   color: #fff;
-  font-family: 'El Messiri', sans-serif;
+  font-family: "El Messiri", sans-serif;
   font-size: 0.85rem;
   font-weight: 600;
   border-radius: 8px;
@@ -1931,7 +1949,7 @@ body.dark-mode .floating-view-details {
 }
 
 [data-tooltip]::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: calc(100% + 2px);
   left: 50%;
@@ -1954,8 +1972,8 @@ body.dark-mode .floating-view-details {
 }
 
 /* Ensure parents don't clip */
-.product-card, 
-.product-info, 
+.product-card,
+.product-info,
 .product-card-actions {
   overflow: visible !important;
 }
