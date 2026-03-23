@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tulip Net</title>
      <!-- fav icon -->
-        <link rel="icon" type="image/png" href="/images/fav_icon.png">
+        <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
     <link
       href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap"
       rel="stylesheet"

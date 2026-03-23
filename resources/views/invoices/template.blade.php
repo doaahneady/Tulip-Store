@@ -5,11 +5,11 @@
     <title>فاتورة #{{ $order->order_number }}</title>
     <style>
           <!-- fav icon -->
-        <link rel="icon" type="image/png" href="/images/fav_icon.png">
+        <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
         @page { size: A4; margin: 15mm; }
         * { box-sizing: border-box; }
         body { 
-            font-family: DejaVu Sans, sans-serif; 
+            font-family:"Montserrat-Alt1 SemBd"; 
             font-size: 12px; 
             line-height: 1.5;
             color: #333;

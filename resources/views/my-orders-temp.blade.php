@@ -2,7 +2,7 @@
 <html>
 <head>
     <!-- fav icon -->
-    <link rel="icon" type="image/png" href="/images/fav_icon.png">
+   <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
     <title>Test Orders</title>
 </head>
 <body>

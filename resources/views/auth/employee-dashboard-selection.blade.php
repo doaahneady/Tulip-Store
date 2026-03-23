@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Dashboard Selection - {{ config('app.name', 'Tulip Store') }}</title>
     <!-- fav icon -->
-        <link rel="icon" type="image/png" href="/images/fav_icon.png">
+        <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

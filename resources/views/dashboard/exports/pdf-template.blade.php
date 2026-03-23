@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>{{ $metadata['title'] ?? 'Export Report' }}</title>
     <!-- fav icon -->
-        <link rel="icon" type="image/png" href="/images/fav_icon.png">
+        <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
     <style>
         * { box-sizing: border-box; }
         body { font-family: "El Messiri", sans-serif; color: #111827; margin: 24px; }

@@ -5,7 +5,7 @@ echo '<!DOCTYPE html>
 <html>
 <head>
     <title>Dashboard Test</title> 
-    <link rel="icon" type="image/png" href="/images/fav_icon.png">
+   <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
 
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; }

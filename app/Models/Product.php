@@ -109,7 +109,13 @@ class Product extends Model
 
         $path = str_replace('\\', '/', trim((string) ($raw ?? '')));
         if ($path === '') {
-            return '/images/panner_mart.png';
+            $market = $this->getAttribute('market') ?: ($this->category ? $this->category->market : 'store');
+            if ($market === 'mart') {
+                return '/images/tulip_mart.jpg';
+            } elseif ($market === 'gift') {
+                return '/images/tulip_gift.jpg';
+            }
+            return '/images/tulip_store.jpg';
         }
 
         if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {

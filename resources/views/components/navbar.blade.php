@@ -393,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="search-result-name">${product.name}</div>
                             <div class="search-result-price">${product.price} ل.س</div>
                         </div>
-                        <img src="${product.primary_image_url || product.image || (Array.isArray(product.images) ? product.images[0] : null) || '/images/gift-placeholder.svg'}" class="search-result-img" alt="${product.name}" loading="lazy" onerror="this.src='/images/gift-placeholder.svg'">
+                        <img src="${product.primary_image_url || product.image || (Array.isArray(product.images) ? product.images[0] : null) || '/images/tulip_store.jpg'}" class="search-result-img" alt="${product.name}" loading="lazy" onerror="this.src='/images/tulip_store.jpg'">
                     </div>
                 `).join('');
             })

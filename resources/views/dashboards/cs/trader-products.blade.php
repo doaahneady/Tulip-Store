@@ -41,7 +41,7 @@
                             @php
                                 $coverUrl = $p->primary_image_url ?? null;
                             @endphp
-                            <img src="{{ $coverUrl ?: '/images/gift-placeholder.svg' }}" srcset="{{ $p->primary_image_srcset ?? '' }}" loading="lazy" class="w-full h-full object-cover" alt="صورة المنتج" onerror="this.onerror=null;this.src='/images/gift-placeholder.svg';">
+                            <img src="{{ $coverUrl ?: '/images/tulip_store.jpg' }}" srcset="{{ $p->primary_image_srcset ?? '' }}" loading="lazy" class="w-full h-full object-cover" alt="صورة المنتج" onerror="this.onerror=null;this.src='/images/tulip_store.jpg';">
                         </div>
                         <div class="min-w-0">
                             <div class="flex items-center gap-2">
@@ -61,7 +61,7 @@
                                                     $u = \Illuminate\Support\Facades\Storage::disk('public')->url(ltrim($u,'/'));
                                                 }
                                             @endphp
-                                            <img src="{{ $u }}" class="w-full h-full object-cover" alt="صورة" onerror="this.onerror=null;this.src='/images/gift-placeholder.svg'">
+                                            <img src="{{ $u }}" class="w-full h-full object-cover" alt="صورة" onerror="this.onerror=null;this.src='/images/tulip_store.jpg'">
                                         </div>
                                     @endforeach
                                     @if(count($imgs) > 6)

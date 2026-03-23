@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تطبيق السائق - Tulip Store</title>
       <!-- fav icon -->
-        <link rel="icon" type="image/png" href="/images/fav_icon.png">
+        <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
     <style>
         body { font-family:'El Messiri',sans-serif; background:#f5f7fb; color:#222; margin:0; }
         .container { max-width: 640px; margin: 0 auto; padding: 2rem; }

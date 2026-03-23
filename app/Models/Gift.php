@@ -82,7 +82,7 @@ class Gift extends Model
         $candidate = trim($candidate);
 
         if ($candidate === '') {
-            return '/images/birthday_card.jpeg';
+            return '/images/tulip_gift.jpg';
         }
 
         if (Str::startsWith($candidate, ['http://', 'https://'])) {

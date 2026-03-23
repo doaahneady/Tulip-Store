@@ -3,7 +3,7 @@
 <head>
     <title>تسجيل الدخول بنجاح</title>
     <!-- fav icon -->
-        <link rel="icon" type="image/png" href="/images/fav_icon.png">
+        <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
     <style>
         body {
             font-family: "El Messiri", sans-serif;
