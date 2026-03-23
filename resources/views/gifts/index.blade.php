@@ -9,7 +9,7 @@
     <meta http-equiv="Expires" content="0">
     <title>هدايا توليب - Tulip Gifts</title>
     <!-- fav icon -->
-        <link rel="icon" type="image/png" href="/images/fav_icon.png">
+        <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}&fix=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -66,7 +66,7 @@
         .premium-card.ready-card { --card-gradient: linear-gradient(90deg, #1a5a5a, #3d9a8a, #7dd3c0); --card-color: #1a5a5a; }
 
         .card-visual {
-            height: 180px;
+            height: 220px;
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             display: flex;
             align-items: center;
@@ -78,16 +78,16 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8) 0%, transparent 60%);
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4) 0%, transparent 60%);
+            z-index: 2;
         }
         .card-image {
-            height: 140px;
-            width: auto;
-            max-height: 100%;
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
             position: relative;
             z-index: 1;
             transition: all 0.5s ease;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
         }
         .premium-card:hover .card-image {
             transform: scale(1.05);
@@ -405,7 +405,7 @@
             <div class="premium-card box-card" onclick="window.location.href='/gifts/box-arrangement'">
                 <div class="card-visual">
                    
-                    <img id="boxCardImage" src="/images/mistery_box.jpg" alt="Gift Box" class="card-image" loading="lazy" >
+                    <img id="boxCardImage" src="/images/box.jpg" alt="Gift Box" class="card-image" loading="lazy" >
                 </div>
                 <div class="card-content">
                     <span class="card-tag">الأكثر طلباً</span>
@@ -427,7 +427,7 @@
             <div class="premium-card flower-card" onclick="window.location.href='/gifts/flower-bouquet'">
                 <div class="card-visual">
                    
-                    <img id="bouquetCardImage" src="/images/banner.jpg" alt="Rose Bouquet" class="card-image" loading="lazy">
+                    <img id="bouquetCardImage" src="/images/Bouquet.jpg" alt="Rose Bouquet" class="card-image" loading="lazy">
                 </div>
                 <div class="card-content">
                     <span class="card-tag">  دفعة ورورد جديدة يومياً</span>
@@ -449,7 +449,7 @@
             <div class="premium-card ready-card" onclick="document.getElementById('readyGifts').scrollIntoView({behavior: 'smooth'})">
                 <div class="card-visual">
                   
-                    <img id="readyCardImage" src="/images/" alt="Ready Gifts" class="card-image" loading="lazy" onerror="this.src=''">
+                    <img id="readyCardImage" src="/images/ready.jpg" alt="Ready Gifts" class="card-image" loading="lazy">
                 </div>
                 <div class="card-content">
                     <span class="card-tag">جاهزة للتوصيل</span>
@@ -503,17 +503,7 @@
 
         async function hydrateGiftCreationSection() {
             try {
-                const res = await fetch('/api/gifts/featured');
-                const payload = await res.json();
-                const gifts = Array.isArray(payload.data) ? payload.data : [];
-                const fallback = '/images/birthday_card.jpeg';
-                const img1 = document.getElementById('boxCardImage');
-                const img2 = document.getElementById('bouquetCardImage');
-                const img3 = document.getElementById('readyCardImage');
-                const getImg = (g) => resolveMediaUrl((g?.main_image || (g?.images && g.images[0]) || g?.image || '') || '') || fallback;
-                if (img1) img1.src = getImg(gifts[0]) || img1.src || fallback;
-                if (img2) img2.src = getImg(gifts[1] || gifts[0]) || img2.src || fallback;
-                if (img3) img3.src = getImg(gifts[2] || gifts[1] || gifts[0]) || img3.src || fallback;
+                // Not overriding manual images as requested
             } catch (e) {
                 // Leave placeholders if API not available
             }
@@ -546,7 +536,7 @@
                 }
 
                 grid.innerHTML = gifts.map(gift => {
-                    const image = resolveMediaUrl(gift.main_image || (gift.images && gift.images[0]) || gift.image || '') || '/images/birthday_card.jpeg';
+                    const image = resolveMediaUrl(gift.main_image || (gift.images && gift.images[0]) || gift.image || '') || '/images/tulip_gift.jpg';
                     const rating = Number(gift.rating ?? 0);
                     const reviews = Number(gift.reviews_count ?? 0);
                     const badgeText = gift.is_featured ? 'مميز' : '';
@@ -555,7 +545,7 @@
                         <div class="gift-card" onclick="window.location.href='/gifts/${gift.id}'">
                             <div class="gift-image">
                                 ${badgeText ? `<span class="gift-badge ${badgeClass}">${badgeText}</span>` : ''}
-                                <img src="${image}" alt="${gift.name || ''}" loading="lazy" onerror="this.src='/images/birthday_card.jpeg'">
+                                <img src="${image}" alt="${gift.name || ''}" loading="lazy" onerror="this.src='/images/tulip_gift.jpg'">
                             </div>
                             <div class="gift-info">
                                 <h3 class="gift-name">${gift.name || ''}</h3>

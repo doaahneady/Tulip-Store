@@ -7,7 +7,7 @@
     <title>جميع المنتجات - توليب مارت</title>
     
     <!-- fav icon -->
-    <link rel="icon" type="image/png" href="/images/fav_icon.png">
+    <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
     <link rel="stylesheet" href="{{ asset('css/store.min.css') }}?v={{ filemtime(public_path('css/store.min.css')) }}&t={{ time() }}" onerror="this.onerror=null;this.href='{{ asset('css/store.css') }}?fallback=1';">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -1008,7 +1008,7 @@
                     id: String(id),
                     name: product?.name || '',
                     price: Number(product?.price || 0),
-                    image: product?.image || '/images/panner_mart.png',
+                    image: product?.image || '/images/tulip_mart.jpg',
                     type: 'product'
                 });
                 favoriteIds.add(String(id));
@@ -1021,10 +1021,10 @@
         function martFallbackImage(categorySlug, categoryName) {
             const slug = String(categorySlug || '').toLowerCase();
             const name = String(categoryName || '').toLowerCase();
-            if (slug.includes('fruit') || slug.includes('veget') || name.includes('فوا') || name.includes('خضا') || name.includes('خضر')) return '/images/panner_mart.png';
-            if (slug.includes('dairy') || name.includes('ألبان') || name.includes('حليب')) return '/images/panner_mart.png';
-            if (slug.includes('bakery') || name.includes('مخب')) return '/images/panner_mart.png';
-            return '/images/panner_mart.png';
+            if (slug.includes('fruit') || slug.includes('veget') || name.includes('فوا') || name.includes('خضا') || name.includes('خضر')) return '/images/tulip_mart.jpg';
+            if (slug.includes('dairy') || name.includes('ألبان') || name.includes('حليب')) return '/images/tulip_mart.jpg';
+            if (slug.includes('bakery') || name.includes('مخب')) return '/images/tulip_mart.jpg';
+            return '/images/tulip_mart.jpg';
         }
 
         function updateFavoritesCount(count) {
@@ -1295,7 +1295,7 @@
                         <button class="product-favorite" onclick="toggleFavorite('${p.id}', this)">
                             <i class="${fav ? 'fas' : 'far'} fa-heart"></i>
                         </button>
-                        <img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.src='/images/panner_mart.png';">
+                        <img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.src='/images/tulip_mart.jpg';">
                     </div>
                     <div class="product-body">
                         <div class="product-category">${p.category}</div>
