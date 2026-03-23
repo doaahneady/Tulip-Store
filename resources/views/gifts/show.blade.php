@@ -395,7 +395,7 @@
             <div class="gift-detail-content">
                 <!-- Images -->
                 <div class="gift-images">
-                    <img src="{{ $gift->main_image }}" alt="{{ $gift->name }}" class="main-image" loading="eager" width="900" height="500" onerror="this.src='/images/birthday_card.jpeg'">
+                    <img src="{{ $gift->main_image }}" alt="{{ $gift->name }}" class="main-image" loading="eager" width="900" height="500" onerror="this.src='/images/tulip_gift.jpg'">
                 </div>
 
                 <!-- Info -->
