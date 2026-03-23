@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Employee;
 use App\Models\EmployeeAttendance;
 use App\Models\EmployeeDashboardPermission;
+use App\Models\EmployeeDashboardOverride;
 use App\Models\FinancialTransaction;
 use App\Models\Gift;
 use App\Models\GiftBox;
@@ -21,6 +22,7 @@ use App\Models\InventoryMovement;
 use App\Models\Order;
 use App\Models\PayrollRecord;
 use App\Models\Permission;
+use App\Models\DashboardRolePermission;
 use App\Models\Product;
 use App\Models\Review;
 use App\Models\Role;
@@ -35,6 +37,7 @@ use App\Services\Dashboard\DeliveryDashboardService;
 use App\Services\Dashboard\ExportService;
 use App\Services\Dashboard\FinanceDashboardService;
 use App\Services\Dashboard\HRDashboardService;
+use App\Services\DashboardPermissionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -150,8 +153,12 @@ class SuperAdminController extends Controller
             'driver_id' => 'nullable|integer',
         ]);
 
+        $newUserId = $request->filled('driver_id')
+            ? Order::resolveAssignedDriverUserId((int) $request->driver_id)
+            : null;
+
         $oldDriver = $order->assigned_driver_id;
-        $order->update(['assigned_driver_id' => $request->driver_id]);
+        $order->update(['assigned_driver_id' => $newUserId]);
 
         Cache::flush();
 
@@ -161,7 +168,7 @@ class SuperAdminController extends Controller
             'model_type' => 'Order',
             'model_id' => $order->id,
             'old_values' => ['assigned_driver_id' => $oldDriver],
-            'new_values' => ['assigned_driver_id' => $request->driver_id],
+            'new_values' => ['assigned_driver_id' => $newUserId],
             'ip_address' => request()->ip(),
         ]);
 
@@ -279,8 +286,12 @@ class SuperAdminController extends Controller
     public function reassignOrder(Request $request, Order $order)
     {
         $request->validate(['driver_id' => 'required|integer']);
+        $newUserId = Order::resolveAssignedDriverUserId((int) $request->driver_id);
+        if ($newUserId === null) {
+            return back()->with('error', 'Invalid driver selection');
+        }
         $old = $order->assigned_driver_id;
-        $order->update(['assigned_driver_id' => $request->driver_id]);
+        $order->update(['assigned_driver_id' => $newUserId]);
         Cache::flush();
         AuditLog::create([
             'user_id' => auth()->id(),
@@ -288,7 +299,7 @@ class SuperAdminController extends Controller
             'model_type' => 'Order',
             'model_id' => $order->id,
             'old_values' => ['assigned_driver_id' => $old],
-            'new_values' => ['assigned_driver_id' => $request->driver_id],
+            'new_values' => ['assigned_driver_id' => $newUserId],
             'ip_address' => request()->ip(),
         ]);
 
@@ -760,57 +771,181 @@ class SuperAdminController extends Controller
             ->paginate(25)
             ->withQueryString();
 
-        return view('dashboards.super-admin.roles', compact('roles', 'permissions', 'employees'));
+        $dashboardCatalog = [
+            'it' => ['title' => 'IT', 'sections' => ['system_health', 'errors', 'deployments', 'security', 'logs'], 'actions' => ['approve', 'submit', 'delete', 'export']],
+            'admin' => ['title' => 'Admin', 'sections' => ['kpis', 'orders', 'users', 'audit', 'settings'], 'actions' => ['approve', 'submit', 'delete', 'export']],
+            'mart' => ['title' => 'Tulip Mart', 'sections' => ['categories', 'products', 'daily_prices'], 'actions' => ['submit', 'delete', 'export']],
+            'cs' => ['title' => 'Customer Support', 'sections' => ['tickets', 'orders', 'trader_approvals'], 'actions' => ['approve', 'submit', 'delete', 'export']],
+            'hr' => ['title' => 'HR', 'sections' => ['employees', 'attendance', 'leave', 'payroll'], 'actions' => ['approve', 'submit', 'delete', 'export']],
+            'finance' => ['title' => 'Finance', 'sections' => ['transactions', 'payouts', 'reports'], 'actions' => ['approve', 'submit', 'delete', 'export']],
+        ];
+
+        $roleTemplateMap = [];
+        if (Schema::hasTable('dashboard_role_permissions')) {
+            DashboardRolePermission::query()->get()->each(function ($r) use (&$roleTemplateMap) {
+                $roleTemplateMap[$r->role_key][$r->dashboard_key] = $r;
+            });
+        }
+
+        $employeeOverrideMap = [];
+        if (Schema::hasTable('employee_dashboard_overrides')) {
+            EmployeeDashboardOverride::query()->get()->each(function ($o) use (&$employeeOverrideMap) {
+                $employeeOverrideMap[$o->employee_id][$o->dashboard_key] = $o;
+            });
+        }
+
+        $resolvedPermissionMap = [];
+        foreach ($employees->items() as $emp) {
+            foreach (array_keys($dashboardCatalog) as $dk) {
+                $resolvedPermissionMap[$emp->id][$dk] = DashboardPermissionService::resolve($emp, $dk);
+            }
+        }
+
+        $preview = null;
+        if ($request->filled('preview_employee') && $request->filled('preview_dashboard')) {
+            $target = Employee::find((int) $request->input('preview_employee'));
+            $dashboardKey = (string) $request->input('preview_dashboard');
+            if ($target && isset($dashboardCatalog[$dashboardKey])) {
+                $preview = [
+                    'employee' => $target,
+                    'dashboard_key' => $dashboardKey,
+                    'resolved' => DashboardPermissionService::resolve($target, $dashboardKey),
+                ];
+            }
+        }
+
+        return view('dashboards.super-admin.roles', compact(
+            'roles',
+            'permissions',
+            'employees',
+            'dashboardCatalog',
+            'roleTemplateMap',
+            'employeeOverrideMap',
+            'resolvedPermissionMap',
+            'preview'
+        ));
     }
 
     public function updateEmployeeDashboardRules(Request $request, Employee $employee)
     {
         $validated = $request->validate([
-            'dashboards' => 'array',
-            'dashboards.*' => 'in:admin,it,hr,cs,finance,supervisor,vendor',
+            'dashboard_key' => 'required|string|in:it,admin,mart,cs,hr,finance',
+            'is_override' => 'nullable|boolean',
+            'can_view' => 'nullable|boolean',
+            'can_edit' => 'nullable|boolean',
+            'can_view_sensitive' => 'nullable|boolean',
+            'sections' => 'nullable|array',
+            'sections.*' => 'string|max:80',
+            'actions' => 'nullable|array',
+            'actions.*' => 'string|max:80',
         ]);
 
-        $keys = array_values(array_unique($validated['dashboards'] ?? []));
+        if (! Schema::hasTable('employee_dashboard_overrides')) {
+            return back()->with('error', 'Permission override table is missing. Run migrations first.');
+        }
 
-        DB::transaction(function () use ($employee, $keys) {
-            $update = [
-                'is_admin' => in_array('admin', $keys, true),
-                'is_it' => in_array('it', $keys, true),
-                'is_hr' => in_array('hr', $keys, true),
-                'is_cs' => in_array('cs', $keys, true),
-                'is_finance' => in_array('finance', $keys, true),
-                'is_driver_supervisor' => in_array('supervisor', $keys, true),
-                'is_trader' => in_array('vendor', $keys, true),
-            ];
-            $update = array_filter($update, fn ($_, $k) => Schema::hasColumn('employees', $k), ARRAY_FILTER_USE_BOTH);
-            if ($update) {
-                $employee->update($update);
-            }
+        $dashboardKey = (string) $validated['dashboard_key'];
+        $isOverride = (bool) ($validated['is_override'] ?? false);
+        $payload = [
+            'is_override' => $isOverride,
+            'can_view' => $isOverride ? (bool) ($validated['can_view'] ?? false) : null,
+            'can_edit' => $isOverride ? (bool) ($validated['can_edit'] ?? false) : null,
+            'sections' => $isOverride ? array_values(array_unique($validated['sections'] ?? [])) : null,
+            'actions' => $isOverride ? array_values(array_unique($validated['actions'] ?? [])) : null,
+            'can_view_sensitive' => $isOverride ? (bool) ($validated['can_view_sensitive'] ?? false) : null,
+        ];
 
-            if (Schema::hasTable('employee_dashboard_permissions')) {
-                EmployeeDashboardPermission::where('employee_id', $employee->id)->delete();
-
-                if (count($keys) === 0) {
-                    EmployeeDashboardPermission::create([
+        EmployeeDashboardOverride::updateOrCreate([
                         'employee_id' => $employee->id,
-                        'dashboard_key' => '__none__',
-                    ]);
+            'dashboard_key' => $dashboardKey,
+        ], $payload);
 
-                    return;
-                }
-
-                foreach ($keys as $k) {
-                    EmployeeDashboardPermission::create([
-                        'employee_id' => $employee->id,
-                        'dashboard_key' => $k,
-                    ]);
-                }
-            }
-        });
+        AuditLog::create([
+            'user_id' => auth('employee')->id(),
+            'action' => 'employee_permission_override_update',
+            'model_type' => 'Employee',
+            'model_id' => $employee->id,
+            'new_values' => ['dashboard' => $dashboardKey, 'payload' => $payload],
+            'ip_address' => request()->ip(),
+        ]);
 
         Cache::flush();
 
-        return back()->with('success', 'Employee rules updated');
+        return back()->with('success', 'تم تحديث صلاحيات الموظف لهذا الداشبورد');
+    }
+
+    public function updateRoleDashboardPermissions(Request $request)
+    {
+        $validated = $request->validate([
+            'role_key' => 'required|string|max:50',
+            'dashboard_key' => 'required|string|in:it,admin,mart,cs,hr,finance',
+            'can_view' => 'nullable|boolean',
+            'can_edit' => 'nullable|boolean',
+            'can_view_sensitive' => 'nullable|boolean',
+            'sections' => 'nullable|array',
+            'sections.*' => 'string|max:80',
+            'actions' => 'nullable|array',
+            'actions.*' => 'string|max:80',
+        ]);
+
+        if (! Schema::hasTable('dashboard_role_permissions')) {
+            return back()->with('error', 'Role permission table is missing. Run migrations first.');
+        }
+
+        $payload = [
+            'can_view' => (bool) ($validated['can_view'] ?? false),
+            'can_edit' => (bool) ($validated['can_edit'] ?? false),
+            'sections' => array_values(array_unique($validated['sections'] ?? [])),
+            'actions' => array_values(array_unique($validated['actions'] ?? [])),
+            'can_view_sensitive' => (bool) ($validated['can_view_sensitive'] ?? false),
+        ];
+
+        DashboardRolePermission::updateOrCreate([
+            'role_key' => (string) $validated['role_key'],
+            'dashboard_key' => (string) $validated['dashboard_key'],
+        ], $payload);
+
+        AuditLog::create([
+            'user_id' => auth('employee')->id(),
+            'action' => 'role_dashboard_permission_update',
+            'model_type' => 'Role',
+            'model_id' => null,
+            'new_values' => [
+                'role_key' => $validated['role_key'],
+                'dashboard_key' => $validated['dashboard_key'],
+                'payload' => $payload,
+            ],
+            'ip_address' => request()->ip(),
+        ]);
+
+        Cache::flush();
+
+        return back()->with('success', 'تم تحديث صلاحيات الدور بنجاح');
+    }
+
+    public function permissionPreview(Request $request)
+    {
+        $validated = $request->validate([
+            'employee_id' => 'required|integer|exists:employees,id',
+            'dashboard_key' => 'required|string|in:it,admin,mart,cs,hr,finance',
+        ]);
+
+        return redirect()->route('dashboard.admin.roles', [
+            'preview_employee' => $validated['employee_id'],
+            'preview_dashboard' => $validated['dashboard_key'],
+        ]);
+    }
+
+    public function updateExchangeRate(Request $request)
+    {
+        $validated = $request->validate([
+            'usd_to_syp_rate' => 'required|numeric|min:1|max:100000',
+        ]);
+
+        SystemSetting::set('usd_to_syp_rate', (string) $validated['usd_to_syp_rate'], 'string');
+        Cache::flush();
+
+        return back()->with('success', 'تم تحديث سعر الصرف بنجاح');
     }
 
     public function categories(Request $request)
@@ -1126,10 +1261,39 @@ class SuperAdminController extends Controller
     {
         abort_unless(Schema::hasTable('gift_boxes'), 404);
 
+        // gift_boxes.size is an ENUM in DB: small/medium/large/xl
+        // UI sometimes sends Arabic values like "متوسط" or "كبير".
+        $rawSize = trim((string) $request->input('size', ''));
+        $sizeNormalized = strtolower($rawSize);
+        $sizeMap = [
+            // Arabic -> enum
+            'صغير' => 'small',
+            'صغيرة' => 'small',
+            'متوسط' => 'medium',
+            'متوسطه' => 'medium',
+            'كبير' => 'large',
+            'كبيرة' => 'large',
+            'اكس لارج' => 'xl',
+            'اكس-لارج' => 'xl',
+            'xl' => 'xl',
+            'x-large' => 'xl',
+            'اكس لارج' => 'xl',
+
+            // English (case-insensitive) -> enum
+            'small' => 'small',
+            'medium' => 'medium',
+            'large' => 'large',
+            'xl' => 'xl',
+        ];
+
+        if (isset($sizeMap[$sizeNormalized])) {
+            $request->merge(['size' => $sizeMap[$sizeNormalized]]);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'size' => 'required|string|max:50',
+            'size' => 'required|in:small,medium,large,xl',
             'price' => 'required|numeric|min:0',
             'max_items' => 'required|integer|min:1',
             'stock' => 'required|integer|min:0',
@@ -1162,7 +1326,7 @@ class SuperAdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'category' => 'required|string|max:50',
+            'category' => 'required|in:chocolate,flower,perfume,accessory,candy,toy,other',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'sort_order' => 'nullable|integer|min:0',
@@ -1255,7 +1419,8 @@ class SuperAdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
-            'color' => 'nullable|string|max:50',
+            // DB migration has `color` as non-nullable.
+            'color' => 'required|string|max:50',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
@@ -1451,7 +1616,7 @@ class SuperAdminController extends Controller
         }
 
         $imagePath = null;
-        if ($request->file('image') && Schema::hasColumn('products', 'image')) {
+        if ($request->file('image')) {
             $imagePath = Storage::disk('public')->putFile('products', $request->file('image'));
         }
 
@@ -1490,7 +1655,11 @@ class SuperAdminController extends Controller
             $data['market'] = 'mart';
         }
         if ($imagePath !== null) {
+            if (Schema::hasColumn('products', 'image')) {
             $data['image'] = $imagePath;
+            } elseif (Schema::hasColumn('products', 'images')) {
+                $data['images'] = [$imagePath];
+            }
         }
 
         $product = Product::create($data);
@@ -1588,8 +1757,13 @@ class SuperAdminController extends Controller
                 $updates[$col] = (bool) $validated[$col];
             }
         }
-        if ($request->file('image') && Schema::hasColumn('products', 'image')) {
-            $updates['image'] = Storage::disk('public')->putFile('products', $request->file('image'));
+        if ($request->file('image')) {
+            $storedImage = Storage::disk('public')->putFile('products', $request->file('image'));
+            if (Schema::hasColumn('products', 'image')) {
+                $updates['image'] = $storedImage;
+            } elseif (Schema::hasColumn('products', 'images')) {
+                $updates['images'] = [$storedImage];
+            }
         }
 
         $product->update($updates);

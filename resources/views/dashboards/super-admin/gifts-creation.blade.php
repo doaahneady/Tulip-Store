@@ -78,7 +78,12 @@
             @csrf
             <input name="name" class="form-input w-full" placeholder="الاسم" required>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="size" class="form-input w-full" placeholder="الحجم (small/medium/large/xl)" required>
+                <select name="size" class="form-select w-full" required>
+                    <option value="small">Small</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="large">Large</option>
+                    <option value="xl">XL</option>
+                </select>
                 <input name="max_items" type="number" min="1" class="form-input w-full" placeholder="حد العناصر" required>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -101,7 +106,12 @@
             <input type="hidden" name="context" value="bouquet">
             <input name="name" class="form-input w-full" placeholder="اسم الحجم (Small/Medium/Large)" required>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="size" class="form-input w-full" placeholder="الرمز (small/medium/large/xl)" required>
+                <select name="size" class="form-select w-full" required>
+                    <option value="small">Small</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="large">Large</option>
+                    <option value="xl">XL</option>
+                </select>
                 <input name="max_items" type="number" min="1" class="form-input w-full" placeholder="عدد الزهور الموصى به" required>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -173,7 +183,7 @@
             <input name="name" class="form-input w-full" placeholder="الاسم" required>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <input name="price" type="number" step="0.01" min="0" class="form-input w-full" placeholder="السعر" required>
-                <input name="color" class="form-input w-full" placeholder="اللون">
+                <input name="color" class="form-input w-full" placeholder="اللون" required>
                 <input name="sort_order" type="number" min="0" class="form-input w-full" placeholder="الترتيب">
             </div>
             <input name="image" type="file" class="form-input w-full" accept="image/*">

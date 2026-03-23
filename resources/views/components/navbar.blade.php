@@ -123,7 +123,7 @@
 
 <script>
 (function () {
-  const USD_TO_SYP = 117;
+  const USD_TO_SYP = Number(@json((float) \App\Models\SystemSetting::get('usd_to_syp_rate', 117))) || 117;
   const serverCurrency = @json(auth()->check() ? (strtoupper((string) (auth()->user()->currency ?: 'USD'))) : (strtoupper((string) (session('currency') ?: 'USD'))));
   const safeServerCurrency = (serverCurrency === 'SYP' || serverCurrency === 'USD') ? serverCurrency : 'USD';
   let preferred = safeServerCurrency;

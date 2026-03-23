@@ -2,6 +2,31 @@
 @section('content')
 @php $title = 'لوحة الإدارة'; $subtitle = 'نظرة عامة على أداء المتجر'; $it = $it ?? []; @endphp
 
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h3 class="text-base font-bold text-gray-800">سعر الصرف (USD -> SYP)</h3>
+            <p class="text-xs text-gray-500">تعديل السعر المستخدم في الواجهة لتحويل العملات</p>
+        </div>
+        <form method="POST" action="{{ route('dashboard.admin.exchange-rate.update') }}" class="flex items-center gap-2">
+            @csrf
+            <input
+                type="number"
+                name="usd_to_syp_rate"
+                step="0.01"
+                min="1"
+                value="{{ \App\Models\SystemSetting::get('usd_to_syp_rate', 117) }}"
+                class="form-input w-40"
+                required
+            >
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-save"></i>
+                تحديث
+            </button>
+        </form>
+    </div>
+</div>
+
 <!-- مركز التحكم الإداري -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
     <div class="flex items-center justify-between mb-4">
@@ -33,7 +58,7 @@
             <i class="fas fa-gift"></i>
             <p>إدارة الهدايا (Gifts)</p>
         </a>
-        <a href="{{ route('dashboard.admin.mart') }}" class="qa-card qa-indigo">
+        <a href="{{ route('dashboard.admin.mart.index') }}" class="qa-card qa-indigo">
             <i class="fas fa-store"></i>
             <p>إدارة المارت (Mart)</p>
         </a>

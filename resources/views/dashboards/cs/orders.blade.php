@@ -76,15 +76,6 @@
                             </td>
                             <td class="px-6 py-4">
                                 <span class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700">{{ $order->status ?? '-' }}</span>
-                                @if(($order->status ?? null) === 'delivered')
-                                    <form method="POST" action="{{ route('dashboard.cs.orders.change-status', $order) }}" class="mt-2">
-                                        @csrf
-                                        <input type="hidden" name="status" value="done">
-                                        <button class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700">
-                                            Complete
-                                        </button>
-                                    </form>
-                                @endif
                             </td>
                             <td class="px-6 py-4">
                                 <span class="px-2 py-1 text-xs rounded bg-blue-50 text-blue-700 border border-blue-100">{{ $order->payment_status ?? '-' }}</span>

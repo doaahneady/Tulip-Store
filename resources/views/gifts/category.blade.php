@@ -227,7 +227,7 @@
                             <h3 class="gift-name">{{ $gift->name }}</h3>
                             <p class="gift-description">{{ Str::limit($gift->description, 100) }}</p>
                             <div class="gift-footer">
-                                <span class="gift-price">{{ $gift->formatted_price }}</span>
+                                <span class="gift-price">@money($gift->price)</span>
                                 <!-- <div class="gift-rating">
                                     <i class="fas fa-star"></i>
                                     <span>{{ number_format($gift->rating, 1) }}</span>

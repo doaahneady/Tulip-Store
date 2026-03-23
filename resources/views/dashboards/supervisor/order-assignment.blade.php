@@ -89,18 +89,7 @@
                                 {{ optional($assign->order)->estimated_delivery ? \Carbon\Carbon::parse(optional($assign->order)->estimated_delivery)->format('Y-m-d') : '—' }}
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">{{ $assign->status }}</span>
-                            @if(optional($assign->order)->status === 'out_for_delivery')
-                                <form method="POST" action="{{ route('dashboard.supervisor.orders.change-status', $assign->order_id) }}">
-                                    @csrf
-                                    <input type="hidden" name="status" value="delivered">
-                                    <button class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700">
-                                        تسليم
-                                    </button>
-                                </form>
-                            @endif
-                        </div>
+                        <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">{{ $assign->status }}</span>
                     </li>
                 @endforeach
                 @if($activeAssignments->count() === 0)

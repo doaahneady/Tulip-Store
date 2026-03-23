@@ -44,9 +44,8 @@ async function refreshHasMartItems() {
 
 // Multiple storage locations in Sweida
 const storageLocations = [
-    { name: 'المستودع الرئيسي - السويداء', lat: 32.7081, lng: 36.5675 },
-    { name: 'مستودع شهبا', lat: 32.8500, lng: 36.3167 },
-    { name: 'مستودع صلخد', lat: 32.7333, lng: 36.7167 }
+    // Only one storage point (Sweida city) as requested
+    { name: 'المستودع الرئيسي - السويداء', lat: 32.7081, lng: 36.5675 }
 ];
 
 let nearestStorage = null;
@@ -181,10 +180,11 @@ function initMap() {
             zoomControl: false // Remove zoom buttons
         });
         
-        // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap',
-            maxZoom: 19
+        // Use satellite imagery tiles (no API key required)
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles © Esri',
+            maxNativeZoom: 18,
+            maxZoom: 18
         }).addTo(map);
         
         console.log('✅ Leaflet Map created');
@@ -1579,20 +1579,25 @@ function renderSavedAddressesUI(addresses) {
     block.id = 'savedAddressesBlock';
     block.style.marginBottom = '1rem';
     block.innerHTML = `
-        <div style="background:#f8f9fa; padding:1rem; border-radius:12px; border:1px solid #e8e8e8;">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:0.75rem; flex-wrap:wrap;">
-                <div style="display:flex; align-items:center; gap:0.5rem;">
+        <div style="background:linear-gradient(135deg,#f5fbfc 0%,#eef7f9 100%); padding:1rem; border-radius:14px; border:1px solid #dbecef;">
+            <div style="display:flex; align-items:center; gap:0.65rem; margin-bottom:0.75rem;">
+                <div style="width:34px;height:34px;border-radius:10px;background:#e4f2f5;display:flex;align-items:center;justify-content:center;">
                     <i class="fas fa-map-marker-alt" style="color:#2a7080;"></i>
-                    <span style="font-family:'El Messiri',sans-serif; font-weight:700; color:#2a7080;">عناوين محفوظة</span>
                 </div>
-                <select id="savedAddressSelect" style="flex:1; min-width:220px; padding:0.6rem 0.8rem; border:2px solid #e0e0e0; border-radius:10px; font-family:'El Messiri',sans-serif; background:#fff;">
+                <span style="font-family:'El Messiri',sans-serif; font-weight:800; color:#1f6b77; font-size:1.02rem;">Saved Locations</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr auto; gap:0.6rem; align-items:center;">
+                <select id="savedAddressSelect" style="width:100%; min-width:220px; padding:0.7rem 0.8rem; border:1px solid #cfe2e7; border-radius:12px; font-family:'El Messiri',sans-serif; background:#fff; color:#0f4f55;">
                     ${addresses.map(a => {
-                        const label = a.label || a.line1 || ('عنوان #' + a.id);
-                        const suffix = a.is_default ? ' (افتراضي)' : '';
+                        const delivered = Number(a.order_count || 0);
+                        const idx = addresses.indexOf(a) + 1;
+                        const autoLabel = `Location ${idx}${delivered > 0 ? ` - delivered to ${delivered} time${delivered > 1 ? 's' : ''}` : ''}`;
+                        const label = autoLabel;
+                        const suffix = a.is_default ? ' (default)' : '';
                         return `<option value="${a.id}">${label}${suffix}</option>`;
                     }).join('')}
                 </select>
-                <button id="applySavedAddressBtn" type="button" style="background:#2a7080; color:#fff; border:none; padding:0.65rem 1rem; border-radius:10px; font-family:'El Messiri',sans-serif; font-weight:700; cursor:pointer;">
+                <button id="applySavedAddressBtn" type="button" style="background:#1f6b77; color:#fff; border:none; padding:0.72rem 1.1rem; border-radius:12px; font-family:'El Messiri',sans-serif; font-weight:800; cursor:pointer; white-space:nowrap;">
                     استخدام
                 </button>
             </div>
@@ -1610,8 +1615,8 @@ function renderSavedAddressesUI(addresses) {
     if (btn) {
         btn.addEventListener('click', () => {
             const sel = document.getElementById('savedAddressSelect');
-            const id = sel ? parseInt(sel.value) : null;
-            const address = savedAddresses.find(a => a.id === id);
+            const id = sel ? String(sel.value) : null;
+            const address = savedAddresses.find(a => String(a.id) === id);
             if (address) {
                 applySavedAddress(address);
             }

@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class UserProfileController extends Controller
 {
@@ -161,6 +163,7 @@ class UserProfileController extends Controller
             'email' => 'sometimes|nullable|email|max:255',
             'phone' => 'sometimes|nullable|string|max:20',
             'address' => 'sometimes|nullable|string|max:500',
+            'profile_photo' => 'sometimes|nullable|image|mimes:jpeg,png,jpg|max:2048',
             'currency' => 'sometimes|nullable|in:USD,SYP',
         ]);
 
@@ -182,6 +185,19 @@ class UserProfileController extends Controller
         if (array_key_exists('address', $validated)) {
             $updates['address'] = is_string($validated['address']) ? trim($validated['address']) : $validated['address'];
         }
+
+        // Profile photo upload (stored on public disk so the app can serve it via /storage/{path})
+        if ($request->hasFile('profile_photo') && Schema::hasColumn('users', 'profile_photo')) {
+            if ($user->profile_photo) {
+                try {
+                    Storage::disk('public')->delete($user->profile_photo);
+                } catch (\Throwable $e) {
+                    // ignore
+                }
+            }
+            $updates['profile_photo'] = $request->file('profile_photo')->store('user-photos', 'public');
+        }
+
         if (array_key_exists('currency', $validated) && \Illuminate\Support\Facades\Schema::hasColumn('users', 'currency')) {
             $updates['currency'] = strtoupper((string) $validated['currency']);
             session(['currency' => $updates['currency']]);

@@ -18,7 +18,7 @@
             <i class="fas fa-gift"></i>
             <span>Tulip Gifts</span>
         </a>
-        <a href="{{ route('dashboard.admin.mart') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">
+        <a href="{{ route('dashboard.admin.mart.index') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">
             <i class="fas fa-store"></i>
             <span>Tulip Mart</span>
         </a>

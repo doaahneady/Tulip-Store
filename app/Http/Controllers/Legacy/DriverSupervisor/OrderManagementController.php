@@ -99,7 +99,7 @@ class OrderManagementController extends Controller
             $assignment = $flowResult['assignment'] ?? null;
 
             $order->update([
-                'assigned_driver_id' => $driver->id,
+                'assigned_driver_id' => $driver->user_id,
                 'assigned_at' => now(),
                 'assigned_by' => auth()->check() ? auth()->id() : null,
                 'status' => 'shipped',

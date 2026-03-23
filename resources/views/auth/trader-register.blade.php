@@ -164,13 +164,13 @@
             </div>
             <div class="content">
                 @if ($errors->any())
-                    <div class="error">
+                    <div class="error" style="display:block;">
                         <i class="fas fa-exclamation-circle"></i>
                         {{ $errors->first() }}
                     </div>
                 @endif
                 @if (session('success'))
-                    <div class="notice">
+                    <div class="notice" style="display:block;">
                         <i class="fas fa-check-circle"></i>
                         {{ session('success') }}
                     </div>
@@ -214,7 +214,6 @@
                     </div>
                     <div id="step-2" class="step-pane" style="display:none">
                         <div class="grid grid-2">
-                          
                             <div class="form-group">
                                 <label>اسم الشخص المسؤول</label>
                                 <input type="text" name="contact_person" class="input" required minlength="3">
@@ -223,7 +222,6 @@
                                 <label>عنوان العمل</label>
                                 <input type="text" name="business_address" class="input" required minlength="3">
                             </div>
-                          
                         </div>
                     </div>
                     <div id="step-3" class="step-pane" style="display:none">
@@ -236,6 +234,16 @@
                             <div class="form-group">
                                 <label>هوية المالك</label>
                                 <input type="file" name="owner_id_card" class="file" accept=".pdf,image/*" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>رخصة العمل (اختياري)</label>
+                                <input type="file" name="business_license" class="file" accept=".pdf,image/*">
+                            </div>
+
+                            <div class="form-group">
+                                <label>شهادة ضريبية (اختياري)</label>
+                                <input type="file" name="tax_certificate" class="file" accept=".pdf,image/*">
                             </div>
                         </div>
                     </div>
@@ -272,40 +280,43 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Optional API-submit button (not shown in current UI). Guard to avoid JS crashes.
     const apiBtn = document.getElementById('apiSubmitBtn');
-    apiBtn.style.display = 'inline-flex';
-    apiBtn.addEventListener('click', async () => {
-        if (!validateCurrentStep()) return;
-        
-        const form = document.querySelector('form[action="{{ route('trader.register') }}"]');
-        const formData = new FormData(form);
-        const data = {};
-        formData.forEach((value, key) => {
-            if (!(value instanceof File)) {
-                data[key] = value;
+    if (apiBtn) {
+        apiBtn.style.display = 'inline-flex';
+        apiBtn.addEventListener('click', async () => {
+            if (!validateCurrentStep()) return;
+            
+            const form = document.querySelector('form[action="{{ route('trader.register') }}"]');
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => {
+                if (!(value instanceof File)) {
+                    data[key] = value;
+                }
+            });
+
+            try {
+                const res = await fetch('/api/trader/register', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(data)
+                });
+                const json = await res.json();
+                if (json?.success) {
+                    alert('تم إرسال التسجيل. سيتم إشعارك بعد المراجعة.');
+                    window.location = "{{ route('trader.login.form') }}";
+                } else {
+                    alert(json?.message || 'حدث خطأ أثناء الإرسال');
+                }
+            } catch (e) {
+                alert('حدث خطأ في الاتصال بالخادم');
             }
         });
-
-        try {
-            const res = await fetch('/api/trader/register', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify(data)
-            });
-            const json = await res.json();
-            if (json?.success) {
-                alert('تم إرسال التسجيل. سيتم إشعارك بعد المراجعة.');
-                window.location = "{{ route('trader.login.form') }}";
-            } else {
-                alert(json?.message || 'حدث خطأ أثناء الإرسال');
-            }
-        } catch (e) {
-            alert('حدث خطأ في الاتصال بالخادم');
-        }
-    });
+    }
 });
 </script>
 

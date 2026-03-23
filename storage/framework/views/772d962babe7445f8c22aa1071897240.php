@@ -1,0 +1,260 @@
+<?php $__env->startSection('content'); ?>
+<?php($title = 'لوحة خدمة العملاء')
+@php($subtitle = 'إدارة التذاكر والردود والمرتجعات')
+@php($resolvedGrowth = '')
+@php($ticketsGrowth = '')
+@php($avgFormatted = 'N/A')
+@php
+    $resolvedGrowth = $kpi['resolved_today']['growth'] ?? '';
+    if (is_array($resolvedGrowth)) {
+        $resolvedGrowth = $resolvedGrowth['value'] ?? '';
+    }
+    if ($resolvedGrowth === '0.0%') {
+        $resolvedGrowth = '';
+    }
+
+    $ticketsGrowth = $kpi['tickets_this_month']['growth'] ?? '';
+    if (is_array($ticketsGrowth)) {
+        $ticketsGrowth = $ticketsGrowth['value'] ?? '';
+    }
+    if ($ticketsGrowth === '0.0%') {
+        $ticketsGrowth = '';
+    }
+
+    $avgFormatted = $kpi['avg_response_time']['formatted'] ?? $avgFormatted;
+    if (is_array($avgFormatted)) {
+        $avgFormatted = $avgFormatted['value'] ?? 'N/A';
+    }
+?>
+
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center gap-2">
+        <a href="<?php echo e(route('dashboard.cs.orders')); ?>" class="inline-flex items-center gap-2 bg-green-700 text-white px-4 py-2 rounded-xl hover:bg-green-800 transition">
+            <i class="fas fa-receipt"></i>
+            <span>الطلبات</span>
+        </a>
+        <a href="<?php echo e(route('dashboard.cs.tickets')); ?>" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition">
+            <i class="fas fa-inbox"></i>
+            <span>التذاكر</span>
+        </a>
+        <a href="<?php echo e(route('dashboard.cs.tickets')); ?>?assigned_to=<?php echo e(auth('employee')->id()); ?>" class="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition">
+            <i class="fas fa-user-check"></i>
+            <span>تذاكري</span>
+        </a>
+        <a href="<?php echo e(route('dashboard.cs.trader-products')); ?>" class="inline-flex items-center gap-2 bg-slate-700 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition">
+            <i class="fas fa-clipboard-check"></i>
+            <span>مراجعة المنتجات</span>
+        </a>
+        <a href="<?php echo e(route('dashboard.cs.payrolls')); ?>" class="inline-flex items-center gap-2 bg-sky-600 text-white px-4 py-2 rounded-xl hover:bg-sky-700 transition">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Invoices</span>
+        </a>
+        <a href="<?php echo e(route('dashboard.administrative-approvals.index')); ?>" class="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition">
+            <i class="fas fa-clipboard-check"></i>
+            <span>الموافقات الإدارية</span>
+        </a>
+        <a href="<?php echo e(route('dashboard.my-attendance.index')); ?>" class="inline-flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-xl hover:bg-teal-700 transition">
+            <i class="fas fa-user-clock"></i>
+            <span>حضوري</span>
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 mb-4">
+    <div class="stat-card bg-indigo-800 rounded-2xl p-4 shadow-sm border border-gray-600">
+        <div class="flex items-start justify-between gap-3">
+            <p class="text-indigo-100 text-xs font-semibold">التذاكر المفتوحة</p>
+            <h3 class="text-xl font-black text-white leading-tight"><?php echo e(number_format($kpi['open_tickets']['value'] ?? 0)); ?></h3>
+        </div>
+    </div>
+    <div class="stat-card bg-blue-800 rounded-2xl p-4 shadow-sm border border-gray-600">
+        <div class="flex items-start justify-between gap-3">
+            <p class="text-blue-100 text-xs font-semibold">قيد المعالجة</p>
+            <h3 class="text-xl font-black text-white leading-tight"><?php echo e(number_format($kpi['pending_tickets']['value'] ?? 0)); ?></h3>
+        </div>
+    </div>
+    <div class="stat-card bg-green-800 rounded-2xl p-4 shadow-sm border border-gray-600">
+        <div class="flex items-start justify-between gap-3">
+            <p class="text-green-100 text-xs font-semibold">تم الحل اليوم</p>
+            <h3 class="text-xl font-black text-white leading-tight"><?php echo e(number_format($kpi['resolved_today']['value'] ?? 0)); ?></h3>
+        </div>
+        <p class="text-xs text-green-200 mt-1"><?php echo e($resolvedGrowth ?? ''); ?></p>
+    </div>
+    <div class="stat-card bg-purple-800 rounded-2xl p-4 shadow-sm border border-gray-600">
+        <div class="flex items-start justify-between gap-3">
+            <p class="text-purple-100 text-xs font-semibold">متوسط وقت الاستجابة</p>
+            <h3 class="text-xl font-black text-white leading-tight"><?php echo e($avgFormatted ?? 'N/A'); ?></h3>
+        </div>
+    </div>
+    <div class="stat-card bg-emerald-800 rounded-2xl p-4 shadow-sm border border-gray-600">
+        <div class="flex items-start justify-between gap-3">
+            <p class="text-emerald-100 text-xs font-semibold">تذاكر هذا الشهر</p>
+            <h3 class="text-xl font-black text-white leading-tight"><?php echo e(number_format($kpi['tickets_this_month']['value'] ?? 0)); ?></h3>
+        </div>
+        <p class="text-xs text-emerald-200 mt-1"><?php echo e($ticketsGrowth ?? ''); ?></p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-4 mb-4">
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 xl:col-span-6">
+        <h3 class="text-base font-black text-gray-900 mb-3"><i class="fas fa-bolt text-red-600 ml-2"></i>تذاكر عاجلة</h3>
+        <div class="space-y-2 max-h-[340px] overflow-y-auto">
+            <?php $__empty_1 = true; $__currentLoopData = $urgentTickets; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <?php
+                    $ticketSubject = $t->subject ?? '';
+                    if (is_array($ticketSubject)) {
+                        $ticketSubject = $ticketSubject['ar'] ?? ($ticketSubject['en'] ?? '');
+                    }
+                    $userName = optional($t->user)->name ?? null;
+                    if (is_array($userName)) {
+                        $userName = $userName['ar'] ?? ($userName['en'] ?? '');
+                    }
+                    $userLabel = $userName ?: ('User #'.$t->user_id);
+                ?>
+                <div class="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl">
+                    <div class="min-w-0">
+                        <p class="text-sm font-semibold text-gray-900 truncate"><?php echo e($t->ticket_number); ?> — <?php echo e($ticketSubject); ?></p>
+                        <p class="text-xs text-gray-600 truncate"><?php echo e($userLabel); ?> • <?php echo e($t->created_at?->diffForHumans()); ?></p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-1 rounded text-xs bg-red-100 text-red-700"><?php echo e($t->priority); ?></span>
+                        <a href="<?php echo e(route('dashboard.cs.tickets.show', $t->id)); ?>" class="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-xs text-gray-700 hover:bg-gray-100">فتح</a>
+                    </div>
+                </div>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                <p class="text-center text-gray-500 py-6">لا توجد تذاكر عاجلة</p>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 xl:col-span-3">
+        <h3 class="text-base font-black text-gray-900 mb-3"><i class="fas fa-layer-group text-indigo-600 ml-2"></i>حسب الأولوية</h3>
+        <canvas id="priorityChart" height="170"></canvas>
+    </div>
+
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 xl:col-span-3">
+        <h3 class="text-base font-black text-gray-900 mb-3"><i class="fas fa-chart-pie text-purple-600 ml-2"></i>حسب الحالة</h3>
+        <canvas id="statusChart" height="170"></canvas>
+    </div>
+</div>
+
+<div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
+    <div class="flex items-center justify-between mb-3">
+        <h3 class="text-base font-black text-gray-900"><i class="fas fa-user-clock text-amber-600 ml-2"></i>طلبات حسابات التجار بانتظار الموافقة</h3>
+        <span class="text-xs text-gray-500"><?php echo e(isset($pendingTraders) ? $pendingTraders->count() : 0); ?></span>
+    </div>
+    <div class="space-y-3">
+        <?php $__empty_1 = true; $__currentLoopData = ($pendingTraders ?? collect()); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <?php
+                $payout = is_array($t->payout_settings) ? $t->payout_settings : [];
+                $business = $payout['business'] ?? [];
+                $documents = $payout['documents'] ?? [];
+            ?>
+            <div class="p-3 rounded-xl border border-gray-200 bg-gray-50">
+                <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+                    <div class="text-sm">
+                        <p class="font-semibold text-gray-900"><?php echo e($t->name ?? 'تاجر'); ?> <?php if(!empty($t->company_name)): ?> - <?php echo e($t->company_name); ?> <?php endif; ?></p>
+                        <p class="text-gray-600"><?php echo e($t->contact_email ?? '-'); ?> • <?php echo e($t->contact_phone ?? '-'); ?></p>
+                        <p class="text-xs text-gray-500 mt-1">الشخص المسؤول: <?php echo e($business['contact_person'] ?? '-'); ?> • العنوان: <?php echo e($business['business_address'] ?? '-'); ?></p>
+                        <details class="mt-2">
+                            <summary class="cursor-pointer text-indigo-700 text-xs font-semibold">Show Info</summary>
+                            <div class="mt-2 text-xs text-gray-700 space-y-1">
+                                <div>الاسم التجاري: <?php echo e($t->name ?? '-'); ?></div>
+                                <div>اسم الشركة: <?php echo e($t->company_name ?? '-'); ?></div>
+                                <div>البريد: <?php echo e($t->contact_email ?? '-'); ?></div>
+                                <div>الهاتف: <?php echo e($t->contact_phone ?? '-'); ?></div>
+                                <div>رقم السجل: <?php echo e($business['registration_number'] ?? '-'); ?></div>
+                                <div>الرقم الضريبي: <?php echo e($business['tax_id'] ?? '-'); ?></div>
+                                <?php if(!empty($documents)): ?>
+                                    <div class="pt-1 font-semibold text-gray-800">الوثائق:</div>
+                                    <div class="flex flex-wrap gap-2">
+                                        <?php $__currentLoopData = $documents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $docKey => $docPath): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <?php if(!empty($docPath)): ?>
+                                                <?php
+                                                    $docUrl = \Illuminate\Support\Str::startsWith($docPath, ['http://','https://','/'])
+                                                        ? $docPath
+                                                        : \Illuminate\Support\Facades\Storage::disk('public')->url(ltrim($docPath, '/'));
+                                                ?>
+                                                <a href="<?php echo e($docUrl); ?>" target="_blank" class="px-2 py-1 rounded bg-white border border-gray-200 text-indigo-700 hover:bg-indigo-50">
+                                                    <?php echo e(str_replace('_', ' ', (string) $docKey)); ?>
+
+                                                </a>
+                                            <?php endif; ?>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </details>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <form method="POST" action="<?php echo e(route('dashboard.cs.traders.approve', $t)); ?>">
+                            <?php echo csrf_field(); ?>
+                            <button class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-sm hover:bg-emerald-700">موافقة</button>
+                        </form>
+                        <form method="POST" action="<?php echo e(route('dashboard.cs.traders.reject', $t)); ?>" class="flex items-center gap-2">
+                            <?php echo csrf_field(); ?>
+                            <input name="reason" required placeholder="سبب الرفض" class="px-3 py-1.5 rounded-lg border border-gray-200 text-sm">
+                            <button class="px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm hover:bg-red-700">رفض</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+            <div class="text-center text-sm text-gray-500 py-6">لا توجد طلبات تجار معلقة حالياً</div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<?php
+    $priorityLabels = array_keys($priority ?? []);
+    $priorityValues = array_values($priority ?? []);
+    $statusLabels = array_keys($statusDist ?? []);
+    $statusValues = array_values($statusDist ?? []);
+?>
+
+<script>
+    const priorityLabels = <?php echo json_encode($priorityLabels, 15, 512) ?>;
+    const priorityValues = <?php echo json_encode($priorityValues, 15, 512) ?>;
+    const statusLabels = <?php echo json_encode($statusLabels, 15, 512) ?>;
+    const statusValues = <?php echo json_encode($statusValues, 15, 512) ?>;
+
+    const pctx = document.getElementById('priorityChart');
+    if (pctx) {
+        new Chart(pctx, {
+            type: 'bar',
+            data: {
+                labels: priorityLabels,
+                datasets: [{
+                    data: priorityValues,
+                    backgroundColor: ['#EF4444','#F59E0B','#6366F1','#22C55E']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+
+    const sctx = document.getElementById('statusChart');
+    if (sctx) {
+        new Chart(sctx, {
+            type: 'doughnut',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusValues,
+                    backgroundColor: ['#6366F1','#22C55E','#F59E0B','#EF4444','#64748B','#8B5CF6']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+</script>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('dashboards.layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH E:\Tulip-Store\resources\views/dashboards/cs/index.blade.php ENDPATH**/ ?>

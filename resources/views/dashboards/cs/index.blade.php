@@ -139,6 +139,72 @@
     </div>
 </div>
 
+<div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
+    <div class="flex items-center justify-between mb-3">
+        <h3 class="text-base font-black text-gray-900"><i class="fas fa-user-clock text-amber-600 ml-2"></i>طلبات حسابات التجار بانتظار الموافقة</h3>
+        <span class="text-xs text-gray-500">{{ isset($pendingTraders) ? $pendingTraders->count() : 0 }}</span>
+    </div>
+    <div class="space-y-3">
+        @forelse(($pendingTraders ?? collect()) as $t)
+            @php
+                $payout = is_array($t->payout_settings) ? $t->payout_settings : [];
+                $business = $payout['business'] ?? [];
+                $documents = $payout['documents'] ?? [];
+            @endphp
+            <div class="p-3 rounded-xl border border-gray-200 bg-gray-50">
+                <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+                    <div class="text-sm">
+                        <p class="font-semibold text-gray-900">{{ $t->name ?? 'تاجر' }} @if(!empty($t->company_name)) - {{ $t->company_name }} @endif</p>
+                        <p class="text-gray-600">{{ $t->contact_email ?? '-' }} • {{ $t->contact_phone ?? '-' }}</p>
+                        <p class="text-xs text-gray-500 mt-1">الشخص المسؤول: {{ $business['contact_person'] ?? '-' }} • العنوان: {{ $business['business_address'] ?? '-' }}</p>
+                        <details class="mt-2">
+                            <summary class="cursor-pointer text-indigo-700 text-xs font-semibold">Show Info</summary>
+                            <div class="mt-2 text-xs text-gray-700 space-y-1">
+                                <div>الاسم التجاري: {{ $t->name ?? '-' }}</div>
+                                <div>اسم الشركة: {{ $t->company_name ?? '-' }}</div>
+                                <div>البريد: {{ $t->contact_email ?? '-' }}</div>
+                                <div>الهاتف: {{ $t->contact_phone ?? '-' }}</div>
+                                <div>رقم السجل: {{ $business['registration_number'] ?? '-' }}</div>
+                                <div>الرقم الضريبي: {{ $business['tax_id'] ?? '-' }}</div>
+                                @if(!empty($documents))
+                                    <div class="pt-1 font-semibold text-gray-800">الوثائق:</div>
+                                    <div class="flex flex-wrap gap-2">
+                                        @foreach($documents as $docKey => $docPath)
+                                            @if(!empty($docPath))
+                                                @php
+                                                    $docUrl = \Illuminate\Support\Str::startsWith($docPath, ['http://','https://','/'])
+                                                        ? $docPath
+                                                        : \Illuminate\Support\Facades\Storage::disk('public')->url(ltrim($docPath, '/'));
+                                                @endphp
+                                                <a href="{{ $docUrl }}" target="_blank" class="px-2 py-1 rounded bg-white border border-gray-200 text-indigo-700 hover:bg-indigo-50">
+                                                    {{ str_replace('_', ' ', (string) $docKey) }}
+                                                </a>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </details>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <form method="POST" action="{{ route('dashboard.cs.traders.approve', $t) }}">
+                            @csrf
+                            <button class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-sm hover:bg-emerald-700">موافقة</button>
+                        </form>
+                        <form method="POST" action="{{ route('dashboard.cs.traders.reject', $t) }}" class="flex items-center gap-2">
+                            @csrf
+                            <input name="reason" required placeholder="سبب الرفض" class="px-3 py-1.5 rounded-lg border border-gray-200 text-sm">
+                            <button class="px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm hover:bg-red-700">رفض</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="text-center text-sm text-gray-500 py-6">لا توجد طلبات تجار معلقة حالياً</div>
+        @endforelse
+    </div>
+</div>
+
 @php
     $priorityLabels = array_keys($priority ?? []);
     $priorityValues = array_values($priority ?? []);

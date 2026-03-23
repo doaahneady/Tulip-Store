@@ -882,6 +882,8 @@
         let categories = [];
         let allProductsFlat = [];
         const categoryImageBySlug = {};
+        const isAuthenticated = @json(auth()->check());
+        let favoriteIds = new Set();
 
         function resolvePublicImage(p) {
             if (!p) return null;
@@ -889,8 +891,8 @@
             const path = typeof p === 'object' ? (p.path || p.url || p.image_url || '') : String(p);
             if (!path) return null;
             
-            const trimmed = path.trim();
-            if (!trimmed || trimmed === '/images/grocery.jpg') return null;
+            const trimmed = path.trim().replace(/\\/g, '/');
+            if (!trimmed || trimmed === '/images/panner_mart.png') return null;
             if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
             if (trimmed.startsWith('/')) return trimmed;
             return `/storage/${trimmed}`;
@@ -939,7 +941,7 @@
                 category: categoryName,
                 categorySlug,
                 imageUrl: resolvePublicImage(imagePath),
-                fallbackImage: '/images/grocery.jpg'
+                fallbackImage: '/images/panner_mart.png'
             };
         }
 
@@ -967,7 +969,7 @@
                 .map((c, i) => {
                 const p = palette[i % palette.length];
                 const slug = c.slug || String(c.id);
-                const image = resolvePublicImage(c.image) || '/images/grocery.jpg';
+                const image = resolvePublicImage(c.image) || '/images/panner_mart.png';
                 categoryImageBySlug[slug] = image;
                 return { id: slug, name: c.name || slug, image, color: p.color, gradient: p.gradient };
             });
@@ -986,6 +988,7 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             await loadMartData();
+            await loadFavoriteIds();
             loadTodayDate();
             loadCategories();
             loadSpecialPrices();
@@ -1034,7 +1037,7 @@
                     </div>
                     <div class="price-item-info">
                         <div class="price-item-name">${p.name}</div>
-                        <div class="price-item-value">${p.price} ل.س لكل 1 كغ</div>
+                        <div class="price-item-value">${window.formatMoney ? window.formatMoney(p.price) : (p.price + ' ل.س')} ${p.unit ? `لكل ${p.unit}` : ''}</div>
                     </div>
                 </div>
             `).join('');
@@ -1047,7 +1050,7 @@
                     </div>
                     <div class="price-item-info">
                         <div class="price-item-name">${p.name}</div>
-                        <div class="price-item-value">${p.price} ل.س لكل 1 كغ</div>
+                        <div class="price-item-value">${window.formatMoney ? window.formatMoney(p.price) : (p.price + ' ل.س')} ${p.unit ? `لكل ${p.unit}` : ''}</div>
                     </div>
                 </div>
             `).join('');
@@ -1066,6 +1069,7 @@
             document.getElementById('freshProducts').innerHTML = fresh.map(p => createProductCard(p)).join('');
         }
         function createProductCard(p) {
+            const isFav = favoriteIds.has(String(p.id));
             return `
                 <div class="product-card" data-id="${p.id}">
                     <div class="product-badges">
@@ -1075,7 +1079,7 @@
                     </div>
                     <div class="product-image" style="background-image: url('${p.fallbackImage}'); background-size: cover; background-position: center;">
                         <button class="product-favorite" onclick="toggleFavorite('${p.id}', event)">
-                            <i class="far fa-heart"></i>
+                            <i class="${isFav ? 'fas' : 'far'} fa-heart"></i>
                         </button>
                         ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}">` : ''}
                     </div>
@@ -1088,9 +1092,9 @@
                         </div>
                         <div class="product-footer">
                             <div class="price-info">
-                                <span class="price-current">${p.price} ل.س</span>
-                                ${p.oldPrice ? `<span class="price-old">${p.oldPrice} ل.س</span>` : ''}
-                                <span class="price-unit">لكل 1 كغ</span>
+                                <span class="price-current">${window.formatMoney ? window.formatMoney(p.price) : (p.price + ' ل.س')}</span>
+                                ${p.oldPrice ? `<span class="price-old">${window.formatMoney ? window.formatMoney(p.oldPrice) : (p.oldPrice + ' ل.س')}</span>` : ''}
+                                <span class="price-unit">${p.unit ? `لكل ${p.unit}` : ''}</span>
                             </div>
                             <button class="add-to-cart" onclick="addToCart('${p.id}', event)" id="btn-${p.id}">
                                 <i class="fas fa-plus"></i>
@@ -1106,13 +1110,86 @@
             return categoryImageBySlug[p.categorySlug] || '';
         }
 
+        async function loadFavoriteIds() {
+            favoriteIds = new Set();
+            if (isAuthenticated) {
+                try {
+                    const r = await fetch('/api/wishlist', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
+                    const d = await r.json();
+                    const items = Array.isArray(d.items) ? d.items : [];
+                    items.forEach((it) => {
+                        if (it && it.id !== undefined && it.id !== null) favoriteIds.add(String(it.id));
+                    });
+                    return;
+                } catch (e) {}
+            }
+            const items = JSON.parse(localStorage.getItem('favorites') || '[]');
+            (Array.isArray(items) ? items : []).forEach((it) => {
+                const id = String(it?.id ?? '');
+                if (id && !id.startsWith('gift-')) favoriteIds.add(id);
+            });
+        }
+
+        function persistLocalFavorite(productId) {
+            const id = String(productId);
+            const product = allProductsFlat.find((p) => String(p.id) === id);
+            const items = JSON.parse(localStorage.getItem('favorites') || '[]');
+            const list = Array.isArray(items) ? items : [];
+            const idx = list.findIndex((x) => String(x?.id) === id);
+            if (idx >= 0) {
+                list.splice(idx, 1);
+                favoriteIds.delete(id);
+            } else {
+                list.unshift({
+                    id,
+                    type: 'product',
+                    name: product?.name || '',
+                    price: Number(product?.price || 0),
+                    image: getProductImage(product || {}) || '/images/panner_mart.png',
+                });
+                favoriteIds.add(id);
+            }
+            localStorage.setItem('favorites', JSON.stringify(list.slice(0, 200)));
+            return favoriteIds.has(id);
+        }
+
         function toggleFavorite(productId, event) {
-            event.stopPropagation();
+            event?.stopPropagation?.();
             const btn = event.target.closest('.product-favorite');
             const icon = btn.querySelector('i');
-            btn.classList.toggle('active');
-            icon.classList.toggle('far');
-            icon.classList.toggle('fas');
+            const id = String(productId);
+            const setIcon = (isFav) => {
+                btn.classList.toggle('active', !!isFav);
+                icon.classList.toggle('far', !isFav);
+                icon.classList.toggle('fas', !!isFav);
+            };
+
+            if (isAuthenticated) {
+                fetch('/api/wishlist/toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'Accept': 'application/json',
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ product_id: id }),
+                })
+                    .then(r => r.json())
+                    .then((d) => {
+                        if (!d || !d.success) {
+                            setIcon(persistLocalFavorite(id));
+                            return;
+                        }
+                        if (d.action === 'added') favoriteIds.add(id);
+                        if (d.action === 'removed') favoriteIds.delete(id);
+                        setIcon(favoriteIds.has(id));
+                    })
+                    .catch(() => setIcon(persistLocalFavorite(id)));
+                return;
+            }
+
+            setIcon(persistLocalFavorite(id));
         }
 
         async function addToCart(productId, event) {
@@ -1281,7 +1358,7 @@
                                 <span><i class="fas fa-tag"></i> ${p.category}</span>
                                 <span><i class="fas fa-map-marker-alt"></i> ${p.origin}</span>
                             </div>
-                            <div class="search-result-price" style="color:#059669;font-weight:700;font-size:1.1rem;margin-top:0.3rem;">${p.price} ل.س لكل 1 كغ</div>
+                            <div class="search-result-price" style="color:#059669;font-weight:700;font-size:1.1rem;margin-top:0.3rem;">${window.formatMoney ? window.formatMoney(p.price) : (p.price + ' ل.س')} ${p.unit ? `لكل ${p.unit}` : ''}</div>
                         </div>
                         <button style="background:#059669;color:#fff;border:none;padding:0.7rem 1.2rem;border-radius:25px;cursor:pointer;font-family: 'El Messiri', sans-serif;font-weight:600;transition:all 0.3s;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
                             <i class="fas fa-plus"></i> أضف

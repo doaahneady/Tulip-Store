@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\DashboardPermissionService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,6 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class DashboardRoleMiddleware
 {
+    protected static array $templateExistsCache = [];
     /**
      * Role flag mappings from role name to User model attribute
      */
@@ -64,9 +66,27 @@ class DashboardRoleMiddleware
         }
 
         $dashboardKey = $this->resolveDashboardKey($request);
+        if ($dashboardKey && class_exists(DashboardPermissionService::class)) {
+            $resolved = DashboardPermissionService::resolve($user, $dashboardKey);
+            $request->attributes->set('resolved_dashboard_permissions', $resolved);
+
+            $hasEmployeeOverride = \Illuminate\Support\Facades\Schema::hasTable('employee_dashboard_overrides')
+                && \App\Models\EmployeeDashboardOverride::query()
+                    ->where('employee_id', $user->id)
+                    ->where('dashboard_key', $dashboardKey)
+                    ->where('is_override', true)
+                    ->exists();
+
+            $hasRoleTemplateForDashboard = \Illuminate\Support\Facades\Schema::hasTable('dashboard_role_permissions')
+                && $this->hasPermissionTemplatesForDashboard($dashboardKey);
+
+            if (($hasEmployeeOverride || $hasRoleTemplateForDashboard) && ! $resolved['can_view']) {
+                abort(403, 'You don\'t have permission to view this dashboard');
+            }
+        }
         $explicitKeys = method_exists($user, 'getExplicitDashboardKeys') ? $user->getExplicitDashboardKeys() : [];
         if (! empty($explicitKeys)) {
-            if (! $dashboardKey || (method_exists($user, 'canAccessDashboard') && $user->canAccessDashboard($dashboardKey))) {
+            if (! $dashboardKey || $this->hasExplicitDashboardAccess($user, $dashboardKey)) {
                 return $next($request);
             }
             abort(403, 'You don\'t have permission to access this resource');
@@ -89,23 +109,63 @@ class DashboardRoleMiddleware
 
     protected function resolveDashboardKey(Request $request): ?string
     {
-        $segment = $request->segment(2);
-        if (! $segment) {
-            return null;
+        $routeName = (string) optional($request->route())->getName();
+        if ($routeName !== '') {
+            if (str_starts_with($routeName, 'dashboard.admin.mart.')) {
+                return 'mart';
+            }
+            if (str_starts_with($routeName, 'dashboard.supervisor.live-tracking') || str_starts_with($routeName, 'dashboard.supervisor.api.driver-locations')) {
+                return 'supervisor_map';
+            }
+            if (str_starts_with($routeName, 'dashboard.supervisor.order-assignment')) {
+                return 'supervisor_orders';
+            }
+            if (str_starts_with($routeName, 'dashboard.admin.')) {
+                return 'admin';
+            }
+            if (str_starts_with($routeName, 'dashboard.it.')) {
+                return 'it';
+            }
+            if (str_starts_with($routeName, 'dashboard.hr.')) {
+                return 'hr';
+            }
+            if (str_starts_with($routeName, 'dashboard.finance.')) {
+                return 'finance';
+            }
+            if (str_starts_with($routeName, 'dashboard.cs.') || str_starts_with($routeName, 'dashboard.support.')) {
+                return 'cs';
+            }
+            if (str_starts_with($routeName, 'dashboard.supervisor.')) {
+                return 'supervisor';
+            }
+            if (str_starts_with($routeName, 'dashboard.vendor.')) {
+                return 'vendor';
+            }
+            if (str_starts_with($routeName, 'dashboard.driver.')) {
+                return 'driver';
+            }
         }
 
-        return match ($segment) {
-            'admin' => 'admin',
-            'it' => 'it',
-            'hr' => 'hr',
-            'cs' => 'cs',
-            'support' => 'cs',
-            'finance' => 'finance',
-            'supervisor' => 'supervisor',
-            'vendor' => 'vendor',
-            'reviews' => 'admin',
-            default => null,
-        };
+        return null;
+    }
+
+    protected function hasExplicitDashboardAccess($user, string $dashboardKey): bool
+    {
+        if (! method_exists($user, 'canAccessDashboard')) {
+            return false;
+        }
+        if ($user->canAccessDashboard($dashboardKey)) {
+            return true;
+        }
+
+        if ($dashboardKey === 'supervisor_map' || $dashboardKey === 'supervisor_orders') {
+            return $user->canAccessDashboard('supervisor');
+        }
+        if ($dashboardKey === 'mart') {
+            return $user->canAccessDashboard('admin');
+        }
+
+        return false;
     }
 
     /**
@@ -141,6 +201,18 @@ class DashboardRoleMiddleware
      */
     public function hasRole($user, string $role): bool
     {
+        // Driver dashboard: logistics supervisors OR employees with a Driver profile
+        if ($role === 'driver') {
+            if ($user->is_driver_supervisor ?? false) {
+                return true;
+            }
+            if (method_exists($user, 'driver') && $user->driver()->exists()) {
+                return true;
+            }
+
+            return false;
+        }
+
         // Check role flag on user model
         if (isset($this->roleFlags[$role])) {
             $flag = $this->roleFlags[$role];
@@ -183,5 +255,20 @@ class DashboardRoleMiddleware
         }
 
         return array_unique($roles);
+    }
+
+    protected function hasPermissionTemplatesForDashboard(string $dashboardKey): bool
+    {
+        if (array_key_exists($dashboardKey, self::$templateExistsCache)) {
+            return self::$templateExistsCache[$dashboardKey];
+        }
+
+        $exists = \App\Models\DashboardRolePermission::query()
+            ->where('dashboard_key', $dashboardKey)
+            ->exists();
+
+        self::$templateExistsCache[$dashboardKey] = $exists;
+
+        return $exists;
     }
 }

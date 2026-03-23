@@ -33,7 +33,9 @@ class GoogleAuthController extends Controller
     public function callback()
     {
         try {
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            // Use stateful OAuth handshake (do not force stateless in callback)
+            // because redirect() stores the state in the session.
+            $googleUser = Socialite::driver('google')->user();
 
             // Find or create user
             $user = User::where('email', $googleUser->email)->first();

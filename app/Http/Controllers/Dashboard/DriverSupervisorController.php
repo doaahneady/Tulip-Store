@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DeliveryAssignment;
 use App\Models\DeliveryRoute;
 use App\Models\Driver;
+use App\Models\Employee;
 use App\Models\EmployeeTrainingRecord;
 use App\Models\FinancialTransaction;
 use App\Models\Order;
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class DriverSupervisorController extends Controller
 {
@@ -453,7 +455,13 @@ class DriverSupervisorController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email',
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email'),
+                Rule::unique('employees', 'email'),
+            ],
             'phone' => 'nullable|string|max:50',
             'password' => 'required|string|min:8|max:255',
             'license_number' => 'required|string|max:255|unique:drivers,license_number',
@@ -499,6 +507,8 @@ class DriverSupervisorController extends Controller
                     'status' => $validated['status'],
                     'availability' => $validated['availability'],
                 ]);
+
+                $this->createDriverEmployee($user, $validated, false);
 
                 return redirect()->route('dashboard.supervisor.drivers')->with('success', 'Driver created successfully');
             });
@@ -564,6 +574,10 @@ class DriverSupervisorController extends Controller
                 'availability' => $validated['availability'],
             ]);
 
+            if ($user) {
+                $this->syncDriverEmployeeFromUser($user->fresh(), $validated);
+            }
+
             return redirect()->route('dashboard.supervisor.drivers')->with('success', 'Driver updated successfully');
         });
     }
@@ -575,10 +589,116 @@ class DriverSupervisorController extends Controller
             return back()->with('error', 'Cannot delete driver with delivery history. Set to suspended instead.');
         }
 
-        $driver->locations()->delete();
-        $driver->delete();
+        DB::transaction(function () use ($driver) {
+            $user = $driver->user;
+            $driver->locations()->delete();
+            $driver->delete();
+
+            if ($user) {
+                $employee = $this->findEmployeeForDriverUser($user);
+                if ($employee) {
+                    $employee->forceDelete();
+                }
+                $hasOrders = Order::where('user_id', $user->id)->exists();
+                if (! $hasOrders) {
+                    $user->delete();
+                }
+            }
+        });
 
         return back()->with('success', 'Driver deleted successfully');
+    }
+
+    /**
+     * Employee portal (/employee/login) authenticates against employees — create a matching row.
+     *
+     * @param  bool  $reuseUserPasswordHash  When true, copy bcrypt hash from users (repair / sync without new password).
+     */
+    protected function createDriverEmployee(User $user, array $validated, bool $reuseUserPasswordHash = false): void
+    {
+        if (! Schema::hasTable('employees')) {
+            return;
+        }
+
+        $parts = preg_split('/\s+/', trim($validated['name']), 2);
+        $first = $parts[0] ?? 'Driver';
+        $last = (isset($parts[1]) && $parts[1] !== '') ? $parts[1] : '—';
+
+        $data = [
+            'first_name' => $first,
+            'last_name' => $last,
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'status' => 'active',
+        ];
+        if (Schema::hasColumn('employees', 'department')) {
+            $data['department'] = 'Delivery';
+        }
+        if (Schema::hasColumn('employees', 'position')) {
+            $data['position'] = 'Driver';
+        }
+        if (Schema::hasColumn('employees', 'hire_date')) {
+            $data['hire_date'] = now();
+        }
+        if (Schema::hasColumn('employees', 'user_id')) {
+            $data['user_id'] = $user->id;
+        }
+
+        if ($reuseUserPasswordHash) {
+            $data['password'] = $user->getAuthPassword();
+        } else {
+            $data['password'] = $validated['password'];
+        }
+
+        Employee::create($data);
+    }
+
+    protected function findEmployeeForDriverUser(User $user): ?Employee
+    {
+        if (! Schema::hasTable('employees')) {
+            return null;
+        }
+        if (Schema::hasColumn('employees', 'user_id')) {
+            $byLink = Employee::where('user_id', $user->id)->first();
+            if ($byLink) {
+                return $byLink;
+            }
+        }
+
+        return Employee::where('email', $user->email)->first();
+    }
+
+    protected function syncDriverEmployeeFromUser(User $user, array $validated): void
+    {
+        if (! Schema::hasTable('employees')) {
+            return;
+        }
+
+        $parts = preg_split('/\s+/', trim($validated['name']), 2);
+        $first = $parts[0] ?? 'Driver';
+        $last = (isset($parts[1]) && $parts[1] !== '') ? $parts[1] : '—';
+
+        $employee = $this->findEmployeeForDriverUser($user);
+        if (! $employee) {
+            // No employee row yet: reuse same password hash as User so /employee/login works without forcing a new password.
+            $this->createDriverEmployee($user, $validated, true);
+
+            return;
+        }
+
+        $updates = [
+            'first_name' => $first,
+            'last_name' => $last,
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+        ];
+        if (! empty($validated['password'])) {
+            $updates['password'] = $validated['password'];
+        }
+        if (Schema::hasColumn('employees', 'user_id') && ! $employee->user_id) {
+            $updates['user_id'] = $user->id;
+        }
+        $employee->update($updates);
     }
 
     /**
@@ -724,6 +844,9 @@ class DriverSupervisorController extends Controller
 
             // Check if driver is available
             $driver = Driver::find($request->driver_id);
+            if (! $driver->user_id) {
+                return response()->json(['success' => false, 'message' => 'Driver has no linked login user (user_id missing)']);
+            }
             if ($driver->availability !== 'available') {
                 return response()->json(['success' => false, 'message' => 'Driver not available']);
             }
@@ -739,9 +862,9 @@ class DriverSupervisorController extends Controller
             // Update driver status
             $driver->update(['availability' => 'busy']);
 
-            // Update order status
+            // Update order status (assigned_driver_id → users.id)
             Order::where('id', $request->order_id)->update([
-                'assigned_driver_id' => $request->driver_id,
+                'assigned_driver_id' => $driver->user_id,
                 'assigned_at' => now(),
             ]);
 

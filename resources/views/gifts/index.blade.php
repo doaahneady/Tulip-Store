@@ -494,7 +494,7 @@
     <script>
         function resolveMediaUrl(path) {
             const p = String(path || '').trim();
-            if (!p) return '/images/tulip_gift.jpg';
+            if (!p) return '/images/birthday_card.jpeg';
             if (p.startsWith('http://') || p.startsWith('https://')) return p;
             if (p.startsWith('/')) return p;
             const cleaned = p.replace(/^storage\//, '');
@@ -506,7 +506,7 @@
                 const res = await fetch('/api/gifts/featured');
                 const payload = await res.json();
                 const gifts = Array.isArray(payload.data) ? payload.data : [];
-                const fallback = '/images/tulip_gift.jpg';
+                const fallback = '/images/birthday_card.jpeg';
                 const img1 = document.getElementById('boxCardImage');
                 const img2 = document.getElementById('bouquetCardImage');
                 const img3 = document.getElementById('readyCardImage');
@@ -546,7 +546,7 @@
                 }
 
                 grid.innerHTML = gifts.map(gift => {
-                    const image = resolveMediaUrl(gift.main_image || (gift.images && gift.images[0]) || gift.image || '') || '/images/tulip_gift.jpg';
+                    const image = resolveMediaUrl(gift.main_image || (gift.images && gift.images[0]) || gift.image || '') || '/images/birthday_card.jpeg';
                     const rating = Number(gift.rating ?? 0);
                     const reviews = Number(gift.reviews_count ?? 0);
                     const badgeText = gift.is_featured ? 'مميز' : '';
@@ -555,7 +555,7 @@
                         <div class="gift-card" onclick="window.location.href='/gifts/${gift.id}'">
                             <div class="gift-image">
                                 ${badgeText ? `<span class="gift-badge ${badgeClass}">${badgeText}</span>` : ''}
-                                <img src="${image}" alt="${gift.name || ''}" loading="lazy" onerror="this.src='/images/tulip_gift.jpg'">
+                                <img src="${image}" alt="${gift.name || ''}" loading="lazy" onerror="this.src='/images/birthday_card.jpeg'">
                             </div>
                             <div class="gift-info">
                                 <h3 class="gift-name">${gift.name || ''}</h3>

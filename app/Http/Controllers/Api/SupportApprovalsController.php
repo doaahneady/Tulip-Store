@@ -21,7 +21,23 @@ class SupportApprovalsController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return response()->json(['traders' => $traders]);
+        $data = $traders->through(function ($t) {
+            $payout = $t->payout_settings ?? [];
+            return [
+                'id' => $t->id,
+                'name' => $t->name,
+                'company_name' => $t->company_name,
+                'contact_email' => $t->contact_email,
+                'contact_phone' => $t->contact_phone,
+                'status' => $t->status,
+                'documents' => $payout['documents'] ?? [],
+                'business' => $payout['business'] ?? [],
+                'bank' => $payout['bank'] ?? [],
+                'user_id' => $t->user_id,
+            ];
+        });
+
+        return response()->json(['traders' => $data]);
     }
 
     public function approveTrader(Request $request, Trader $trader)

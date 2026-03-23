@@ -102,6 +102,23 @@
                     </div>
 
                     <div class="flex flex-col gap-2 lg:items-end">
+                        <details class="w-full lg:w-96 bg-white border border-gray-200 rounded-xl p-2">
+                            <summary class="cursor-pointer text-sm font-semibold text-indigo-700">تعديل بيانات المنتج</summary>
+                            <form method="POST" action="{{ route('dashboard.cs.trader-products.update', $p) }}" enctype="multipart/form-data" class="mt-3 space-y-2">
+                                @csrf
+                                <input name="name" value="{{ $p->name }}" required class="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" placeholder="اسم المنتج">
+                                <textarea name="description" rows="3" class="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" placeholder="الوصف">{{ $p->description }}</textarea>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input name="price" type="number" step="0.01" min="0" value="{{ $p->price }}" required class="px-3 py-2 rounded-lg border border-gray-200 text-sm" placeholder="السعر">
+                                    <input name="stock_quantity" type="number" min="0" value="{{ $p->stock_quantity ?? 0 }}" class="px-3 py-2 rounded-lg border border-gray-200 text-sm" placeholder="الكمية">
+                                </div>
+                                <input type="file" name="photo" accept="image/*" class="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm">
+                                <button type="submit" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition text-sm">
+                                    <i class="fas fa-pen"></i>
+                                    <span>حفظ التعديل</span>
+                                </button>
+                            </form>
+                        </details>
                         <form method="POST" action="{{ route('dashboard.cs.trader-products.approve', $p) }}">
                             @csrf
                             <button type="submit" class="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition">

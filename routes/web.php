@@ -928,7 +928,7 @@ Route::get('/checkout', function () {
 // Order confirmation page
 Route::get('/order-confirmation/{id}', [\App\Http\Controllers\OrderController::class, 'show'])->name('order.confirmation');
 
-// My Orders page (requires authentication)
+// My Orders page (owned by the logged-in user; check happens inside controller)
 Route::get('/my-orders', [\App\Http\Controllers\OrderController::class, 'myOrders'])->name('my.orders');
 
 // Invoice routes
@@ -1473,7 +1473,7 @@ Route::middleware(['web', 'auth:employee'])->group(function () {
     Route::middleware('dashboard.role:admin')->group(function () {
         Route::get('/admin/dashboard', fn () => redirect()->route('dashboard.admin.index'));
         Route::get('/admin/gifts', fn () => redirect()->route('dashboard.admin.gifts'));
-        Route::get('/admin/mart', fn () => redirect()->route('dashboard.admin.mart'));
+        Route::get('/admin/mart', fn () => redirect()->route('dashboard.admin.mart.index'));
     });
 
     Route::middleware('dashboard.role:it')->get('/it/dashboard', fn () => redirect()->route('dashboard.it.index'));

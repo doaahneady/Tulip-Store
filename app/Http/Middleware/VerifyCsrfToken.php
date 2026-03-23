@@ -25,6 +25,7 @@ class VerifyCsrfToken extends Middleware
             $this->except = array_values(array_unique(array_merge($this->except, [
                 'trader/login',
                 'trader/logout',
+                'trader/register',
             ])));
         }
 

@@ -988,7 +988,7 @@
         }
 
         function resolveProductImage(path) {
-            const p = String(path || '').trim();
+            const p = String(path || '').trim().replace(/\\/g, '/');
             if (!p) return null;
             if (p.startsWith('http://') || p.startsWith('https://')) return p;
             if (p.startsWith('/')) return `${window.location.origin}${p}`;
@@ -996,13 +996,35 @@
             return `${window.location.origin}/storage/${cleaned}`;
         }
 
+        function persistLocalFavorite(id, product) {
+            const items = JSON.parse(localStorage.getItem('favorites') || '[]');
+            const list = Array.isArray(items) ? items : [];
+            const idx = list.findIndex((x) => String(x?.id) === String(id));
+            if (idx >= 0) {
+                list.splice(idx, 1);
+                favoriteIds.delete(String(id));
+            } else {
+                list.unshift({
+                    id: String(id),
+                    name: product?.name || '',
+                    price: Number(product?.price || 0),
+                    image: product?.image || '/images/panner_mart.png',
+                    type: 'product'
+                });
+                favoriteIds.add(String(id));
+            }
+            localStorage.setItem('favorites', JSON.stringify(list.slice(0, 200)));
+            updateFavoritesCount(favoriteIds.size);
+            return favoriteIds.has(String(id));
+        }
+
         function martFallbackImage(categorySlug, categoryName) {
             const slug = String(categorySlug || '').toLowerCase();
             const name = String(categoryName || '').toLowerCase();
-            if (slug.includes('fruit') || slug.includes('veget') || name.includes('فوا') || name.includes('خضا') || name.includes('خضر')) return '/images/grocery.jpg';
-            if (slug.includes('dairy') || name.includes('ألبان') || name.includes('حليب')) return '/images/grocery.jpg';
-            if (slug.includes('bakery') || name.includes('مخب')) return '/images/grocery.jpg';
-            return '/images/grocery.jpg';
+            if (slug.includes('fruit') || slug.includes('veget') || name.includes('فوا') || name.includes('خضا') || name.includes('خضر')) return '/images/panner_mart.png';
+            if (slug.includes('dairy') || name.includes('ألبان') || name.includes('حليب')) return '/images/panner_mart.png';
+            if (slug.includes('bakery') || name.includes('مخب')) return '/images/panner_mart.png';
+            return '/images/panner_mart.png';
         }
 
         function updateFavoritesCount(count) {
@@ -1043,7 +1065,9 @@
             const attrs = Array.isArray(p.attributes) ? p.attributes : [];
             const unit = (attrs.find(a => a.name === 'unit')?.value) || p.unit || 'حبة';
             const origin = (attrs.find(a => a.name === 'origin')?.value) || p.origin || 'محلي';
-            const image = resolveProductImage((p.images && p.images[0]) || p.image || p.photo || '') || martFallbackImage(categorySlug, categoryName);
+            const firstImage = Array.isArray(p.images) ? (p.images[0]?.path || p.images[0]?.url || p.images[0]) : null;
+            const imageSource = p.primary_image_url || firstImage || p.image || p.photo || '';
+            const image = resolveProductImage(imageSource) || martFallbackImage(categorySlug, categoryName);
             let badge = '';
             if (p.discount_price) badge = 'sale';
             else if (String(origin).includes('محلي')) badge = 'fresh';
@@ -1271,7 +1295,7 @@
                         <button class="product-favorite" onclick="toggleFavorite('${p.id}', this)">
                             <i class="${fav ? 'fas' : 'far'} fa-heart"></i>
                         </button>
-                        <img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.src='/images/grocery.jpg';">
+                        <img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.src='/images/panner_mart.png';">
                     </div>
                     <div class="product-body">
                         <div class="product-category">${p.category}</div>
@@ -1282,8 +1306,8 @@
                         </div>
                         <div class="product-footer">
                             <div class="price-wrapper">
-                                <span class="price-current">${p.price} ل.س</span>
-                                ${p.oldPrice ? `<span class="price-old">${p.oldPrice} ل.س</span>` : ''}
+                                <span class="price-current">${window.formatMoney ? window.formatMoney(p.price) : (p.price + ' ل.س')}</span>
+                                ${p.oldPrice ? `<span class="price-old">${window.formatMoney ? window.formatMoney(p.oldPrice) : (p.oldPrice + ' ل.س')}</span>` : ''}
                                 <span class="price-unit">لكل 1 كغ</span>
                             </div>
                             <button class="add-cart-btn" onclick="addToCart('${p.id}', this)" id="btn-${p.id}">
@@ -1445,7 +1469,11 @@
                 })
                 .then(r => r.json())
                 .then(d => {
-                    if (!d || !d.success) { setIcon(favoriteIds.has(id)); return; }
+                    if (!d || !d.success) {
+                        const localState = persistLocalFavorite(id, product);
+                        setIcon(localState);
+                        return;
+                    }
                     if (d.action === 'added') favoriteIds.add(id);
                     if (d.action === 'removed') favoriteIds.delete(id);
                     updateFavoritesCount(d.count || favoriteIds.size);
@@ -1454,21 +1482,15 @@
                         window.showToast(d.action === 'added' ? `تمت إضافة ${product.name} للمفضلة` : `تمت إزالة ${product.name} من المفضلة`);
                     }
                 })
-                .catch(() => setIcon(favoriteIds.has(id)));
+                .catch(() => {
+                    const localState = persistLocalFavorite(id, product);
+                    setIcon(localState);
+                });
                 return;
             }
 
-            const items = JSON.parse(localStorage.getItem('favorites') || '[]');
-            const list = Array.isArray(items) ? items : [];
-            const idx = list.findIndex((x) => String(x?.id) === id);
-            if (idx >= 0) { list.splice(idx, 1); favoriteIds.delete(id); }
-            else {
-                list.unshift({ id, name: product?.name || '', price: product?.price || 0, image: product?.image || null });
-                favoriteIds.add(id);
-            }
-            localStorage.setItem('favorites', JSON.stringify(list.slice(0, 200)));
-            updateFavoritesCount(favoriteIds.size);
-            setIcon(favoriteIds.has(id));
+            const localState = persistLocalFavorite(id, product);
+            setIcon(localState);
         }
 
         async function addToCart(productId, source) {

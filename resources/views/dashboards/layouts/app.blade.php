@@ -10,9 +10,34 @@
     $dashboardRoutes = $employee
         ? collect($employee?->available_dashboards ?? [])->pluck('route')->filter()->values()->all()
         : ['dashboard.vendor.index'];
-    $isAdmin = (bool) ($employee?->is_admin ?? false);
-    $canAccess = function (string $routeName) use ($dashboardRoutes, $isAdmin): bool {
-        return $isAdmin || in_array($routeName, $dashboardRoutes, true);
+    $routeToDashboardKey = [
+        'dashboard.admin.index' => 'admin',
+        'dashboard.admin.style-guide' => 'admin',
+        'dashboard.admin.mart' => 'mart',
+        'dashboard.admin.mart.index' => 'mart',
+        'dashboard.cs.index' => 'cs',
+        'dashboard.finance.index' => 'finance',
+        'dashboard.hr.index' => 'hr',
+        'dashboard.it.index' => 'it',
+        'dashboard.supervisor.index' => 'supervisor',
+        'dashboard.driver.index' => 'driver',
+        'dashboard.vendor.index' => 'vendor',
+    ];
+    $resolvedSidebarPerms = [];
+    if ($employee) {
+        foreach (array_unique(array_values($routeToDashboardKey)) as $dk) {
+            $resolvedSidebarPerms[$dk] = \App\Services\DashboardPermissionService::resolve($employee, $dk);
+        }
+    }
+    $canAccess = function (string $routeName) use ($dashboardRoutes, $employee, $routeToDashboardKey, $resolvedSidebarPerms): bool {
+        if (! $employee) {
+            return in_array($routeName, $dashboardRoutes, true);
+        }
+        $dk = $routeToDashboardKey[$routeName] ?? null;
+        if ($dk) {
+            return (bool) ($resolvedSidebarPerms[$dk]['can_view'] ?? false);
+        }
+        return in_array($routeName, $dashboardRoutes, true);
     };
 @endphp
 
@@ -134,8 +159,18 @@
                         <a href="{{ route('dashboard.supervisor.index') }}" class="db4-nav-link {{ request()->routeIs('dashboard.supervisor.*') ? 'is-active' : '' }}">
                             <span class="db4-nav-icon" aria-hidden="true"><i class="fas fa-truck"></i></span>
                             <span class="db4-nav-meta">
-                                <span class="db4-nav-label">{{ $dashboardLocale === 'ar' ? 'إدارة السائقين' : 'Drivers' }}</span>
+                                <span class="db4-nav-label">{{ $dashboardLocale === 'ar' ? 'اللوجستيات' : 'Logistics' }}</span>
                                 <span class="db4-nav-hint">{{ $dashboardLocale === 'ar' ? 'تتبع وتوزيع الطلبات' : 'Live tracking and dispatch' }}</span>
+                            </span>
+                        </a>
+                    @endif
+
+                    @if(! $isTraderSession && $canAccess('dashboard.driver.index'))
+                        <a href="{{ route('dashboard.driver.index') }}" class="db4-nav-link {{ request()->routeIs('dashboard.driver.*') ? 'is-active' : '' }}">
+                            <span class="db4-nav-icon" aria-hidden="true"><i class="fas fa-truck-fast"></i></span>
+                            <span class="db4-nav-meta">
+                                <span class="db4-nav-label">{{ $dashboardLocale === 'ar' ? 'السائق' : 'Driver' }}</span>
+                                <span class="db4-nav-hint">{{ $dashboardLocale === 'ar' ? 'طلباتي وحالة التوصيل' : 'My deliveries and status' }}</span>
                             </span>
                         </a>
                     @endif
@@ -330,8 +365,30 @@
             $dashKey = 'supervisor';
         } elseif (request()->routeIs('dashboard.vendor.*')) {
             $dashKey = 'vendor';
+        } elseif (request()->routeIs('dashboard.driver.*')) {
+            $dashKey = 'driver';
         }
     @endphp
+    @php
+        $resolvedPerm = request()->attributes->get('resolved_dashboard_permissions', null);
+    @endphp
+    @if($dashKey)
+        <script>
+            window.DASHBOARD_KEY = @json($dashKey);
+            window.DASHBOARD_PERMISSIONS = @json($resolvedPerm);
+            window.canDashboardEdit = function () {
+                return !!(window.DASHBOARD_PERMISSIONS && window.DASHBOARD_PERMISSIONS.can_edit === true);
+            };
+            window.canDashboardAction = function (action) {
+                const actions = (window.DASHBOARD_PERMISSIONS && Array.isArray(window.DASHBOARD_PERMISSIONS.actions))
+                    ? window.DASHBOARD_PERMISSIONS.actions : [];
+                return actions.includes(String(action || ''));
+            };
+            window.canViewSensitive = function () {
+                return !!(window.DASHBOARD_PERMISSIONS && window.DASHBOARD_PERMISSIONS.can_view_sensitive === true);
+            };
+        </script>
+    @endif
     @if($broadcastDriver === 'pusher' && $dashKey)
         <script src="https://cdn.jsdelivr.net/npm/pusher-js@8.4.0/dist/web/pusher.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.0/dist/echo.iife.js"></script>

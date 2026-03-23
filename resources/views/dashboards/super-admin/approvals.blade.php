@@ -108,7 +108,45 @@ async function loadPendingTraders() {
             row.className = 'p-3 bg-gray-50 rounded-lg flex items-center justify-between';
             const info = document.createElement('div');
             info.className = 'text-sm';
-            info.innerHTML = `<p class="text-gray-800 font-semibold">${t.name ?? 'تاجر'}</p><p class="text-gray-500">${t.contact_email ?? ''} · ${t.contact_phone ?? ''}</p>`;
+            const business = t.business || {};
+            const bank = t.bank || {};
+            const docs = t.documents || {};
+
+            const docsHtml = Object.entries(docs)
+                .map(([key, path]) => {
+                    if (!path) return '';
+                    const strPath = String(path);
+                    const url = (strPath.startsWith('http://') || strPath.startsWith('https://'))
+                        ? strPath
+                        : `/storage/${strPath}`;
+                    const label = key.replace(/_/g, ' ');
+                    const fileName = strPath.split('/').pop();
+                    return `<div class="text-xs text-gray-600 mt-1">
+                        <span class="font-medium text-gray-700">${label}:</span>
+                        <a href="${url}" target="_blank" class="text-indigo-600 underline">${fileName}</a>
+                    </div>`;
+                })
+                .filter(Boolean)
+                .join('');
+
+            const docsSection = docsHtml ? `<div class="mt-2">${docsHtml}</div>` : '';
+
+            info.innerHTML = `
+                <p class="text-gray-800 font-semibold">${t.name ?? 'تاجر'}</p>
+                <p class="text-gray-500">${t.contact_email ?? ''} · ${t.contact_phone ?? ''}</p>
+                <div class="mt-2 text-xs text-gray-700">
+                    <p><span class="font-medium text-gray-800">الشركة:</span> ${t.company_name ?? '-'}</p>
+                    <p><span class="font-medium text-gray-800">الشخص المسؤول:</span> ${business.contact_person ?? '-'}</p>
+                    <p><span class="font-medium text-gray-800">العنوان:</span> ${business.business_address ?? '-'}</p>
+                    <p><span class="font-medium text-gray-800">رقم السجل:</span> ${business.registration_number ?? '-'}</p>
+                    <p><span class="font-medium text-gray-800">الرقم الضريبي:</span> ${business.tax_id ?? '-'}</p>
+                    <p><span class="font-medium text-gray-800">اسم البنك:</span> ${bank.bank_name ?? '-'}</p>
+                    <p><span class="font-medium text-gray-800">حامل الحساب:</span> ${bank.account_holder ?? '-'}</p>
+                    <p><span class="font-medium text-gray-800">رقم الحساب:</span> ${bank.account_number ?? '-'}</p>
+                    <p><span class="font-medium text-gray-800">IBAN:</span> ${bank.iban ?? '-'}</p>
+                </div>
+                ${docsSection}
+            `;
             const actions = document.createElement('div');
             actions.className = 'flex gap-2';
             const btnApprove = document.createElement('button');

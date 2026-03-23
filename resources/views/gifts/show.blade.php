@@ -395,7 +395,7 @@
             <div class="gift-detail-content">
                 <!-- Images -->
                 <div class="gift-images">
-                    <img src="{{ $gift->main_image }}" alt="{{ $gift->name }}" class="main-image" loading="eager" width="900" height="500" onerror="this.src='/images/tulip_gift.jpg'">
+                    <img src="{{ $gift->main_image }}" alt="{{ $gift->name }}" class="main-image" loading="eager" width="900" height="500" onerror="this.src='/images/birthday_card.jpeg'">
                 </div>
 
                 <!-- Info -->
@@ -415,7 +415,7 @@
                         <span>({{ $gift->reviews_count }} تقييم)</span>
                     </div> -->
 
-                    <div class="gift-price">{{ $gift->formatted_price }}</div>
+                    <div class="gift-price">@money($gift->price)</div>
 
                     <div class="gift-description">
                         {{ $gift->description }}
@@ -490,10 +490,10 @@
                 <div class="related-grid">
                     @foreach($relatedGifts as $relatedGift)
                         <div class="related-card" onclick="window.location.href='{{ route('gifts.show', $relatedGift) }}'">
-                            <img src="{{ $relatedGift->main_image }}" alt="{{ $relatedGift->name }}" class="related-image" loading="lazy" width="320" height="200" onerror="this.src='/images/tulip_gift.jpg'">
+                            <img src="{{ $relatedGift->main_image }}" alt="{{ $relatedGift->name }}" class="related-image" loading="lazy" width="320" height="200" onerror="this.src='/images/birthday_card.jpeg'">
                             <div class="related-content">
                                 <div class="related-name">{{ $relatedGift->name }}</div>
-                                <div class="related-price">{{ $relatedGift->formatted_price }}</div>
+                                <div class="related-price">@money($relatedGift->price)</div>
                             </div>
                         </div>
                     @endforeach
@@ -542,10 +542,28 @@
         }
 
         function addToWishlist() {
-            // Show success message
-            if (window.showToast) {
-                window.showToast('تم إضافة الهدية إلى المفضلة!');
+            const giftId = 'gift-{{ $gift->id }}';
+            const items = JSON.parse(localStorage.getItem('favorites') || '[]');
+            const list = Array.isArray(items) ? items : [];
+            const idx = list.findIndex((x) => String(x?.id) === giftId);
+
+            if (idx >= 0) {
+                list.splice(idx, 1);
+                localStorage.setItem('favorites', JSON.stringify(list.slice(0, 200)));
+                if (window.showToast) window.showToast('تمت إزالة الهدية من المفضلة');
+                return;
             }
+
+            list.unshift({
+                id: giftId,
+                type: 'gift',
+                name: @json($gift->name),
+                price: Number(@json((float) $gift->price)),
+                image: @json($gift->main_image),
+                url: @json(route('gifts.show', $gift)),
+            });
+            localStorage.setItem('favorites', JSON.stringify(list.slice(0, 200)));
+            if (window.showToast) window.showToast('تم إضافة الهدية إلى المفضلة!');
         }
     </script>
 </body>

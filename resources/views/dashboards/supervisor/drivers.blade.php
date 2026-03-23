@@ -2,6 +2,13 @@
 @section('content')
 @php $title = 'إدارة السائقين'; $subtitle = 'قائمة السائقين وتحديث الحالة'; @endphp
 
+@if(session('success'))
+    <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 px-4 py-3 text-sm">{{ session('success') }}</div>
+@endif
+@if(session('error'))
+    <div class="mb-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-800 px-4 py-3 text-sm">{{ session('error') }}</div>
+@endif
+
 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
     <div class="flex items-center justify-between gap-3 mb-4">
         <a href="{{ route('dashboard.supervisor.drivers.create') }}" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition">
@@ -66,9 +73,20 @@
                             {{ $driver->availability }}
                         </span>
                     </td>
-                    <td class="px-4 py-3 text-right">
-                        <a href="{{ route('dashboard.supervisor.drivers.edit', $driver) }}" class="text-sm text-indigo-600 hover:text-indigo-900 mr-2">تعديل</a>
-                        <form method="POST" action="{{ route('dashboard.supervisor.drivers.update-status', $driver) }}" class="flex items-center gap-2">
+                    <td class="px-4 py-3 text-right space-y-2">
+                        <div class="flex flex-wrap items-center justify-end gap-2">
+                            <a href="{{ route('dashboard.supervisor.drivers.edit', $driver) }}" class="inline-flex items-center gap-1 rounded-lg bg-indigo-600 text-white px-3 py-1.5 text-xs font-semibold hover:bg-indigo-700">
+                                <i class="fas fa-pen"></i> تعديل البيانات
+                            </a>
+                            <form method="POST" action="{{ route('dashboard.supervisor.drivers.delete', $driver) }}" class="inline" onsubmit="return confirm('حذف هذا السائق نهائياً؟ لا يمكن التراجع.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-white text-rose-700 px-3 py-1.5 text-xs font-semibold hover:bg-rose-50">
+                                    <i class="fas fa-trash-alt"></i> حذف
+                                </button>
+                            </form>
+                        </div>
+                        <form method="POST" action="{{ route('dashboard.supervisor.drivers.update-status', $driver) }}" class="flex flex-wrap items-center justify-end gap-2 border-t border-gray-100 pt-2">
                             @csrf
                             <select name="status" class="border rounded-xl px-2 py-1 text-xs">
                                 <option value="active" @selected($driver->status==='active')>نشط</option>

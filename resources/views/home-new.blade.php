@@ -231,9 +231,20 @@
                     } elseif ($i === 2) {
                         $slideClass = 'prev';
                     }
+                    $slideImage = (string) ($slide['image'] ?? '');
+                    $normalizedSlideImage = str_replace('\\', '/', $slideImage);
+                    $slideFile = strtolower(basename($normalizedSlideImage));
+                    $slideLink = $slide['link'] ?? '#';
+                    if ($slideFile === 'banner3.jpg') {
+                        $slideLink = '/store';
+                    } elseif ($slideFile === 'banner2.jpg') {
+                        $slideLink = '/gifts';
+                    } elseif ($slideFile === 'banner1.jpg') {
+                        $slideLink = '/mart';
+                    }
                 @endphp
                 <div class="modern-slide {{ $slideClass }}">
-                    <a href="{{ $slide['link'] ?? '#' }}" style="display:block; width:100%; height:100%; text-decoration:none;">
+                    <a href="{{ $slideLink }}" style="display:block; width:100%; height:100%; text-decoration:none;">
                         <img src="{{ $slide['image'] ?? '' }}" alt="{{ $slide['title'] ?? '' }}">
                         <div class="modern-slide-content">
                             <h2 style="font-family:'El Messiri', sans-serif; font-size:2rem; font-weight:900; margin:0 0 0.8rem 0;">{{ $slide['title'] ?? '' }}</h2>
@@ -679,6 +690,10 @@
     color: #cbd5e1;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
+.store-section-cards .product-favorite-btn.active,
+.store-section-cards .product-favorite-btn .fas {
+    color: #ef4444;
+}
 </style>
 <!-- PERSONALIZED FOR YOU - NO CIRCLE, SIMPLE DESIGN -->
 <section id="personalizedSection" class="store-section-cards" style="padding:2.5rem 1.5rem; background:#fff;">
@@ -702,7 +717,7 @@
                     $price = (float) ($product->discount_price ?? $product->price ?? 0);
                     $oldPrice = (float) ($product->price ?? 0);
                     $img = $product->primary_image_url ?? '';
-                    $img = $img ?: '/images/tulip_store.jpg';
+                    $img = $img ?: '/images/banner1.jpg';
                     $imgUrl = (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) ? $img : url($img);
                 @endphp
                 <div class="product-card" data-product-id="{{ $product->id }}" onclick="window.location.href='/products/{{ $product->id }}'">
@@ -715,7 +730,7 @@
                              loading="lazy"
                              width="320"
                              height="320"
-                             onerror="this.onerror=null; this.src='{{ url('/images/tulip_store.jpg') }}';">
+                             onerror="this.onerror=null; this.src='{{ url('/images/banner1.jpg') }}';">
                     </div>
                     <div class="product-body">
                         <h3 class="product-name">{{ $product->name }}</h3>
@@ -764,7 +779,7 @@
                     $price = (float) ($product->discount_price ?? $product->price ?? 0);
                     $oldPrice = (float) ($product->price ?? 0);
                     $img = $product->primary_image_url ?? '';
-                    $img = $img ?: '/images/tulip_store.jpg';
+                    $img = $img ?: '/images/banner1.jpg';
                     $imgUrl = (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) ? $img : url($img);
                 @endphp
                 <div class="product-card" data-product-id="{{ $product->id }}" onclick="window.location.href='/products/{{ $product->id }}'">
@@ -777,7 +792,7 @@
                              loading="lazy"
                              width="320"
                              height="320"
-                             onerror="this.onerror=null; this.src='{{ url('/images/tulip_store.jpg') }}';">
+                             onerror="this.onerror=null; this.src='{{ url('/images/banner1.jpg') }}';">
                     </div>
                     <div class="product-body">
                         <h3 class="product-name">{{ $product->name }}</h3>

@@ -92,16 +92,24 @@ class Product extends Model
         if (Schema::hasColumn('products', 'image')) {
             $raw = $this->getAttribute('image');
         }
+        if (! $raw) {
+            $raw = $this->getAttribute('photo') ?: $this->getAttribute('image_path');
+        }
         if (! $raw && Schema::hasColumn('products', 'images')) {
             $imgs = $this->getAttribute('images');
             if (is_array($imgs) && count($imgs) > 0) {
-                $raw = $imgs[0];
+                $first = $imgs[0];
+                if (is_array($first)) {
+                    $raw = $first['path'] ?? $first['url'] ?? null;
+                } else {
+                    $raw = $first;
+                }
             }
         }
 
-        $path = trim((string) ($raw ?? ''));
+        $path = str_replace('\\', '/', trim((string) ($raw ?? '')));
         if ($path === '') {
-            return '';
+            return '/images/panner_mart.png';
         }
 
         if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
@@ -129,7 +137,7 @@ class Product extends Model
             return '/storage/'.$clean;
         }
 
-        return '/images/tulip_gift.jpg';
+        return '/images/banner1.jpg';
     }
 
     public function getPrimaryImageSrcsetAttribute(): string

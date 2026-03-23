@@ -110,18 +110,15 @@ class FinanceController extends Controller
                 ->get()
                 ->keyBy('driver_id');
 
-            $drivers = Driver::query()->whereIn('id', $driverRows->keys())->get()->keyBy('id');
+            // assigned_driver_id on orders references users.id (driver login)
+            $drivers = Driver::query()->whereIn('user_id', $driverRows->keys())->with('user')->get()->keyBy('user_id');
             $revenueByDriver = $driverRows->map(function ($row) use ($drivers) {
                 $d = $drivers->get($row->driver_id);
-                $driverName = null;
-                if ($d && isset($d->name)) {
-                    $driverName = $d->name;
-                } elseif ($d && isset($d->user_id)) {
-                    $driverName = $d->user?->name;
-                }
+                $driverName = $d?->user?->name ?? $d?->name ?? null;
                 if (! $driverName) {
-                    $driverName = 'Driver #'.(int) $row->driver_id;
+                    $driverName = 'Driver user #'.(int) $row->driver_id;
                 }
+
                 return (object) [
                     'id' => (int) $row->driver_id,
                     'driver_name' => $driverName,
@@ -1949,5 +1946,159 @@ class FinanceController extends Controller
     public function getDashboardMetrics()
     {
         return response()->json($this->getFinanceMetrics(request()));
+    }
+
+    private function orderMoney(Order $order): float
+    {
+        return (float) ($order->total_amount ?? $order->total ?? 0);
+    }
+
+    /**
+     * Finance: drivers cash collection after they mark orders delivered.
+     * Shows pending delivered orders grouped by driver with a "Complete" action.
+     */
+    public function driverDeliveries(Request $request)
+    {
+        $driverUserIdFilter = $request->query('driver_id');
+        $driverUserIdFilter = is_numeric($driverUserIdFilter) ? (int) $driverUserIdFilter : null;
+
+        $pendingOrdersQuery = Order::query()
+            ->where('status', 'delivered')
+            ->whereNotNull('assigned_driver_id')
+            ->with([
+                'deliveryAssignments' => function ($q) {
+                    $q->orderByDesc('id');
+                },
+            ])
+            ->orderByDesc('updated_at');
+
+        if ($driverUserIdFilter !== null) {
+            $pendingOrdersQuery->where('assigned_driver_id', $driverUserIdFilter);
+        }
+
+        // Keep it bounded; finance can filter by driver via query string.
+        $pendingOrders = $pendingOrdersQuery->limit(400)->get();
+
+        $driverIds = $pendingOrders->pluck('assigned_driver_id')->unique()->values();
+        $driversByUserId = Driver::query()
+            ->with('user')
+            ->whereIn('user_id', $driverIds)
+            ->get()
+            ->keyBy('user_id');
+
+        $pendingDrivers = $pendingOrders
+            ->groupBy('assigned_driver_id')
+            ->map(function ($orders, $driverUserId) use ($driversByUserId) {
+                $driver = $driversByUserId->get($driverUserId);
+                $driverName = $driver?->user?->name ?? $driver?->name ?? ('Driver user #'.(int) $driverUserId);
+
+                $cashDue = (float) $orders
+                    ->filter(fn ($o) => ($o->payment_method ?? null) === 'cash' && ($o->payment_status ?? null) !== 'paid')
+                    ->sum(fn ($o) => $this->orderMoney($o));
+
+                $ordersPayload = $orders->map(function ($o) {
+                    $assignment = $o->deliveryAssignments->first();
+                    $deliveredAt = $assignment?->delivered_at;
+
+                    return (object) [
+                        'id' => (int) $o->id,
+                        'order_number' => $o->order_number ?? '#'.$o->id,
+                        'recipient_name' => $o->recipient_name ?? '—',
+                        'payment_method' => $o->payment_method ?? '—',
+                        'payment_status' => $o->payment_status ?? '—',
+                        'total' => $this->orderMoney($o),
+                        'delivered_at' => $deliveredAt,
+                    ];
+                })->values();
+
+                return (object) [
+                    'driverUserId' => (int) $driverUserId,
+                    'driverName' => $driverName,
+                    'cashDue' => $cashDue,
+                    'orders' => $ordersPayload,
+                ];
+            })
+            ->values();
+
+        // History: completed orders by drivers
+        $historyOrdersQuery = Order::query()
+            ->where('status', 'done')
+            ->whereNotNull('assigned_driver_id')
+            ->with([
+                'deliveryAssignments' => function ($q) {
+                    $q->orderByDesc('id');
+                },
+            ])
+            ->orderByDesc('updated_at');
+
+        if ($driverUserIdFilter !== null) {
+            $historyOrdersQuery->where('assigned_driver_id', $driverUserIdFilter);
+        }
+
+        $historyOrders = $historyOrdersQuery->limit(100)->get();
+
+        $historyDriverIds = $historyOrders->pluck('assigned_driver_id')->unique()->values();
+        $historyDriversByUserId = Driver::query()
+            ->with('user')
+            ->whereIn('user_id', $historyDriverIds)
+            ->get()
+            ->keyBy('user_id');
+
+        $historyOrders->transform(function (Order $o) use ($historyDriversByUserId) {
+            $driver = $historyDriversByUserId->get($o->assigned_driver_id);
+            $o->driver_name = $driver?->user?->name ?? $driver?->name ?? ('Driver user #'.(int) $o->assigned_driver_id);
+
+            $assignment = $o->deliveryAssignments->first();
+            $o->delivered_at = $assignment?->delivered_at;
+
+            // `completed_at` may not be cast on the model, so parse it safely for the view.
+            $o->completed_at_display = null;
+            if (! empty($o->completed_at)) {
+                try {
+                    $o->completed_at_display = \Carbon\Carbon::parse($o->completed_at);
+                } catch (\Throwable $e) {
+                    $o->completed_at_display = null;
+                }
+            }
+
+            return $o;
+        });
+
+        return view('dashboards.finance.driver-deliveries', compact('pendingDrivers', 'historyOrders', 'driverUserIdFilter'));
+    }
+
+    /**
+     * Finance action: mark driver's delivered orders as paid+done.
+     * This is the "Complete" button replacing CS completion for delivered orders.
+     */
+    public function completeDriverDeliveries(int $driverUserId, Request $request)
+    {
+        $employee = auth('employee')->user();
+
+        $orders = Order::query()
+            ->where('status', 'delivered')
+            ->where('assigned_driver_id', $driverUserId)
+            ->with(['deliveryAssignments'])
+            ->get();
+
+        if ($orders->isEmpty()) {
+            return back()->with('error', 'لا توجد طلبات تسليم بانتظار اعتماد السائق.');
+        }
+
+        DB::transaction(function () use ($orders, $employee) {
+            foreach ($orders as $order) {
+                if (($order->payment_status ?? null) !== 'paid') {
+                    $order->update(['payment_status' => 'paid']);
+                }
+
+                if (($order->status ?? null) !== 'done') {
+                    \App\Services\StatusTransitionService::transition($order->refresh(), 'status', 'done', $employee?->id);
+                }
+            }
+        });
+
+        return redirect()
+            ->route('dashboard.finance.driver-deliveries.index', ['driver_id' => $driverUserId])
+            ->with('success', 'تم اعتماد تسليمات السائق وتحديث الحالة والدفع.');
     }
 }

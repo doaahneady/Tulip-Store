@@ -12,9 +12,64 @@ use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 
 class OrderController extends Controller
 {
+    /**
+     * Orders are owned by a logged-in User row (same `users` table) but authenticated via either:
+     * - `auth('trader')` (customer/trader login)
+     * - or default `auth()` (web)
+     *
+     * Invoice ownership checks must use the active guard, otherwise customers get 403.
+     */
+    private function currentOrderUser(): ?\App\Models\User
+    {
+        $traderUser = Auth::guard('trader')->user();
+        if ($traderUser) {
+            return $traderUser;
+        }
+
+        return Auth::user();
+    }
+
+    private function currentOrderUserId(): ?int
+    {
+        $user = $this->currentOrderUser();
+        return $user ? (int) $user->id : null;
+    }
+
+    private function orderOwnerOrAdmin(Order $order): bool
+    {
+        $user = $this->currentOrderUser();
+        if (! $user) {
+            return false;
+        }
+
+        $isAdmin = (bool) ($user->is_admin ?? false);
+        if ($isAdmin) {
+            return true;
+        }
+
+        return $order->user_id !== null && (int) $order->user_id === (int) $user->id;
+    }
+
+    private function redirectToLogin()
+    {
+        if (Route::has('login')) {
+            return redirect()->guest(route('login'));
+        }
+        if (Route::has('trader.login.form')) {
+            return redirect()->guest(route('trader.login.form'));
+        }
+        if (Route::has('employee.login')) {
+            return redirect()->guest(route('employee.login'));
+        }
+
+        return redirect()->guest('/login');
+    }
+
     public function create(Request $request)
     {
         $validated = $request->validate([
@@ -292,7 +347,7 @@ class OrderController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Order creation failed: '.$e->getMessage());
+            Log::error('Order creation failed: '.$e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -307,7 +362,7 @@ class OrderController extends Controller
         $order = Order::with('items.product')->findOrFail($id);
 
         // Check if user owns this order or is guest
-        if ($order->user_id && Auth::id() !== $order->user_id) {
+        if ($order->user_id && ! $this->orderOwnerOrAdmin($order)) {
             abort(403);
         }
 
@@ -320,9 +375,11 @@ class OrderController extends Controller
         // Otherwise show all orders (for testing)
         $query = Order::with('items.product');
 
-        if (Auth::check()) {
-            $query->where('user_id', Auth::id());
+        $userId = $this->currentOrderUserId();
+        if ($userId === null) {
+            return $this->redirectToLogin();
         }
+        $query->where('user_id', $userId);
 
         $orders = $query->orderBy('created_at', 'desc')->paginate(10);
 
@@ -338,7 +395,7 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
 
         // Check if user owns this order
-        if (Auth::check() && $order->user_id !== Auth::id()) {
+        if ($order->user_id && ! $this->orderOwnerOrAdmin($order)) {
             return response()->json([
                 'success' => false,
                 'message' => 'غير مصرح',
@@ -371,16 +428,20 @@ class OrderController extends Controller
         $order = Order::with(['items.product', 'user'])->findOrFail($id);
 
         // Check if user owns this order or is admin
-        if (! Auth::check() || (Auth::id() !== $order->user_id && ! Auth::user()->is_admin)) {
+        if (! $this->orderOwnerOrAdmin($order)) {
+            if ($this->currentOrderUser() === null) {
+                return $this->redirectToLogin();
+            }
             abort(403, 'Unauthorized');
         }
 
         $order = $this->prepareOrderForPdf($order);
-        $pdf = \PDF::loadView('invoices.template-en', compact('order'))
-            ->setOption('defaultFont', 'DejaVu Sans')
-            ->setOption('isHtml5ParserEnabled', true);
 
-        return $pdf->download('invoice-'.$order->order_number.'.pdf');
+        return \App\Services\InvoicePdfService::download(
+            'invoices.template-en',
+            compact('order'),
+            'invoice-'.$order->order_number
+        );
     }
 
     public function viewInvoice($id)
@@ -388,9 +449,14 @@ class OrderController extends Controller
         $order = Order::with(['items.product', 'user'])->findOrFail($id);
 
         // Check if user owns this order or is admin
-        if (! Auth::check() || (Auth::id() !== $order->user_id && ! Auth::user()->is_admin)) {
+        if (! $this->orderOwnerOrAdmin($order)) {
+            if ($this->currentOrderUser() === null) {
+                return $this->redirectToLogin();
+            }
             abort(403, 'Unauthorized');
         }
+
+        $order = $this->prepareOrderForPdf($order);
 
         return view('invoices.template', compact('order'));
     }
@@ -524,11 +590,6 @@ class OrderController extends Controller
             } else {
                 $out .= $forms[$ch][0] ?? $ch;
             }
-        }
-
-        $rev = preg_split('//u', $out, -1, PREG_SPLIT_NO_EMPTY);
-        if (is_array($rev) && $rev !== []) {
-            $out = implode('', array_reverse($rev));
         }
 
         return "\u{200F}".$out."\u{200F}";

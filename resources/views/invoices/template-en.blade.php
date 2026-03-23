@@ -41,12 +41,24 @@
         $payMethod = (string) ($order->payment_method ?? '-');
         $customer = $order->user?->name ?? $order->recipient_name ?? 'Customer';
         $currencySymbol = '$';
+        $invoiceLogoPath = public_path('images/tulip_logo.png');
+        $invoiceLogoData = is_file($invoiceLogoPath) ? 'data:image/png;base64,'.base64_encode((string) file_get_contents($invoiceLogoPath)) : null;
+        $logoGirlPath = public_path('images/logo-girl.jpg');
+        $logoGirlData = is_file($logoGirlPath) ? 'data:image/jpeg;base64,'.base64_encode((string) file_get_contents($logoGirlPath)) : null;
     @endphp
 
     <div class="header">
         <div>
-            <div class="brand">TULIP STORE</div>
-            <div class="muted">Invoice</div>
+            @if($logoGirlData)
+                <div class="brand" style="font-size:22px; display:flex; align-items:center; gap:2px;">
+                    <span>T</span><img src="{{ $logoGirlData }}" alt="" style="height:1.2em; width:auto; vertical-align:middle; display:inline-block;"><span>lip</span>
+                </div>
+            @elseif($invoiceLogoData)
+                <img src="{{ $invoiceLogoData }}" alt="Tulip" style="height:56px; width:auto; max-width:260px; display:block;">
+            @else
+                <div class="brand" style="font-size:22px;">Tulip</div>
+            @endif
+            <div class="muted" style="margin-top:4px;">Invoice</div>
         </div>
         <div class="right">
             <div style="font-weight:800; font-size: 16px;">{{ $order->order_number }}</div>
@@ -62,7 +74,7 @@
     <div class="grid">
         <div class="card">
             <h3>Customer</h3>
-            <div class="row"><span>Name :</span><span class="bidi"><bdi class="arabic" dir="rtl" lang="ar">{{ $customer }}</bdi></span></div>
+            <div class="row"><span>Name :</span><span class="bidi" style="direction:rtl;unicode-bidi:embed;"><bdi lang="ar">{{ $customer }}</bdi></span></div>
             <div class="row"><span>Phone :</span><span class="bidi">{{ $order->phone ?? '-' }}</span></div>
             <div class="row"><span>Email :</span><span class="bidi">{{ $order->user?->email ?? '-' }}</span></div>
         </div>
@@ -70,7 +82,7 @@
             <h3>Delivery</h3>
             <div class="row"><span>Delivery type :</span><span class="bidi">{{ $order->delivery_method ?? '-' }}</span></div>
             <div class="row"><span>Estimated delivery :</span><span class="bidi">{{ $order->estimated_delivery ? \Carbon\Carbon::parse($order->estimated_delivery)->format('Y-m-d') : '-' }}</span></div>
-            <div class="row"><span>Address :</span><span class="bidi"><bdi class="arabic" dir="rtl" lang="ar">{{ $order->village ?? '-' }}{{ $order->address_note ? ' - '.$order->address_note : '' }}</bdi></span></div>
+            <div class="row"><span>Address :</span><span class="bidi" style="direction:rtl;unicode-bidi:embed;"><bdi lang="ar">{{ $order->village ?? '-' }}{{ $order->address_note ? ' - '.$order->address_note : '' }}</bdi></span></div>
         </div>
     </div>
 
@@ -90,7 +102,7 @@
                     $line = (float) ($item->total_price ?? $item->subtotal ?? ($unit * (int) ($item->quantity ?? 0)));
                 @endphp
                 <tr>
-                    <td class="bidi"><bdi class="arabic" dir="rtl" lang="ar">{{ $item->product->name ?? $item->product_name ?? ('Product #'.$item->product_id) }}</bdi></td>
+                    <td class="bidi" style="direction:rtl;unicode-bidi:embed;"><bdi lang="ar">{{ $item->product->name ?? $item->product_name ?? ('Product #'.$item->product_id) }}</bdi></td>
                     <td>{{ (int) ($item->quantity ?? 0) }}</td>
                     <td class="right">{{ number_format($unit, 2) }} {{ $currencySymbol }}</td>
                     <td class="right">{{ number_format($line, 2) }} {{ $currencySymbol }}</td>
@@ -106,6 +118,31 @@
         <div class="row" style="border-top:1px solid #e5e7eb; padding-top:10px; margin-top:10px;">
             <span><strong>Grand total :</strong></span>
             <span><strong>{{ number_format($total, 2) }} {{ $currencySymbol }}</strong></span>
+        </div>
+    </div>
+
+    <div class="grid" style="margin-top:16px;">
+        <div class="card">
+            <h3>Delivery representative signature</h3>
+            <div style="border:1px solid #e5e7eb; border-radius:8px; padding:12px; background:#fafafa; min-height:80px;">
+                @if(!empty($order->driver_delivery_signature))
+                    <img src="{{ $order->driver_delivery_signature }}" alt="Driver signature" style="max-width:100%; max-height:80px;">
+                @else
+                    <div style="border-bottom:2px dashed #d1d5db; height:50px;"></div>
+                    <span class="muted" style="font-size:10px;">Sign on driver dashboard when order delivered</span>
+                @endif
+            </div>
+        </div>
+        <div class="card">
+            <h3>Customer signature</h3>
+            <div style="border:1px solid #e5e7eb; border-radius:8px; padding:12px; background:#fafafa; min-height:80px;">
+                @if(!empty($order->customer_signature))
+                    <img src="{{ $order->customer_signature }}" alt="Customer signature" style="max-width:100%; max-height:80px;">
+                @else
+                    <div style="border-bottom:2px dashed #d1d5db; height:50px;"></div>
+                    <span class="muted" style="font-size:10px;">Sign on driver dashboard when order delivered</span>
+                @endif
+            </div>
         </div>
     </div>
 

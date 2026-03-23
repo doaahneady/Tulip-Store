@@ -1,15 +1,62 @@
 @extends('dashboards.layouts.app')
 @section('content')
-@php $title = 'تتبع السائقين المباشر'; $subtitle = 'مواقع السائقين والمهام النشطة'; @endphp
+@php
+    $isFullscreen = request()->boolean('fullscreen');
+    $title = 'تتبع السائقين المباشر';
+    $subtitle = 'مواقع السائقين والمهام النشطة';
+@endphp
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+@if($isFullscreen)
+    @push('styles')
+        <style>
+            .db4-shell {
+                grid-template-columns: 1fr !important;
+            }
+            .db4-container {
+                max-width: 100vw !important;
+                padding: 0 !important;
+            }
+            .db4-topbar {
+                display: none !important;
+            }
+            #sidebar,
+            #sidebarOverlay {
+                display: none !important;
+            }
+            .db4-main {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+        </style>
+    @endpush
+@endif
+
+<div class="grid grid-cols-1 {{ $isFullscreen ? '' : 'lg:grid-cols-3' }} gap-6">
+    <div
+        class="{{ $isFullscreen ? '' : 'lg:col-span-2' }} bg-white rounded-2xl shadow-sm border border-gray-200 p-6"
+        @if($isFullscreen)
+            style="position:fixed; inset:0; z-index:9999; margin:0; border-radius:0; border:0; padding:0; width:100vw; height:100vh;"
+        @endif
+    >
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-bold text-gray-800">الخريطة المباشرة</h3>
-            <button id="refresh-btn" class="text-sm text-indigo-600">تحديث</button>
+            <div class="flex items-center gap-3">
+                <button id="refresh-btn" class="text-sm text-indigo-600">تحديث</button>
+                @if(! $isFullscreen)
+                    <a href="{{ route('dashboard.supervisor.live-tracking') }}?fullscreen=1" target="_blank" class="inline-flex items-center gap-1 text-sm text-white bg-indigo-600 px-3 py-1.5 rounded-lg hover:bg-indigo-700">
+                        <i class="fas fa-up-right-from-square"></i>
+                        فتح بملء الشاشة
+                    </a>
+                @endif
+            </div>
         </div>
-        <div id="map" class="w-full h-96 rounded-xl border border-gray-200"></div>
+        <div
+            id="map"
+            class="w-full rounded-xl border border-gray-200"
+            style="height: {{ $isFullscreen ? '100vh' : '24rem' }}; {{ $isFullscreen ? 'border:0; border-radius:0;' : '' }}"
+        ></div>
     </div>
+    @if(! $isFullscreen)
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <h3 class="text-lg font-bold text-gray-800 mb-4">السائقون</h3>
         <div id="driver-list" class="space-y-3">
@@ -30,6 +77,7 @@
             @endforeach
         </div>
     </div>
+    @endif
     </div>
 @endsection
 
@@ -44,9 +92,14 @@
         }
     } else {
         const map = L.map('map').setView([33.5138, 36.2765], 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '' }).addTo(map);
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles © Esri',
+            maxNativeZoom: 18,
+            maxZoom: 18
+        }).addTo(map);
         let markers = {};
         setTimeout(() => map.invalidateSize(), 200);
+        window.addEventListener('load', () => setTimeout(() => map.invalidateSize(), 250));
 
         function loadLocations() {
             fetch('{{ route('dashboard.supervisor.api.driver-locations') }}')

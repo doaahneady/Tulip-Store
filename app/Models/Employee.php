@@ -14,6 +14,7 @@ class Employee extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
+        'user_id',
         'employee_id', 'employee_code', 'first_name', 'last_name', 'email', 'phone', 'password',
         'profile_photo', 'bio', 'employee_id_card',
         'national_id', 'date_of_birth', 'gender', 'marital_status', 'address',
@@ -190,7 +191,7 @@ class Employee extends Authenticatable
             $roles[] = 'Finance';
         }
         if ($this->is_driver_supervisor) {
-            $roles[] = 'Driver Supervisor';
+            $roles[] = 'Logistics';
         }
         if ($this->is_trader) {
             $roles[] = 'Store Manager';
@@ -276,9 +277,23 @@ class Employee extends Authenticatable
                 'color' => 'emerald',
             ],
             'supervisor' => [
-                'name' => 'Driver Supervisor',
+                'name' => 'Logistics',
                 'description' => 'Fleet management and delivery coordination',
                 'icon' => 'fa-route',
+                'route' => 'dashboard.supervisor.index',
+                'color' => 'orange',
+            ],
+            'supervisor_map' => [
+                'name' => 'Logistics Map',
+                'description' => 'Live driver locations map access',
+                'icon' => 'fa-map-marked-alt',
+                'route' => 'dashboard.supervisor.index',
+                'color' => 'orange',
+            ],
+            'supervisor_orders' => [
+                'name' => 'Logistics Orders',
+                'description' => 'Delivery orders access',
+                'icon' => 'fa-clipboard-list',
                 'route' => 'dashboard.supervisor.index',
                 'color' => 'orange',
             ],
@@ -289,11 +304,18 @@ class Employee extends Authenticatable
                 'route' => 'dashboard.vendor.index',
                 'color' => 'indigo',
             ],
+            'driver' => [
+                'name' => 'Driver',
+                'description' => 'Driver dashboard and assigned orders',
+                'icon' => 'fa-truck-fast',
+                'route' => 'dashboard.driver.index',
+                'color' => 'teal',
+            ],
             'mart' => [
                 'name' => 'Tulip Mart',
                 'description' => 'Mart products and categories management',
                 'icon' => 'fa-store-alt',
-                'route' => 'dashboard.admin.mart',
+                'route' => 'dashboard.admin.mart.index',
                 'color' => 'blue',
             ],
         ];
@@ -329,7 +351,7 @@ class Employee extends Authenticatable
         }
 
         if ($this->is_admin) {
-            return ['admin', 'it', 'hr', 'cs', 'finance', 'supervisor', 'vendor'];
+            return ['admin', 'mart', 'it', 'hr', 'cs', 'finance', 'supervisor', 'supervisor_map', 'supervisor_orders', 'vendor', 'driver'];
         }
 
         if ($this->is_it) {
@@ -352,8 +374,14 @@ class Employee extends Authenticatable
         if ($this->is_trader) {
             $keys[] = 'vendor';
         }
+        if ($this->is_driver_supervisor) {
+            $keys[] = 'driver';
+        }
+        if ($this->driver()->exists()) {
+            $keys[] = 'driver';
+        }
 
-        return $keys;
+        return array_values(array_unique($keys));
     }
 
     public function canAccessDashboard(string $dashboardKey): bool
@@ -364,7 +392,16 @@ class Employee extends Authenticatable
                 return false;
             }
 
-            return in_array($dashboardKey, $explicit, true);
+            if (in_array($dashboardKey, $explicit, true)) {
+                return true;
+            }
+            // Detailed permission keys (e.g. cs.view, cs.edit) still grant access to base dashboard.
+            foreach ($explicit as $k) {
+                if (str_starts_with((string) $k, $dashboardKey.'.')) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         if ((bool) ($this->is_admin ?? false)) {

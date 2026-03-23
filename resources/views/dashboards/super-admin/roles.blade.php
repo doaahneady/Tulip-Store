@@ -1,138 +1,235 @@
 @extends('dashboards.layouts.app')
 @section('content')
-@php $title = 'الأدوار والصلاحيات'; $subtitle = 'إدارة RBAC والمصفوفة'; @endphp
+@php $title = 'الأدوار والصلاحيات'; $subtitle = 'صلاحيات مختلطة (Role + Employee Override)'; @endphp
 
-<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
-    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <h3 class="text-lg font-bold text-gray-800">صلاحيات الموظفين (لوحات التحكم)</h3>
-        <form method="GET" action="{{ route('dashboard.admin.roles') }}" class="flex flex-wrap items-center gap-2">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="بحث بالاسم أو البريد أو كود الموظف" class="form-input w-64">
-            <button type="submit" class="btn btn-ghost btn-sm">
-                <i class="fas fa-search"></i>
-                بحث
-            </button>
+<style>
+    .roles-permissions-page {
+        color: #111827 !important;
+        background: transparent !important;
+    }
+    .roles-permissions-page * {
+        color: #111827 !important;
+    }
+    .roles-permissions-page .rp-card {
+        background: #ffffff !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 16px;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    }
+    .roles-permissions-page .bg-white,
+    .roles-permissions-page .bg-gray-50,
+    .roles-permissions-page .bg-indigo-50 {
+        background: #ffffff !important;
+    }
+    .roles-permissions-page .border,
+    .roles-permissions-page .border-gray-100,
+    .roles-permissions-page .border-gray-200,
+    .roles-permissions-page .border-indigo-100,
+    .roles-permissions-page .border-slate-700 {
+        border-color: #e5e7eb !important;
+    }
+    .roles-permissions-page .rp-muted { color: #6b7280 !important; }
+    .roles-permissions-page .rp-title { color: #111827 !important; font-weight: 800; }
+    .roles-permissions-page .rp-label { color: #374151 !important; font-weight: 600; }
+    .roles-permissions-page .rp-section {
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 14px;
+    }
+    .roles-permissions-page .rp-chip {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 9999px;
+        padding: 2px 10px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    .roles-permissions-page .rp-chip-inherited {
+        background: #dcfce7;
+        color: #166534 !important;
+    }
+    .roles-permissions-page .rp-chip-custom {
+        background: #fef3c7;
+        color: #92400e !important;
+    }
+    .roles-permissions-page input[type="checkbox"] {
+        accent-color: #2563eb;
+    }
+    .roles-permissions-page .rp-grid-headers {
+        display: grid;
+        grid-template-columns: minmax(260px, 1.2fr) 130px 1fr 1fr 130px 120px 90px;
+        gap: 10px;
+        font-size: 12px;
+        color: #64748b !important;
+        font-weight: 800;
+        padding: 0 8px;
+    }
+    .roles-permissions-page .rp-grid-row {
+        display: grid;
+        grid-template-columns: minmax(260px, 1.2fr) 130px 1fr 1fr 130px 120px 90px;
+        gap: 10px;
+        align-items: center;
+    }
+    @media (max-width: 1280px) {
+        .roles-permissions-page .rp-grid-headers,
+        .roles-permissions-page .rp-grid-row {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+    }
+</style>
+
+@php
+    $roleOrder = ['admin','it','hr','cs','finance','supervisor','driver','vendor'];
+    $employeeRows = ($employees ?? null) instanceof \Illuminate\Contracts\Pagination\Paginator
+        ? collect(($employees ?? null)->items())
+        : collect($employees ?? []);
+    $resolveRole = function($emp) {
+        if ($emp->is_admin) return 'admin';
+        if ($emp->is_it) return 'it';
+        if ($emp->is_hr) return 'hr';
+        if ($emp->is_cs) return 'cs';
+        if ($emp->is_finance) return 'finance';
+        if ($emp->is_driver_supervisor) return 'supervisor';
+        if ($emp->is_trader) return 'vendor';
+        return 'staff';
+    };
+    $grouped = $employeeRows->groupBy(fn($e) => $resolveRole($e));
+@endphp
+
+<div class="roles-permissions-page space-y-5">
+<div class="rp-card p-5">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+            <h3 class="text-lg rp-title">Permission Matrix</h3>
+            <p class="text-sm rp-muted">واجهة مبسطة: Role Template + Employee Overrides لكل Dashboard</p>
+        </div>
+        <form method="GET" action="{{ route('dashboard.admin.roles') }}" class="flex items-center gap-2">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="بحث بالاسم/البريد/الكود" class="form-input w-72">
+            <button type="submit" class="btn btn-ghost btn-sm"><i class="fas fa-search"></i> بحث</button>
         </form>
     </div>
+</div>
 
-    <div class="overflow-x-auto mt-4">
-        <table class="w-full">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500">الموظف</th>
-                    <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500">البريد</th>
-                    <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500">اللوحات</th>
-                    <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500">حفظ</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @forelse(($employees ?? []) as $emp)
+@foreach(($dashboardCatalog ?? []) as $dashboardKey => $cfg)
+    <div class="rp-card p-5">
+        <div class="flex items-start justify-between mb-4">
+            <div>
+                <h3 class="text-base rp-title">{{ $cfg['title'] }}</h3>
+                <p class="text-xs rp-muted">الأعمدة: View/Edit | Sections | Actions | Sensitive | Mode</p>
+            </div>
+    </div>
+
+        <div class="space-y-3">
+            <div class="rp-grid-headers">
+                <div>Employee (Grouped by Role)</div>
+                <div>View/Edit</div>
+                <div>Sections Access</div>
+                <div>Allowed Actions</div>
+                <div>Sensitive</div>
+                <div>Mode</div>
+                <div>Save</div>
+            </div>
+            @foreach($roleOrder as $rk)
+                @php $rows = $grouped->get($rk, collect()); @endphp
+                @if($rows->isNotEmpty())
+                    <div class="rp-label text-sm px-2">Role: {{ strtoupper($rk) }}</div>
+                @endif
+                @foreach($rows as $emp)
                     @php
-                        $explicit = method_exists($emp, 'getExplicitDashboardKeys') ? $emp->getExplicitDashboardKeys() : [];
-                        $selected = $explicit;
-                        if (in_array('__none__', $selected, true)) {
-                            $selected = [];
-                        }
-                        if (empty($selected) && method_exists($emp, 'getAllowedDashboardKeys')) {
-                            $selected = $emp->getAllowedDashboardKeys();
-                        }
+                        $ov = $employeeOverrideMap[$emp->id][$dashboardKey] ?? null;
+                        $isOverride = (bool)($ov->is_override ?? false);
+                        $formId = 'ov-'.$dashboardKey.'-'.$emp->id;
+                        $resolved = $resolvedPermissionMap[$emp->id][$dashboardKey] ?? ['can_view' => false, 'can_edit' => false, 'sections' => [], 'actions' => [], 'can_view_sensitive' => false];
+                        $checkedView = $isOverride ? (bool)($ov->can_view ?? false) : (bool)($resolved['can_view'] ?? false);
+                        $checkedEdit = $isOverride ? (bool)($ov->can_edit ?? false) : (bool)($resolved['can_edit'] ?? false);
+                        $checkedSensitive = $isOverride ? (bool)($ov->can_view_sensitive ?? false) : (bool)($resolved['can_view_sensitive'] ?? false);
+                        $checkedSections = $isOverride ? (array)($ov->sections ?? []) : (array)($resolved['sections'] ?? []);
+                        $checkedActions = $isOverride ? (array)($ov->actions ?? []) : (array)($resolved['actions'] ?? []);
                     @endphp
-                    @php $formId = 'emp-rules-'.$emp->id; @endphp
-                    <tr>
-                        <td class="px-4 py-3 text-sm text-gray-900">
-                            <div class="font-semibold">{{ $emp->full_name }}</div>
-                            <div class="text-xs text-gray-500">{{ $emp->employee_code ?? '-' }}</div>
-                        </td>
-                        <td class="px-4 py-3 text-sm text-gray-600">{{ $emp->email }}</td>
-                        <td class="px-4 py-3">
-                            @php
-                                $options = [
-                                    'admin' => 'Admin',
-                                    'it' => 'IT',
-                                    'hr' => 'HR',
-                                    'cs' => 'CS',
-                                    'finance' => 'Finance',
-                                    'supervisor' => 'Supervisor',
-                                    
-                                    'vendor' => 'Trader',
-                                ];
-                            @endphp
-                            <div class="flex flex-wrap items-center gap-3">
-                                @foreach($options as $key => $label)
-                                    <label class="inline-flex items-center gap-2 text-sm text-gray-700">
-                                        <input form="{{ $formId }}" type="checkbox" name="dashboards[]" value="{{ $key }}" class="form-checkbox"
-                                            @checked(in_array($key, $selected, true))>
-                                        <span>{{ $label }}</span>
+                    <div class="rp-grid-row rp-section p-3">
+                        <div>
+                            <div class="rp-title text-sm">{{ $emp->full_name }}</div>
+                            <div class="text-xs rp-muted">{{ $emp->employee_code ?? '-' }} • {{ $emp->email }}</div>
+                        </div>
+                        <div class="text-xs space-x-2">
+                            <label class="inline-flex items-center gap-1">
+                                <input form="{{ $formId }}" type="hidden" name="can_view" value="0">
+                                <input form="{{ $formId }}" type="checkbox" name="can_view" value="1" @checked($checkedView)>View
+                            </label>
+                            <label class="inline-flex items-center gap-1">
+                                <input form="{{ $formId }}" type="hidden" name="can_edit" value="0">
+                                <input form="{{ $formId }}" type="checkbox" name="can_edit" value="1" @checked($checkedEdit)>Edit
                                     </label>
+                        </div>
+                        <div class="text-xs">
+                            @foreach(($cfg['sections'] ?? []) as $sec)
+                                <label class="inline-flex items-center gap-1 mr-2"><input form="{{ $formId }}" type="checkbox" name="sections[]" value="{{ $sec }}" @checked(in_array($sec, $checkedSections, true))>{{ $sec }}</label>
+                            @endforeach
+                        </div>
+                        <div class="text-xs">
+                            @foreach(($cfg['actions'] ?? []) as $ac)
+                                <label class="inline-flex items-center gap-1 mr-2"><input form="{{ $formId }}" type="checkbox" name="actions[]" value="{{ $ac }}" @checked(in_array($ac, $checkedActions, true))>{{ $ac }}</label>
                                 @endforeach
                             </div>
-                        </td>
-                        <td class="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
-                            <form id="{{ $formId }}" method="POST" action="{{ route('dashboard.admin.roles.employees.update', $emp) }}" class="inline-flex items-center gap-2">
+                        <div class="text-xs">
+                            <label class="inline-flex items-center gap-1">
+                                <input form="{{ $formId }}" type="hidden" name="can_view_sensitive" value="0">
+                                <input form="{{ $formId }}" type="checkbox" name="can_view_sensitive" value="1" @checked($checkedSensitive)>Sensitive
+                            </label>
+                        </div>
+                        <div class="text-xs">
+                            <span class="rp-label">Employee Override</span>
+                            @if($isOverride)
+                                <span class="rp-chip rp-chip-custom">Custom</span>
+                            @else
+                                <span class="rp-chip rp-chip-inherited">Inherited</span>
+                            @endif
+                        </div>
+                        <div>
+                            <form id="{{ $formId }}" method="POST" action="{{ route('dashboard.admin.roles.employees.update', $emp) }}">
                                 @csrf
-                                <button type="submit" class="btn btn-secondary btn-xs">حفظ</button>
-                                <a href="{{ route('dashboard.admin.employees.dashboards.edit', $emp) }}" class="text-indigo-600 hover:underline text-sm">تفاصيل</a>
+                                <input type="hidden" name="dashboard_key" value="{{ $dashboardKey }}">
+                                <input type="hidden" name="is_override" value="1">
                             </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="px-4 py-8 text-center text-gray-500">لا توجد بيانات</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <div class="mt-4">
-        @if(method_exists(($employees ?? null), 'links'))
-            {{ $employees->links() }}
-        @endif
+                            <button form="{{ $formId }}" class="btn btn-secondary btn-xs" type="submit">Save</button>
     </div>
 </div>
-
-<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-    <h3 class="text-lg font-bold text-gray-800 mb-4">الأدوار</h3>
-    <div class="overflow-x-auto">
-        <table class="w-full">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500">الاسم</th>
-                    <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500">الوصف</th>
-                    <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500">الصلاحيات</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @foreach($roles as $role)
-                <tr>
-                    <td class="px-4 py-2 text-sm text-gray-800">{{ $role->display_name ?? $role->name }}</td>
-                    <td class="px-4 py-2 text-sm text-gray-600">{{ $role->description }}</td>
-                    <td class="px-4 py-2 text-sm text-gray-600">
-                        @foreach(($role->permissions ?? []) as $perm)
-                            <span class="inline-block px-2 py-1 text-xs rounded bg-gray-100 text-gray-700 mr-1 mb-1">
-                                {{ $perm->display_name ?? $perm->name }}
-                            </span>
-                        @endforeach
-                    </td>
-                </tr>
                 @endforeach
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mt-6">
-    <h3 class="text-lg font-bold text-gray-800 mb-4">مصفوفة الصلاحيات حسب الفئات</h3>
-    @foreach(($permissions ?? collect())->toArray() as $category => $perms)
-        <div class="mb-4">
-            <p class="text-sm font-semibold text-gray-700 mb-2">{{ is_string($category) ? $category : 'عام' }}</p>
-            <div class="flex flex-wrap gap-2">
-                @foreach(($perms ?? []) as $perm)
-                    <span class="px-3 py-1 text-xs rounded bg-indigo-50 text-indigo-700">
-                        {{ is_array($perm) ? ($perm['display_name'] ?? $perm['name'] ?? 'غير معروف') : ($perm->display_name ?? $perm->name) }}
-                    </span>
                 @endforeach
             </div>
         </div>
     @endforeach
+
+<div class="rp-card p-5">
+    <h3 class="text-base font-black text-gray-900 mb-3">View As Employee (Preview)</h3>
+    <form method="POST" action="{{ route('dashboard.admin.roles.preview') }}" class="flex flex-wrap items-center gap-2">
+        @csrf
+        <select name="employee_id" class="form-select w-64" required>
+            <option value="">Select employee</option>
+            @foreach(($employeeRows ?? collect()) as $emp)
+                <option value="{{ $emp->id }}" @selected((int)request('preview_employee') === (int)$emp->id)>{{ $emp->full_name }} ({{ $emp->email }})</option>
+            @endforeach
+        </select>
+        <select name="dashboard_key" class="form-select w-48" required>
+            @foreach(array_keys($dashboardCatalog ?? []) as $dk)
+                <option value="{{ $dk }}" @selected((string)request('preview_dashboard') === (string)$dk)>{{ strtoupper($dk) }}</option>
+            @endforeach
+        </select>
+        <button class="btn btn-primary btn-sm" type="submit">Preview</button>
+    </form>
+    @if(!empty($preview))
+        <div class="mt-3 p-3 rounded-xl bg-gray-50 border border-gray-200 text-xs text-gray-700">
+            <div class="font-semibold mb-1">Resolved permissions for {{ $preview['employee']->full_name }} / {{ strtoupper($preview['dashboard_key']) }}</div>
+            <pre class="whitespace-pre-wrap">{{ json_encode($preview['resolved'], JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE) }}</pre>
+        </div>
+    @endif
+</div>
+
+@if(method_exists(($employees ?? null), 'links'))
+    <div class="pt-2">
+        {{ $employees->links() }}
+    </div>
+@endif
 </div>
 @endsection

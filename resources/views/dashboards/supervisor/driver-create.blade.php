@@ -74,6 +74,10 @@
             <a href="{{ route('dashboard.supervisor.drivers') }}" class="px-4 py-2 rounded-xl border border-gray-200 text-gray-700">إلغاء</a>
             <button class="px-4 py-2 rounded-xl bg-indigo-600 text-white">حفظ</button>
         </div>
+
+        <div class="md:col-span-2 mt-4 p-3 rounded-xl bg-indigo-50 border border-indigo-100 text-sm text-indigo-800">
+            <strong>تسجيل الدخول:</strong> بعد حفظ السائق، يمكنه تسجيل الدخول من <a href="{{ url('/employee/login') }}" class="underline font-semibold">/employee/login</a> باستخدام نفس البريد الإلكتروني وكلمة المرور أعلاه.
+        </div>
     </form>
 </div>
 @endsection

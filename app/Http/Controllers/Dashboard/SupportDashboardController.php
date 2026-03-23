@@ -43,6 +43,11 @@ class SupportDashboardController extends Controller
 
         $urgentTickets = $this->dashboardService->getUrgentTickets(10);
         $performance = $this->dashboardService->getAgentPerformance(auth('employee')->id());
+        $pendingTraders = Trader::query()
+            ->where('status', Trader::STATUS_PENDING)
+            ->orderBy('created_at', 'asc')
+            ->limit(8)
+            ->get();
 
         return view('dashboards.cs.index', compact(
             'kpi',
@@ -52,8 +57,38 @@ class SupportDashboardController extends Controller
             'today',
             'assignedToMe',
             'urgentTickets',
-            'performance'
+            'performance',
+            'pendingTraders'
         ));
+    }
+
+    public function approveTrader(Trader $trader)
+    {
+        $trader->update(['status' => Trader::STATUS_APPROVED]);
+
+        return back()->with('success', 'تمت الموافقة على حساب التاجر');
+    }
+
+    public function rejectTrader(Request $request, Trader $trader)
+    {
+        $validated = $request->validate([
+            'reason' => 'required|string|max:1000',
+        ]);
+
+        $trader->update(['status' => Trader::STATUS_REJECTED]);
+
+        if ($trader->user_id && Schema::hasTable('notifications')) {
+            \App\Models\Notification::create([
+                'user_id' => $trader->user_id,
+                'type' => 'trader_rejection',
+                'title' => 'تم رفض طلب التاجر',
+                'message' => $validated['reason'],
+                'icon' => 'x-circle',
+                'color' => 'red',
+            ]);
+        }
+
+        return back()->with('success', 'تم رفض حساب التاجر');
     }
 
     public function tickets(Request $request)
@@ -316,6 +351,49 @@ class SupportDashboardController extends Controller
         return back()->with('success', 'Product rejected');
     }
 
+    public function updateTraderProduct(Request $request, Product $product)
+    {
+        abort_unless($product->trader_id !== null, 404);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:5000',
+            'price' => 'required|numeric|min:0',
+            'stock_quantity' => 'nullable|integer|min:0',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
+        ]);
+
+        $updates = [
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? $product->description,
+            'price' => $validated['price'],
+        ];
+        if (Schema::hasColumn('products', 'stock_quantity')) {
+            $updates['stock_quantity'] = $validated['stock_quantity'] ?? ($product->stock_quantity ?? 0);
+        }
+
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('products', 'public');
+            if (Schema::hasColumn('products', 'image')) {
+                $updates['image'] = $path;
+            }
+            if (Schema::hasColumn('products', 'photo')) {
+                $updates['photo'] = $path;
+            }
+            if (Schema::hasColumn('products', 'image_path')) {
+                $updates['image_path'] = $path;
+            }
+            if (Schema::hasColumn('products', 'images')) {
+                // Cast as array on Product model — pass a PHP array, not a JSON string
+                $updates['images'] = [$path];
+            }
+        }
+
+        $product->update($updates);
+
+        return back()->with('success', 'تم تحديث طلب المنتج بنجاح');
+    }
+
     public function orders(Request $request)
     {
         $query = Order::query()
@@ -392,11 +470,12 @@ class SupportDashboardController extends Controller
         $name = (string) ($order->order_number ?? $order->id);
 
         $order = $this->prepareOrderForPdf($order);
-        $pdf = \PDF::loadView('invoices.template-en', compact('order'))
-            ->setOption('defaultFont', 'DejaVu Sans')
-            ->setOption('isHtml5ParserEnabled', true);
 
-        return $pdf->download('invoice-'.$name.'.pdf');
+        return \App\Services\InvoicePdfService::download(
+            'invoices.template-en',
+            compact('order'),
+            'invoice-'.$name
+        );
     }
 
     private function prepareOrderForPdf(Order $order): Order
@@ -528,11 +607,6 @@ class SupportDashboardController extends Controller
             } else {
                 $out .= $forms[$ch][0] ?? $ch;
             }
-        }
-
-        $rev = preg_split('//u', $out, -1, PREG_SPLIT_NO_EMPTY);
-        if (is_array($rev) && $rev !== []) {
-            $out = implode('', array_reverse($rev));
         }
 
         return "\u{200F}".$out."\u{200F}";

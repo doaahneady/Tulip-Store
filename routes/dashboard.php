@@ -3,6 +3,7 @@
 use App\Http\Controllers\Dashboard\AdminDashboardController;
 use App\Http\Controllers\Dashboard\AdministrativeApprovalsController;
 use App\Http\Controllers\Dashboard\DriverSupervisorController;
+use App\Http\Controllers\Dashboard\DriverDashboardController;
 use App\Http\Controllers\Dashboard\FinanceController;
 use App\Http\Controllers\Dashboard\HRController;
 use App\Http\Controllers\Dashboard\ITController;
@@ -100,6 +101,8 @@ Route::prefix('administrative-approvals')->name('administrative-approvals.')->mi
 // Customer Support Dashboard (Flow 9/10)
 Route::prefix('cs')->name('cs.')->middleware('dashboard.role:cs')->group(function () {
     Route::get('/', [SupportDashboardController::class, 'index'])->name('index');
+    Route::post('/traders/{trader}/approve', [SupportDashboardController::class, 'approveTrader'])->name('traders.approve');
+    Route::post('/traders/{trader}/reject', [SupportDashboardController::class, 'rejectTrader'])->name('traders.reject');
     Route::get('/tickets', [SupportDashboardController::class, 'tickets'])->name('tickets');
     Route::get('/tickets/{ticket}', [SupportDashboardController::class, 'showTicket'])->name('tickets.show');
     Route::post('/tickets/{ticket}/reply', [SupportDashboardController::class, 'replyTicket'])->name('tickets.reply');
@@ -118,6 +121,7 @@ Route::prefix('cs')->name('cs.')->middleware('dashboard.role:cs')->group(functio
     Route::get('/payrolls/{order}/invoice', [SupportDashboardController::class, 'downloadInvoice'])->name('payrolls.invoice');
 
     Route::get('/trader-products', [SupportDashboardController::class, 'traderProducts'])->name('trader-products');
+    Route::post('/trader-products/{product}/update', [SupportDashboardController::class, 'updateTraderProduct'])->name('trader-products.update');
     Route::post('/trader-products/{product}/approve', [SupportDashboardController::class, 'approveTraderProduct'])->name('trader-products.approve');
     Route::post('/trader-products/{product}/reject', [SupportDashboardController::class, 'rejectTraderProduct'])->name('trader-products.reject');
 });
@@ -167,6 +171,9 @@ Route::prefix('admin')->name('admin.')->middleware('dashboard.role:admin')->grou
     Route::delete('/users/{user}', [SuperAdminController::class, 'deleteUser'])->name('users.delete');
     Route::get('/roles', [SuperAdminController::class, 'roles'])->name('roles');
     Route::post('/roles/employees/{employee}', [SuperAdminController::class, 'updateEmployeeDashboardRules'])->name('roles.employees.update');
+    Route::post('/roles/templates', [SuperAdminController::class, 'updateRoleDashboardPermissions'])->name('roles.templates.update');
+    Route::post('/roles/preview', [SuperAdminController::class, 'permissionPreview'])->name('roles.preview');
+    Route::post('/exchange-rate', [SuperAdminController::class, 'updateExchangeRate'])->name('exchange-rate.update');
 
     Route::get('/categories', [SuperAdminController::class, 'categories'])->name('categories');
     Route::post('/categories', [SuperAdminController::class, 'createCategory'])->name('categories.create');
@@ -235,6 +242,8 @@ Route::prefix('admin')->name('admin.')->middleware('dashboard.role:admin')->grou
 
 Route::prefix('finance')->name('finance.')->middleware('dashboard.role:finance')->group(function () {
     Route::get('/', [FinanceController::class, 'index'])->name('index');
+    Route::get('/driver-deliveries', [FinanceController::class, 'driverDeliveries'])->name('driver-deliveries.index');
+    Route::post('/driver-deliveries/{driverUserId}/complete', [FinanceController::class, 'completeDriverDeliveries'])->name('driver-deliveries.complete');
     Route::get('/transactions', [FinanceController::class, 'transactions'])->name('transactions');
     Route::get('/payroll', [FinanceController::class, 'payroll'])->name('payroll');
     Route::get('/payroll/{transaction}/pay', [FinanceController::class, 'paySalaryForm'])->name('payroll.pay');
@@ -255,6 +264,7 @@ Route::prefix('finance')->name('finance.')->middleware('dashboard.role:finance')
     Route::get('/reports', [FinanceController::class, 'reports'])->name('reports');
     Route::get('/tax', [FinanceController::class, 'tax'])->name('tax');
     Route::get('/tax/export', [FinanceController::class, 'exportTaxReport'])->name('tax.export');
+    Route::post('/exchange-rate', [SuperAdminController::class, 'updateExchangeRate'])->name('exchange-rate.update');
 });
 
 // HR Dashboard - Full HR Management
@@ -346,6 +356,13 @@ Route::prefix('supervisor')->name('supervisor.')->middleware('dashboard.role:del
     Route::post('/vehicle-maintenance/log', [DriverSupervisorController::class, 'logMaintenance'])->name('vehicle-maintenance.log');
 
     Route::get('/delivery-proof', [DriverSupervisorController::class, 'deliveryProof'])->name('delivery-proof');
+});
+
+Route::prefix('driver')->name('driver.')->middleware('dashboard.role:driver')->group(function () {
+    Route::get('/', [DriverDashboardController::class, 'index'])->name('index');
+    Route::get('/orders/{order}', [DriverDashboardController::class, 'showOrder'])->name('orders.show');
+    Route::post('/orders/{order}/receive', [DriverDashboardController::class, 'receiveOrder'])->name('orders.receive');
+    Route::post('/orders/{order}/deliver', [DriverDashboardController::class, 'markDelivered'])->name('orders.deliver');
 });
 
 Route::get('/home', [MainController::class, 'index'])->name('home');

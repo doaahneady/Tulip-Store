@@ -7,9 +7,35 @@ use App\Models\Product;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class WishlistController extends Controller
 {
+    protected function resolveWishlistImage($p): string
+    {
+        $raw = $p->primary_image_url
+            ?? $p->image
+            ?? ($p->photo ?? null)
+            ?? ($p->image_path ?? null)
+            ?? '';
+
+        $path = trim(str_replace('\\', '/', (string) $raw));
+        if ($path === '') {
+            return '/images/banner1.jpg';
+        }
+        if (Str::startsWith($path, ['http://', 'https://'])) {
+            return $path;
+        }
+        if (Str::startsWith($path, '/')) {
+            if (Str::startsWith($path, '/storage/public/')) {
+                return '/storage/'.ltrim(Str::after($path, '/storage/public/'), '/');
+            }
+            return $path;
+        }
+        $cleaned = ltrim((string) preg_replace('#^(storage/|public/)#', '', $path), '/');
+        return '/storage/'.$cleaned;
+    }
+
     public function index()
     {
         $user = Auth::user();
@@ -26,7 +52,7 @@ class WishlistController extends Controller
                     'id' => $p->id,
                     'name' => $p->name,
                     'price' => $p->discount_price ?? $p->price,
-                    'image' => $p->image,
+                    'image' => $this->resolveWishlistImage($p),
                 ];
             });
 
@@ -127,7 +153,7 @@ class WishlistController extends Controller
                     'id' => $p->id,
                     'name' => $p->name,
                     'price' => $p->discount_price ?? $p->price,
-                    'image' => $p->image,
+                    'image' => $this->resolveWishlistImage($p),
                 ];
             });
 

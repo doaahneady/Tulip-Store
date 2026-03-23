@@ -197,13 +197,30 @@
     </style>
 </head>
 <body>
+    @php
+        $invoiceLogoPath = public_path('images/tulip_logo.png');
+        $invoiceLogoData = is_file($invoiceLogoPath) ? 'data:image/png;base64,'.base64_encode((string) file_get_contents($invoiceLogoPath)) : null;
+        $logoGirlPath = public_path('images/logo-girl.jpg');
+        $logoGirlData = is_file($logoGirlPath) ? 'data:image/jpeg;base64,'.base64_encode((string) file_get_contents($logoGirlPath)) : null;
+    @endphp
+
     <button class="print-btn no-print" onclick="window.print()">
         🖨️ طباعة الفاتورة
     </button>
     
     <div class="invoice-box">
         <div class="invoice-header">
-            <h1>🌷 TULIP STORE</h1>
+            <div style="display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap;">
+                @if($logoGirlData)
+                    <h1 style="margin:0; color:#2a7080; font-size:28px; display:flex; align-items:center; gap:3px;">
+                        <span>T</span><img src="{{ $logoGirlData }}" alt="" style="height:1.2em; width:auto; vertical-align:middle; display:inline-block;"><span>lip</span>
+                    </h1>
+                @elseif($invoiceLogoData)
+                    <img src="{{ $invoiceLogoData }}" alt="Tulip" style="height:56px; width:auto; max-width:260px;">
+                @else
+                    <h1 style="margin:0; color:#2a7080;">Tulip</h1>
+                @endif
+            </div>
             <div class="invoice-number">فاتورة رقم: {{ $order->order_number }}</div>
             <div class="invoice-date">التاريخ: {{ $order->created_at->format('Y/m/d - h:i A') }}</div>
         </div>
@@ -294,29 +311,33 @@
             </tr>
         </table>
 
-        @if($order->payment_method == 'cash')
         <div class="signature-section">
-            <h3>✍️ التوقيعات (للدفع عند الاستلام)</h3>
+            <h3>✍️ التوقيعات</h3>
             <div class="signature-box">
                 <div class="signature-item">
                     <div class="signature-line">
-                        @if($order->customer_signature)
+                        @if(!empty($order->driver_delivery_signature))
+                            <img src="{{ $order->driver_delivery_signature }}" alt="توقيع المندوب">
+                        @endif
+                    </div>
+                    <div class="signature-label">توقيع المندوب</div>
+                </div>
+                <div class="signature-item">
+                    <div class="signature-line">
+                        @if(!empty($order->customer_signature))
                             <img src="{{ $order->customer_signature }}" alt="توقيع العميل">
                         @endif
                     </div>
                     <div class="signature-label">توقيع العميل</div>
                 </div>
-                <div class="signature-item">
-                    <div class="signature-line"></div>
-                    <div class="signature-label">توقيع المندوب</div>
-                </div>
+                @if($order->payment_method == 'cash')
                 <div class="signature-item">
                     <div class="signature-line"></div>
                     <div class="signature-label">المبلغ المستلم: @money($order->total)</div>
                 </div>
+                @endif
             </div>
         </div>
-        @endif
 
         <div class="footer">
             <p>شكراً لتسوقكم معنا! 🌷</p>

@@ -18,6 +18,7 @@ use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Cross-Department Flow Service
@@ -375,6 +376,15 @@ class CrossDepartmentFlowService
             // Update order status
             StatusTransitionService::transition($order, 'status', 'out_for_delivery', $userId);
             $order = $order->fresh();
+
+            // FK: assigned_driver_id → users.id
+            if ($driver->user_id && Schema::hasColumn('orders', 'assigned_driver_id')) {
+                $order->update([
+                    'assigned_driver_id' => $driver->user_id,
+                    'assigned_at' => now(),
+                ]);
+                $order = $order->fresh();
+            }
 
             // Payment status rules
             // - cash: stays pending/unpaid until delivered

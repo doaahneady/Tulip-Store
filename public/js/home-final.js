@@ -92,6 +92,16 @@ const FALLBACK_SLIDER_DATA = [
   },
 ];
 
+function resolveSliderLink(slide) {
+  const imageRaw = String(slide?.image || "").replace(/\\/g, "/");
+  const file = imageRaw.split("/").pop()?.toLowerCase() || "";
+  if (file === "banner3.jpg") return "/store";
+  if (file === "banner2.jpg") return "/gifts";
+  if (file === "banner1.jpg") return "/mart";
+  const explicit = String(slide?.link || "").trim();
+  return explicit || "#";
+}
+
 async function loadSliderData() {
   try {
     const response = await fetch("/api/homepage/slides", {
@@ -128,10 +138,11 @@ function initializeModernSlider() {
 
   // Create slides
   sliderData.forEach((slide, index) => {
+    const slideLink = resolveSliderLink(slide);
     const slideEl = document.createElement("div");
     slideEl.className = "modern-slide";
     slideEl.innerHTML = `
-            <a href="${slide.link || "#"}" style="display:block; width:100%; height:100%; text-decoration:none;">
+            <a href="${slideLink}" style="display:block; width:100%; height:100%; text-decoration:none;">
                 <img src="${slide.image}" alt="${slide.title}">
                 <div class="modern-slide-content">
                     <h2 style="font-family:'El Messiri', sans-serif; font-size:2rem; font-weight:900; margin:0 0 0.8rem 0;">${slide.title}</h2>
@@ -404,13 +415,20 @@ function escapeHtml(value) {
 }
 
 function getProductImageUrl(p) {
+  const firstImage = Array.isArray(p?.images)
+    ? (typeof p.images[0] === "object"
+        ? p.images[0]?.path || p.images[0]?.url
+        : p.images[0])
+    : null;
   const img =
     p?.primary_image_url ||
     p?.image ||
-    (Array.isArray(p?.images) ? p.images[0] : null) ||
+    p?.photo ||
+    p?.image_path ||
+    firstImage ||
     "";
-  const s = String(img || "").trim();
-  if (!s) return "/images/gift-placeholder.jpg";
+  const s = String(img || "").trim().replace(/\\/g, "/");
+  if (!s) return "/images/banner1.jpg";
   if (s.startsWith("http://") || s.startsWith("https://")) return s;
   if (s.startsWith("/")) return s;
   return `/storage/${s.replace(/^storage\//, "")}`;
@@ -442,7 +460,7 @@ function createProductCard(p) {
                 ${stockLabel}
             </div>
             <div class="product-image-wrapper">
-                <img src="${imgUrl}" alt="${safeName}" class="product-img" loading="lazy" onerror="this.src='/images/gift-placeholder.jpg'">
+                <img src="${imgUrl}" alt="${safeName}" class="product-img" loading="lazy" onerror="this.src='/images/banner1.jpg'">
             </div>
             <div class="product-info">
                 <h3 class="product-name">${safeName}</h3>
@@ -1136,6 +1154,43 @@ function updateFavoritesCount() {
   }
 }
 
+function applyFavoriteStateToCards() {
+  const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+  const favoriteIds = new Set(favorites.map((p) => String(p.id)));
+  document.querySelectorAll(".product-favorite-btn").forEach((btn) => {
+    const onclickAttr = btn.getAttribute("onclick") || "";
+    const match = onclickAttr.match(/toggleProductFavorite\(event,\s*(\d+)\)/);
+    if (!match) return;
+    const id = String(match[1]);
+    const active = favoriteIds.has(id);
+    const icon = btn.querySelector("i");
+    btn.classList.toggle("active", active);
+    if (icon) {
+      icon.classList.toggle("fas", active);
+      icon.classList.toggle("far", !active);
+    }
+  });
+}
+
+function extractProductFromCard(btn, productId) {
+  const card = btn?.closest?.(".product-card");
+  if (!card) return null;
+  const name = card.querySelector(".product-name")?.textContent?.trim() || "";
+  const image =
+    card.querySelector(".product-image img")?.getAttribute("src") ||
+    "/images/banner1.jpg";
+  const priceText =
+    card.querySelector(".price-current")?.textContent?.replace(/[^\d.]/g, "") ||
+    "0";
+  const parsedPrice = Number(priceText || 0);
+  return {
+    id: Number(productId),
+    name,
+    price: Number.isFinite(parsedPrice) ? parsedPrice : 0,
+    image,
+  };
+}
+
 async function syncFavoritesFromServer() {
   const isAuth =
     window.isAuthenticated === true || window.isAuthenticated === "true";
@@ -1146,6 +1201,7 @@ async function syncFavoritesFromServer() {
   try {
     const res = await fetch("/api/wishlist", {
       headers: { Accept: "application/json" },
+      credentials: "same-origin",
     });
     if (!res.ok) return;
     const data = await res.json();
@@ -1158,17 +1214,23 @@ async function syncFavoritesFromServer() {
       }
     }
   } catch (e) {}
+  applyFavoriteStateToCards();
 }
 
 async function toggleProductFavorite(event, productId) {
   event.stopPropagation();
-  const btn = event.currentTarget;
+  const btn =
+    event.currentTarget?.closest?.(".product-favorite-btn") ||
+    event.target?.closest?.(".product-favorite-btn");
+  if (!btn) return;
   const icon = btn.querySelector("i");
+  if (!icon) return;
   const isAuth =
     window.isAuthenticated === true || window.isAuthenticated === "true";
   let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-  const isFavorite = favorites.some((p) => p.id === productId);
+  const isFavorite = favorites.some((p) => String(p.id) === String(productId));
   const product = (window.__productsById || {})[productId];
+  const fallbackProduct = extractProductFromCard(btn, productId);
 
   if (isAuth) {
     try {
@@ -1188,21 +1250,23 @@ async function toggleProductFavorite(event, productId) {
         btn.classList.add("active");
         icon.classList.remove("far");
         icon.classList.add("fas");
-        if (product) {
-          favorites.push({
-            id: product.id,
-            name: product.name,
-            price: product.discount_price || product.price,
-            image: getProductImageUrl(product),
-          });
-        }
       } else if (data.action === "removed") {
         btn.classList.remove("active");
         icon.classList.remove("fas");
         icon.classList.add("far");
-        favorites = favorites.filter((p) => p.id !== productId);
       }
-      localStorage.setItem("favorites", JSON.stringify(favorites));
+
+      // For server-rendered homepage cards we may not have product data in
+      // window.__productsById. Always sync favorites from the backend after toggle.
+      await syncFavoritesFromServer();
+
+      // Update UI from the synced state (localStorage).
+      favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+      const nowFavorite = favorites.some((p) => String(p.id) === String(productId));
+      btn.classList.toggle("active", nowFavorite);
+      icon.classList.toggle("fas", nowFavorite);
+      icon.classList.toggle("far", !nowFavorite);
+
       updateFavoritesCount();
     } catch (e) {}
   } else {
@@ -1211,12 +1275,13 @@ async function toggleProductFavorite(event, productId) {
       btn.classList.remove("active");
       icon.classList.remove("fas");
       icon.classList.add("far");
-    } else if (product) {
+    } else if (product || fallbackProduct) {
+      const source = product || fallbackProduct;
       favorites.push({
-        id: product.id,
-        name: product.name,
-        price: product.discount_price || product.price,
-        image: getProductImageUrl(product),
+        id: source.id,
+        name: source.name,
+        price: source.discount_price || source.price,
+        image: source.image || (product ? getProductImageUrl(product) : "/images/banner1.jpg"),
       });
       btn.classList.add("active");
       icon.classList.remove("far");
@@ -1230,4 +1295,5 @@ async function toggleProductFavorite(event, productId) {
 window.addEventListener("DOMContentLoaded", () => {
   syncFavoritesFromServer();
   updateFavoritesCount();
+  applyFavoriteStateToCards();
 });

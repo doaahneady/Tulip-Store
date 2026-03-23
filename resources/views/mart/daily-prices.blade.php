@@ -481,18 +481,18 @@ function renderCategories() {
 }
 
 function createCard(p) {
-    const photoUrl = resolvePublicImage(p.photo || p.image || p.imageUrl) || '/images/grocery.jpg';
+    const photoUrl = resolvePublicImage(p.photo || p.image || p.imageUrl) || '/images/panner_mart.png';
     return `
         <div class="price-card">
             <div class="photo-container">
-                <img src="${photoUrl}" alt="${p.name}" onerror="this.src='/images/grocery.jpg'">
+                <img src="${photoUrl}" alt="${p.name}" onerror="this.src='/images/panner_mart.png'">
             </div>
             <div class="info">
                 <div class="name">${p.name}</div>
                 <div class="origin"><i class="fas fa-map-marker-alt"></i> ${p.origin || ''}</div>
                 <div class="prices">
-                    <span class="current">${p.price} ل.س</span>
-                    ${p.oldPrice ? `<span class="old">${p.oldPrice} ل.س</span>` : ''}
+                    <span class="current">${window.formatMoney ? window.formatMoney(p.price) : (p.price + ' ل.س')}</span>
+                    ${p.oldPrice ? `<span class="old">${window.formatMoney ? window.formatMoney(p.oldPrice) : (p.oldPrice + ' ل.س')}</span>` : ''}
                     <span class="unit">لكل 1 كغ</span>
                 </div>
             </div>
@@ -511,7 +511,7 @@ async function addToCart(id, btn) {
     const p = all.find(x => (x.id || x.name) === id);
     
     try {
-        const photoUrl = resolvePublicImage(p?.photo || p?.image || p?.imageUrl) || '/images/grocery.jpg';
+        const photoUrl = resolvePublicImage(p?.photo || p?.image || p?.imageUrl) || '/images/panner_mart.png';
         const r = await fetch(`${API_BASE}/cart/add`, {
             method: 'POST',
             headers: {

@@ -72,7 +72,13 @@ class Gift extends Model
     {
         $images = $this->images ?? [];
 
-        $candidate = ! empty($images) ? (string) $images[0] : '';
+        $first = ! empty($images) ? $images[0] : '';
+        if (is_array($first)) {
+            $candidate = (string) ($first['path'] ?? $first['url'] ?? '');
+        } else {
+            $candidate = (string) $first;
+        }
+        $candidate = str_replace('\\', '/', $candidate);
         $candidate = trim($candidate);
 
         if ($candidate === '') {

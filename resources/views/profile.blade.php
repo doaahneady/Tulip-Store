@@ -83,6 +83,12 @@
             font-size: 2.5rem;
             border: 3px solid rgba(255,255,255,0.3);
         }
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
         .profile-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.3rem; }
         .profile-email { font-size: 0.9rem; opacity: 0.8; }
 
@@ -483,7 +489,19 @@
         <!-- ============ SIDEBAR ============ -->
         <div class="profile-sidebar" id="profileSidebar">
             <div class="profile-header">
-                <div class="profile-avatar"><i class="fas fa-user"></i></div>
+                <div class="profile-avatar" id="profileAvatar">
+                    <img
+                        id="profilePhotoPreviewImg"
+                        src="{{ Auth::user()->profile_photo ? Storage::url(Auth::user()->profile_photo) : '' }}"
+                        alt="صورة المستخدم"
+                        style="{{ Auth::user()->profile_photo ? '' : 'display:none;' }}"
+                    >
+                    <i
+                        id="profilePhotoPreviewIcon"
+                        class="fas fa-user"
+                        style="{{ Auth::user()->profile_photo ? 'display:none;' : '' }}"
+                    ></i>
+                </div>
                 <div class="profile-name" id="userName">{{ Auth::user()->name ?? 'المستخدم' }}</div>
                 <div class="profile-email" id="userEmail">{{ Auth::user()->email ?? '' }}</div>
             </div>
@@ -566,6 +584,15 @@
                                     <button type="button" class="currency-btn" id="currencyBtnSYP" onclick="setCurrencyPreferenceUI('SYP')">
                                         <span>SYP</span><span>(Syrian Pound)</span>
                                     </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="grid-column:1/-1;">
+                                <label class="form-label">صورة الملف الشخصي</label>
+                                <input type="file" id="profilePhotoInput" class="form-input" accept="image/*" style="padding:0.6rem 1.2rem;">
+                                <div style="color:#666;font-size:0.9rem;margin-top:0.5rem;">
+                                    اختياري. يدعم JPG/PNG وبحد أقصى 2MB.
                                 </div>
                             </div>
                         </div>
@@ -877,6 +904,29 @@
                 : (document.getElementById('currencyPref')?.value || 'USD');
             setCurrencyPreferenceUI(initial);
 
+            // Profile photo preview (sidebar avatar)
+            const photoInput = document.getElementById('profilePhotoInput');
+            const previewImg = document.getElementById('profilePhotoPreviewImg');
+            const previewIcon = document.getElementById('profilePhotoPreviewIcon');
+            if (photoInput && previewImg && previewIcon) {
+                photoInput.addEventListener('change', function () {
+                    const file = this.files && this.files[0] ? this.files[0] : null;
+                    if (!file) {
+                        previewImg.style.display = 'none';
+                        previewIcon.style.display = '';
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function () {
+                        previewImg.src = String(reader.result || '');
+                        previewImg.style.display = '';
+                        previewIcon.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
             // إظهار القسم الأول مباشرة على الموبايل بدون تحريك (الـ sidebar هو الشاشة الأولى)
             if (isMobile()) {
                 const content = document.getElementById('profileContent');
@@ -929,11 +979,32 @@
                     window.location.href = '/ar-verify-code?target=email-change';
                     return;
                 }
-                const response = await fetch(API_BASE + '/profile/update', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' },
-                    body: JSON.stringify({ name: payload.name, phone: payload.phone, address: payload.address, currency: payload.currency })
-                });
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+                const profileFile = document.getElementById('profilePhotoInput')?.files?.[0] || null;
+                let response;
+
+                if (profileFile) {
+                    const formData = new FormData();
+                    formData.append('_method', 'PUT');
+                    formData.append('name', payload.name);
+                    formData.append('phone', payload.phone);
+                    formData.append('address', payload.address);
+                    formData.append('currency', payload.currency);
+                    formData.append('profile_photo', profileFile);
+
+                    response = await fetch(API_BASE + '/profile/update', {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+                        body: formData
+                    });
+                } else {
+                    response = await fetch(API_BASE + '/profile/update', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+                        body: JSON.stringify({ name: payload.name, phone: payload.phone, address: payload.address, currency: payload.currency })
+                    });
+                }
                 if (!response.ok) {
                     let msg = 'فشل حفظ البيانات';
                     try { const err = await response.json(); msg = err.message || msg; } catch (_) {}

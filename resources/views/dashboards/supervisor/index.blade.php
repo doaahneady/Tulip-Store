@@ -1,6 +1,6 @@
 @extends('dashboards.layouts.app')
 @section('content')
-@php $title = 'لوحة مشرف السائقين'; $subtitle = 'نظرة عامة على السائقين والتوصيلات والأداء'; @endphp
+@php $title = 'لوحة اللوجستيات'; $subtitle = 'نظرة عامة على السائقين والتوصيلات والأداء'; @endphp
 
 <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
     <div class="flex flex-wrap items-center gap-2">
@@ -56,7 +56,13 @@
 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 xl:col-span-7">
     <div class="flex items-center justify-between mb-4">
         <h3 class="text-base font-black text-gray-800">خريطة تتبع مباشر</h3>
-        <a href="{{ route('dashboard.supervisor.live-tracking') }}" class="text-sm text-indigo-600">تفاصيل</a>
+        <div class="flex items-center gap-3">
+            <a href="{{ route('dashboard.supervisor.live-tracking') }}" class="text-sm text-indigo-600">تفاصيل</a>
+            <a href="{{ route('dashboard.supervisor.live-tracking') }}?fullscreen=1" target="_blank" class="inline-flex items-center gap-1 text-sm text-white bg-indigo-600 px-3 py-1.5 rounded-lg hover:bg-indigo-700">
+                <i class="fas fa-up-right-from-square"></i>
+                فتح بملء الشاشة
+            </a>
+        </div>
     </div>
     <div id="overview-map" class="w-full h-[240px] rounded-xl border border-gray-200"></div>
 </div>
@@ -248,7 +254,11 @@
             overviewMapEl.innerHTML = '<div class="h-full w-full flex items-center justify-center text-sm text-gray-500">فشل تحميل الخريطة (Leaflet). تحقق من الاتصال بالإنترنت.</div>';
         } else {
             const map = L.map('overview-map').setView([33.5138, 36.2765], 12);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '' }).addTo(map);
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles © Esri',
+                maxNativeZoom: 18,
+                maxZoom: 18
+            }).addTo(map);
             setTimeout(() => map.invalidateSize(), 200);
             fetch('{{ route('dashboard.supervisor.api.driver-locations') }}').then(r => r.json()).then(data => {
                 const markers = [];

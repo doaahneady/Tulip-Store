@@ -8,6 +8,28 @@ use Illuminate\Support\Facades\Schema;
 
 class Order extends Model
 {
+    /**
+     * orders.assigned_driver_id is a foreign key to users.id (the driver's login account).
+     * Supervisors/APIs often pass drivers.id — convert that to the driver's user id.
+     */
+    public static function resolveAssignedDriverUserId(?int $driverOrUserId): ?int
+    {
+        if ($driverOrUserId === null || $driverOrUserId === 0) {
+            return null;
+        }
+
+        $driver = Driver::find($driverOrUserId);
+        if ($driver && $driver->user_id) {
+            return (int) $driver->user_id;
+        }
+
+        if (User::query()->whereKey($driverOrUserId)->exists()) {
+            return (int) $driverOrUserId;
+        }
+
+        return null;
+    }
+
     use HasFactory;
 
     protected static function booted(): void
@@ -96,6 +118,7 @@ class Order extends Model
         'confirmation_token',
         'confirmed_at',
         'customer_signature',
+        'driver_delivery_signature',
         'signed_at',
         'delivery_notes',
         'tracking_number',
@@ -139,9 +162,20 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    /**
+     * The user account of the assigned delivery driver (FK: assigned_driver_id → users.id).
+     */
     public function assignedDriver()
     {
-        return $this->belongsTo(Driver::class, 'assigned_driver_id');
+        return $this->belongsTo(User::class, 'assigned_driver_id');
+    }
+
+    /**
+     * Driver profile row when assigned_driver_id holds the driver's user id.
+     */
+    public function assignedDriverRecord()
+    {
+        return $this->hasOne(Driver::class, 'user_id', 'assigned_driver_id');
     }
 
     public function assignedBy()

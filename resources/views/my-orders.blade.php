@@ -174,9 +174,6 @@ $daysLeft = \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($order->esti
 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
 <button class="btn-details" onclick="showOrderDetails({{ $order->id }})"><i class="fas fa-eye"></i> التفاصيل</button>
 <a class="btn-details" style="background:#6f42c1;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem;" href="{{ route('order.invoice.download', $order->id) }}"><i class="fas fa-file-pdf"></i> تحميل الفاتورة</a>
-@if(in_array($order->status, ['delivered', 'done'], true) && $order->customer_signature)
-<button class="btn-details" style="background:#28a745;" onclick="showDeliveryReceipt({{ $order->id }})"><i class="fas fa-file-signature"></i> الفاتورة</button>
-@endif
 </div>
 </td>
 </tr>
@@ -201,21 +198,6 @@ $daysLeft = \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($order->esti
 <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
 </div>
 <div class="modal-body" id="modalBody"></div>
-</div>
-</div>
-
-<!-- Delivery Receipt Modal -->
-<div id="receiptModal" class="modal">
-<div class="modal-content" style="max-width:600px;">
-<div class="modal-header" style="background:linear-gradient(135deg,#28a745 0%,#1e7e34 100%);">
-<h2 style="color:#fff;margin:0;font-size:1.5rem"><i class="fas fa-file-invoice"></i> فاتورة التوصيل</h2>
-<button class="modal-close" onclick="closeReceiptModal()"><i class="fas fa-times"></i></button>
-</div>
-<div class="modal-body" id="receiptBody" style="padding:0;"></div>
-<div style="padding:1rem 2rem 2rem;display:flex;gap:1rem;">
-<button onclick="closeReceiptModal()" style="flex:1;padding:0.8rem;background:#6c757d;color:#fff;border:none;border-radius:8px;font-family:'El Messiri',sans-serif;font-weight:700;cursor:pointer;"><i class="fas fa-times"></i> إغلاق</button>
-<button onclick="printReceipt()" style="flex:1;padding:0.8rem;background:#28a745;color:#fff;border:none;border-radius:8px;font-family:'El Messiri',sans-serif;font-weight:700;cursor:pointer;"><i class="fas fa-print"></i> طباعة</button>
-</div>
 </div>
 </div>
 
@@ -276,145 +258,6 @@ document.getElementById('orderModal').classList.add('show');
 }
 function closeModal(){document.getElementById('orderModal').classList.remove('show')}
 document.getElementById('orderModal').addEventListener('click',function(e){if(e.target===this)closeModal()});
-
-function showDeliveryReceipt(orderId){
-const order=ordersData.find(o=>o.id===orderId);
-if(!order)return;
-const effectiveDelivery = n(order.delivery_cost ?? order.shipping_cost ?? 0);
-const effectiveSubtotal = n(order.subtotal ?? 0);
-const effectiveTotal = n(order.total ?? order.total_amount ?? (effectiveSubtotal + effectiveDelivery));
-
-const confirmedDate = order.confirmed_at ? new Date(order.confirmed_at).toLocaleDateString('ar-SA', {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}) : 'غير محدد';
-
-let html = `
-<div id="receiptContent" style="background:#fff;padding:2rem;">
-    <!-- Header -->
-    <div style="text-align:center;border-bottom:3px solid #28a745;padding-bottom:1.5rem;margin-bottom:1.5rem;">
-        <h1 style="color:#28a745;margin:0;font-size:1.8rem;"><i class="fas fa-check-circle"></i> فاتورة التوصيل</h1>
-        <p style="color:#666;margin:0.5rem 0 0 0;">تم التوصيل بنجاح</p>
-    </div>
-    
-    <!-- Order Info -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
-        <div style="background:#f8f9fa;padding:1rem;border-radius:8px;">
-            <p style="margin:0 0 0.5rem 0;color:#666;font-size:0.85rem;">رقم الطلب</p>
-            <p style="margin:0;font-weight:700;color:#28a745;font-size:1.1rem;">${order.order_number}</p>
-        </div>
-        <div style="background:#f8f9fa;padding:1rem;border-radius:8px;">
-            <p style="margin:0 0 0.5rem 0;color:#666;font-size:0.85rem;">تاريخ التوصيل</p>
-            <p style="margin:0;font-weight:700;color:#1a1a1a;">${confirmedDate}</p>
-        </div>
-    </div>
-    
-    <!-- Customer Info -->
-    <div style="background:#e8f5e9;padding:1rem;border-radius:8px;margin-bottom:1.5rem;border-right:4px solid #28a745;">
-        <h4 style="margin:0 0 0.8rem 0;color:#28a745;"><i class="fas fa-user"></i> معلومات المستلم</h4>
-        <p style="margin:0 0 0.3rem 0;"><strong>الاسم:</strong> ${order.recipient_name}</p>
-        <p style="margin:0 0 0.3rem 0;"><strong>الهاتف:</strong> ${order.phone}</p>
-        <p style="margin:0;"><strong>العنوان:</strong> ${order.village}</p>
-    </div>
-    
-    <!-- Products -->
-    <div style="margin-bottom:1.5rem;">
-        <h4 style="margin:0 0 0.8rem 0;color:#1a1a1a;"><i class="fas fa-box"></i> المنتجات</h4>
-        <table style="width:100%;border-collapse:collapse;">
-            <thead>
-                <tr style="background:#f8f9fa;">
-                    <th style="padding:0.8rem;text-align:right;border-bottom:2px solid #dee2e6;">المنتج</th>
-                    <th style="padding:0.8rem;text-align:center;border-bottom:2px solid #dee2e6;">الكمية</th>
-                    <th style="padding:0.8rem;text-align:left;border-bottom:2px solid #dee2e6;">السعر</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${order.items.map(item => `
-                    <tr>
-                        <td style="padding:0.8rem;border-bottom:1px solid #eee;">${item.product_name || item.product?.name || 'منتج'}</td>
-                        <td style="padding:0.8rem;text-align:center;border-bottom:1px solid #eee;">${item.quantity}</td>
-                        <td style="padding:0.8rem;text-align:left;border-bottom:1px solid #eee;">${window.formatMoney ? window.formatMoney(item.subtotal ?? item.total_price ?? 0) : ('$' + parseFloat(item.subtotal ?? item.total_price ?? 0).toFixed(2))}</td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    </div>
-    
-    <!-- Totals -->
-    <div style="background:#f8f9fa;padding:1rem;border-radius:8px;margin-bottom:1.5rem;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
-            <span>المجموع الفرعي:</span>
-            <span>${window.formatMoney ? window.formatMoney(effectiveSubtotal) : ('$' + parseFloat(effectiveSubtotal).toFixed(2))}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
-            <span>تكلفة التوصيل:</span>
-            <span>${window.formatMoney ? window.formatMoney(effectiveDelivery) : ('$' + parseFloat(effectiveDelivery).toFixed(2))}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding-top:0.8rem;border-top:2px solid #28a745;font-size:1.2rem;font-weight:700;color:#28a745;">
-            <span>المجموع الكلي:</span>
-            <span>${window.formatMoney ? window.formatMoney(effectiveTotal) : ('$' + parseFloat(effectiveTotal).toFixed(2))}</span>
-        </div>
-    </div>
-    
-    <!-- Signature -->
-    <div style="border:2px dashed #28a745;padding:1.5rem;border-radius:12px;text-align:center;">
-        <h4 style="margin:0 0 1rem 0;color:#28a745;"><i class="fas fa-signature"></i> توقيع المستلم</h4>
-        ${order.customer_signature ? 
-            `<img src="${order.customer_signature}" alt="توقيع المستلم" style="max-width:100%;max-height:150px;border:1px solid #ddd;border-radius:8px;background:#fff;">` : 
-            `<p style="color:#999;margin:0;">لا يوجد توقيع</p>`
-        }
-        <p style="margin:1rem 0 0 0;color:#666;font-size:0.85rem;">تم التأكيد بتاريخ: ${confirmedDate}</p>
-    </div>
-    
-    <!-- Footer -->
-     <div style="position:relative; z-index:1001;">
-    @include('components.footer')
-</div>
-    // <div style="text-align:center;margin-top:1.5rem;padding-top:1rem;border-top:1px solid #eee;">
-    //     <p style="margin:0;color:#28a745;font-weight:700;"><i class="fas fa-check-double"></i> شكراً لتسوقكم معنا!</p>
-    //     <p style="margin:0.5rem 0 0 0;color:#999;font-size:0.85rem;">Tulip Store - توليب ستور</p>
-    // </div>
-</div>
-`;
-
-document.getElementById('receiptBody').innerHTML = html;
-document.getElementById('receiptModal').classList.add('show');
-}
-
-function closeReceiptModal(){
-document.getElementById('receiptModal').classList.remove('show');
-}
-
-function printReceipt(){
-const content = document.getElementById('receiptContent').innerHTML;
-const printWindow = window.open('', '_blank');
-printWindow.document.write(`
-    <!DOCTYPE html>
-    <html lang="ar" dir="rtl">
-    <head>
-        <meta charset="UTF-8">
-        <!-- fav icon -->
-        <link rel="icon" type="image/png" href="/images/fav_icon.png">
-        <title>فاتورة التوصيل</title>
-        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <style>
-            * { font-family: "El Messiri", sans-serif; }
-            body { padding: 20px; }
-            @media print {
-                body { padding: 0; }
-            }
-        </style>
-    </head>
-    <body>
-        ${content}
-    </body>
-    </html>
-`);
-printWindow.document.close();
-printWindow.onload = function() {
-    printWindow.print();
-};
-}
-
-document.getElementById('receiptModal')?.addEventListener('click',function(e){if(e.target===this)closeReceiptModal()});
 
 function uploadReceipt(orderId){
 const input=document.createElement('input');

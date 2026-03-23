@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Delivery Dashboard Service
@@ -315,16 +316,26 @@ class DeliveryDashboardService
                 'delivery_longitude' => $order->longitude,
             ]);
 
+            // orders.assigned_driver_id references users.id (driver login), not drivers.id
+            $driverUserId = $driver->user_id;
+            if (! $driverUserId) {
+                DB::rollBack();
+
+                return null;
+            }
+
             // Update order with driver assignment
             $order->update([
-                'assigned_driver_id' => $driverId,
+                'assigned_driver_id' => $driverUserId,
                 'assigned_at' => now(),
                 'assigned_by' => $assignedBy,
                 'status' => 'assigned',
             ]);
 
-            // Update driver status to busy
-            $driver->update(['status' => 'busy']);
+            // Update driver availability to busy
+            if (Schema::hasColumn('drivers', 'availability')) {
+                $driver->update(['availability' => 'busy']);
+            }
 
             // Log the assignment
             $this->auditService->log(

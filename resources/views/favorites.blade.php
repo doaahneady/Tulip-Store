@@ -264,6 +264,37 @@
 
     <script>
         const isAuthenticated = {!! auth()->check() ? 'true' : 'false' !!};
+        function resolveFavoriteImage(product) {
+            const raw = product?.image || product?.primary_image_url || product?.photo || product?.image_path || '';
+            const s = String(raw || '').trim().replace(/\\/g, '/');
+            if (!s) return '/images/banner1.jpg';
+            if (s.startsWith('http://') || s.startsWith('https://')) return s;
+            if (s.startsWith('/')) {
+                if (s.startsWith('/storage/public/')) return `/storage/${s.replace('/storage/public/', '')}`;
+                return s;
+            }
+            return `/storage/${s.replace(/^storage\//, '').replace(/^public\//, '')}`;
+        }
+        function resolveFavoriteUrl(product) {
+            if (product?.url) return product.url;
+            if (String(product?.type || '') === 'gift' || String(product?.id || '').startsWith('gift-')) {
+                const id = String(product.id).replace('gift-', '');
+                return `/gifts/${id}`;
+            }
+            return `/products/${product.id}`;
+        }
+        function isGiftFavorite(product) {
+            return String(product?.type || '') === 'gift' || String(product?.id || '').startsWith('gift-');
+        }
+        function removeFavoriteHandlerArg(product) {
+            return JSON.stringify(String(product?.id ?? ''));
+        }
+        function renderAddAction(product) {
+            if (isGiftFavorite(product)) {
+                return `<button class="favorite-card-btn btn-add-cart" onclick="window.location.href='${resolveFavoriteUrl(product)}'">عرض الهدية</button>`;
+            }
+            return `<button class="favorite-card-btn btn-add-cart" onclick="addToCart(${JSON.stringify(String(product.id))})">أضف للسلة</button>`;
+        }
         function loadFavorites() {
             if (isAuthenticated) {
                 fetch('/api/wishlist')
@@ -309,24 +340,22 @@
                     ${favorites.map(product => `
                         <div class="favorite-card" data-product-id="${product.id}">
                             <div class="favorite-card-image-wrapper">
-                                <button class="remove-favorite-btn" onclick="removeFromFavorites(${product.id})">
+                                <button class="remove-favorite-btn" onclick='removeFromFavorites(${removeFavoriteHandlerArg(product)})'>
                                     <i class="fas fa-times"></i>
                                 </button>
-                                <img src="${product.image || 'https://via.placeholder.com/280x280'}" 
+                                <img src="${resolveFavoriteImage(product)}" 
                                      alt="${product.name}" 
                                      class="favorite-card-image"
-                                     onclick="window.location.href='/products/${product.id}'">
+                                     onclick="window.location.href='${resolveFavoriteUrl(product)}'">
                             </div>
                             <div class="favorite-card-content">
                                 <h3 class="favorite-card-name">${product.name}</h3>
                                 <div class="favorite-card-price">${product.price} ل.س</div>
                                 <div class="favorite-card-actions">
-                                    <button class="favorite-card-btn btn-view" onclick="window.location.href='/products/${product.id}'">
+                                    <button class="favorite-card-btn btn-view" onclick="window.location.href='${resolveFavoriteUrl(product)}'">
                                         عرض
                                     </button>
-                                    <button class="favorite-card-btn btn-add-cart" onclick="addToCart(${product.id})">
-                                        أضف للسلة
-                                    </button>
+                                    ${renderAddAction(product)}
                                 </div>
                             </div>
                         </div>
@@ -336,7 +365,15 @@
         }
         
         function removeFromFavorites(productId) {
-            if (isAuthenticated) {
+            const id = String(productId);
+            const localRemove = () => {
+                let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                favorites = (Array.isArray(favorites) ? favorites : []).filter(p => String(p.id) !== id);
+                localStorage.setItem('favorites', JSON.stringify(favorites));
+                animateRemoval(productId);
+            };
+
+            if (isAuthenticated && /^\d+$/.test(id)) {
                 fetch('/api/wishlist/items/' + productId, {
                     method: 'DELETE',
                     headers: {
@@ -344,12 +381,9 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                     }
                 }).then(() => animateRemoval(productId))
-                .catch(() => animateRemoval(productId));
+                .catch(() => localRemove());
             } else {
-                let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-                favorites = favorites.filter(p => p.id !== productId);
-                localStorage.setItem('favorites', JSON.stringify(favorites));
-                animateRemoval(productId);
+                localRemove();
             }
         }
         function animateRemoval(productId) {

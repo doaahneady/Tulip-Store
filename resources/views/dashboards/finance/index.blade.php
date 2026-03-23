@@ -2,6 +2,31 @@
 @section('content')
 @php $title = 'لوحة المالية'; $subtitle = 'نظرة عامة على الإيرادات والتكاليف والتفصيل'; @endphp
 
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h3 class="text-base font-bold text-gray-800">سعر الصرف (USD -> SYP)</h3>
+            <p class="text-xs text-gray-500">تعديل السعر المستخدم في الواجهة لتحويل العملات</p>
+        </div>
+        <form method="POST" action="{{ route('dashboard.finance.exchange-rate.update') }}" class="flex items-center gap-2">
+            @csrf
+            <input
+                type="number"
+                name="usd_to_syp_rate"
+                step="0.01"
+                min="1"
+                value="{{ \App\Models\SystemSetting::get('usd_to_syp_rate', 117) }}"
+                class="form-input w-40"
+                required
+            >
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-save"></i>
+                تحديث
+            </button>
+        </form>
+    </div>
+</div>
+
 <div class="top-0  bg-white/80 backdrop-blur-sm border-b border-gray-200 mb-6">
     <div class="px-4 py-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div class="flex items-center gap-3">
@@ -70,6 +95,13 @@
         <div>
             <div class="text-sm font-semibold text-gray-900">التحويلات</div>
             <div class="text-xs text-gray-500">طلبات المتاجر</div>
+        </div>
+    </a>
+    <a href="{{ route('dashboard.finance.driver-deliveries.index') }}" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center"><i class="fas fa-truck"></i></div>
+        <div>
+            <div class="text-sm font-semibold text-gray-900">تسليمات السائقين</div>
+            <div class="text-xs text-gray-500">اعتماد الدفع والسجل</div>
         </div>
     </a>
     <a href="{{ route('dashboard.finance.revenue') }}" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition flex items-center gap-3">

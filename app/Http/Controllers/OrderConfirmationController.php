@@ -51,9 +51,9 @@ class OrderConfirmationController extends Controller
                 'status' => 'delivered',
             ]);
 
-            // Update driver status back to 'available'
+            // Update driver status back to 'available' (assigned_driver_id is users.id)
             if ($driverId) {
-                Driver::where('id', $driverId)->update([
+                Driver::where('user_id', $driverId)->update([
                     'status' => 'available',
                 ]);
             }

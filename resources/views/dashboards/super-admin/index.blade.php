@@ -2,6 +2,31 @@
 @section('content')
 @php $title = 'لوحة الإدارة'; $subtitle = 'نظرة عامة على المنصة'; @endphp
 
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h3 class="text-base font-bold text-gray-800">سعر الصرف (USD -> SYP)</h3>
+            <p class="text-xs text-gray-500">تعديل السعر المستخدم في الواجهة لتحويل العملات</p>
+        </div>
+        <form method="POST" action="{{ route('dashboard.admin.exchange-rate.update') }}" class="flex items-center gap-2">
+            @csrf
+            <input
+                type="number"
+                name="usd_to_syp_rate"
+                step="0.01"
+                min="1"
+                value="{{ \App\Models\SystemSetting::get('usd_to_syp_rate', 117) }}"
+                class="form-input w-40"
+                required
+            >
+            <button type="submit" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition">
+                <i class="fas fa-save"></i>
+                تحديث
+            </button>
+        </form>
+    </div>
+</div>
+
 <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
     <div class="flex flex-wrap items-center gap-2">
         <a href="{{ route('dashboard.admin.orders') }}" class="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-xl hover:bg-black transition">

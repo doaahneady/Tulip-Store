@@ -26,6 +26,7 @@ class User extends Authenticatable
         'phone',
         'birth_date',
         'address',
+        'profile_photo',
         'language',
         'gender',
         'currency',
