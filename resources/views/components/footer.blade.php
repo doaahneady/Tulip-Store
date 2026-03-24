@@ -95,6 +95,7 @@
                     <a href="/store" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">المتجر</a>
                     <a href="/about" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">من نحن؟</a>
                     <a href="/contact" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">تواصل معنا</a>
+                    <a href="/trader/login" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">بوابة التجار</a>
                 </div>
             </div>
             
@@ -113,12 +114,13 @@
                 <div style="display:flex; flex-direction:column; gap:1.1rem; align-items:center;">
                     <a href="/" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">توليب ستور</a>
                     <a href="/mart" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">توليب مارت</a>
-                    <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">توليب نت</a>
+                    <!-- <a href="#" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">توليب نت</a> -->
                     <a href="/gifts" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:all 0.3s; font-size:0.95rem; font-weight:400;" onmouseover="this.style.color='#fff'; this.style.paddingRight='8px'; this.style.fontWeight='700'" onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.paddingRight='0'; this.style.fontWeight='400'">توليب لتنسيق الهدايا</a>
                   </div>
             </div>
              </div>
-         <div style="text-align: right;">
+             <!-- applications -->
+         <!-- <div style="text-align: right;">
     <div style="display: inline-block; vertical-align: middle;">
         <a href="#" target="_blank" style="text-decoration: none;">
             <img src="/images/android.png" style="height: 40px; margin-left: 10px; border: 0;">
@@ -129,15 +131,15 @@
             <img src="/images/ios.png" style="height: 40px; border: 0;">
         </a>
     </div>
-</div>
+</div> -->
           
      
-          <div style="display:flex; flex-direction:column; gap:1.1rem; align-items:center;">
+          <!-- <div style="display:flex; flex-direction:column; gap:1.1rem; align-items:center;">
               <h2 style="color:#ff6b35; font-weight:800; margin-bottom:1rem;margin-top:1rem ">
                 يمكك زيارة موقع الشركة و التعرف على خدماتنا
                 <a href="#" style="color:rgba(255,255,255,0.7); font-weight:800; margin-bottom:1rem;margin-top:1rem "> من هنا </a>
                </h2>
-            </div>
+            </div> -->
        
         <div style="padding-top:2rem; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:center; align-items:center; gap:1.2rem; flex-wrap:wrap;">
             <p style="color:rgba(255,255,255,0.5); margin:0; font-size:0.95rem;">© 2026 Tulip Store. جميع الحقوق محفوظة</p>

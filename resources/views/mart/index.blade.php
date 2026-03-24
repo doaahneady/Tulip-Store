@@ -969,7 +969,7 @@
                 .map((c, i) => {
                 const p = palette[i % palette.length];
                 const slug = c.slug || String(c.id);
-                const image = resolvePublicImage(c.image) || '/images/panner_mart.png';
+                const image = resolvePublicImage(c.image) || '/images/tulip_mart.jpg';
                 categoryImageBySlug[slug] = image;
                 return { id: slug, name: c.name || slug, image, color: p.color, gradient: p.gradient };
             });

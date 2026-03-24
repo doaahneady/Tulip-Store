@@ -547,6 +547,7 @@
                                 ${badgeText ? `<span class="gift-badge ${badgeClass}">${badgeText}</span>` : ''}
                                 <img src="${image}" alt="${gift.name || ''}" loading="lazy" onerror="this.src='/images/tulip_gift.jpg'">
                             </div>
+                            
                             <div class="gift-info">
                                 <h3 class="gift-name">${gift.name || ''}</h3>
                                 <div class="gift-rating">
