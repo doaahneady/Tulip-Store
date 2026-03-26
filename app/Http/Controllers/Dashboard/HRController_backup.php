@@ -262,7 +262,7 @@ class HRController_backup extends Controller
             'department' => 'required|string',
             'position' => 'required|string',
             'employment_type' => 'required|in:full_time,part_time,contract,intern',
-            'hire_date' => 'required|date',
+            'hire_date' => 'required|date|date_format:Y-m-d',
             'hourly_rate' => 'nullable|numeric|min:0',
             'monthly_salary' => 'nullable|numeric|min:0',
             'emergency_contact' => 'required|array',
@@ -335,7 +335,7 @@ class HRController_backup extends Controller
             'status' => 'required|in:active,inactive,on_leave,terminated',
             'hourly_rate' => 'nullable|numeric|min:0',
             'monthly_salary' => 'nullable|numeric|min:0',
-            'termination_date' => 'nullable|date',
+            'termination_date' => 'nullable|date|date_format:Y-m-d',
             'emergency_contact' => 'nullable|array',
             'emergency_contact.name' => 'nullable|string',
             'emergency_contact.phone' => 'nullable|string',
@@ -955,7 +955,7 @@ class HRController_backup extends Controller
     {
         $request->validate([
             'employee_id' => 'required|exists:employees,id',
-            'date' => 'nullable|date',
+            'date' => 'nullable|date|date_format:Y-m-d',
         ]);
         $date = $request->date ?: today()->format('Y-m-d');
         $shift = Shift::where('employee_id', $request->employee_id)->whereDate('shift_date', $date)->first();
@@ -1003,7 +1003,7 @@ class HRController_backup extends Controller
     {
         $request->validate([
             'employee_id' => 'required|exists:employees,id',
-            'date' => 'nullable|date',
+            'date' => 'nullable|date|date_format:Y-m-d',
         ]);
         $date = $request->date ?: today()->format('Y-m-d');
 

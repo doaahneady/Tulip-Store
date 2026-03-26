@@ -14,8 +14,16 @@
             <input name="name" value="{{ old('name', optional($driver->user)->name) }}" class="w-full mt-1 border rounded-xl px-4 py-2" required>
         </div>
         <div>
-            <label class="text-sm text-gray-600">البريد</label>
-            <input type="email" name="email" value="{{ old('email', optional($driver->user)->email) }}" class="w-full mt-1 border rounded-xl px-4 py-2" required>
+            <label class="text-sm text-gray-600">اليوزر الخاص</label>
+            <input
+                type="text"
+                name="username"
+                value="{{ old('username', optional($driver->user)->username) }}"
+                class="w-full mt-1 border rounded-xl px-4 py-2"
+                pattern="[A-Za-z0-9._-]+"
+                title="يسمح فقط بالأحرف الإنجليزية والأرقام و . _ -"
+                required
+            >
         </div>
         <div>
             <label class="text-sm text-gray-600">الهاتف</label>

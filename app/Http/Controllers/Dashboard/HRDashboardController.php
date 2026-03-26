@@ -293,7 +293,7 @@ class HRDashboardController extends Controller
     {
         $validated = $request->validate([
             'employee_id' => 'required|exists:employees,id',
-            'date' => 'required|date',
+            'date' => 'required|date|date_format:Y-m-d',
             'check_in' => 'nullable',
             'check_out' => 'nullable',
             'status' => 'required|in:present,absent,late,leave',

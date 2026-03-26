@@ -108,7 +108,7 @@ class VendorController extends Controller
                     $q->where('status', 'active');
                 })
                 ->count(),
-            'low_stock_products' => Product::where('store_id', $store->id)
+            'low_stock_products_count' => Product::where('store_id', $store->id)
                 ->when(Schema::hasColumn('products', 'stock_quantity') && Schema::hasColumn('products', 'low_stock_threshold'), function ($q) {
                     $q->whereRaw('stock_quantity <= low_stock_threshold');
                 }, function ($q) {
@@ -117,6 +117,17 @@ class VendorController extends Controller
                     }
                 })
                 ->count(),
+            'low_stock_products_list' => Product::where('store_id', $store->id)
+                ->when(Schema::hasColumn('products', 'stock_quantity') && Schema::hasColumn('products', 'low_stock_threshold'), function ($q) {
+                    $q->whereRaw('stock_quantity <= low_stock_threshold');
+                }, function ($q) {
+                    if (Schema::hasColumn('products', 'stock') && Schema::hasColumn('products', 'low_stock_threshold')) {
+                        $q->whereRaw('stock <= low_stock_threshold');
+                    }
+                })
+                ->orderBy('stock_quantity', 'asc')
+                ->take(5)
+                ->get(),
             'out_of_stock_products' => Product::where('store_id', $store->id)
                 ->when(Schema::hasColumn('products', 'stock_quantity'), function ($q) {
                     $q->where('stock_quantity', 0);
@@ -616,6 +627,34 @@ class VendorController extends Controller
 
         return redirect()->route('dashboard.vendor.products')
             ->with('success', 'Product deleted successfully!');
+    }
+
+    public function restock(Request $request, Product $product)
+    {
+        $store = $this->getUserStore();
+
+        if ($product->store_id !== $store->id) {
+            abort(403, 'Unauthorized access to product');
+        }
+
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        DB::transaction(function () use ($product, $request) {
+            $product->increment('stock_quantity', $request->quantity);
+            
+            InventoryMovement::recordMovement(
+                $product,
+                'in',
+                $request->quantity,
+                'Manual Restock (Vendor)',
+                null,
+                'Restocked from vendor dashboard'
+            );
+        });
+
+        return redirect()->back()->with('success', 'Stock updated successfully.');
     }
 
     public function updateStock(Request $request, Product $product)
@@ -1402,6 +1441,11 @@ class VendorController extends Controller
     public function getProductPerformanceMetrics(Request $request)
     {
         $store = $this->getUserStore();
+        
+        $request->validate([
+            'date_from' => 'nullable|date|date_format:Y-m-d',
+            'date_to' => 'nullable|date|date_format:Y-m-d',
+        ]);
 
         $metrics = \App\Models\ProductPerformanceMetric::whereHas('product', function ($q) use ($store) {
             $q->where('store_id', $store->id);
@@ -1426,7 +1470,7 @@ class VendorController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'metric_date' => 'required|date',
+            'metric_date' => 'required|date|date_format:Y-m-d',
             'views' => 'nullable|integer|min:0',
             'cart_additions' => 'nullable|integer|min:0',
             'purchases' => 'nullable|integer|min:0',

@@ -1347,12 +1347,17 @@ Route::get('/create-test-orders', function () {
 Route::get('/driver/tracking', [\App\Http\Controllers\DriverTrackingController::class, 'index'])->name('driver.tracking');
 
 Route::prefix('trader')->name('trader.')->group(function () {
-    Route::middleware('guest:trader')->group(function () {
-        Route::get('/login', [\App\Http\Controllers\Auth\TraderAuthController::class, 'showLoginForm'])->name('login.form');
-        Route::post('/login', [\App\Http\Controllers\Auth\TraderAuthController::class, 'login'])->name('login');
-        Route::get('/register', [\App\Http\Controllers\Auth\TraderAuthController::class, 'showRegisterForm'])->name('register.form');
-        Route::post('/register', [\App\Http\Controllers\Auth\TraderAuthController::class, 'register'])->name('register');
-    });
+        Route::middleware('guest:trader')->group(function () {
+            Route::get('/login', [\App\Http\Controllers\Auth\TraderAuthController::class, 'showLoginForm'])->name('login.form');
+            Route::post('/login', [\App\Http\Controllers\Auth\TraderAuthController::class, 'login'])->name('login');
+            Route::get('/register', [\App\Http\Controllers\Auth\TraderAuthController::class, 'showRegisterForm'])->name('register.form');
+            Route::post('/register', [\App\Http\Controllers\Auth\TraderAuthController::class, 'register'])->name('register');
+            
+            // Trader registration verification routes
+            Route::post('/check-email', [\App\Http\Controllers\Auth\TraderAuthController::class, 'checkEmailAvailability'])->name('check-email');
+            Route::post('/send-otp', [\App\Http\Controllers\Auth\TraderAuthController::class, 'sendOtp'])->name('send-otp');
+            Route::post('/verify-otp', [\App\Http\Controllers\Auth\TraderAuthController::class, 'verifyOtp'])->name('verify-otp');
+        });
     Route::middleware(['auth:trader', 'role:store_owner'])->group(function () {
         Route::post('/logout', [\App\Http\Controllers\Auth\TraderAuthController::class, 'logout'])->name('logout');
         Route::get('/dashboard', [\App\Http\Controllers\Trader\TraderDashboardController::class, 'index'])->name('dashboard');
@@ -1380,6 +1385,7 @@ Route::prefix('dashboard/vendor')->name('dashboard.vendor.')->middleware(['web',
     Route::put('/products/{product}', [\App\Http\Controllers\Dashboard\VendorController::class, 'updateProduct'])->name('products.update');
     Route::delete('/products/{product}', [\App\Http\Controllers\Dashboard\VendorController::class, 'deleteProduct'])->name('products.delete');
     Route::post('/stock/{product}', [\App\Http\Controllers\Dashboard\VendorController::class, 'updateStock'])->name('stock.update');
+    Route::post('/restock/{product}', [\App\Http\Controllers\Dashboard\VendorController::class, 'restock'])->name('restock');
     Route::get('/purchase-orders', [\App\Http\Controllers\Dashboard\VendorController::class, 'purchaseOrders'])->name('purchase-orders');
     Route::post('/purchase-orders', [\App\Http\Controllers\Dashboard\VendorController::class, 'createPurchaseOrder'])->name('purchase-orders.create');
     Route::post('/purchase-orders/{purchaseOrder}/receive', [\App\Http\Controllers\Dashboard\VendorController::class, 'receivePurchaseOrder'])->name('purchase-orders.receive');

@@ -12,7 +12,8 @@ class InventoryController extends Controller
 {
     public function alerts()
     {
-        $lowStockProducts = Product::whereColumn('stock_quantity', '<=', 'low_stock_threshold')
+        $lowStockProducts = Product::with(['store', 'trader'])
+            ->whereColumn('stock_quantity', '<=', 'low_stock_threshold')
             ->orderBy('stock_quantity', 'asc')
             ->get();
 

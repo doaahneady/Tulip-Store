@@ -39,12 +39,14 @@
                 <td>{{ number_format((int)($p->stock_quantity ?? 0)) }}</td>
                 <td><span class="badge {{ $badgeClass }}">{{ $status }}</span></td>
                 <td style="text-align:left;white-space:nowrap">
-                    <a class="btn gray" style="padding:.45rem .8rem;border-radius:999px" href="{{ route('trader.products.edit', $p) }}"><i class="fas fa-pen"></i> تعديل</a>
+                    <a class="btn gray" style="padding:.45rem .8rem;border-radius:999px"
+                     href="{{ route('trader.products.edit', $p) }}"><i class="fas fa-pen"></i> تعديل</a>
                     @if($canEdit)
                         <form method="POST" action="{{ route('trader.products.destroy', $p) }}" style="display:inline">
                             @csrf
                             @method('DELETE')
-                            <button class="btn danger" style="padding:.45rem .8rem;border-radius:999px" onclick="return confirm('حذف المنتج؟');"><i class="fas fa-trash"></i> حذف</button>
+                            <button class="btn danger" style="padding:.45rem .8rem;border-radius:999px"
+                             onclick="return confirm('حذف المنتج؟');"><i class="fas fa-trash"></i> حذف</button>
                         </form>
                     @endif
                 </td>

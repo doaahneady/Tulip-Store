@@ -614,7 +614,7 @@ class FinanceController extends Controller
         }
 
         request()->validate([
-            'paid_date' => 'required|date',
+            'paid_date' => 'required|date|date_format:Y-m-d',
             'signed_name' => 'nullable|string|max:255',
             'signature_data' => 'nullable|string',
         ]);
@@ -850,6 +850,12 @@ class FinanceController extends Controller
 
         $dateFrom = $request->get('date_from') ?: now()->subDays(30)->toDateString();
         $dateTo = $request->get('date_to') ?: now()->toDateString();
+        
+        $request->validate([
+            'date_from' => 'nullable|date|date_format:Y-m-d',
+            'date_to' => 'nullable|date|date_format:Y-m-d',
+        ]);
+
         $start = \Carbon\Carbon::parse($dateFrom)->startOfDay();
         $end = \Carbon\Carbon::parse($dateTo)->endOfDay();
 
@@ -1959,8 +1965,17 @@ class FinanceController extends Controller
      */
     public function driverDeliveries(Request $request)
     {
+        $validatedFilters = $request->validate([
+            'driver_name' => 'nullable|string|max:255',
+            'date_from' => ['nullable', 'date_format:Y-m-d', 'regex:/^\d{4}-\d{2}-\d{2}$/'],
+            'date_to' => ['nullable', 'date_format:Y-m-d', 'regex:/^\d{4}-\d{2}-\d{2}$/'],
+        ]);
+
         $driverUserIdFilter = $request->query('driver_id');
         $driverUserIdFilter = is_numeric($driverUserIdFilter) ? (int) $driverUserIdFilter : null;
+        $historyDriverNameFilter = trim((string) ($validatedFilters['driver_name'] ?? ''));
+        $historyDateFrom = $validatedFilters['date_from'] ?? null;
+        $historyDateTo = $validatedFilters['date_to'] ?? null;
 
         $pendingOrdersQuery = Order::query()
             ->where('status', 'delivered')
@@ -2035,6 +2050,43 @@ class FinanceController extends Controller
             $historyOrdersQuery->where('assigned_driver_id', $driverUserIdFilter);
         }
 
+        if ($historyDriverNameFilter !== '') {
+            $matchingDriverUserIds = Driver::query()
+                ->whereHas('user', function ($q) use ($historyDriverNameFilter) {
+                    $q->where('name', 'like', "%{$historyDriverNameFilter}%")
+                        ->orWhere('username', 'like', "%{$historyDriverNameFilter}%");
+                })
+                ->pluck('user_id')
+                ->filter()
+                ->values();
+
+            if ($matchingDriverUserIds->isEmpty()) {
+                $historyOrdersQuery->whereRaw('1 = 0');
+            } else {
+                $historyOrdersQuery->whereIn('assigned_driver_id', $matchingDriverUserIds);
+            }
+        }
+
+        if ($historyDateFrom) {
+            $historyOrdersQuery->where(function ($q) use ($historyDateFrom) {
+                $q->whereDate('completed_at', '>=', $historyDateFrom)
+                    ->orWhere(function ($qq) use ($historyDateFrom) {
+                        $qq->whereNull('completed_at')
+                            ->whereDate('updated_at', '>=', $historyDateFrom);
+                    });
+            });
+        }
+
+        if ($historyDateTo) {
+            $historyOrdersQuery->where(function ($q) use ($historyDateTo) {
+                $q->whereDate('completed_at', '<=', $historyDateTo)
+                    ->orWhere(function ($qq) use ($historyDateTo) {
+                        $qq->whereNull('completed_at')
+                            ->whereDate('updated_at', '<=', $historyDateTo);
+                    });
+            });
+        }
+
         $historyOrders = $historyOrdersQuery->limit(100)->get();
 
         $historyDriverIds = $historyOrders->pluck('assigned_driver_id')->unique()->values();
@@ -2064,7 +2116,14 @@ class FinanceController extends Controller
             return $o;
         });
 
-        return view('dashboards.finance.driver-deliveries', compact('pendingDrivers', 'historyOrders', 'driverUserIdFilter'));
+        return view('dashboards.finance.driver-deliveries', compact(
+            'pendingDrivers',
+            'historyOrders',
+            'driverUserIdFilter',
+            'historyDriverNameFilter',
+            'historyDateFrom',
+            'historyDateTo'
+        ));
     }
 
     /**

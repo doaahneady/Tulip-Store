@@ -212,7 +212,7 @@
         <div class="invoice-header">
             <div style="display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap;">
                 @if($logoGirlData)
-                    <h1 style="margin:0; color:#2a7080; font-size:28px; display:flex; align-items:center; gap:3px;">
+                    <h1 style="margin:0; color:#2a7080; font-size:28px; display:flex; align-items:center; gap:3px;font-family:'Montserrat-Alt1 SemBd';">
                         <span>T</span><img src="{{ $logoGirlData }}" alt="" style="height:1.2em; width:auto; vertical-align:middle; display:inline-block;"><span>lip</span>
                     </h1>
                 @elseif($invoiceLogoData)
@@ -222,7 +222,7 @@
                 @endif
             </div>
             <div class="invoice-number">فاتورة رقم: {{ $order->order_number }}</div>
-            <div class="invoice-date">التاريخ: {{ $order->created_at->format('Y/m/d - h:i A') }}</div>
+            <div class="invoice-date"  min="1000-01-01" max="9999-12-31" oninput="if(this.value.length > 10) this.value=this.value.slice(0,10)">التاريخ: {{ $order->created_at->format('Y/m/d - h:i A') }}</div>
         </div>
 
         <div class="info-section">

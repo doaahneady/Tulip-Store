@@ -144,8 +144,9 @@ class OrderController extends Controller
             }
             $total = $subtotal + $deliveryCost;
 
-            // Determine payment status based on payment method
-            $paymentStatus = $validated['payment_method'] === 'cash' ? 'pending' : 'pending'; // Default to pending for safety
+            // Card-like methods are paid immediately; cash remains pending until delivery collection.
+            $isCashPayment = $validated['payment_method'] === 'cash';
+            $paymentStatus = $isCashPayment ? 'pending' : 'paid';
 
             // Calculate estimated delivery time
             $deliveryDays = [
@@ -275,7 +276,7 @@ class OrderController extends Controller
                 'user_id' => Auth::id(),
                 'order_id' => $order->id,
                 'type' => 'order_payment',
-                'status' => 'pending', // Pending until delivered/paid
+                'status' => $isCashPayment ? 'pending' : 'completed',
                 'amount' => $total,
                 'currency' => 'SYP', // Assuming default currency
                 'description' => "Order Payment #{$order->order_number}",

@@ -8,7 +8,7 @@ echo '<!DOCTYPE html>
    <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
 
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
+        body { font-family: "El Messiri", sans-serif; margin: 40px; }
         .success { color: green; }
         .error { color: red; }
         .card { border: 1px solid #ddd; padding: 20px; margin: 10px 0; border-radius: 5px; }

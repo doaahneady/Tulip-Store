@@ -17,6 +17,8 @@ use App\Services\StatusTransitionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use App\Mail\TraderWelcomeMail;
+use Illuminate\Support\Facades\Mail;
 
 class SupportDashboardController extends Controller
 {
@@ -62,11 +64,26 @@ class SupportDashboardController extends Controller
         ));
     }
 
+    /**
+     * Approves a trader and sends a welcome email.
+     */
     public function approveTrader(Trader $trader)
     {
         $trader->update(['status' => Trader::STATUS_APPROVED]);
 
-        return back()->with('success', 'تمت الموافقة على حساب التاجر');
+        // Send welcome email to trader
+        try {
+            if ($trader->contact_email) {
+                Mail::to($trader->contact_email)->send(new TraderWelcomeMail($trader->name));
+            } elseif ($trader->user && $trader->user->email) {
+                Mail::to($trader->user->email)->send(new TraderWelcomeMail($trader->name));
+            }
+        } catch (\Exception $e) {
+            // Log error but don't stop the approval process
+            \Log::error('Failed to send trader welcome email: ' . $e->getMessage());
+        }
+
+        return back()->with('success', 'تمت الموافقة على حساب التاجر وإرسال بريد الترحيب');
     }
 
     public function rejectTrader(Request $request, Trader $trader)

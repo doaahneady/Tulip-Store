@@ -17,14 +17,14 @@
         </a>
     </div>
     <form method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input type="text" name="search" value="{{ request('search') }}" class="border rounded-xl px-4 py-2" placeholder="بحث بالاسم أو البريد">
-        <select name="status" class="border rounded-xl px-4 py-2">
+        <input type="text" name="search" value="{{ request('search') }}" class="border rounded-xl px-4 py-2" placeholder="بحث بالاسم أو اليوزر">
+        <select name="status" class="text-black rounded-xl px-4 py-2">
             <option value="">الحالة</option>
             <option value="active" @selected(request('status')==='active')>نشط</option>
             <option value="inactive" @selected(request('status')==='inactive')>غير نشط</option>
             <option value="suspended" @selected(request('status')==='suspended')>موقوف</option>
         </select>
-        <select name="availability" class="border rounded-xl px-4 py-2">
+        <select name="availability" class="text-black rounded-xl px-4 py-2">
             <option value="">التوفر</option>
             <option value="available" @selected(request('availability')==='available')>متاح</option>
             <option value="busy" @selected(request('availability')==='busy')>مشغول</option>
@@ -43,7 +43,7 @@
             <thead>
             <tr>
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">السائق</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">البريد</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">اليوزر</th>
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">الهاتف</th>
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">الحالة</th>
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">التوفر</th>
@@ -54,19 +54,19 @@
             @foreach($drivers as $driver)
                 <tr>
                     <td class="px-4 py-3 text-sm text-gray-900">{{ optional($driver->user)->name ?? optional($driver->user)->user_full_name ?? optional($driver->user)->email ?? ('Driver #'.$driver->id) }}</td>
-                    <td class="px-4 py-3 text-sm text-gray-500">{{ optional($driver->user)->email ?? '—' }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-500">{{ optional($driver->user)->username ?? '—' }}</td>
                     <td class="px-4 py-3 text-sm text-gray-500">{{ optional($driver->user)->phone ?? optional($driver->user)->mobile ?? '—' }}</td>
                     <td class="px-4 py-3">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                            @if($driver->status==='active') bg-green-100 text-green-800
-                            @elseif($driver->status==='inactive') bg-gray-100 text-gray-800
+                            @if($driver->status==='active') bg-gray-100 text-black-800
+                            @elseif($driver->status==='inactive') bg-gray-100 text-black-800
                             @else bg-red-100 text-red-800 @endif">
                             {{ $driver->status }}
                         </span>
                     </td>
                     <td class="px-4 py-3">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                            @if($driver->availability==='available') bg-green-100 text-green-800
+                            @if($driver->availability==='available') bg-gray-100 text-black-800
                             @elseif($driver->availability==='busy') bg-blue-100 text-blue-800
                             @elseif($driver->availability==='on_break') bg-yellow-100 text-yellow-800
                             @else bg-gray-100 text-gray-800 @endif">

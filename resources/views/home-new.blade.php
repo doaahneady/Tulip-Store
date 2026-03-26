@@ -343,15 +343,14 @@
 
 <!-- CATEGORIES - SMALLER, ICON-BASED, BLUE LINE, SMALLER BUTTONS -->
 <section id="categories" style="padding:2rem 1.5rem; background:#fff;">
-    <div style="max-width:1400px; margin:0 auto; position:relative;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
-            <h2 style="font-family:'El Messiri',sans-serif; font-size:1.6rem; font-weight:800; color:#1a1a1a; margin:0;">
-                 تسوق حسب الفئة
-            </h2>
-            <a href="/categories" style="color:#2a7080; font-size:1rem; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:0.5rem; transition:all 0.3s;" onmouseover="this.style.gap='0.8rem'" onmouseout="this.style.gap='0.5rem'">
-                عرض الكل <i class="fas fa-arrow-left"></i>
-            </a>
-        </div>
+<div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+    <h2 style="font-family:'El Messiri',sans-serif; font-size:1.6rem; font-weight:800; color:#1a1a1a; margin:0;">
+        تسوق حسب الفئة
+    </h2>
+    <a href="/categories" style="color:#2a7080; font-size:1rem; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:0.5rem; transition:all 0.3s;" onmouseover="this.style.gap='0.8rem'" onmouseout="this.style.gap='0.5rem'">
+        عرض الكل <i class="fas fa-arrow-left"></i>
+    </a>
+</div>
         
         <div class="marquee-container">
             <div class="marquee-track">

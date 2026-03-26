@@ -279,7 +279,7 @@ class DriverSupervisorController extends Controller
             ->when($request->search, function ($query, $search) {
                 $query->whereHas('user', function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('username', 'like', "%{$search}%");
                 });
             })
             ->when($request->status, function ($query, $status) {
@@ -455,12 +455,11 @@ class DriverSupervisorController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => [
+            'username' => [
                 'required',
-                'email',
                 'max:255',
-                Rule::unique('users', 'email'),
-                Rule::unique('employees', 'email'),
+                'regex:/^[A-Za-z0-9._-]+$/',
+                Rule::unique('users', 'username'),
             ],
             'phone' => 'nullable|string|max:50',
             'password' => 'required|string|min:8|max:255',
@@ -474,20 +473,20 @@ class DriverSupervisorController extends Controller
 
         try {
             return DB::transaction(function () use ($validated) {
-                $base = Str::slug(Str::before($validated['email'], '@'), '_');
-                $base = $base !== '' ? $base : 'user';
-                $username = $base;
-                if (Schema::hasColumn('users', 'username')) {
-                    $i = 0;
-                    while (User::where('username', $username)->exists() && $i < 50) {
-                        $username = $base.'_'.random_int(1000, 9999);
-                        $i++;
-                    }
+                $username = trim((string) $validated['username']);
+                $driverEmail = Str::lower($username).'@drivers.local';
+                $i = 0;
+                while (
+                    (User::where('email', $driverEmail)->exists() || Employee::where('email', $driverEmail)->exists())
+                    && $i < 100
+                ) {
+                    $i++;
+                    $driverEmail = Str::lower($username).'+'.$i.'@drivers.local';
                 }
 
                 $userData = [
                     'name' => $validated['name'],
-                    'email' => $validated['email'],
+                    'email' => $driverEmail,
                     'phone' => $validated['phone'] ?? null,
                     'password' => Hash::make($validated['password']),
                     'verified' => true,
@@ -530,13 +529,13 @@ class DriverSupervisorController extends Controller
 
     public function updateDriver(Request $request, Driver $driver)
     {
-        $emailRule = $driver->user_id
-            ? 'required|email|max:255|unique:users,email,'.$driver->user_id
-            : 'required|email|max:255|unique:users,email';
+        $usernameRule = $driver->user_id
+            ? 'required|max:255|regex:/^[A-Za-z0-9._-]+$/|unique:users,username,'.$driver->user_id
+            : 'required|max:255|regex:/^[A-Za-z0-9._-]+$/|unique:users,username';
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => $emailRule,
+            'username' => $usernameRule,
             'phone' => 'nullable|string|max:50',
             'password' => 'nullable|string|min:8|max:255',
             'license_number' => 'required|string|max:255|unique:drivers,license_number,'.$driver->id,
@@ -554,11 +553,26 @@ class DriverSupervisorController extends Controller
             }
 
             if ($user) {
+                $driverEmail = Str::lower(trim((string) $validated['username'])).'@drivers.local';
+                $i = 0;
+                while (
+                    (
+                        User::where('email', $driverEmail)->where('id', '!=', $user->id)->exists() ||
+                        Employee::where('email', $driverEmail)->exists()
+                    ) && $i < 100
+                ) {
+                    $i++;
+                    $driverEmail = Str::lower(trim((string) $validated['username'])).'+'.$i.'@drivers.local';
+                }
+
                 $userUpdates = [
                     'name' => $validated['name'],
-                    'email' => $validated['email'],
+                    'email' => $driverEmail,
                     'phone' => $validated['phone'] ?? null,
                 ];
+                if (Schema::hasColumn('users', 'username')) {
+                    $userUpdates['username'] = trim((string) $validated['username']);
+                }
                 if (! empty($validated['password'])) {
                     $userUpdates['password'] = Hash::make($validated['password']);
                 }
@@ -627,7 +641,7 @@ class DriverSupervisorController extends Controller
         $data = [
             'first_name' => $first,
             'last_name' => $last,
-            'email' => $validated['email'],
+            'email' => Str::lower(trim((string) ($validated['username'] ?? 'driver_'.$user->id))).'@drivers.local',
             'phone' => $validated['phone'] ?? null,
             'status' => 'active',
         ];
@@ -689,7 +703,7 @@ class DriverSupervisorController extends Controller
         $updates = [
             'first_name' => $first,
             'last_name' => $last,
-            'email' => $validated['email'],
+            'email' => Str::lower(trim((string) ($validated['username'] ?? 'driver_'.$user->id))).'@drivers.local',
             'phone' => $validated['phone'] ?? null,
         ];
         if (! empty($validated['password'])) {
@@ -1421,7 +1435,7 @@ class DriverSupervisorController extends Controller
     {
         $request->validate([
             'zone_name' => 'required|string',
-            'analytics_date' => 'required|date',
+            'analytics_date' => 'required|date|date_format:Y-m-d',
         ]);
 
         // Calculate analytics for the zone on that date

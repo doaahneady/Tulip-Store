@@ -61,9 +61,9 @@
             background: var(--card-gradient);
             z-index: 2;
         }
-        .premium-card.box-card { --card-gradient: linear-gradient(90deg, #c9956c, #daa87e, #e8c4a8); --card-color: #c9956c; }
-        .premium-card.flower-card { --card-gradient: linear-gradient(90deg, #e91e63, #f48fb1, #fce4ec); --card-color: #e91e63; }
-        .premium-card.ready-card { --card-gradient: linear-gradient(90deg, #1a5a5a, #3d9a8a, #7dd3c0); --card-color: #1a5a5a; }
+        .premium-card.box-card { --card-gradient: linear-gradient(90deg, #c9956c, #daa87e); --card-color: #c9956c; }
+        .premium-card.flower-card { --card-gradient: linear-gradient(90deg, #e91e63, #f48fb1); --card-color: #e91e63; }
+        .premium-card.ready-card { --card-gradient: linear-gradient(90deg, #1a5a5a, #3d9a8a); --card-color: #1a5a5a; }
 
         .card-visual {
             height: 220px;
@@ -547,6 +547,7 @@
                                 ${badgeText ? `<span class="gift-badge ${badgeClass}">${badgeText}</span>` : ''}
                                 <img src="${image}" alt="${gift.name || ''}" loading="lazy" onerror="this.src='/images/tulip_gift.jpg'">
                             </div>
+                            
                             <div class="gift-info">
                                 <h3 class="gift-name">${gift.name || ''}</h3>
                                 <div class="gift-rating">

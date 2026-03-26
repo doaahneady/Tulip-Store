@@ -502,7 +502,7 @@
         
         .popup-info {
             font-size: 0.9rem;
-            color: #64748b;
+            color: #1e293b;
             line-height: 1.6;
         }
         
