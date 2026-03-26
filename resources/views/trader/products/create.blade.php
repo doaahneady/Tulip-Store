@@ -79,7 +79,8 @@
                 <div style="font-weight:900">Custom Attributes</div>
                 <button type="button" class="btn gray" data-action="add"><i class="fas fa-plus"></i> إضافة</button>
             </div>
-            <div style="color:#6b7280; font-size:.9rem; margin-bottom:.75rem">يدعم: dropdown, textbox, multi-line, number, date, checkbox group, radio group, file upload</div>
+            <div style="color:#6b7280; font-size:.9rem; margin-bottom:.75rem"
+            >يدعم: dropdown, textbox, multi-line, number, date, checkbox group, radio group, file upload</div>
             <div style="display:grid; grid-template-columns:1.2fr 0.8fr; gap:1rem;" id="attrBuilder">
                 <div>
                     <div style="font-weight:800; margin-bottom:.5rem;">Builder</div>

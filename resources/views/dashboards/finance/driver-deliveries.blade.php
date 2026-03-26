@@ -28,6 +28,11 @@
         {{ session('error') }}
     </div>
 @endif
+@if($errors->any())
+    <div class="mb-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-800 px-4 py-3 text-sm">
+        {{ $errors->first() }}
+    </div>
+@endif
 
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
     <div class="flex items-center justify-between gap-3 flex-wrap">
@@ -134,6 +139,49 @@
             {{ $historyOrders->count() }} سجل
         </div>
     </div>
+
+    <form method="GET" action="{{ route('dashboard.finance.driver-deliveries.index') }}" class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-3">
+        @if($driverUserIdFilter !== null)
+            <input type="hidden" name="driver_id" value="{{ $driverUserIdFilter }}">
+        @endif
+
+        <input
+            type="text"
+            name="driver_name"
+            value="{{ old('driver_name', $historyDriverNameFilter ?? '') }}"
+            class="border rounded-xl px-4 py-2"
+            placeholder="اسم السائق أو اليوزر"
+        >
+
+        <input
+            type="text"
+            name="date_from"
+            value="{{ old('date_from', $historyDateFrom ?? '') }}"
+            class="border rounded-xl px-4 py-2"
+            placeholder="من تاريخ (YYYY-MM-DD)"
+            inputmode="numeric"
+            maxlength="10"
+            pattern="\d{4}-\d{2}-\d{2}"
+            oninput="this.value=this.value.replace(/[^0-9-]/g,'').slice(0,10)"
+        >
+
+        <input
+            type="text"
+            name="date_to"
+            value="{{ old('date_to', $historyDateTo ?? '') }}"
+            class="border rounded-xl px-4 py-2"
+            placeholder="إلى تاريخ (YYYY-MM-DD)"
+            inputmode="numeric"
+            maxlength="10"
+            pattern="\d{4}-\d{2}-\d{2}"
+            oninput="this.value=this.value.replace(/[^0-9-]/g,'').slice(0,10)"
+        >
+
+        <div class="flex items-center gap-2">
+            <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 text-white">تصفية</button>
+            <a href="{{ route('dashboard.finance.driver-deliveries.index', $driverUserIdFilter ? ['driver_id' => $driverUserIdFilter] : []) }}" class="px-4 py-2 rounded-xl border border-gray-200 text-gray-700">إعادة ضبط</a>
+        </div>
+    </form>
 
     <div class="overflow-x-auto mt-5">
         <table class="w-full text-sm">

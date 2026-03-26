@@ -174,7 +174,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-500 text-xs">قريبة النفاد</p>
-                <h3 class="text-2xl font-black text-gray-800 mt-1">{{ number_format($metrics['low_stock_products'] ?? 0) }}</h3>
+                <h3 class="text-2xl font-black text-gray-800 mt-1">{{ number_format($metrics['low_stock_products_count'] ?? 0) }}</h3>
             </div>
             <div class="w-10 h-10 bg-red-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-exclamation-triangle text-red-600 text-base"></i>
@@ -194,6 +194,63 @@
     </div>
 </div>
 </x-dashboard.collapsible>
+
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
+    <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-bold text-gray-800">تنبيهات نقص المخزون</h3>
+        <a href="{{ route('dashboard.vendor.products', ['stock_status' => 'low']) }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 transition">عرض الكل <i class="fas fa-chevron-left mr-1 text-[10px]"></i></a>
+    </div>
+    
+    <div class="overflow-x-auto -mx-6 px-6">
+        <table class="w-full text-sm border-separate border-spacing-y-3">
+            <thead>
+                <tr class="text-gray-500 uppercase tracking-wider text-xs font-semibold">
+                    <th class="text-right pb-2">المنتج</th>
+                    <th class="text-center pb-2">المخزون الحالي</th>
+                    <th class="text-center pb-2">حد التنبيه</th>
+                    <th class="text-left pb-2">توريد سريع</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse(($metrics['low_stock_products_list'] ?? []) as $p)
+                    <tr class="bg-gray-50/50 hover:bg-gray-100 transition-colors rounded-xl overflow-hidden group">
+                        <td class="py-4 px-4 rounded-r-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-white shadow-sm border border-gray-100 overflow-hidden flex-shrink-0">
+                                    <img src="{{ $p->primary_image_url }}" class="w-full h-full object-cover" alt="">
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="font-bold text-gray-900 truncate">{{ $p->name }}</div>
+                                    <div class="text-[10px] text-gray-400 font-medium truncate uppercase tracking-tighter">{{ $p->sku }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4 px-4 text-center">
+                            <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-red-50 text-red-600 border border-red-100">
+                                {{ (int) $p->stock_quantity }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4 text-center text-gray-500 font-medium">{{ (int) $p->low_stock_threshold }}</td>
+                        <td class="py-4 px-4 rounded-l-xl">
+                            <form action="{{ route('dashboard.vendor.restock', $p->id) }}" method="POST" class="flex items-center justify-end gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                                @csrf
+                                <input type="number" name="quantity" value="1" min="1" class="w-16 h-8 px-2 text-center rounded-lg border border-gray-200 text-xs focus:ring-2 focus:ring-emerald-200 outline-none">
+                                <button type="submit" class="h-8 px-3 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition shadow-sm whitespace-nowrap">توريد</button>
+                            </form>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="py-8 text-center text-gray-400 italic">
+                            <i class="fas fa-check-circle text-emerald-500 mb-2"></i>
+                            <p>لا توجد منتجات تحت حد التنبيه حالياً</p>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
 
 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
     <div class="flex items-center justify-between mb-4">

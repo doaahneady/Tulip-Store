@@ -43,7 +43,7 @@ class HRPayrollController extends Controller
     {
         $validated = $request->validate([
             'employee_id' => 'required|exists:employees,id',
-            'month' => 'required|date',
+            'month' => 'required|date|date_format:Y-m-d',
             'basic_salary' => 'required|numeric|min:0',
             'allowances' => 'nullable|numeric|min:0',
             'bonuses' => 'nullable|numeric|min:0',

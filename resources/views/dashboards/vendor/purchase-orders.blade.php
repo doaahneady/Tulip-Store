@@ -4,11 +4,11 @@
 <div class="bg-white rounded-xl shadow border border-gray-100">
     <div class="p-6 flex items-center justify-between border-b border-gray-100">
         <div>
-            <h3 class="text-lg font-semibold text-gray-800">Purchase Orders</h3>
-            <p class="text-sm text-gray-500">Create and track restocking orders</p>
+            <h3 class="text-lg font-semibold text-gray-800">طلبات الشراء</h3>
+            <p class="text-sm text-gray-500">إنشاء y تتبع طلبات إعادة المخزون</p>
         </div>
         <button type="button" onclick="document.getElementById('createPOModal').classList.remove('hidden')" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-            Create PO
+            إنشاء PO
         </button>
     </div>
 
@@ -27,25 +27,25 @@
         <form method="GET" action="{{ route('dashboard.vendor.purchase-orders') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div class="md:col-span-3">
                 <select name="status" class="border rounded-lg px-3 py-2 w-full">
-                    <option value="">All Status</option>
+                    <option value="">جميع الحالات</option>
                     @foreach($statusOptions as $st)
                         <option value="{{ $st }}" @selected(request('status') === $st)>{{ $st }}</option>
                     @endforeach
                 </select>
             </div>
-            <button class="px-4 py-2 bg-gray-800 text-white rounded-lg">Filter</button>
+            <button class="px-4 py-2 bg-gray-800 text-white rounded-lg">تصفية</button>
         </form>
 
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">PO</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Supplier</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expected</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">طلب الشراء</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">المورد</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">الحالة</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">تاريخ التسليم المتوقع</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">مجموع التكلفة</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">تاريخ الإنشاء</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -64,7 +64,8 @@
                                     {{ $po->status }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-gray-700">{{ optional($po->expected_delivery_date)->format('Y-m-d') ?: '-' }}</td>
+                            <td class="px-6 py-4 text-gray-700" min="1000-01-01" max="9999-12-31" oninput="if(this.value.length > 10) this.value=this.value.slice(0,10)"
+                            >{{ optional($po->expected_delivery_date)->format('Y-m-d') ?: '-' }}</td>
                             <td class="px-6 py-4 text-gray-700">{{ number_format((float) $po->total_cost, 2) }}</td>
                             <td class="px-6 py-4 text-gray-700">{{ optional($po->created_at)->format('Y-m-d') ?: '-' }}</td>
                         </tr>
@@ -89,7 +90,7 @@
                     @empty
                         <tr>
                             <td colspan="6" class="px-6 py-10 text-center text-gray-500">
-                                No purchase orders yet
+                                لا توجد طلبات شراء بعد
                             </td>
                         </tr>
                     @endforelse
@@ -106,51 +107,52 @@
 <div id="createPOModal" class="fixed inset-0 bg-black bg-opacity-40 z-50 hidden">
     <div class="bg-white rounded-xl shadow-xl w-full max-w-3xl mx-auto mt-16">
         <div class="p-4 border-b border-gray-100 flex items-center justify-between">
-            <h4 class="font-semibold text-gray-800">Create Purchase Order</h4>
+            <h4 class="font-semibold text-gray-800">إنشاء طلب شراء</h4>
             <button type="button" onclick="document.getElementById('createPOModal').classList.add('hidden')" class="text-gray-500 hover:text-gray-700">&times;</button>
         </div>
         <form action="{{ route('dashboard.vendor.purchase-orders.create') }}" method="POST">
             @csrf
             <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm text-gray-600 mb-1">Supplier Name</label>
+                    <label class="block text-sm text-gray-600 mb-1">اسم المورد</label>
                     <input type="text" name="supplier_name" value="{{ old('supplier_name') }}" class="border rounded-lg px-3 py-2 w-full">
                 </div>
                 <div>
-                    <label class="block text-sm text-gray-600 mb-1">Supplier Contact</label>
+                    <label class="block text-sm text-gray-600 mb-1">رقم الاتصال للمورد</label>
                     <input type="text" name="supplier_contact" value="{{ old('supplier_contact') }}" class="border rounded-lg px-3 py-2 w-full">
                 </div>
                 <div>
-                    <label class="block text-sm text-gray-600 mb-1">Expected Delivery Date</label>
+                    <label class="block text-sm text-gray-600 mb-1">تاريخ التسليم المتوقع</label>
                     <input type="date" name="expected_delivery_date" value="{{ old('expected_delivery_date') }}" class="border rounded-lg px-3 py-2 w-full">
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-sm text-gray-600 mb-1">Notes</label>
+                    <label class="block text-sm text-gray-600 mb-1">ملاحظات</label>
                     <textarea name="notes" class="border rounded-lg px-3 py-2 w-full" rows="2">{{ old('notes') }}</textarea>
                 </div>
 
                 <div class="md:col-span-2">
                     <div class="flex items-center justify-between mb-2">
-                        <div class="text-sm font-medium text-gray-700">Items</div>
-                        <button type="button" class="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200" onclick="addPOItemRow()">Add item</button>
+                        <div class="text-sm font-medium text-gray-700">عناصر الطلب</div>
+                        <button type="button" class="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200" onclick="addPOItemRow()">إضافة عنصر</button>
                     </div>
                     <div id="poItems" class="space-y-2">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                             <select name="items[0][product_id]" class="border rounded-lg px-3 py-2 w-full" required>
-                                <option value="">Select product</option>
+                                <option value="">اختر المنتج</option>
                                 @foreach($products as $p)
                                     <option value="{{ $p->id }}">{{ $p->name }}</option>
                                 @endforeach
                             </select>
                             <input type="number" name="items[0][quantity]" min="1" class="border rounded-lg px-3 py-2 w-full" placeholder="Quantity" required>
-                            <input type="number" step="0.01" name="items[0][unit_cost]" min="0" class="border rounded-lg px-3 py-2 w-full" placeholder="Unit cost" required>
+                            <input type="number" step="0.01" name="items[0][unit_cost]" min="0" class="border rounded-lg px-3 py-2 w-full"
+                             placeholder="Unit cost" required>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="p-4 border-t border-gray-100 flex items-center justify-end gap-2">
-                <button type="button" onclick="document.getElementById('createPOModal').classList.add('hidden')" class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
-                <button class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">Create</button>
+                <button type="button" onclick="document.getElementById('createPOModal').classList.add('hidden')" class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">إلغاء</button>
+                <button class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">إنشاء</button>
             </div>
         </form>
     </div>

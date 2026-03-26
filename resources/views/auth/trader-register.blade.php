@@ -20,7 +20,7 @@
         .header { padding: 2rem; background: linear-gradient(135deg, #4a148c 0%, #7b1fa2 100%); color: white; }
         .header h1 { font-family: 'El Messiri', sans-serif; font-size: 1.8rem; }
         .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1rem; }
-        .step { background: rgba(255,255,255,0.15); border-radius: 12px; padding: .75rem; display: flex; align-items: center; gap: .75rem; color: rgba(255,255,255,0.9); }
+        .step { background: rgba(255,255,255,0.15); border-radius: 12px; padding: .75rem; display: flex; align-items: center; gap: .75rem; color: rgba(255,255,255,0.9); font-size: 0.85rem; }
         .step.active { background: rgba(255,255,255,0.3); font-weight: 600; }
         .content { padding: 2rem; }
         .form-group { margin-bottom: 1rem; }
@@ -30,15 +30,16 @@
         .grid { display: grid; gap: 1rem; }
         .grid-2 { grid-template-columns: repeat(2, 1fr); }
         .actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
-        .btn { padding: .875rem 1.25rem; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; }
+        .btn { padding: .875rem 1.25rem; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
         .btn-primary { background: linear-gradient(135deg, #7b1fa2 0%, #9c27b0 100%); color: white; }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-outline { background: white; color: #7b1fa2; border: 2px solid #7b1fa2; }
         .nav { display: flex; gap: 1rem; margin-top: 1rem; }
         .notice { background: #efe; border: 1px solid #cfc; color: #060; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.9rem; display: none; }
         .error { background: #fee; border: 1px solid #fcc; color: #c00; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.9rem; display: none; }
-        .links { margin-top: 1rem; display: flex; gap: 1rem; }
-        .links a { color: #7b1fa2; text-decoration: none; }
-        .links a:hover { text-decoration: underline; }
+        .otp-box { display: flex; gap: 0.5rem; justify-content: center; margin: 1.5rem 0; direction: ltr; }
+        .otp-input { width: 45px; height: 55px; text-align: center; font-size: 1.5rem; font-weight: bold; border: 2px solid #e0e0e0; border-radius: 10px; background: #fafafa; }
+        .otp-input:focus { border-color: #7b1fa2; background: white; outline: none; }
         @media (max-width: 768px) { 
             .grid-2 { grid-template-columns: 1fr; } 
             .container { padding: 0; }
@@ -50,50 +51,53 @@
             .content { padding: 2rem 1.5rem; }
             .actions { flex-direction: column; gap: 1rem; }
             .actions > div { width: 100%; display: flex; flex-direction: column; gap: 0.75rem; }
-            .btn { width: 100%; display: flex; justify-content: center; align-items: center; }
+            .btn { width: 100%; }
             .nav { width: 100%; justify-content: center; }
         }
     </style>
     <script>
+        let isEmailAvailable = false;
+        let isOtpVerified = false;
+
         function showStep(step) {
             document.querySelectorAll('.step-pane').forEach(p => p.style.display = 'none');
             document.getElementById('step-' + step).style.display = 'block';
             document.querySelectorAll('.step').forEach((el, idx) => {
                 if ((idx + 1) === step) el.classList.add('active'); else el.classList.remove('active');
             });
-            document.getElementById('prevBtn').style.visibility = step === 1 ? 'hidden' : 'visible';
-            document.getElementById('nextBtn').style.display = step === 3 ? 'none' : 'inline-flex';
-            document.getElementById('submitBtn').style.display = step === 3 ? 'inline-flex' : 'none';
+            document.getElementById('prevBtn').style.visibility = (step === 1 || step === 4) ? 'hidden' : 'visible';
+            document.getElementById('nextBtn').style.display = (step === 3 || step === 4) ? 'none' : 'inline-flex';
+            document.getElementById('otpBtn').style.display = step === 3 ? 'inline-flex' : 'none';
+            document.getElementById('submitBtn').style.display = step === 4 ? 'inline-flex' : 'none';
         }
-        function validateCurrentStep() {
+
+        async function validateCurrentStep() {
             const current = parseInt(document.getElementById('currentStep').value);
             const pane = document.getElementById('step-' + current);
             const fields = pane.querySelectorAll('input[required], select[required], textarea[required]');
             let isValid = true;
             let errorMessage = '';
             
-            fields.forEach(field => {
-                // Reset border
-                field.style.borderColor = '#e0e0e0';
-                
+            // Clear previous errors
+            pane.querySelectorAll('.input, .file').forEach(f => f.style.borderColor = '#e0e0e0');
+
+            for (const field of fields) {
                 const value = field.value.trim();
                 
-                // Required check
                 if (!value) {
                     field.style.borderColor = '#ff4444';
                     isValid = false;
                     if (!errorMessage) errorMessage = 'يرجى ملء جميع الحقول المطلوبة';
                 } 
-                // Pattern check (Regex)
                 else if (field.hasAttribute('pattern')) {
-                    const regex = new RegExp(field.getAttribute('pattern'));
+                    const pattern = field.getAttribute('pattern');
+                    const regex = new RegExp(pattern);
                     if (!regex.test(value)) {
                         field.style.borderColor = '#ff4444';
                         isValid = false;
                         if (!errorMessage) errorMessage = field.getAttribute('title') || 'تنسيق الحقل غير صحيح';
                     }
                 }
-                // Minlength check
                 else if (field.hasAttribute('minlength')) {
                     const min = parseInt(field.getAttribute('minlength'));
                     if (value.length < min) {
@@ -102,53 +106,171 @@
                         if (!errorMessage) errorMessage = `يجب أن يكون طول الحقل ${min} محارف على الأقل`;
                     }
                 }
+            }
 
-                // Reset on input
-                if (!field.hasAttribute('data-has-reset-listener')) {
-                    field.addEventListener('input', function() {
-                        this.style.borderColor = '#e0e0e0';
-                    });
-                    field.setAttribute('data-has-reset-listener', 'true');
-                }
-            });
+            if (!isValid) {
+                showError(errorMessage);
+                return false;
+            }
 
-            // Password Match Check (Step 1)
-            if (current === 1 && isValid) {
+            if (current === 1) {
+                const emailField = pane.querySelector('input[name="email"]');
                 const pass = pane.querySelector('input[name="password"]');
                 const confirm = pane.querySelector('input[name="password_confirmation"]');
+                
+                // Password Strength
+                const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                if (!passRegex.test(pass.value)) {
+                    pass.style.borderColor = '#ff4444';
+                    showError('كلمة المرور يجب أن تحتوي على حرف كبير، حرف صغير، رقم، ورمز خاص');
+                    return false;
+                }
+                
                 if (pass.value !== confirm.value) {
                     confirm.style.borderColor = '#ff4444';
-                    isValid = false;
-                    errorMessage = 'كلمة المرور غير متطابقة';
+                    showError('كلمة المرور غير متطابقة');
+                    return false;
+                }
+
+                // Email check (Async)
+                try {
+                    const res = await fetch('{{ route('trader.check-email') }}', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ email: emailField.value })
+                    });
+                    const data = await res.json();
+                    if (!data.available) {
+                        emailField.style.borderColor = '#ff4444';
+                        showError(data.message);
+                        return false;
+                    }
+                } catch (e) {
+                    showError('خطأ في التحقق من البريد الإلكتروني');
+                    return false;
                 }
             }
             
-            if (!isValid) {
-                const errorDiv = document.querySelector('.error');
-                if (errorDiv) {
-                    errorDiv.style.display = 'block';
-                    errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMessage}`;
-                    setTimeout(() => { errorDiv.style.display = 'none'; }, 5000);
-                }
-            } else {
-                const errorDiv = document.querySelector('.error');
-                if (errorDiv) errorDiv.style.display = 'none';
+            return true;
+        }
+
+        function showError(msg) {
+            const errorDiv = document.querySelector('.error');
+            if (errorDiv) {
+                errorDiv.style.display = 'block';
+                errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${msg}`;
+                setTimeout(() => { errorDiv.style.display = 'none'; }, 5000);
             }
-            
-            return isValid;
         }
-        function nextStep() {
-            if (!validateCurrentStep()) return;
-            const current = parseInt(document.getElementById('currentStep').value);
-            showStep(current + 1);
-            document.getElementById('currentStep').value = current + 1;
+
+        async function nextStep() {
+            if (await validateCurrentStep()) {
+                const current = parseInt(document.getElementById('currentStep').value);
+                showStep(current + 1);
+                document.getElementById('currentStep').value = current + 1;
+            }
         }
+
         function prevStep() {
             const current = parseInt(document.getElementById('currentStep').value);
             showStep(current - 1);
             document.getElementById('currentStep').value = current - 1;
         }
-        window.addEventListener('DOMContentLoaded', () => showStep(1));
+
+        async function sendRegistrationOtp() {
+            if (!(await validateCurrentStep())) return;
+            
+            const email = document.querySelector('input[name="email"]').value;
+            const btn = document.getElementById('otpBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+
+            try {
+                const res = await fetch('{{ route('trader.send-otp') }}', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showStep(4);
+                    document.getElementById('currentStep').value = 4;
+                    document.getElementById('display-email').innerText = email;
+                } else {
+                    showError(data.message);
+                }
+            } catch (e) {
+                showError('فشل الاتصال بالخادم');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'التحقق والإرسال';
+            }
+        }
+
+        async function verifyAndSubmit() {
+            const otpInputs = document.querySelectorAll('.otp-input');
+            let otp = '';
+            otpInputs.forEach(input => otp += input.value);
+
+            if (otp.length < 6) {
+                showError('يرجى إدخال رمز التحقق كاملاً');
+                return;
+            }
+
+            const email = document.querySelector('input[name="email"]').value;
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحقق...';
+
+            try {
+                const res = await fetch('{{ route('trader.verify-otp') }}', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ email, otp })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    isOtpVerified = true;
+                    document.querySelector('form').submit();
+                } else {
+                    showError(data.message);
+                }
+            } catch (e) {
+                showError('فشل الاتصال بالخادم');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'إرسال التسجيل';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const initialStep = parseInt(document.getElementById('currentStep').value) || 1;
+            showStep(initialStep);
+            
+            // OTP Input focusing
+            const otpInputs = document.querySelectorAll('.otp-input');
+            otpInputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    if (e.target.value.length === 1 && index < otpInputs.length - 1) {
+                        otpInputs[index + 1].focus();
+                    }
+                });
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                        otpInputs[index - 1].focus();
+                    }
+                });
+            });
+        });
     </script>
     </head>
 <body>
@@ -158,8 +280,9 @@
                 <h1>تسجيل تاجر جديد</h1>
                 <div class="steps">
                     <div class="step active"><i class="fas fa-user"></i><span>الحساب</span></div>
-                    <div class="step"><i class="fas fa-building"></i><span>تفاصيل العمل</span></div>
+                    <div class="step"><i class="fas fa-building"></i><span>العمل</span></div>
                     <div class="step"><i class="fas fa-file-upload"></i><span>المستندات</span></div>
+                    <div class="step"><i class="fas fa-envelope-open-text"></i><span>التحقق</span></div>
                 </div>
             </div>
             <div class="content">
@@ -177,24 +300,25 @@
                 @endif
                 <form action="{{ route('trader.register') }}" method="POST" enctype="multipart/form-data">
                     @csrf
-                    <input type="hidden" id="currentStep" value="1">
+                    <input type="hidden" id="currentStep" name="current_step" value="{{ old('current_step', 1) }}">
+                    
                     <div id="step-1" class="step-pane">
                         <div class="grid grid-2">
                             <div class="form-group">
                                 <label>الاسم التجاري (بالإنجليزية)</label>
-                                <input type="text" name="business_name_en" class="input" required minlength="3" pattern="^[a-zA-Z0-9\s]+$" title="يجب إدخال أحرف إنجليزية وأرقام فقط، و3 محارف على الأقل">
+                                <input type="text" name="business_name_en" class="input" value="{{ old('business_name_en') }}" required minlength="2" pattern="^[a-zA-Z0-9\s]+$" title="أحرف إنجليزية وأرقام فقط، محرفين على الأقل">
                             </div>
                             <div class="form-group">
                                 <label>الاسم التجاري (بالعربية)</label>
-                                <input type="text" name="business_name_ar" class="input" required minlength="3" pattern="^[\u0621-\u064A0-9\s]+$" title="يجب إدخال أحرف عربية وأرقام فقط، و3 محارف على الأقل">
+                                <input type="text" name="business_name_ar" class="input" value="{{ old('business_name_ar') }}" required minlength="2" pattern="^[\u0600-\u06FF0-9\s]+$" title="أحرف عربية وأرقام فقط، محرفين على الأقل">
                             </div>
                             <div class="form-group">
                                 <label>البريد الإلكتروني</label>
-                                <input type="email" name="email" class="input" required>
+                                <input type="email" name="email" class="input" value="{{ old('email') }}" required>
                             </div>
                             <div class="form-group">
                                 <label>الهاتف</label>
-                                <input type="text" name="phone" class="input" required pattern="^09\d{8}$" title="يجب أن يبدأ بـ 09 ويتكون من 10 أرقام">
+                                <input type="text" name="phone" class="input" value="{{ old('phone') }}" required pattern="^09\d{8}$" title="يجب أن يبدأ بـ 09 ويتكون من 10 أرقام">
                             </div>
                             <div class="form-group">
                                 <label>كلمة المرور</label>
@@ -202,6 +326,9 @@
                                     <input type="password" name="password" class="input" required minlength="8" style="padding-left: 45px;">
                                     <i class="fas fa-eye toggle-password" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 1.1rem;"></i>
                                 </div>
+                                <small style="color: #888; font-size: 0.75rem; display: block; margin-top: 5px; line-height: 1.4;">
+                                    يجب أن تحتوي 8 محارف على الأقل، حرف كبير، حرف صغير، رقم، ورمز خاص (@$!%*?&)
+                                </small>
                             </div>
                             <div class="form-group">
                                 <label>تأكيد كلمة المرور</label>
@@ -212,6 +339,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div id="step-2" class="step-pane" style="display:none">
                         <div class="grid grid-2">
                             <div class="form-group">
@@ -224,37 +352,56 @@
                             </div>
                         </div>
                     </div>
+
                     <div id="step-3" class="step-pane" style="display:none">
                         <div class="grid grid-2">
                              <div class="form-group">
                                 <label>شعار العمل</label>
                                 <input type="file" name="business_logo" class="file" accept="image/*" required>
                             </div>
-
                             <div class="form-group">
                                 <label>هوية المالك</label>
                                 <input type="file" name="owner_id_card" class="file" accept=".pdf,image/*" required>
                             </div>
-
                             <div class="form-group">
                                 <label>رخصة العمل (اختياري)</label>
                                 <input type="file" name="business_license" class="file" accept=".pdf,image/*">
                             </div>
-
                             <div class="form-group">
                                 <label>شهادة ضريبية (اختياري)</label>
                                 <input type="file" name="tax_certificate" class="file" accept=".pdf,image/*">
                             </div>
                         </div>
                     </div>
+
+                    <div id="step-4" class="step-pane" style="display:none">
+                        <div style="text-align: center; padding: 1rem;">
+                            <i class="fas fa-paper-plane fa-3x" style="color: #7b1fa2; margin-bottom: 1rem;"></i>
+                            <h2 style="margin-bottom: 0.5rem;">تأكيد البريد الإلكتروني</h2>
+                            <p style="color: #666; margin-bottom: 1.5rem;">تم إرسال رمز التحقق إلى: <strong id="display-email"></strong></p>
+                            
+                            <div class="otp-box">
+                                <input type="text" maxlength="1" class="otp-input">
+                                <input type="text" maxlength="1" class="otp-input">
+                                <input type="text" maxlength="1" class="otp-input">
+                                <input type="text" maxlength="1" class="otp-input">
+                                <input type="text" maxlength="1" class="otp-input">
+                                <input type="text" maxlength="1" class="otp-input">
+                            </div>
+                            
+                            <p style="font-size: 0.85rem; color: #888;">إذا لم يصلك الرمز، يمكنك إعادة الإرسال بعد دقيقة.</p>
+                        </div>
+                    </div>
+
                     <div class="actions">
                         <button type="button" id="prevBtn" class="btn btn-outline" onclick="prevStep()">السابق</button>
                         <div class="nav">
                             <a href="{{ route('trader.login.form') }}">لدي حساب؟ تسجيل الدخول</a>
                         </div>
                         <div>
-                            <button type="button" id="nextBtn" class="btn btn-primary" onclick="nextStep()">التالي</button>
-                            <button type="submit" id="submitBtn" class="btn btn-primary" style="display:none">إرسال التسجيل</button>
+                            <button type="button" id="nextBtn" class="btn btn-primary" onclick="nextStep()">التالي <i class="fas fa-chevron-left"></i></button>
+                            <button type="button" id="otpBtn" class="btn btn-primary" style="display:none" onclick="sendRegistrationOtp()">التحقق والإرسال <i class="fas fa-paper-plane"></i></button>
+                            <button type="button" id="submitBtn" class="btn btn-primary" style="display:none" onclick="verifyAndSubmit()">تأكيد وإكمال التسجيل <i class="fas fa-check"></i></button>
                         </div>
                     </div>
                 </form>

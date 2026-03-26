@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+use App\Mail\TraderWelcomeMail;
+use Illuminate\Support\Facades\Mail;
+
 class SupportTraderController extends Controller
 {
     protected function employee()
@@ -273,6 +276,17 @@ class SupportTraderController extends Controller
         $t = Trader::findOrFail($id);
         $t->update(['status' => Trader::STATUS_APPROVED]);
         $this->notifyTrader($t->id, 'trader_activated', 'Your trader account has been activated.', 'check-circle', 'green');
+
+        // Send welcome email
+        try {
+            if ($t->contact_email) {
+                Mail::to($t->contact_email)->send(new TraderWelcomeMail($t->name));
+            } elseif ($t->user && $t->user->email) {
+                Mail::to($t->user->email)->send(new TraderWelcomeMail($t->name));
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send trader welcome email (Activate): ' . $e->getMessage());
+        }
 
         return response()->json(['success' => true]);
     }

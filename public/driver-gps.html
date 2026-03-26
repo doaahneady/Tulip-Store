@@ -1,445 +1,456 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>تتبع موقع السائق - Tulip Store</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+      body {
+        font-family: "El Messiri", sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 500px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
+      .container {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
 
-        h1 {
-            color: #2d3748;
-            font-size: 24px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
+      h1 {
+        color: #2d3748;
+        font-size: 24px;
+        margin-bottom: 10px;
+        text-align: center;
+      }
 
-        .subtitle {
-            color: #718096;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
+      .subtitle {
+        color: #718096;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+      .form-group {
+        margin-bottom: 20px;
+      }
 
-        label {
-            display: block;
-            color: #4a5568;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
+      label {
+        display: block;
+        color: #4a5568;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
 
-        input, select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s;
-            font-family: inherit;
-        }
+      input,
+      select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: all 0.3s;
+        font-family: "El Messiri", sans-serif;
+      }
 
-        input:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
 
-        .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 10px;
-        }
+      .btn {
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 10px;
+      }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+      }
 
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
+      .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
 
-        .btn-danger {
-            background: #f56565;
-            color: white;
-        }
+      .btn-danger {
+        background: #f56565;
+        color: white;
+      }
 
-        .btn-danger:hover {
-            background: #e53e3e;
-        }
+      .btn-danger:hover {
+        background: #e53e3e;
+      }
 
-        .status {
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: 600;
-        }
+      .status {
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: 600;
+      }
 
-        .status-inactive {
-            background: #fed7d7;
-            color: #c53030;
-        }
+      .status-inactive {
+        background: #fed7d7;
+        color: #c53030;
+      }
 
-        .status-active {
-            background: #c6f6d5;
-            color: #22543d;
-        }
+      .status-active {
+        background: #c6f6d5;
+        color: #22543d;
+      }
 
-        .info-box {
-            background: #edf2f7;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
+      .info-box {
+        background: #edf2f7;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 20px;
+      }
 
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #cbd5e0;
-            font-size: 14px;
-        }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #cbd5e0;
+        font-size: 14px;
+      }
 
-        .info-row:last-child {
-            border-bottom: none;
-        }
+      .info-row:last-child {
+        border-bottom: none;
+      }
 
-        .info-label {
-            color: #718096;
-        }
+      .info-label {
+        color: #718096;
+      }
 
-        .info-value {
-            color: #2d3748;
-            font-weight: 600;
-        }
+      .info-value {
+        color: #2d3748;
+        font-weight: 600;
+      }
 
-        .pulse {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background: #48bb78;
-            border-radius: 50%;
-            margin-left: 8px;
-            animation: pulse 2s infinite;
-        }
+      .pulse {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background: #48bb78;
+        border-radius: 50%;
+        margin-left: 8px;
+        animation: pulse 2s infinite;
+      }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
         }
+        50% {
+          opacity: 0.3;
+        }
+      }
 
-        .hidden {
-            display: none;
-        }
+      .hidden {
+        display: none;
+      }
 
-        .alert {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
+      .alert {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-size: 14px;
+      }
 
-        .alert-error {
-            background: #fed7d7;
-            color: #c53030;
-        }
+      .alert-error {
+        background: #fed7d7;
+        color: #c53030;
+      }
 
-        .alert-success {
-            background: #c6f6d5;
-            color: #22543d;
-        }
+      .alert-success {
+        background: #c6f6d5;
+        color: #22543d;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>🚗 تتبع موقع السائق</h1>
-        <p class="subtitle">Tulip Store - Driver GPS Tracking</p>
+      <h1>🚗 تتبع موقع السائق</h1>
+      <p class="subtitle">Tulip Store - Driver GPS Tracking</p>
 
-        <div id="alertBox" class="hidden"></div>
+      <div id="alertBox" class="hidden"></div>
 
-        <!-- Login Form -->
-        <div id="loginForm">
-            <div class="form-group">
-                <label>رقم السائق (Driver ID)</label>
-                <select id="driverId">
-                    <option value="">اختر السائق</option>
-                    <option value="1">أحمد محمد (1)</option>
-                    <option value="2">محمد علي (2)</option>
-                    <option value="3">خالد عبدالله (3)</option>
-                    <option value="4">عبدالرحمن سعيد (4)</option>
-                    <option value="5">سعد فهد (5)</option>
-                    <option value="6">فيصل ناصر (6)</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>رقم الهاتف (Phone)</label>
-                <input type="tel" id="phone" placeholder="05xxxxxxxx" dir="ltr">
-            </div>
-
-            <button class="btn btn-primary" onclick="startTracking()">
-                🚀 بدء التتبع
-            </button>
+      <!-- Login Form -->
+      <div id="loginForm">
+        <div class="form-group">
+          <label>رقم السائق (Driver ID)</label>
+          <select id="driverId">
+            <option value="">اختر السائق</option>
+            <option value="1">أحمد محمد (1)</option>
+            <option value="2">محمد علي (2)</option>
+            <option value="3">خالد عبدالله (3)</option>
+            <option value="4">عبدالرحمن سعيد (4)</option>
+            <option value="5">سعد فهد (5)</option>
+            <option value="6">فيصل ناصر (6)</option>
+          </select>
         </div>
 
-        <!-- Tracking Status -->
-        <div id="trackingStatus" class="hidden">
-            <div class="status status-active">
-                <span class="pulse"></span>
-                التتبع نشط - يتم إرسال الموقع
-            </div>
-
-            <div class="info-box">
-                <div class="info-row">
-                    <span class="info-label">السائق:</span>
-                    <span class="info-value" id="displayDriver">-</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">الموقع الحالي:</span>
-                    <span class="info-value" id="displayLocation">-</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">السرعة:</span>
-                    <span class="info-value" id="displaySpeed">-</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">الدقة:</span>
-                    <span class="info-value" id="displayAccuracy">-</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">آخر تحديث:</span>
-                    <span class="info-value" id="displayLastUpdate">-</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">عدد التحديثات:</span>
-                    <span class="info-value" id="displayCount">0</span>
-                </div>
-            </div>
-
-            <button class="btn btn-danger" onclick="stopTracking()">
-                ⏹️ إيقاف التتبع
-            </button>
+        <div class="form-group">
+          <label>رقم الهاتف (Phone)</label>
+          <input type="tel" id="phone" placeholder="05xxxxxxxx" dir="ltr" />
         </div>
+
+        <button class="btn btn-primary" onclick="startTracking()">
+          🚀 بدء التتبع
+        </button>
+      </div>
+
+      <!-- Tracking Status -->
+      <div id="trackingStatus" class="hidden">
+        <div class="status status-active">
+          <span class="pulse"></span>
+          التتبع نشط - يتم إرسال الموقع
+        </div>
+
+        <div class="info-box">
+          <div class="info-row">
+            <span class="info-label">السائق:</span>
+            <span class="info-value" id="displayDriver">-</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">الموقع الحالي:</span>
+            <span class="info-value" id="displayLocation">-</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">السرعة:</span>
+            <span class="info-value" id="displaySpeed">-</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">الدقة:</span>
+            <span class="info-value" id="displayAccuracy">-</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">آخر تحديث:</span>
+            <span class="info-value" id="displayLastUpdate">-</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">عدد التحديثات:</span>
+            <span class="info-value" id="displayCount">0</span>
+          </div>
+        </div>
+
+        <button class="btn btn-danger" onclick="stopTracking()">
+          ⏹️ إيقاف التتبع
+        </button>
+      </div>
     </div>
 
     <script>
-        let watchId = null;
-        let updateCount = 0;
-        let currentDriverId = null;
-        let currentPhone = null;
-        
-        // API URL - Change this to your server URL
-        // For ngrok: 'https://abc123.ngrok.io/api/driver/location/update'
-        // For public IP: 'http://185.123.45.67:8000/api/driver/location/update'
-        // For domain: 'https://your-domain.com/api/driver/location/update'
-        const API_URL = window.location.origin + '/api/driver/location/update';
+      let watchId = null;
+      let updateCount = 0;
+      let currentDriverId = null;
+      let currentPhone = null;
 
-        // Start tracking
-        function startTracking() {
-            const driverId = document.getElementById('driverId').value;
-            const phone = document.getElementById('phone').value;
+      // API URL - Change this to your server URL
+      // For ngrok: 'https://abc123.ngrok.io/api/driver/location/update'
+      // For public IP: 'http://185.123.45.67:8000/api/driver/location/update'
+      // For domain: 'https://your-domain.com/api/driver/location/update'
+      const API_URL = window.location.origin + "/api/driver/location/update";
 
-            if (!driverId) {
-                showAlert('الرجاء اختيار السائق', 'error');
-                return;
-            }
+      // Start tracking
+      function startTracking() {
+        const driverId = document.getElementById("driverId").value;
+        const phone = document.getElementById("phone").value;
 
-            if (!phone) {
-                showAlert('الرجاء إدخال رقم الهاتف', 'error');
-                return;
-            }
+        if (!driverId) {
+          showAlert("الرجاء اختيار السائق", "error");
+          return;
+        }
 
-            // Check if geolocation is supported
-            if (!navigator.geolocation) {
-                showAlert('المتصفح لا يدعم تحديد الموقع', 'error');
-                return;
-            }
+        if (!phone) {
+          showAlert("الرجاء إدخال رقم الهاتف", "error");
+          return;
+        }
 
-            currentDriverId = driverId;
-            currentPhone = phone;
+        // Check if geolocation is supported
+        if (!navigator.geolocation) {
+          showAlert("المتصفح لا يدعم تحديد الموقع", "error");
+          return;
+        }
 
-            // Request permission and start watching position
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    // Success - start tracking
-                    document.getElementById('loginForm').classList.add('hidden');
-                    document.getElementById('trackingStatus').classList.remove('hidden');
-                    
-                    const driverName = document.getElementById('driverId').selectedOptions[0].text;
-                    document.getElementById('displayDriver').textContent = driverName;
+        currentDriverId = driverId;
+        currentPhone = phone;
 
-                    // Send initial location
-                    sendLocation(position);
+        // Request permission and start watching position
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            // Success - start tracking
+            document.getElementById("loginForm").classList.add("hidden");
+            document
+              .getElementById("trackingStatus")
+              .classList.remove("hidden");
 
-                    // Watch position (updates every few seconds)
-                    watchId = navigator.geolocation.watchPosition(
-                        sendLocation,
-                        handleError,
-                        {
-                            enableHighAccuracy: true,
-                            maximumAge: 0,
-                            timeout: 5000
-                        }
-                    );
+            const driverName =
+              document.getElementById("driverId").selectedOptions[0].text;
+            document.getElementById("displayDriver").textContent = driverName;
 
-                    showAlert('تم بدء التتبع بنجاح!', 'success');
-                },
-                (error) => {
-                    handleError(error);
-                }
+            // Send initial location
+            sendLocation(position);
+
+            // Watch position (updates every few seconds)
+            watchId = navigator.geolocation.watchPosition(
+              sendLocation,
+              handleError,
+              {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 5000,
+              },
             );
+
+            showAlert("تم بدء التتبع بنجاح!", "success");
+          },
+          (error) => {
+            handleError(error);
+          },
+        );
+      }
+
+      // Stop tracking
+      function stopTracking() {
+        if (watchId !== null) {
+          navigator.geolocation.clearWatch(watchId);
+          watchId = null;
         }
 
-        // Stop tracking
-        function stopTracking() {
-            if (watchId !== null) {
-                navigator.geolocation.clearWatch(watchId);
-                watchId = null;
+        document.getElementById("loginForm").classList.remove("hidden");
+        document.getElementById("trackingStatus").classList.add("hidden");
+        updateCount = 0;
+
+        showAlert("تم إيقاف التتبع", "success");
+      }
+
+      // Send location to server
+      function sendLocation(position) {
+        const data = {
+          driver_id: currentDriverId,
+          phone: currentPhone,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          speed: position.coords.speed || 0,
+          accuracy: position.coords.accuracy,
+        };
+
+        // Update display
+        updateCount++;
+        document.getElementById("displayLocation").textContent =
+          `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`;
+        document.getElementById("displaySpeed").textContent =
+          `${(position.coords.speed || 0).toFixed(1)} م/ث`;
+        document.getElementById("displayAccuracy").textContent =
+          `${position.coords.accuracy.toFixed(1)} متر`;
+        document.getElementById("displayLastUpdate").textContent =
+          new Date().toLocaleTimeString("ar-SA");
+        document.getElementById("displayCount").textContent = updateCount;
+
+        // Send to server
+        fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => response.json())
+          .then((result) => {
+            if (result.success) {
+              console.log("Location sent successfully:", result);
+            } else {
+              console.error("Failed to send location:", result);
             }
+          })
+          .catch((error) => {
+            console.error("Error sending location:", error);
+          });
+      }
 
-            document.getElementById('loginForm').classList.remove('hidden');
-            document.getElementById('trackingStatus').classList.add('hidden');
-            updateCount = 0;
+      // Handle geolocation errors
+      function handleError(error) {
+        let message = "حدث خطأ في تحديد الموقع";
 
-            showAlert('تم إيقاف التتبع', 'success');
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            message =
+              "تم رفض الإذن للوصول إلى الموقع. الرجاء السماح بالوصول للموقع في إعدادات المتصفح.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            message = "معلومات الموقع غير متوفرة";
+            break;
+          case error.TIMEOUT:
+            message = "انتهت مهلة طلب الموقع";
+            break;
         }
 
-        // Send location to server
-        function sendLocation(position) {
-            const data = {
-                driver_id: currentDriverId,
-                phone: currentPhone,
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-                speed: position.coords.speed || 0,
-                accuracy: position.coords.accuracy
-            };
+        showAlert(message, "error");
+      }
 
-            // Update display
-            updateCount++;
-            document.getElementById('displayLocation').textContent = 
-                `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`;
-            document.getElementById('displaySpeed').textContent = 
-                `${(position.coords.speed || 0).toFixed(1)} م/ث`;
-            document.getElementById('displayAccuracy').textContent = 
-                `${position.coords.accuracy.toFixed(1)} متر`;
-            document.getElementById('displayLastUpdate').textContent = 
-                new Date().toLocaleTimeString('ar-SA');
-            document.getElementById('displayCount').textContent = updateCount;
+      // Show alert message
+      function showAlert(message, type) {
+        const alertBox = document.getElementById("alertBox");
+        alertBox.className = `alert alert-${type}`;
+        alertBox.textContent = message;
+        alertBox.classList.remove("hidden");
 
-            // Send to server
-            fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    console.log('Location sent successfully:', result);
-                } else {
-                    console.error('Failed to send location:', result);
-                }
-            })
-            .catch(error => {
-                console.error('Error sending location:', error);
-            });
+        setTimeout(() => {
+          alertBox.classList.add("hidden");
+        }, 5000);
+      }
+
+      // Keep screen awake (if supported)
+      let wakeLock = null;
+      async function requestWakeLock() {
+        try {
+          if ("wakeLock" in navigator) {
+            wakeLock = await navigator.wakeLock.request("screen");
+            console.log("Wake Lock active");
+          }
+        } catch (err) {
+          console.log("Wake Lock error:", err);
         }
+      }
 
-        // Handle geolocation errors
-        function handleError(error) {
-            let message = 'حدث خطأ في تحديد الموقع';
-            
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    message = 'تم رفض الإذن للوصول إلى الموقع. الرجاء السماح بالوصول للموقع في إعدادات المتصفح.';
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    message = 'معلومات الموقع غير متوفرة';
-                    break;
-                case error.TIMEOUT:
-                    message = 'انتهت مهلة طلب الموقع';
-                    break;
-            }
-            
-            showAlert(message, 'error');
+      // Request wake lock when tracking starts
+      document.addEventListener("visibilitychange", () => {
+        if (watchId !== null && document.visibilityState === "visible") {
+          requestWakeLock();
         }
-
-        // Show alert message
-        function showAlert(message, type) {
-            const alertBox = document.getElementById('alertBox');
-            alertBox.className = `alert alert-${type}`;
-            alertBox.textContent = message;
-            alertBox.classList.remove('hidden');
-
-            setTimeout(() => {
-                alertBox.classList.add('hidden');
-            }, 5000);
-        }
-
-        // Keep screen awake (if supported)
-        let wakeLock = null;
-        async function requestWakeLock() {
-            try {
-                if ('wakeLock' in navigator) {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('Wake Lock active');
-                }
-            } catch (err) {
-                console.log('Wake Lock error:', err);
-            }
-        }
-
-        // Request wake lock when tracking starts
-        document.addEventListener('visibilitychange', () => {
-            if (watchId !== null && document.visibilityState === 'visible') {
-                requestWakeLock();
-            }
-        });
+      });
     </script>
-</body>
+  </body>
 </html>

@@ -41,8 +41,8 @@ class HRLeaveController extends Controller
         $validated = $request->validate([
             'employee_id' => 'required|exists:employees,id',
             'leave_type' => 'required|in:annual,sick,emergency,unpaid,maternity,paternity',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
+            'start_date' => 'required|date|date_format:Y-m-d',
+            'end_date' => 'required|date|date_format:Y-m-d|after_or_equal:start_date',
             'reason' => 'required|string',
         ]);
 
@@ -76,8 +76,8 @@ class HRLeaveController extends Controller
 
         $validated = $request->validate([
             'leave_type' => 'required|in:annual,sick,emergency,unpaid,maternity,paternity',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
+            'start_date' => 'required|date|date_format:Y-m-d',
+            'end_date' => 'required|date|date_format:Y-m-d|after_or_equal:start_date',
             'reason' => 'required|string',
         ]);
 

@@ -194,19 +194,7 @@ class Product extends Model
         }
 
         if (Schema::hasColumn('products', 'status')) {
-            if (Schema::hasColumn('products', 'is_trader_product')) {
-                $query->where(function ($q) {
-                    $q->where(function ($q2) {
-                        $q2->where('is_trader_product', true)
-                            ->whereIn('status', ['approved', 'active']);
-                    })->orWhere(function ($q2) {
-                        $q2->whereNull('is_trader_product')
-                            ->orWhere('is_trader_product', false);
-                    });
-                });
-            } else {
-                $query->whereIn('status', ['approved', 'active']);
-            }
+            $query->whereIn('status', ['approved', 'active']);
         }
 
         return $query;

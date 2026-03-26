@@ -11,37 +11,7 @@ class TulipStoreSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create categories
-        $categories = [
-            [
-                'name' => 'الزهور الطازة',
-                'slug' => 'fresh-flowers',
-                'description' => 'مجموعة متنوعة من الزهور الطازة',
-                'image' => 'https://via.placeholder.com/300x300?text=Fresh+Flowers',
-                'display_order' => 1,
-            ],
-            [
-                'name' => 'الهدايا والمفاجآت',
-                'slug' => 'gifts',
-                'description' => 'هدايا فاخرة لأحبائك',
-                'image' => 'https://via.placeholder.com/300x300?text=Gifts',
-                'display_order' => 2,
-            ],
-            [
-                'name' => 'الشوكولاتة والحلويات',
-                'slug' => 'chocolates',
-                'description' => 'شوكولاتة وحلويات عالية الجودة',
-                'image' => 'https://via.placeholder.com/300x300?text=Chocolates',
-                'display_order' => 3,
-            ],
-            [
-                'name' => 'البالونات والديكور',
-                'slug' => 'balloons',
-                'description' => 'بالونات وديكورات احتفالية',
-                'image' => 'https://via.placeholder.com/300x300?text=Balloons',
-                'display_order' => 4,
-            ],
-        ];
+    
 
         foreach ($categories as $categoryData) {
             Category::updateOrCreate(

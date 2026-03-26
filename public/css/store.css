@@ -468,7 +468,7 @@ h6 {
   border: none;
   padding: 0.5rem 1.2rem;
   border-radius: 25px;
-  /* font-family: "Changa", sans-serif; */
+
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -1273,7 +1273,7 @@ h6 {
   padding: 0.4rem 0.5rem;
   border: none;
   border-radius: 7px;
-  /* font-family: "Changa", sans-serif; */
+
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -1340,7 +1340,7 @@ h6 {
   border: none;
   padding: 0.8rem 1.2rem;
   border-radius: 10px;
-  /* font-family: "Changa", sans-serif; */
+
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;

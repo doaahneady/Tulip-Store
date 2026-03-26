@@ -16,24 +16,24 @@
     <div class="p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-                <h4 class="text-sm font-medium text-gray-900 mb-3">Today's Stats</h4>
+                <h4 class="text-sm font-medium text-gray-900 mb-3">إحصائيات اليوم</h4>
                 <ul class="space-y-2">
                     <li class="flex justify-between">
-                        <span class="text-sm text-gray-600">Orders Today</span>
+                        <span class="text-sm text-gray-600">طلبات اليوم</span>
                         <span class="text-sm font-medium">{{ $metrics['orders_today'] }}</span>
                     </li>
                     <li class="flex justify-between">
-                        <span class="text-sm text-gray-600">Revenue Today</span>
+                        <span class="text-sm text-gray-600">إجمالي المبيعات اليوم</span>
                         <span class="text-sm font-medium">${{ number_format($metrics['revenue_today'], 2) }}</span>
                     </li>
                     <li class="flex justify-between">
-                        <span class="text-sm text-gray-600">Total Employees</span>
+                        <span class="text-sm text-gray-600">عدد الموظفين</span>
                         <span class="text-sm font-medium">{{ $metrics['total_employees'] }}</span>
                     </li>
                 </ul>
             </div>
             <div>
-                <h4 class="text-sm font-medium text-gray-900 mb-3">Quick Actions</h4>
+                <h4 class="text-sm font-medium text-gray-900 mb-3">إجراءات سريعة</h4>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <x-dashboard.quick-action href="{{ route('dashboard.orders') }}" icon="fas fa-clipboard-list" label="View All Orders" color="blue" />
                     <x-dashboard.quick-action href="{{ route('dashboard.users') }}" icon="fas fa-users-cog" label="Manage Users" color="indigo" />
