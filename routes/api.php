@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\EmployeeAuthController as EmployeeApiAuthController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Auth\TraderAuthController;
@@ -34,6 +35,11 @@ Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
     });
+});
+
+Route::prefix('employee')->group(function () {
+    Route::post('/login', [EmployeeApiAuthController::class, 'login']);
+    Route::middleware('auth:sanctum')->post('/logout', [EmployeeApiAuthController::class, 'logout']);
 });
 
 // Trader Auth API
@@ -139,10 +145,7 @@ Route::prefix('mart')->group(function () {
             'categories' => [],
         ];
         if (\Illuminate\Support\Facades\Schema::hasTable('categories') && \Illuminate\Support\Facades\Schema::hasTable('products')) {
-            $fruitSlugs = ['fruits', 'mart-fruits'];
-            $vegetableSlugs = ['vegetables', 'khdroaat', 'khodraat', 'mart-vegetables'];
-            $allowedSlugs = array_values(array_unique(array_merge($fruitSlugs, $vegetableSlugs)));
-
+            // Get all mart categories that are fruits or vegetables
             $cats = \App\Models\Category::query()->where(function($q){
                 if (\Illuminate\Support\Facades\Schema::hasColumn('categories','is_active')) {
                     $q->where('is_active', true);
@@ -151,19 +154,35 @@ Route::prefix('mart')->group(function () {
                     $q->where('market', 'mart');
                 }
             })
-                ->when(\Illuminate\Support\Facades\Schema::hasColumn('categories', 'slug'), fn ($q) => $q->whereIn('slug', $allowedSlugs))
-                ->orderBy('display_order')
-                ->orderBy('name')
-                ->get();
+            ->where(function($q) {
+                // Match by slug or name containing fruit/vegetable keywords in Arabic or English
+                $q->where('name', 'like', '%فواكه%')
+                  ->orWhere('name', 'like', '%خضروات%')
+                  ->orWhere('name', 'like', '%خضار%')
+                  ->orWhere('name', 'like', '%fruit%')
+                  ->orWhere('name', 'like', '%vegetable%')
+                  ->orWhere('slug', 'like', '%fruit%')
+                  ->orWhere('slug', 'like', '%vegetable%')
+                  ->orWhere('slug', 'like', '%khdroaat%')
+                  ->orWhere('slug', 'like', '%khodraat%');
+            })
+            ->orderBy('display_order')
+            ->orderBy('name')
+            ->get();
+            
             foreach ($cats as $cat) {
                 $slug = strtolower((string) ($cat->slug ?? ''));
                 $name = mb_strtolower(trim((string) ($cat->name ?? '')));
                 $key = null;
-                if (in_array($slug, $fruitSlugs, true) || str_contains($name, 'فواكه') || str_contains($name, 'فاكه')) {
+                
+                // Determine if it's fruits or vegetables based on name/slug
+                if (str_contains($slug, 'fruit') || str_contains($name, 'فواكه') || str_contains($name, 'فاكه')) {
                     $key = 'fruits';
-                } elseif (in_array($slug, $vegetableSlugs, true) || str_contains($name, 'خضار') || str_contains($name, 'خضرو')) {
+                } elseif (str_contains($slug, 'vegetable') || str_contains($slug, 'khdro') || str_contains($slug, 'khodra') || 
+                          str_contains($name, 'خضار') || str_contains($name, 'خضرو')) {
                     $key = 'vegetables';
                 }
+                
                 if (! $key) {
                     continue;
                 }
@@ -279,6 +298,7 @@ if (app()->environment('testing')) {
     });
 }
 Route::middleware('auth:sanctum')->prefix('delivery')->group(function () {
+    Route::get('/assignments', [DeliveryAssignmentController::class, 'index']);
     Route::post('/assignments/{id}/pickup', [DeliveryAssignmentController::class, 'pickup']);
     Route::post('/assignments/{id}/in-transit', [DeliveryAssignmentController::class, 'inTransit']);
     Route::post('/assignments/{id}/deliver', [DeliveryAssignmentController::class, 'deliver']);

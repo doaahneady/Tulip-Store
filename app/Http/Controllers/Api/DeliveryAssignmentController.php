@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DeliveryAssignment;
 use App\Models\DeliveryRoute;
 use App\Models\Driver;
+use App\Models\Employee;
 use App\Models\Notification;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketReply;
@@ -16,9 +17,45 @@ use Illuminate\Support\Facades\Auth;
 
 class DeliveryAssignmentController extends Controller
 {
+    public function index(Request $request)
+    {
+        $driver = $this->getDriverForUser();
+        if (! $driver) {
+            abort(403);
+        }
+        $status = $request->query('status');
+        $query = DeliveryAssignment::with(['order'])->where('driver_id', $driver->id);
+        if ($status) {
+            $query->where('status', $status);
+        }
+        $assignments = $query->orderBy('assigned_at', 'desc')->get();
+        return response()->json([
+            'success' => true,
+            'assignments' => $assignments,
+        ]);
+    }
     private function getDriverForUser()
     {
-        return Driver::where('user_id', Auth::id())->first();
+        $user = Auth::user();
+        $userId = null;
+        if ($user instanceof Employee) {
+            $userId = $user->user_id;
+        } else {
+            $userId = $user?->id;
+        }
+        if (! $userId) {
+            return null;
+        }
+        return Driver::where('user_id', $userId)->first();
+    }
+
+    private function getActorUserIdForFlow(): ?int
+    {
+        $user = Auth::user();
+        if ($user instanceof Employee) {
+            return $user->user_id ? (int) $user->user_id : null;
+        }
+        return Auth::id();
     }
 
     private function authorizeAssignment(DeliveryAssignment $assignment)
@@ -177,7 +214,8 @@ class DeliveryAssignmentController extends Controller
             $order->update(['payment_status' => 'paid']);
         }
 
-        CrossDepartmentFlowService::handleOrderCompletion($order->id, Auth::id());
+        $actorUserId = $this->getActorUserIdForFlow();
+        CrossDepartmentFlowService::handleOrderCompletion($order->id, $actorUserId ?? 0);
 
         return response()->json([
             'success' => true,

@@ -306,15 +306,22 @@ class DeliveryDashboardService
         DB::beginTransaction();
 
         try {
-            // Create delivery assignment
-            $assignment = DeliveryAssignment::create([
+            // Create delivery assignment - only include assigned_by if it's a valid user
+            $assignmentData = [
                 'driver_id' => $driverId,
                 'order_id' => $orderId,
                 'status' => 'assigned',
                 'assigned_at' => now(),
                 'delivery_latitude' => $order->latitude,
                 'delivery_longitude' => $order->longitude,
-            ]);
+            ];
+            
+            // Only add assigned_by if the user exists in the users table
+            if ($assignedBy && \App\Models\User::find($assignedBy)) {
+                $assignmentData['assigned_by'] = $assignedBy;
+            }
+            
+            $assignment = DeliveryAssignment::create($assignmentData);
 
             // orders.assigned_driver_id references users.id (driver login), not drivers.id
             $driverUserId = $driver->user_id;

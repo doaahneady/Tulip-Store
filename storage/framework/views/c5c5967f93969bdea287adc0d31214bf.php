@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
-    <title>بوابة الموظفين - متجر توليب</title>
+    <title>بوابة الموظفين - متجر تولیب</title>
     <!-- fav icon -->
-        <link rel="icon" type="image/png" href="/images/fav_icon.png">
+        <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -479,10 +479,10 @@
                         <?php echo csrf_field(); ?>
                         
                         <div class="form-group">
-                            <label for="email">البريد الإلكتروني</label>
+                            <label for="email">البريد الإلكتروني أو اسم المستخدم</label>
                             <div class="input-wrapper">
-                                <input type="email" id="email" name="email" value="<?php echo e(old('email')); ?>" required placeholder="example@company.com">
-                                <i class="fas fa-envelope"></i>
+                                <input type="text" id="email" name="email" value="<?php echo e(old('email')); ?>" required placeholder="name@company.com أو driver_username">
+                                <i class="fas fa-user"></i>
                             </div>
                         </div>
                         

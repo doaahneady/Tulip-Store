@@ -41,6 +41,19 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
+        $user = \App\Models\User::where('email', $this->email)->first();
+        $trader = \App\Models\Trader::where('email', $this->email)
+            ->orWhere('contact_email', $this->email)
+            ->first();
+
+        if (($user && $user->is_trader) || $trader) {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => 'هذا الحساب هو حساب تاجر، يرجى تسجيل الدخول من لوحة تحكم التجار.',
+            ]);
+        }
+
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 

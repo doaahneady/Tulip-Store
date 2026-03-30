@@ -83,6 +83,7 @@ class OrderController extends Controller
             'delivery_method' => 'required|in:normal,express,instant',
             'payment_method' => 'required|in:cash,card,syriatel,bank',
             'delivery_cost' => 'required|numeric|min:0',
+            'distance_km' => 'nullable|numeric|min:0',
             'service_fee' => 'nullable|numeric|min:0',
         ]);
 
@@ -90,6 +91,7 @@ class OrderController extends Controller
             DB::beginTransaction();
 
             $cart = session()->get('cart', []);
+            $martProducts = session()->get('mart_products', []);
 
             if (empty($cart) && Auth::check() && \Illuminate\Support\Facades\Schema::hasTable('carts') && \Illuminate\Support\Facades\Schema::hasTable('cart_items')) {
                 $dbCart = Cart::firstOrCreate(['user_id' => Auth::id()]);
@@ -99,10 +101,10 @@ class OrderController extends Controller
                 }
             }
 
-            if (empty($cart)) {
+            if (empty($cart) && empty($martProducts)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'السلة فارغة',
+                    'message' => 'ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ·ط·آ¢ط¢آ³ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ·ط·آ¢ط¢آ© ط·آ·ط¢آ¸ط·آ¸ط¢آ¾ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ·ط·آ¢ط¢آ±ط·آ·ط¢آ·ط·آ·أ¢â‚¬ط›ط·آ·ط¢آ·ط·آ¢ط¢آ©',
                 ], 400);
             }
 
@@ -113,15 +115,15 @@ class OrderController extends Controller
                 $product = \App\Models\Product::lockForUpdate()->find($productId);
 
                 if (! $product) {
-                    throw new \Exception("المنتج غير موجود: ID $productId");
+                    throw new \Exception("ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ¦ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ ط·آ·ط¢آ·ط·آ¹ط¢آ¾ط·آ·ط¢آ·ط·آ¢ط¢آ¬ ط·آ·ط¢آ·ط·آ·أ¢â‚¬ط›ط·آ·ط¢آ¸ط·آ¸ط¢آ¹ط·آ·ط¢آ·ط·آ¢ط¢آ± ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ¦ط·آ·ط¢آ¸ط·آ«أ¢â‚¬آ ط·آ·ط¢آ·ط·آ¢ط¢آ¬ط·آ·ط¢آ¸ط·آ«أ¢â‚¬آ ط·آ·ط¢آ·ط·آ¢ط¢آ¯: ID $productId");
                 }
 
                 if (! $product->is_active) {
-                    throw new \Exception("المنتج غير متاح حالياً: {$product->name}");
+                    throw new \Exception("ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ¦ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ ط·آ·ط¢آ·ط·آ¹ط¢آ¾ط·آ·ط¢آ·ط·آ¢ط¢آ¬ ط·آ·ط¢آ·ط·آ·أ¢â‚¬ط›ط·آ·ط¢آ¸ط·آ¸ط¢آ¹ط·آ·ط¢آ·ط·آ¢ط¢آ± ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ¦ط·آ·ط¢آ·ط·آ¹ط¢آ¾ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ·ط·آ¢ط¢آ­ ط·آ·ط¢آ·ط·آ¢ط¢آ­ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ¸ط·آ¸ط¢آ¹ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ¹: {$product->name}");
                 }
 
                 if ($product->track_inventory && $product->stock_quantity < $quantity) {
-                    throw new \Exception("الكمية المطلوبة غير متوفرة للمنتج: {$product->name}. المتوفر: {$product->stock_quantity}");
+                    throw new \Exception("ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ¸ط·آ¦أ¢â‚¬â„¢ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ¦ط·آ·ط¢آ¸ط·آ¸ط¢آ¹ط·آ·ط¢آ·ط·آ¢ط¢آ© ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ¦ط·آ·ط¢آ·ط·آ¢ط¢آ·ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ¸ط·آ«أ¢â‚¬آ ط·آ·ط¢آ·ط·آ¢ط¢آ¨ط·آ·ط¢آ·ط·آ¢ط¢آ© ط·آ·ط¢آ·ط·آ·أ¢â‚¬ط›ط·آ·ط¢آ¸ط·آ¸ط¢آ¹ط·آ·ط¢آ·ط·آ¢ط¢آ± ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ¦ط·آ·ط¢آ·ط·آ¹ط¢آ¾ط·آ·ط¢آ¸ط·آ«أ¢â‚¬آ ط·آ·ط¢آ¸ط·آ¸ط¢آ¾ط·آ·ط¢آ·ط·آ¢ط¢آ±ط·آ·ط¢آ·ط·آ¢ط¢آ© ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ¦ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ ط·آ·ط¢آ·ط·آ¹ط¢آ¾ط·آ·ط¢آ·ط·آ¢ط¢آ¬: {$product->name}. ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ¦ط·آ·ط¢آ·ط·آ¹ط¢آ¾ط·آ·ط¢آ¸ط·آ«أ¢â‚¬آ ط·آ·ط¢آ¸ط·آ¸ط¢آ¾ط·آ·ط¢آ·ط·آ¢ط¢آ±: {$product->stock_quantity}");
                 }
 
                 $price = $product->discount_price ?? $product->price;
@@ -129,6 +131,24 @@ class OrderController extends Controller
 
                 $orderItemsData[] = [
                     'product' => $product,
+                    'quantity' => $quantity,
+                    'price' => $price,
+                ];
+            }
+
+            foreach ($martProducts as $productId => $martProduct) {
+                $quantity = (int) ($martProduct['quantity'] ?? 0);
+                $price = (float) ($martProduct['price'] ?? 0);
+                if ($quantity <= 0) {
+                    continue;
+                }
+
+                $subtotal += $price * $quantity;
+                $orderItemsData[] = [
+                    'product' => null,
+                    'product_id' => $productId,
+                    'product_name' => $martProduct['name'] ?? 'Mart Product',
+                    'product_sku' => $martProduct['unit'] ?? 'MART',
                     'quantity' => $quantity,
                     'price' => $price,
                 ];
@@ -244,28 +264,28 @@ class OrderController extends Controller
 
             // 3. Process Items & Inventory
             foreach ($orderItemsData as $item) {
-                $product = $item['product'];
+                $product = $item['product'] ?? null;
                 $quantity = $item['quantity'];
                 $price = $item['price'];
 
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => $product->id,
-                    'product_name' => $product->name,
-                    'product_sku' => $product->sku,
+                    'product_id' => $product?->id ?? ($item['product_id'] ?? null),
+                    'product_name' => $product?->name ?? ($item['product_name'] ?? 'Mart Product'),
+                    'product_sku' => $product?->sku ?? ($item['product_sku'] ?? 'MART'),
                     'quantity' => $quantity,
                     'unit_price' => $price,
                     'total_price' => $price * $quantity,
                 ]);
 
-                if ($product->track_inventory) {
+                if ($product && $product->track_inventory) {
                     InventoryMovement::recordMovement(
                         $product,
                         'out',
                         $quantity,
                         'sale',
                         $order->id,
-                        'Order '.$order->order_number
+                        'Order ' . $order->order_number
                     );
                 }
             }
@@ -291,6 +311,7 @@ class OrderController extends Controller
             \App\Models\FinancialTransaction::create($ftData);
 
             session()->forget('cart');
+            session()->forget('mart_products');
             if (Auth::check() && \Illuminate\Support\Facades\Schema::hasTable('carts') && \Illuminate\Support\Facades\Schema::hasTable('cart_items')) {
                 $dbCart = Cart::where('user_id', Auth::id())->first();
                 if ($dbCart) {
@@ -343,7 +364,7 @@ class OrderController extends Controller
             return response()->json([
                 'success' => true,
                 'order_id' => $order->id,
-                'message' => 'تم إنشاء الطلب بنجاح',
+                'message' => 'ط·آ·ط¢آ·ط·آ¹ط¢آ¾ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ¦ ط·آ·ط¢آ·ط·آ¢ط¢آ¥ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ ط·آ·ط¢آ·ط·آ¢ط¢آ´ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ·ط·آ·ط¥â€™ ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ·ط·آ¢ط¢آ·ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ·ط·آ¢ط¢آ¨ ط·آ·ط¢آ·ط·آ¢ط¢آ¨ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ ط·آ·ط¢آ·ط·آ¢ط¢آ¬ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ·ط·آ¢ط¢آ­',
             ]);
 
         } catch (\Exception $e) {
@@ -352,7 +373,7 @@ class OrderController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'حدث خطأ في إنشاء الطلب',
+                'message' => 'ط·آ·ط¢آ·ط·آ¢ط¢آ­ط·آ·ط¢آ·ط·آ¢ط¢آ¯ط·آ·ط¢آ·ط·آ¢ط¢آ« ط·آ·ط¢آ·ط·آ¢ط¢آ®ط·آ·ط¢آ·ط·آ¢ط¢آ·ط·آ·ط¢آ·ط·آ¢ط¢آ£ ط·آ·ط¢آ¸ط·آ¸ط¢آ¾ط·آ·ط¢آ¸ط·آ¸ط¢آ¹ ط·آ·ط¢آ·ط·آ¢ط¢آ¥ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ ط·آ·ط¢آ·ط·آ¢ط¢آ´ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ·ط·آ·ط¥â€™ ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ·ط·آ¢ط¢آ·ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ·ط·آ¢ط¢آ¨',
                 'error' => $e->getMessage(), // Show actual error for debugging (remove in prod)
             ], 400); // Changed to 400 for validation errors
         }
@@ -399,7 +420,7 @@ class OrderController extends Controller
         if ($order->user_id && ! $this->orderOwnerOrAdmin($order)) {
             return response()->json([
                 'success' => false,
-                'message' => 'غير مصرح',
+                'message' => 'ط·آ·ط¢آ·ط·آ·أ¢â‚¬ط›ط·آ·ط¢آ¸ط·آ¸ط¢آ¹ط·آ·ط¢آ·ط·آ¢ط¢آ± ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ¦ط·آ·ط¢آ·ط·آ¢ط¢آµط·آ·ط¢آ·ط·آ¢ط¢آ±ط·آ·ط¢آ·ط·آ¢ط¢آ­',
             ], 403);
         }
 
@@ -414,13 +435,13 @@ class OrderController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'تم رفع الإيصال بنجاح',
+                'message' => 'ط·آ·ط¢آ·ط·آ¹ط¢آ¾ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ¦ ط·آ·ط¢آ·ط·آ¢ط¢آ±ط·آ·ط¢آ¸ط·آ¸ط¢آ¾ط·آ·ط¢آ·ط·آ¢ط¢آ¹ ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ·ط·آ¢ط¢آ¥ط·آ·ط¢آ¸ط·آ¸ط¢آ¹ط·آ·ط¢آ·ط·آ¢ط¢آµط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع† ط·آ·ط¢آ·ط·آ¢ط¢آ¨ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ ط·آ·ط¢آ·ط·آ¢ط¢آ¬ط·آ·ط¢آ·ط·آ¢ط¢آ§ط·آ·ط¢آ·ط·آ¢ط¢آ­',
             ]);
         }
 
         return response()->json([
             'success' => false,
-            'message' => 'لم يتم رفع أي ملف',
+            'message' => 'ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ¦ ط·آ·ط¢آ¸ط·آ¸ط¢آ¹ط·آ·ط¢آ·ط·آ¹ط¢آ¾ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ¦ ط·آ·ط¢آ·ط·آ¢ط¢آ±ط·آ·ط¢آ¸ط·آ¸ط¢آ¾ط·آ·ط¢آ·ط·آ¢ط¢آ¹ ط·آ·ط¢آ·ط·آ¢ط¢آ£ط·آ·ط¢آ¸ط·آ¸ط¢آ¹ ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬ط¢آ¦ط·آ·ط¢آ¸ط£آ¢أ¢â€ڑآ¬أ¢â‚¬ع†ط·آ·ط¢آ¸ط·آ¸ط¢آ¾',
         ], 400);
     }
 

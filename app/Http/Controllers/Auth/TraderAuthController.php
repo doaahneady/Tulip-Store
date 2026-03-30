@@ -10,6 +10,7 @@ use App\Models\Trader;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
@@ -145,6 +146,11 @@ class TraderAuthController extends Controller
 
     public function apiRegister(Request $request)
     {
+        \Log::info('Trader API Registration started', [
+            'email' => $request->email,
+            'files' => array_keys($request->allFiles())
+        ]);
+
         $validated = $request->validate([
             'business_name_en' => 'required|string|min:2|max:255|regex:/^[a-zA-Z0-9\s]+$/',
             'business_name_ar' => 'required|string|min:2|max:255|regex:/^[\x{0600}-\x{06FF}0-9\s]+$/u',
@@ -165,6 +171,10 @@ class TraderAuthController extends Controller
             'account_holder' => 'nullable|string|max:255',
             'account_number' => 'nullable|string|max:100',
             'iban' => 'nullable|string|max:50',
+            'business_logo' => 'nullable|file|mimes:jpg,jpeg,png,heic,heif|max:2048',
+            'owner_id_card' => 'nullable|file|mimes:pdf,jpg,jpeg,png,heic,heif|max:5120',
+            'business_license' => 'nullable|file|mimes:pdf,jpg,jpeg,png,heic,heif|max:5120',
+            'tax_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png,heic,heif|max:5120',
         ], [
             'business_name_en.min' => 'الاسم التجاري بالإنجليزية يجب أن يكون 3 محارف على الأقل',
             'business_name_en.regex' => 'الاسم التجاري بالإنجليزية يجب أن يحتوي على أحرف إنجليزية وأرقام فقط',
@@ -178,65 +188,76 @@ class TraderAuthController extends Controller
             'business_address.min' => 'عنوان العمل يجب أن يكون 3 محارف على الأقل',
         ]);
 
-        $user = User::create([
-            'name' => $validated['business_name_en'],
-            'username' => Str::slug($validated['business_name_en']).'_'.Str::random(5),
-            'email' => strtolower($validated['email']),
-            'phone' => $validated['phone'],
-            'password' => Hash::make($validated['password']),
-            'verified' => false,
-            'is_trader' => true,
-        ]);
-
-        $traderData = [
-            'user_id' => $user->id,
-            'name' => $validated['business_name_en'],
-            'company_name' => $validated['business_name_ar'] ?? null,
-            'contact_email' => $user->email,
-            'contact_phone' => $user->phone,
-            'status' => Trader::STATUS_PENDING,
-            'payout_settings' => [
-                'bank' => [
-                    'bank_name' => $validated['bank_name'] ?? null,
-                    'account_holder' => $validated['account_holder'] ?? null,
-                    'account_number' => $validated['account_number'] ?? null,
-                    'iban' => $validated['iban'] ?? null,
-                ],
-                'business' => [
-                    'registration_number' => $validated['registration_number'] ?? null,
-                    'tax_id' => $validated['tax_id'] ?? null,
-                    'contact_person' => $validated['contact_person'],
-                    'business_address' => $validated['business_address'],
-                ],
-            ],
-        ];
-        if (Schema::hasColumn('traders', 'account_name_en')) {
-            $traderData['account_name_en'] = $validated['business_name_en'];
-        }
-        if (Schema::hasColumn('traders', 'account_name_ar')) {
-            $traderData['account_name_ar'] = $validated['business_name_ar'] ?? $validated['business_name_en'];
-        }
-        if (Schema::hasColumn('traders', 'email')) {
-            $traderData['email'] = $user->email;
-        }
-        if (Schema::hasColumn('traders', 'phone')) {
-            $traderData['phone'] = $user->phone;
-        }
-        if (Schema::hasColumn('traders', 'responsible_name')) {
-            $traderData['responsible_name'] = $validated['contact_person'];
-        }
-        if (Schema::hasColumn('traders', 'work_address')) {
-            $traderData['work_address'] = $validated['business_address'];
-        }
-        if (Schema::hasColumn('traders', 'activity')) {
-            $traderData['activity'] = 'mart';
-        }
-        if (Schema::hasColumn('traders', 'password')) {
-            $traderData['password'] = Hash::make($validated['password']);
-        }
-        $trader = Trader::create($traderData);
-
         try {
+            DB::beginTransaction();
+
+            $user = User::create([
+                'name' => $validated['business_name_en'],
+                'username' => Str::slug($validated['business_name_en']).'_'.Str::random(5),
+                'email' => strtolower($validated['email']),
+                'phone' => $validated['phone'],
+                'password' => Hash::make($validated['password']),
+                'verified' => false,
+                'is_trader' => true,
+            ]);
+
+            $documents = [];
+            $userDir = 'trader_documents/' . $user->id;
+            
+            // Log directory attempt
+            \Log::info('Attempting to create directory: ' . $userDir);
+            
+            if (!Storage::disk('public')->exists($userDir)) {
+                Storage::disk('public')->makeDirectory($userDir, 0775, true);
+            }
+
+            $fileFields = ['business_logo', 'business_license', 'tax_certificate', 'owner_id_card'];
+            foreach ($fileFields as $field) {
+                if ($request->hasFile($field)) {
+                    $file = $request->file($field);
+                    $path = $file->store($userDir, 'public');
+                    $documents[$field] = $path;
+                    \Log::info("File saved for field $field: $path");
+                }
+            }
+
+            $traderData = [
+                'user_id' => $user->id,
+                'name' => $validated['business_name_en'],
+                'company_name' => $validated['business_name_ar'] ?? null,
+                'contact_email' => $user->email,
+                'contact_phone' => $user->phone,
+                'status' => Trader::STATUS_PENDING,
+                'payout_settings' => [
+                    'bank' => [
+                        'bank_name' => $validated['bank_name'] ?? null,
+                        'account_holder' => $validated['account_holder'] ?? null,
+                        'account_number' => $validated['account_number'] ?? null,
+                        'iban' => $validated['iban'] ?? null,
+                    ],
+                    'business' => [
+                        'registration_number' => $validated['registration_number'] ?? null,
+                        'tax_id' => $validated['tax_id'] ?? null,
+                        'contact_person' => $validated['contact_person'],
+                        'business_address' => $validated['business_address'],
+                    ],
+                    'documents' => $documents,
+                ],
+            ];
+
+            if (Schema::hasColumn('traders', 'account_name_en')) $traderData['account_name_en'] = $validated['business_name_en'];
+            if (Schema::hasColumn('traders', 'account_name_ar')) $traderData['account_name_ar'] = $validated['business_name_ar'] ?? $validated['business_name_en'];
+            if (Schema::hasColumn('traders', 'email')) $traderData['email'] = $user->email;
+            if (Schema::hasColumn('traders', 'phone')) $traderData['phone'] = $user->phone;
+            if (Schema::hasColumn('traders', 'responsible_name')) $traderData['responsible_name'] = $validated['contact_person'];
+            if (Schema::hasColumn('traders', 'work_address')) $traderData['work_address'] = $validated['business_address'];
+            if (Schema::hasColumn('traders', 'activity')) $traderData['activity'] = 'mart';
+            if (Schema::hasColumn('traders', 'password')) $traderData['password'] = Hash::make($validated['password']);
+
+            $trader = Trader::create($traderData);
+
+            DB::commit();
+
             SystemLog::create([
                 'level' => 'info',
                 'action' => 'trader_registration_submitted',
@@ -244,19 +265,20 @@ class TraderAuthController extends Controller
                 'user' => $user->email,
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
-                'metadata' => [
-                    'trader_id' => $trader->id,
-                    'company' => $trader->name,
-                ],
+                'metadata' => ['trader_id' => $trader->id],
             ]);
-        } catch (\Throwable $e) {
-        }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'تم إرسال طلب إنشاء الحساب. يجب انتظار موافقة خدمة العملاء ثم تسجيل الدخول.',
-            'redirect' => route('trader.login.form'),
-        ], 201);
+            return response()->json([
+                'success' => true,
+                'message' => 'تم إرسال طلب إنشاء الحساب بنجاح.',
+                'redirect' => route('trader.login.form'),
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Trader API Registration Error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json(['success' => false, 'message' => 'حدث خطأ أثناء التسجيل: ' . $e->getMessage()], 500);
+        }
     }
 
     public function login(Request $request)
@@ -266,19 +288,12 @@ class TraderAuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $trader = Trader::where('email', $request->email)
+            ->orWhere('contact_email', $request->email)
+            ->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        if (! $trader || ! Hash::check($request->password, $trader->password)) {
             return back()->withErrors(['email' => 'بيانات الدخول غير صحيحة'])->withInput($request->only('email'));
-        }
-
-        if (! $user->is_trader) {
-            return back()->withErrors(['email' => 'الحساب ليس لحساب تاجر'])->withInput($request->only('email'));
-        }
-
-        $trader = Trader::where('user_id', $user->id)->first();
-        if (! $trader) {
-            return back()->withErrors(['email' => 'لم يتم العثور على ملف التاجر لهذا الحساب'])->withInput($request->only('email'));
         }
 
         if ($trader->status === Trader::STATUS_PENDING) {
@@ -292,7 +307,7 @@ class TraderAuthController extends Controller
         }
 
         Auth::guard('web')->logout();
-        Auth::guard('trader')->login($user, $request->boolean('remember'));
+        Auth::guard('trader')->login($trader, $request->boolean('remember'));
         $request->session()->regenerate();
 
         return redirect('/trader/dashboard');
@@ -337,81 +352,72 @@ class TraderAuthController extends Controller
             'owner_id_card.required' => 'يرجى رفع هوية المالك',
         ]);
 
-        $user = User::create([
-            'name' => $validated['business_name_en'],
-            'username' => Str::slug($validated['business_name_en']).'_'.Str::random(5),
-            'email' => strtolower($validated['email']),
-            'phone' => $validated['phone'],
-            'password' => Hash::make($validated['password']),
-            'verified' => false,
-            'is_trader' => true,
-        ]);
-
-        $documents = [];
-        $dir = 'trader_documents/'.$user->id;
-        if ($request->file('business_logo')) {
-            $documents['business_logo'] = Storage::disk('public')->putFile($dir, $request->file('business_logo'));
-        }
-        if ($request->file('business_license')) {
-            $documents['business_license'] = Storage::disk('public')->putFile($dir, $request->file('business_license'));
-        }
-        if ($request->file('tax_certificate')) {
-            $documents['tax_certificate'] = Storage::disk('public')->putFile($dir, $request->file('tax_certificate'));
-        }
-        if ($request->file('owner_id_card')) {
-            $documents['owner_id_card'] = Storage::disk('public')->putFile($dir, $request->file('owner_id_card'));
-        }
-
-        $traderData = [
-            'user_id' => $user->id,
-            'name' => $validated['business_name_en'],
-            'company_name' => $validated['business_name_ar'] ?? null,
-            'contact_email' => $user->email,
-            'contact_phone' => $user->phone,
-            'status' => Trader::STATUS_PENDING,
-            'payout_settings' => [
-                'bank' => [
-                    'bank_name' => $validated['bank_name'] ?? null,
-                    'account_holder' => $validated['account_holder'] ?? null,
-                    'account_number' => $validated['account_number'] ?? null,
-                    'iban' => $validated['iban'] ?? null,
-                ],
-                'business' => [
-                    'registration_number' => $validated['registration_number'] ?? null,
-                    'tax_id' => $validated['tax_id'] ?? null,
-                    'contact_person' => $validated['contact_person'],
-                    'business_address' => $validated['business_address'],
-                ],
-                'documents' => $documents,
-            ],
-        ];
-        if (Schema::hasColumn('traders', 'account_name_en')) {
-            $traderData['account_name_en'] = $validated['business_name_en'];
-        }
-        if (Schema::hasColumn('traders', 'account_name_ar')) {
-            $traderData['account_name_ar'] = $validated['business_name_ar'] ?? $validated['business_name_en'];
-        }
-        if (Schema::hasColumn('traders', 'email')) {
-            $traderData['email'] = $user->email;
-        }
-        if (Schema::hasColumn('traders', 'phone')) {
-            $traderData['phone'] = $user->phone;
-        }
-        if (Schema::hasColumn('traders', 'responsible_name')) {
-            $traderData['responsible_name'] = $validated['contact_person'];
-        }
-        if (Schema::hasColumn('traders', 'work_address')) {
-            $traderData['work_address'] = $validated['business_address'];
-        }
-        if (Schema::hasColumn('traders', 'activity')) {
-            $traderData['activity'] = 'mart';
-        }
-        if (Schema::hasColumn('traders', 'password')) {
-            $traderData['password'] = Hash::make($validated['password']);
-        }
-        $trader = Trader::create($traderData);
-
         try {
+            DB::beginTransaction();
+
+            $user = User::create([
+                'name' => $validated['business_name_en'],
+                'username' => Str::slug($validated['business_name_en']).'_'.Str::random(5),
+                'email' => strtolower($validated['email']),
+                'phone' => $validated['phone'],
+                'password' => Hash::make($validated['password']),
+                'verified' => false,
+                'is_trader' => true,
+            ]);
+
+            $documents = [];
+            $userDir = 'trader_documents/' . $user->id;
+            
+            if (!Storage::disk('public')->exists($userDir)) {
+                Storage::disk('public')->makeDirectory($userDir, 0775, true);
+            }
+
+            $fileFields = ['business_logo', 'business_license', 'tax_certificate', 'owner_id_card'];
+            foreach ($fileFields as $field) {
+                if ($request->hasFile($field)) {
+                    $file = $request->file($field);
+                    $path = $file->store($userDir, 'public');
+                    $documents[$field] = $path;
+                }
+            }
+
+            $traderData = [
+                'user_id' => $user->id,
+                'name' => $validated['business_name_en'],
+                'company_name' => $validated['business_name_ar'] ?? null,
+                'contact_email' => $user->email,
+                'contact_phone' => $user->phone,
+                'status' => Trader::STATUS_PENDING,
+                'payout_settings' => [
+                    'bank' => [
+                        'bank_name' => $validated['bank_name'] ?? null,
+                        'account_holder' => $validated['account_holder'] ?? null,
+                        'account_number' => $validated['account_number'] ?? null,
+                        'iban' => $validated['iban'] ?? null,
+                    ],
+                    'business' => [
+                        'registration_number' => $validated['registration_number'] ?? null,
+                        'tax_id' => $validated['tax_id'] ?? null,
+                        'contact_person' => $validated['contact_person'],
+                        'business_address' => $validated['business_address'],
+                    ],
+                    'documents' => $documents,
+                ],
+            ];
+
+            if (Schema::hasColumn('traders', 'account_name_en')) $traderData['account_name_en'] = $validated['business_name_en'];
+            if (Schema::hasColumn('traders', 'account_name_ar')) $traderData['account_name_ar'] = $validated['business_name_ar'] ?? $validated['business_name_en'];
+            if (Schema::hasColumn('traders', 'email')) $traderData['email'] = $user->email;
+            if (Schema::hasColumn('traders', 'phone')) $traderData['phone'] = $user->phone;
+            if (Schema::hasColumn('traders', 'responsible_name')) $traderData['responsible_name'] = $validated['contact_person'];
+            if (Schema::hasColumn('traders', 'work_address')) $traderData['work_address'] = $validated['business_address'];
+            if (Schema::hasColumn('traders', 'activity')) $traderData['activity'] = 'mart';
+            if (Schema::hasColumn('traders', 'password')) $traderData['password'] = Hash::make($validated['password']);
+
+            $trader = Trader::create($traderData);
+
+            DB::commit();
+
             SystemLog::create([
                 'level' => 'info',
                 'action' => 'trader_registration_submitted',
@@ -419,16 +425,17 @@ class TraderAuthController extends Controller
                 'user' => $user->email,
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
-                'metadata' => [
-                    'trader_id' => $trader->id,
-                    'company' => $trader->name,
-                ],
+                'metadata' => ['trader_id' => $trader->id],
             ]);
-        } catch (\Throwable $e) {
+
+            $request->session()->forget(['trader_registration_otp', 'trader_registration_otp_verified']);
+
+            return redirect()->route('trader.login.form')->with('success', 'تم إرسال طلب التسجيل بنجاح. يرجى انتظار موافقة الإدارة، وسيتم إعلامك عبر البريد الإلكتروني.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Trader Web Registration Error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return redirect()->back()->withErrors(['error' => 'حدث خطأ أثناء التسجيل: ' . $e->getMessage()])->withInput();
         }
-
-        $request->session()->forget(['trader_registration_otp', 'trader_registration_otp_verified']);
-
-        return redirect()->route('trader.login.form')->with('success', 'تم إرسال طلب التسجيل بنجاح. يرجى انتظار موافقة الإدارة، وسيتم إعلامك عبر البريد الإلكتروني.');
     }
 }

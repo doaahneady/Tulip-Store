@@ -83,7 +83,7 @@ class SupportDashboardController extends Controller
             \Log::error('Failed to send trader welcome email: ' . $e->getMessage());
         }
 
-        return back()->with('success', 'تمت الموافقة على حساب التاجر وإرسال بريد الترحيب');
+        return back()->with('success', 'ط·ع¾ط¸â€¦ط·ع¾ ط·آ§ط¸â€‍ط¸â€¦ط¸ث†ط·آ§ط¸ظ¾ط¸â€ڑط·آ© ط·آ¹ط¸â€‍ط¸â€° ط·آ­ط·آ³ط·آ§ط·آ¨ ط·آ§ط¸â€‍ط·ع¾ط·آ§ط·آ¬ط·آ± ط¸ث†ط·آ¥ط·آ±ط·آ³ط·آ§ط¸â€‍ ط·آ¨ط·آ±ط¸ظ¹ط·آ¯ ط·آ§ط¸â€‍ط·ع¾ط·آ±ط·آ­ط¸ظ¹ط·آ¨');
     }
 
     public function rejectTrader(Request $request, Trader $trader)
@@ -98,14 +98,32 @@ class SupportDashboardController extends Controller
             \App\Models\Notification::create([
                 'user_id' => $trader->user_id,
                 'type' => 'trader_rejection',
-                'title' => 'تم رفض طلب التاجر',
-                'message' => $validated['reason'],
-                'icon' => 'x-circle',
-                'color' => 'red',
+                'title' => 'ط·ع¾ط¸â€¦ ط·آ±ط¸ظ¾ط·آ¶ ط·آ·ط¸â€‍ط·آ¨ ط·آ§ط¸â€‍ط·ع¾ط·آ³ط·آ¬ط¸ظ¹ط¸â€‍',
+                'content' => $validated['reason'],
             ]);
         }
 
-        return back()->with('success', 'تم رفض حساب التاجر');
+        return back()->with('success', 'ط·ع¾ط¸â€¦ ط·آ±ط¸ظ¾ط·آ¶ ط·آ·ط¸â€‍ط·آ¨ ط·آ§ط¸â€‍ط·ع¾ط·آ§ط·آ¬ط·آ±');
+    }
+
+    public function traders(Request $request)
+    {
+        $traders = Trader::query()
+            ->when($request->search, function ($q, $search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('company_name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            })
+            ->when($request->status, fn($q, $status) => $q->where('status', $status))
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return view('dashboards.cs.traders.index', compact('traders'));
+    }
+
+    public function traderDetails(Trader $trader)
+    {
+        return view('dashboards.cs.traders.show', compact('trader'));
     }
 
     public function tickets(Request $request)
@@ -312,8 +330,8 @@ class SupportDashboardController extends Controller
             \App\Models\DashboardNotification::create([
                 'user_type' => User::class,
                 'user_id' => $trader->user_id,
-                'title' => 'تمت الموافقة على منتجك',
-                'message' => 'تمت الموافقة على المنتج: '.$product->name,
+                'title' => 'ط·ع¾ط¸â€¦ط·ع¾ ط·آ§ط¸â€‍ط¸â€¦ط¸ث†ط·آ§ط¸ظ¾ط¸â€ڑط·آ© ط·آ¹ط¸â€‍ط¸â€° ط¸â€¦ط¸â€ ط·ع¾ط·آ¬ط¸ئ’',
+                'message' => 'ط·ع¾ط¸â€¦ط·ع¾ ط·آ§ط¸â€‍ط¸â€¦ط¸ث†ط·آ§ط¸ظ¾ط¸â€ڑط·آ© ط·آ¹ط¸â€‍ط¸â€° ط·آ§ط¸â€‍ط¸â€¦ط¸â€ ط·ع¾ط·آ¬: '.$product->name,
                 'type' => 'success',
                 'is_read' => false,
                 'dashboard_type' => 'cs',
@@ -356,8 +374,8 @@ class SupportDashboardController extends Controller
             \App\Models\DashboardNotification::create([
                 'user_type' => User::class,
                 'user_id' => $trader->user_id,
-                'title' => 'تم رفض منتجك',
-                'message' => 'تم رفض المنتج: '.$product->name.' - السبب: '.$validated['reason'],
+                'title' => 'ط·ع¾ط¸â€¦ ط·آ±ط¸ظ¾ط·آ¶ ط¸â€¦ط¸â€ ط·ع¾ط·آ¬ط¸ئ’',
+                'message' => 'ط·ع¾ط¸â€¦ ط·آ±ط¸ظ¾ط·آ¶ ط·آ§ط¸â€‍ط¸â€¦ط¸â€ ط·ع¾ط·آ¬: '.$product->name.' - ط·آ§ط¸â€‍ط·آ³ط·آ¨ط·آ¨: '.$validated['reason'],
                 'type' => 'error',
                 'is_read' => false,
                 'dashboard_type' => 'cs',
@@ -401,14 +419,14 @@ class SupportDashboardController extends Controller
                 $updates['image_path'] = $path;
             }
             if (Schema::hasColumn('products', 'images')) {
-                // Cast as array on Product model — pass a PHP array, not a JSON string
+                // Cast as array on Product model أ¢â‚¬â€‌ pass a PHP array, not a JSON string
                 $updates['images'] = [$path];
             }
         }
 
         $product->update($updates);
 
-        return back()->with('success', 'تم تحديث طلب المنتج بنجاح');
+        return back()->with('success', 'ط·ع¾ط¸â€¦ ط·ع¾ط·آ­ط·آ¯ط¸ظ¹ط·آ« ط·آ·ط¸â€‍ط·آ¨ ط·آ§ط¸â€‍ط¸â€¦ط¸â€ ط·ع¾ط·آ¬ ط·آ¨ط¸â€ ط·آ¬ط·آ§ط·آ­');
     }
 
     public function orders(Request $request)
@@ -757,15 +775,15 @@ class SupportDashboardController extends Controller
         $next = $statusManager->normalize((string) $request->input('status'));
         $canonical = (array) config('order_statuses.canonical', []);
         if (! in_array($next, $canonical, true)) {
-            return back()->with('error', 'حالة غير صالحة');
+            return back()->with('error', 'ط·آ­ط·آ§ط¸â€‍ط·آ© ط·ط›ط¸ظ¹ط·آ± ط·آµط·آ§ط¸â€‍ط·آ­ط·آ©');
         }
         $employee = auth('employee')->user();
         if ($current === $next) {
-            return back()->with('success', 'تم تحديث حالة الطلب');
+            return back()->with('success', 'ط·ع¾ط¸â€¦ ط·ع¾ط·آ­ط·آ¯ط¸ظ¹ط·آ« ط·آ­ط·آ§ط¸â€‍ط·آ© ط·آ§ط¸â€‍ط·آ·ط¸â€‍ط·آ¨');
         }
         $adminOverride = (bool) ($employee->is_admin ?? false);
         if (! StatusTransitionService::canTransition('order', $current, $next, $adminOverride)) {
-            return back()->with('error', 'انتقال غير مسموح للحالة المطلوبة');
+            return back()->with('error', 'ط·آ§ط¸â€ ط·ع¾ط¸â€ڑط·آ§ط¸â€‍ ط·ط›ط¸ظ¹ط·آ± ط¸â€¦ط·آ³ط¸â€¦ط¸ث†ط·آ­ ط¸â€‍ط¸â€‍ط·آ­ط·آ§ط¸â€‍ط·آ© ط·آ§ط¸â€‍ط¸â€¦ط·آ·ط¸â€‍ط¸ث†ط·آ¨ط·آ©');
         }
 
         DB::transaction(function () use ($order, $current, $next, $employee, $adminOverride) {
@@ -780,6 +798,6 @@ class SupportDashboardController extends Controller
             }
         });
 
-        return back()->with('success', 'تم تحديث حالة الطلب');
+        return back()->with('success', 'ط·ع¾ط¸â€¦ ط·ع¾ط·آ­ط·آ¯ط¸ظ¹ط·آ« ط·آ­ط·آ§ط¸â€‍ط·آ© ط·آ§ط¸â€‍ط·آ·ط¸â€‍ط·آ¨');
     }
 }

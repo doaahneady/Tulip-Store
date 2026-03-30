@@ -735,9 +735,9 @@
                         <h3 class="product-name">{{ $product->name }}</h3>
                         <div class="product-footer">
                             <div class="price-wrapper">
-                                <span class="price-current">@money($price)</span>
+                                <span class="price-current js-home-price" data-usd="{{ $price }}">@money($price)</span>
                                 @if(!empty($product->discount_price))
-                                    <span class="price-old">@money($oldPrice)</span>
+                                    <span class="price-old js-home-price-old" data-usd="{{ $oldPrice }}">@money($oldPrice)</span>
                                 @endif
                             </div>
                             <button type="button" class="add-cart-btn" onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)" data-product-id="{{ $product->id }}" {{ $isOutOfStock ? 'disabled' : '' }} style="{{ $isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : '' }}">
@@ -797,9 +797,9 @@
                         <h3 class="product-name">{{ $product->name }}</h3>
                         <div class="product-footer">
                             <div class="price-wrapper">
-                                <span class="price-current">@money($price)</span>
+                                <span class="price-current js-home-price" data-usd="{{ $price }}">@money($price)</span>
                                 @if(!empty($product->discount_price))
-                                    <span class="price-old">@money($oldPrice)</span>
+                                    <span class="price-old js-home-price-old" data-usd="{{ $oldPrice }}">@money($oldPrice)</span>
                                 @endif
                             </div>
                             <button type="button" class="add-cart-btn" onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)" data-product-id="{{ $product->id }}" {{ $isOutOfStock ? 'disabled' : '' }} style="{{ $isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : '' }}">
@@ -846,5 +846,16 @@
 
 <script>window.isAuthenticated = {!! auth()->check() ? 'true' : 'false' !!};</script>
 <script src="/js/home-final.js?v={{ time() }}"></script>
-</body>
+<script>
+function rerenderHomePrices() {
+    document.querySelectorAll('.js-home-price, .js-home-price-old').forEach((node) => {
+        const usd = Number(node.dataset.usd || 0);
+        node.textContent = window.formatMoney ? window.formatMoney(usd) : ('$' + usd.toFixed(2));
+    });
+}
+
+document.addEventListener('DOMContentLoaded', rerenderHomePrices);
+window.addEventListener('tulip:currency-changed', rerenderHomePrices);
+window.addEventListener('tulip:exchange-rate-changed', rerenderHomePrices);
+</script></body>
 </html>

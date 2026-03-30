@@ -27,7 +27,7 @@ return [
 
         'trader' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'traders',
         ],
 
         'sanctum' => [
@@ -53,6 +53,11 @@ return [
             'model' => App\Models\User::class,
         ],
 
+        'traders' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Trader::class,
+        ],
+
         'employees' => [
             'driver' => 'eloquent',
             'model' => App\Models\Employee::class,
@@ -68,6 +73,13 @@ return [
     'passwords' => [
         'users' => [
             'provider' => 'users',
+            'table' => 'password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+
+        'traders' => [
+            'provider' => 'traders',
             'table' => 'password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,

@@ -98,7 +98,7 @@
         </div>
     </a>
     <a href="<?php echo e(route('dashboard.finance.driver-deliveries.index')); ?>" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center"><i class="fas fa-truck"></i></div>
+        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center"><i class="fas fa-truck"></i></div>
         <div>
             <div class="text-sm font-semibold text-gray-900">تسليمات السائقين</div>
             <div class="text-xs text-gray-500">اعتماد الدفع والسجل</div>
@@ -119,7 +119,7 @@
         </div>
     </a>
     <a href="<?php echo e(route('dashboard.finance.reports')); ?>" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gray-100 text-gray-700 flex items-center justify-center"><i class="fas fa-file-invoice-dollar"></i></div>
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center"><i class="fas fa-file-invoice-dollar"></i></div>
         <div>
             <div class="text-sm font-semibold text-gray-900">التقارير</div>
             <div class="text-xs text-gray-500">P&L / Cash Flow</div>

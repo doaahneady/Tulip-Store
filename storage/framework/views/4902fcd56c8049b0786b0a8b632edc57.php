@@ -45,7 +45,7 @@
 <html lang="<?php echo e($dashboardLocale); ?>" dir="<?php echo e($dashboardDir); ?>">
 <head>
        <!-- fav icon -->
-        <link rel="icon" type="image/png" href="/images/fav_icon.png">
+        <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
@@ -348,6 +348,38 @@
                 mq.addListener(onChange);
             }
         })();
+
+        // Global date input validation (ensure 4-digit year)
+        document.addEventListener('DOMContentLoaded', function() {
+            function enforceDateLimit(input) {
+                if (!input.getAttribute('min')) input.setAttribute('min', '1000-01-01');
+                if (!input.getAttribute('max')) input.setAttribute('max', '9999-12-31');
+                
+                input.addEventListener('input', function() {
+                    if (this.value && this.value.length > 10) {
+                        this.value = this.value.slice(0, 10);
+                    }
+                });
+            }
+
+            // Apply to existing inputs
+            document.querySelectorAll('input[type="date"]').forEach(enforceDateLimit);
+
+            // Watch for dynamically added inputs
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) {
+                            if (node.tagName === 'INPUT' && node.type === 'date') {
+                                enforceDateLimit(node);
+                            }
+                            node.querySelectorAll('input[type="date"]').forEach(enforceDateLimit);
+                        }
+                    });
+                });
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        });
     </script>
     <?php echo $__env->yieldPushContent('scripts'); ?>
     <?php

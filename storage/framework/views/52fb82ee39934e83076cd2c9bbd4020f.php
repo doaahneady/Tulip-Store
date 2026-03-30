@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice - <?php echo e($order->order_number); ?></title>
       <!-- fav icon -->
-        <link rel="icon" type="image/png" href="/images/fav_icon.png">
+        <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
     <style>
-        body { font-family: DejaVu Sans, sans-serif; margin: 0; padding: 24px; color: #111827; }
+        body {  font-family: "El Messiri", sans-serif; margin: 0; padding: 24px; color: #111827; }
         .header { display:flex; justify-content:space-between; align-items:flex-start; gap: 16px; margin-bottom: 18px; }
-        .brand { font-weight: 800; letter-spacing: 0.5px; color: #0f766e; font-size: 18px; }
+        .brand { font-weight: 600; letter-spacing: 0.6px; color: #0D464C; font-size: 18px;font-family:"Montserrat-Alt1" }
         .muted { color:#6b7280; font-size: 12px; }
         .pill { display:inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
         .pill--paid { background:#dcfce7; color:#166534; }
@@ -50,13 +50,13 @@
     <div class="header">
         <div>
             <?php if($logoGirlData): ?>
-                <div class="brand" style="font-size:22px; display:flex; align-items:center; gap:2px;">
-                    <span>T</span><img src="<?php echo e($logoGirlData); ?>" alt="" style="height:1.2em; width:auto; vertical-align:middle; display:inline-block;"><span>lip</span>
+                <div class="brand" style="font-size:22px; display:flex; align-items:center; gap:2px;">   
+                    <span style="color:#F05928;">T</span><img src="<?php echo e($logoGirlData); ?>" alt="" style="height:1.1em; width:auto; vertical-align:middle; display:inline-block;"><span>LIP</span>
                 </div>
             <?php elseif($invoiceLogoData): ?>
                 <img src="<?php echo e($invoiceLogoData); ?>" alt="Tulip" style="height:56px; width:auto; max-width:260px; display:block;">
             <?php else: ?>
-                <div class="brand" style="font-size:22px;">Tulip</div>
+                <div class="brand" style="font-size:22px;">TULIP</div>
             <?php endif; ?>
             <div class="muted" style="margin-top:4px;">Invoice</div>
         </div>

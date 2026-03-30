@@ -229,7 +229,8 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'email' => 'nullable|string',
+            'username' => 'nullable|string',
             'password' => 'required|string',
         ]);
 
@@ -238,6 +239,18 @@ class AuthController extends Controller
                 'success' => false,
                 'message' => 'Validation failed',
                 'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $identifier = trim((string) ($request->input('username') ?? $request->input('email') ?? ''));
+        if ($identifier === '') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => [
+                    'username' => ['The username field is required when email is not present.'],
+                    'email' => ['The email field is required when username is not present.'],
+                ],
             ], 422);
         }
 
@@ -256,7 +269,18 @@ class AuthController extends Controller
             }
         }
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::query()
+            ->where(function ($q) use ($identifier) {
+                if (str_contains($identifier, '@')) {
+                    $q->where('email', $identifier);
+                    return;
+                }
+                if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'username')) {
+                    $q->where('username', $identifier);
+                }
+                $q->orWhere('email', $identifier);
+            })
+            ->first();
 
         if ($user && $user->locked_until && $user->locked_until->isFuture()) {
             return response()->json([
@@ -267,7 +291,7 @@ class AuthController extends Controller
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
             \App\Services\CrossDepartmentFlowService::recordFailedLoginAttempt(
-                (string) $request->email,
+                $identifier,
                 $user?->id,
                 $request->ip(),
                 $request->userAgent()

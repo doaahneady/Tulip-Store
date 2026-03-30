@@ -29,6 +29,7 @@ class AdminDashboardController extends Controller
             'total_employees' => Employee::count(),
             'total_drivers' => Driver::count(),
             'active_drivers' => Driver::where('status', 'available')->count(),
+            'total_traders' => \App\Models\Trader::count(),
         ];
 
         // Revenue Data
@@ -69,6 +70,25 @@ class AdminDashboardController extends Controller
                 ->get()
             : collect();
 
-        return view('dashboards.admin.index', compact('metrics', 'revenue', 'chartData', 'recentOrders', 'topProducts', 'orderStatus', 'loginLogs'));
+        $systemLogs = \App\Models\SystemLog::orderBy('created_at', 'desc')->take(20)->get();
+
+        return view('dashboards.admin.index', compact('metrics', 'revenue', 'chartData', 'recentOrders', 'topProducts', 'orderStatus', 'loginLogs', 'systemLogs'));
+    }
+
+    public function traders()
+    {
+        $traders = \App\Models\Trader::paginate(20);
+        return view('dashboards.admin.traders.index', compact('traders'));
+    }
+
+    public function traderDetails(\App\Models\Trader $trader)
+    {
+        return view('dashboards.admin.traders.show', compact('trader'));
+    }
+
+    public function logs()
+    {
+        $logs = \App\Models\SystemLog::orderBy('created_at', 'desc')->paginate(50);
+        return view('dashboards.admin.logs', compact('logs'));
     }
 }

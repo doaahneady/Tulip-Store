@@ -33,10 +33,21 @@ class EmployeeAuthController extends Controller
         ]);
 
         $loginValue = $request->email;
+        
+        // First try to find employee by email, employee_code, or employee_id
         $employee = Employee::where('email', $loginValue)
             ->orWhere('employee_code', $loginValue)
             ->orWhere('employee_id', $loginValue)
             ->first();
+        
+        // If not found, check if it's a driver username
+        if (!$employee) {
+            $user = \App\Models\User::where('username', $loginValue)->first();
+            if ($user) {
+                // Find employee record linked to this user
+                $employee = Employee::where('user_id', $user->id)->first();
+            }
+        }
 
         if (! $employee || ! Hash::check($request->password, $employee->password)) {
             if (Schema::hasTable('system_logs')) {
@@ -71,7 +82,7 @@ class EmployeeAuthController extends Controller
             }
 
             throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+                'login' => ['The provided credentials are incorrect.'],
             ]);
         }
 
@@ -108,7 +119,7 @@ class EmployeeAuthController extends Controller
             }
 
             throw ValidationException::withMessages([
-                'email' => ['Your account is not active. Please contact HR.'],
+                'login' => ['Your account is not active. Please contact HR.'],
             ]);
         }
 

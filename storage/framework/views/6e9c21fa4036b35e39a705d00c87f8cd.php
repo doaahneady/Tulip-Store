@@ -1,3 +1,4 @@
+
 <?php $__env->startSection('content'); ?>
 <?php $title = 'إدارة السائقين'; $subtitle = 'قائمة السائقين وتحديث الحالة'; ?>
 
@@ -16,14 +17,14 @@
         </a>
     </div>
     <form method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input type="text" name="search" value="<?php echo e(request('search')); ?>" class="border rounded-xl px-4 py-2" placeholder="بحث بالاسم أو البريد">
-        <select name="status" class="border rounded-xl px-4 py-2">
+        <input type="text" name="search" value="<?php echo e(request('search')); ?>" class="border rounded-xl px-4 py-2" placeholder="بحث بالاسم أو اليوزر">
+        <select name="status" class="text-black rounded-xl px-4 py-2">
             <option value="">الحالة</option>
             <option value="active" <?php if(request('status')==='active'): echo 'selected'; endif; ?>>نشط</option>
             <option value="inactive" <?php if(request('status')==='inactive'): echo 'selected'; endif; ?>>غير نشط</option>
             <option value="suspended" <?php if(request('status')==='suspended'): echo 'selected'; endif; ?>>موقوف</option>
         </select>
-        <select name="availability" class="border rounded-xl px-4 py-2">
+        <select name="availability" class="text-black rounded-xl px-4 py-2">
             <option value="">التوفر</option>
             <option value="available" <?php if(request('availability')==='available'): echo 'selected'; endif; ?>>متاح</option>
             <option value="busy" <?php if(request('availability')==='busy'): echo 'selected'; endif; ?>>مشغول</option>
@@ -42,7 +43,7 @@
             <thead>
             <tr>
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">السائق</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">البريد</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">اليوزر</th>
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">الهاتف</th>
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">الحالة</th>
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">التوفر</th>
@@ -53,12 +54,12 @@
             <?php $__currentLoopData = $drivers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $driver): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
                     <td class="px-4 py-3 text-sm text-gray-900"><?php echo e(optional($driver->user)->name ?? optional($driver->user)->user_full_name ?? optional($driver->user)->email ?? ('Driver #'.$driver->id)); ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-500"><?php echo e(optional($driver->user)->email ?? '—'); ?></td>
+                    <td class="px-4 py-3 text-sm text-gray-500"><?php echo e(optional($driver->user)->username ?? '—'); ?></td>
                     <td class="px-4 py-3 text-sm text-gray-500"><?php echo e(optional($driver->user)->phone ?? optional($driver->user)->mobile ?? '—'); ?></td>
                     <td class="px-4 py-3">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                            <?php if($driver->status==='active'): ?> bg-green-100 text-green-800
-                            <?php elseif($driver->status==='inactive'): ?> bg-gray-100 text-gray-800
+                            <?php if($driver->status==='active'): ?> bg-gray-100 text-black-800
+                            <?php elseif($driver->status==='inactive'): ?> bg-gray-100 text-black-800
                             <?php else: ?> bg-red-100 text-red-800 <?php endif; ?>">
                             <?php echo e($driver->status); ?>
 
@@ -66,7 +67,7 @@
                     </td>
                     <td class="px-4 py-3">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                            <?php if($driver->availability==='available'): ?> bg-green-100 text-green-800
+                            <?php if($driver->availability==='available'): ?> bg-gray-100 text-black-800
                             <?php elseif($driver->availability==='busy'): ?> bg-blue-100 text-blue-800
                             <?php elseif($driver->availability==='on_break'): ?> bg-yellow-100 text-yellow-800
                             <?php else: ?> bg-gray-100 text-gray-800 <?php endif; ?>">

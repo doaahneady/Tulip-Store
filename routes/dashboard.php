@@ -101,6 +101,8 @@ Route::prefix('administrative-approvals')->name('administrative-approvals.')->mi
 // Customer Support Dashboard (Flow 9/10)
 Route::prefix('cs')->name('cs.')->middleware('dashboard.role:cs')->group(function () {
     Route::get('/', [SupportDashboardController::class, 'index'])->name('index');
+    Route::get('/traders', [SupportDashboardController::class, 'traders'])->name('traders.index');
+    Route::get('/traders/{trader}', [SupportDashboardController::class, 'traderDetails'])->name('traders.show');
     Route::post('/traders/{trader}/approve', [SupportDashboardController::class, 'approveTrader'])->name('traders.approve');
     Route::post('/traders/{trader}/reject', [SupportDashboardController::class, 'rejectTrader'])->name('traders.reject');
     Route::get('/tickets', [SupportDashboardController::class, 'tickets'])->name('tickets');
@@ -166,6 +168,8 @@ Route::prefix('admin')->name('admin.')->middleware('dashboard.role:admin')->grou
     Route::post('/announcements', [SuperAdminController::class, 'createAnnouncement'])->name('announcements.create');
     Route::get('/audit-logs', [SuperAdminController::class, 'auditLogs'])->name('audit-logs');
     Route::get('/users', [SuperAdminController::class, 'users'])->name('users');
+    Route::get('/traders', [SuperAdminController::class, 'traders'])->name('traders');
+    Route::get('/traders/{trader}', [SuperAdminController::class, 'traderDetails'])->name('traders.show');
     Route::post('/users', [SuperAdminController::class, 'createUser'])->name('users.create');
     Route::put('/users/{user}', [SuperAdminController::class, 'updateUser'])->name('users.update');
     Route::delete('/users/{user}', [SuperAdminController::class, 'deleteUser'])->name('users.delete');

@@ -969,7 +969,7 @@
                 .map((c, i) => {
                 const p = palette[i % palette.length];
                 const slug = c.slug || String(c.id);
-                const image = resolvePublicImage(c.image) || '/images/panner_mart.png';
+                const image = resolvePublicImage(c.image) || '/images/tulip_mart.jpg';
                 categoryImageBySlug[slug] = image;
                 return { id: slug, name: c.name || slug, image, color: p.color, gradient: p.gradient };
             });
@@ -1026,8 +1026,8 @@
         }
 
         function loadSpecialPrices() {
-            const first = categories.find(c => c.id === 'fruits') || categories[0];
-            const second = categories.find(c => c.id === 'vegetables') || categories[1];
+            const first = categories.find(c => c.id === 'fruits' || c.id === 'fruit') || categories[0];
+            const second = categories.find(c => c.id === 'vegetables' || c.id === 'vegetable') || categories[1];
 
             const fruitsSpecial = first ? (products[first.id] || []).slice(0, 4) : [];
             document.getElementById('fruitsSpecialPrices').innerHTML = fruitsSpecial.map(p => `

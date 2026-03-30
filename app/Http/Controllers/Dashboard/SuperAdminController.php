@@ -45,6 +45,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class SuperAdminController extends Controller
 {
@@ -1567,6 +1568,38 @@ class SuperAdminController extends Controller
         return view('dashboards.super-admin.mart', compact('categories', 'products'));
     }
 
+    private function generateUniqueSku(string $prefix, ?int $ignoreProductId = null): string
+    {
+        $clean = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $prefix) ?? '', 0, 3));
+        if ($clean === '') {
+            $clean = 'PRD';
+        }
+
+        $latest = Product::query()
+            ->when(Schema::hasColumn('products', 'sku'), fn ($q) => $q->where('sku', 'like', $clean.'-%'))
+            ->orderBy('sku', 'desc')
+            ->value('sku');
+
+        $next = 1;
+        if (is_string($latest) && preg_match('/-(\d+)$/', $latest, $m)) {
+            $next = max(1, ((int) $m[1]) + 1);
+        }
+
+        for ($i = 0; $i < 500; $i++) {
+            $sku = $clean.'-'.str_pad((string) $next, 5, '0', STR_PAD_LEFT);
+            $exists = Product::query()
+                ->where('sku', $sku)
+                ->when($ignoreProductId !== null, fn ($q) => $q->where('id', '!=', $ignoreProductId))
+                ->exists();
+            if (! $exists) {
+                return $sku;
+            }
+            $next++;
+        }
+
+        return $clean.'-'.str_pad((string) random_int(1, 99999), 5, '0', STR_PAD_LEFT);
+    }
+
     public function createMartProduct()
     {
         abort_unless(Schema::hasTable('products'), 404);
@@ -1584,13 +1617,13 @@ class SuperAdminController extends Controller
     {
         abort_unless(Schema::hasTable('products'), 404);
 
-        $validated = $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'details' => 'nullable|string',
             'category_id' => 'nullable|integer|exists:categories,id',
-            'sku' => 'nullable|string|max:255',
+            'sku' => ['nullable', 'string', 'max:255'],
             'price' => 'nullable|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0',
             'stock_quantity' => 'nullable|integer|min:0',
@@ -1601,7 +1634,11 @@ class SuperAdminController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
             'unit' => 'nullable|string|max:50',
             'origin' => 'nullable|string|max:100',
-        ]);
+        ];
+        if (Schema::hasColumn('products', 'sku')) {
+            $rules['sku'][] = Rule::unique('products', 'sku');
+        }
+        $validated = $request->validate($rules);
 
         $slug = trim((string) ($validated['slug'] ?? ''));
         $slug = $slug === '' ? Str::slug($validated['name']) : Str::slug($slug);
@@ -1620,15 +1657,16 @@ class SuperAdminController extends Controller
             $imagePath = Storage::disk('public')->putFile('products', $request->file('image'));
         }
 
-        $sku = $validated['sku'] ?? null;
-        if (empty($sku) && !empty($validated['category_id'])) {
-            $cat = Category::find($validated['category_id']);
-            if ($cat) {
-                $count = Product::where('category_id', $cat->id)->count();
-                $prefix = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $cat->name), 0, 3));
-                if (empty($prefix)) { $prefix = 'PRD'; }
-                $sku = $prefix . '-' . str_pad($count + 1, 5, '0', STR_PAD_LEFT);
+        $sku = trim((string) ($validated['sku'] ?? ''));
+        if ($sku === '') {
+            $prefix = 'PRD';
+            if (! empty($validated['category_id'])) {
+                $cat = Category::find($validated['category_id']);
+                if ($cat) {
+                    $prefix = (string) $cat->name;
+                }
             }
+            $sku = $this->generateUniqueSku($prefix);
         }
 
         $data = [
@@ -1693,13 +1731,13 @@ class SuperAdminController extends Controller
     {
         abort_unless(Schema::hasTable('products'), 404);
 
-        $validated = $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'details' => 'nullable|string',
             'category_id' => 'nullable|integer|exists:categories,id',
-            'sku' => 'nullable|string|max:255',
+            'sku' => ['nullable', 'string', 'max:255'],
             'price' => 'nullable|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0',
             'stock_quantity' => 'nullable|integer|min:0',
@@ -1710,7 +1748,11 @@ class SuperAdminController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
             'unit' => 'nullable|string|max:50',
             'origin' => 'nullable|string|max:100',
-        ]);
+        ];
+        if (Schema::hasColumn('products', 'sku')) {
+            $rules['sku'][] = Rule::unique('products', 'sku')->ignore($product->id);
+        }
+        $validated = $request->validate($rules);
 
         $slug = trim((string) ($validated['slug'] ?? ''));
         $slug = $slug === '' ? Str::slug($validated['name']) : Str::slug($slug);
@@ -1729,16 +1771,18 @@ class SuperAdminController extends Controller
             'slug' => $slug,
         ];
 
-        $sku = $validated['sku'] ?? $product->sku;
-        $categoryChanged = isset($validated['category_id']) && (int)$validated['category_id'] !== (int)$product->category_id;
-        if ((empty($sku) || $categoryChanged) && !empty($validated['category_id'])) {
-            $cat = Category::find($validated['category_id']);
-            if ($cat) {
-                $count = Product::where('category_id', $cat->id)->count();
-                $prefix = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $cat->name), 0, 3));
-                if (empty($prefix)) { $prefix = 'PRD'; }
-                $sku = $prefix . '-' . str_pad($count + ($categoryChanged ? 1 : 0), 5, '0', STR_PAD_LEFT);
+        $sku = trim((string) ($validated['sku'] ?? ($product->sku ?? '')));
+        $categoryChanged = array_key_exists('category_id', $validated) && (int) ($validated['category_id'] ?? 0) !== (int) ($product->category_id ?? 0);
+        if ($sku === '' || $categoryChanged) {
+            $prefix = 'PRD';
+            $catId = $validated['category_id'] ?? $product->category_id;
+            if (! empty($catId)) {
+                $cat = Category::find($catId);
+                if ($cat) {
+                    $prefix = (string) $cat->name;
+                }
             }
+            $sku = $this->generateUniqueSku($prefix, $product->id);
         }
         $updates['sku'] = $sku;
 
@@ -2073,15 +2117,29 @@ class SuperAdminController extends Controller
     {
         abort_unless(Schema::hasTable('products'), 404);
         $categories = collect();
-        $vegFruitSlugs = ['fruits', 'vegetables', 'khdroaat', 'khodraat', 'mart-fruits', 'mart-vegetables'];
+        
+        // Get all mart categories that are fruits or vegetables
+        // Look for categories with names or slugs containing these keywords
         if (Schema::hasTable('categories')) {
             $categories = Category::query()
                 ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'mart'))
-                ->when(true, fn ($q) => $q->whereIn('slug', $vegFruitSlugs))
+                ->where(function($q) {
+                    // Match by slug or name containing fruit/vegetable keywords in Arabic or English
+                    $q->where('name', 'like', '%فواكه%')
+                      ->orWhere('name', 'like', '%خضروات%')
+                      ->orWhere('name', 'like', '%خضار%')
+                      ->orWhere('name', 'like', '%fruit%')
+                      ->orWhere('name', 'like', '%vegetable%')
+                      ->orWhere('slug', 'like', '%fruit%')
+                      ->orWhere('slug', 'like', '%vegetable%')
+                      ->orWhere('slug', 'like', '%khdroaat%')
+                      ->orWhere('slug', 'like', '%khodraat%');
+                })
                 ->orderBy('display_order')
                 ->orderBy('name')
                 ->get();
         }
+        
         $allowedIds = $categories->pluck('id')->all();
         $products = Product::query()
             ->with(['category', 'attributes'])

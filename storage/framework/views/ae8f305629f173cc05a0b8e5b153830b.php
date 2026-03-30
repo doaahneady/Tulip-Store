@@ -343,15 +343,14 @@
 
 <!-- CATEGORIES - SMALLER, ICON-BASED, BLUE LINE, SMALLER BUTTONS -->
 <section id="categories" style="padding:2rem 1.5rem; background:#fff;">
-    <div style="max-width:1400px; margin:0 auto; position:relative;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
-            <h2 style="font-family:'El Messiri',sans-serif; font-size:1.6rem; font-weight:800; color:#1a1a1a; margin:0;">
-                 تسوق حسب الفئة
-            </h2>
-            <a href="/categories" style="color:#2a7080; font-size:1rem; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:0.5rem; transition:all 0.3s;" onmouseover="this.style.gap='0.8rem'" onmouseout="this.style.gap='0.5rem'">
-                عرض الكل <i class="fas fa-arrow-left"></i>
-            </a>
-        </div>
+<div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+    <h2 style="font-family:'El Messiri',sans-serif; font-size:1.6rem; font-weight:800; color:#1a1a1a; margin:0;">
+        تسوق حسب الفئة
+    </h2>
+    <a href="/categories" style="color:#2a7080; font-size:1rem; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:0.5rem; transition:all 0.3s;" onmouseover="this.style.gap='0.8rem'" onmouseout="this.style.gap='0.5rem'">
+        عرض الكل <i class="fas fa-arrow-left"></i>
+    </a>
+</div>
         
         <div class="marquee-container">
             <div class="marquee-track">
@@ -736,9 +735,9 @@
                         <h3 class="product-name"><?php echo e($product->name); ?></h3>
                         <div class="product-footer">
                             <div class="price-wrapper">
-                                <span class="price-current"><?php echo app(App\Services\CurrencyService::class)->formatUsd((float)($price)); ?></span>
+                                <span class="price-current js-home-price" data-usd="<?php echo e($price); ?>"><?php echo app(App\Services\CurrencyService::class)->formatUsd((float)($price)); ?></span>
                                 <?php if(!empty($product->discount_price)): ?>
-                                    <span class="price-old"><?php echo app(App\Services\CurrencyService::class)->formatUsd((float)($oldPrice)); ?></span>
+                                    <span class="price-old js-home-price-old" data-usd="<?php echo e($oldPrice); ?>"><?php echo app(App\Services\CurrencyService::class)->formatUsd((float)($oldPrice)); ?></span>
                                 <?php endif; ?>
                             </div>
                             <button type="button" class="add-cart-btn" onclick="event.stopPropagation(); addToCart(<?php echo e($product->id); ?>, this)" data-product-id="<?php echo e($product->id); ?>" <?php echo e($isOutOfStock ? 'disabled' : ''); ?> style="<?php echo e($isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : ''); ?>">
@@ -798,9 +797,9 @@
                         <h3 class="product-name"><?php echo e($product->name); ?></h3>
                         <div class="product-footer">
                             <div class="price-wrapper">
-                                <span class="price-current"><?php echo app(App\Services\CurrencyService::class)->formatUsd((float)($price)); ?></span>
+                                <span class="price-current js-home-price" data-usd="<?php echo e($price); ?>"><?php echo app(App\Services\CurrencyService::class)->formatUsd((float)($price)); ?></span>
                                 <?php if(!empty($product->discount_price)): ?>
-                                    <span class="price-old"><?php echo app(App\Services\CurrencyService::class)->formatUsd((float)($oldPrice)); ?></span>
+                                    <span class="price-old js-home-price-old" data-usd="<?php echo e($oldPrice); ?>"><?php echo app(App\Services\CurrencyService::class)->formatUsd((float)($oldPrice)); ?></span>
                                 <?php endif; ?>
                             </div>
                             <button type="button" class="add-cart-btn" onclick="event.stopPropagation(); addToCart(<?php echo e($product->id); ?>, this)" data-product-id="<?php echo e($product->id); ?>" <?php echo e($isOutOfStock ? 'disabled' : ''); ?> style="<?php echo e($isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : ''); ?>">
@@ -847,6 +846,17 @@
 
 <script>window.isAuthenticated = <?php echo auth()->check() ? 'true' : 'false'; ?>;</script>
 <script src="/js/home-final.js?v=<?php echo e(time()); ?>"></script>
-</body>
+<script>
+function rerenderHomePrices() {
+    document.querySelectorAll('.js-home-price, .js-home-price-old').forEach((node) => {
+        const usd = Number(node.dataset.usd || 0);
+        node.textContent = window.formatMoney ? window.formatMoney(usd) : ('$' + usd.toFixed(2));
+    });
+}
+
+document.addEventListener('DOMContentLoaded', rerenderHomePrices);
+window.addEventListener('tulip:currency-changed', rerenderHomePrices);
+window.addEventListener('tulip:exchange-rate-changed', rerenderHomePrices);
+</script></body>
 </html>
 <?php /**PATH E:\Tulip-Store\resources\views/home-new.blade.php ENDPATH**/ ?>

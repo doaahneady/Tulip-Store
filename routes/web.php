@@ -28,18 +28,50 @@ Route::get('/storage/{path}', function (string $path) {
         abort(404);
     }
 
-    $disk = Storage::disk('public');
-    if (! $disk->exists($path)) {
-        abort(404);
+    // Try multiple possible storage base directories for maximum compatibility
+    $basePaths = [
+        storage_path('app/public'),
+        storage_path('app'),
+        base_path('storage/app/public'),
+        base_path('storage/app'),
+        public_path('storage'),
+    ];
+
+    foreach ($basePaths as $base) {
+        if (!is_dir($base)) continue;
+        
+        $fullPath = rtrim($base, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
+        
+        if (file_exists($fullPath) && is_file($fullPath)) {
+            $mime = 'application/octet-stream';
+            try {
+                $mime = mime_content_type($fullPath) ?: 'application/octet-stream';
+            } catch (\Exception $e) {
+                // Ignore mime errors
+            }
+            
+            return response()->file($fullPath, [
+                'Content-Type' => $mime,
+                'Cache-Control' => 'public, max-age=31536000, immutable',
+            ]);
+        }
     }
 
-    $mime = $disk->mimeType($path) ?: 'application/octet-stream';
-    return response($disk->get($path), 200, [
-        'Content-Type' => $mime,
-        'Cache-Control' => 'public, max-age=31536000, immutable',
-    ]);
+    abort(404);
 })->where('path', '.*');
 
+Route::post('/api/session/exchange-rate', function (\Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'usd_to_syp_rate' => 'required|numeric|min:1|max:100000',
+    ]);
+
+    session(['usd_to_syp_rate' => (float) $validated['usd_to_syp_rate']]);
+
+    return response()->json([
+        'success' => true,
+        'usd_to_syp_rate' => (float) $validated['usd_to_syp_rate'],
+    ]);
+});
 Route::get('/', function () {
     $martSlugs = ['fruits', 'vegetables', 'khdroaat', 'khodraat', 'mart-fruits', 'mart-vegetables'];
 
@@ -80,20 +112,20 @@ Route::get('/', function () {
     $defaultSlides = [
         [
             'image' => 'public\images\banner1.jpg',
-            'title' => 'أرسل',
-            'subtitle' => 'تسوق معنا أفضل المنتجات والعروض',
+            'title' => 'ط·آ·ط¢آ£ط·آ·ط¢آ±ط·آ·ط¢آ³ط·آ¸أ¢â‚¬â€چ',
+            'subtitle' => 'ط·آ·ط¹آ¾ط·آ·ط¢آ³ط·آ¸ط«â€ ط·آ¸أ¢â‚¬ع‘ ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ¹ط·آ¸أ¢â‚¬آ ط·آ·ط¢آ§ ط·آ·ط¢آ£ط·آ¸ط¸آ¾ط·آ·ط¢آ¶ط·آ¸أ¢â‚¬â€چ ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ¸أ¢â‚¬آ¦ط·آ¸أ¢â‚¬آ ط·آ·ط¹آ¾ط·آ·ط¢آ¬ط·آ·ط¢آ§ط·آ·ط¹آ¾ ط·آ¸ط«â€ ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ·ط¢آ¹ط·آ·ط¢آ±ط·آ¸ط«â€ ط·آ·ط¢آ¶',
             'link' => '/store',
         ],
         [
             'image' => '/images/banner2.jpg',
-            'title' => 'عروض وخصومات',
-            'subtitle' => 'اكتشف عروضنا المميزة وتوفير أكبر على مشترياتك',
+            'title' => 'ط·آ·ط¢آ¹ط·آ·ط¢آ±ط·آ¸ط«â€ ط·آ·ط¢آ¶ ط·آ¸ط«â€ ط·آ·ط¢آ®ط·آ·ط¢آµط·آ¸ط«â€ ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ§ط·آ·ط¹آ¾',
+            'subtitle' => 'ط·آ·ط¢آ§ط·آ¸ط¦â€™ط·آ·ط¹آ¾ط·آ·ط¢آ´ط·آ¸ط¸آ¾ ط·آ·ط¢آ¹ط·آ·ط¢آ±ط·آ¸ط«â€ ط·آ·ط¢آ¶ط·آ¸أ¢â‚¬آ ط·آ·ط¢آ§ ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ¸أ¢â‚¬آ¦ط·آ¸أ¢â‚¬آ¦ط·آ¸ط¸آ¹ط·آ·ط¢آ²ط·آ·ط¢آ© ط·آ¸ط«â€ ط·آ·ط¹آ¾ط·آ¸ط«â€ ط·آ¸ط¸آ¾ط·آ¸ط¸آ¹ط·آ·ط¢آ± ط·آ·ط¢آ£ط·آ¸ط¦â€™ط·آ·ط¢آ¨ط·آ·ط¢آ± ط·آ·ط¢آ¹ط·آ¸أ¢â‚¬â€چط·آ¸أ¢â‚¬آ° ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ´ط·آ·ط¹آ¾ط·آ·ط¢آ±ط·آ¸ط¸آ¹ط·آ·ط¢آ§ط·آ·ط¹آ¾ط·آ¸ط¦â€™',
             'link' => '/store?on_sale=1',
         ],
         [
             'image' => '/images/banner3.jpg',
-            'title' => 'وصل حديثاً',
-            'subtitle' => 'اكتشف أحدث المنتجات في متجرنا',
+            'title' => 'ط·آ¸ط«â€ ط·آ·ط¢آµط·آ¸أ¢â‚¬â€چ ط·آ·ط¢آ­ط·آ·ط¢آ¯ط·آ¸ط¸آ¹ط·آ·ط¢آ«ط·آ·ط¢آ§ط·آ¸أ¢â‚¬آ¹',
+            'subtitle' => 'ط·آ·ط¢آ§ط·آ¸ط¦â€™ط·آ·ط¹آ¾ط·آ·ط¢آ´ط·آ¸ط¸آ¾ ط·آ·ط¢آ£ط·آ·ط¢آ­ط·آ·ط¢آ¯ط·آ·ط¢آ« ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ¸أ¢â‚¬آ¦ط·آ¸أ¢â‚¬آ ط·آ·ط¹آ¾ط·آ·ط¢آ¬ط·آ·ط¢آ§ط·آ·ط¹آ¾ ط·آ¸ط¸آ¾ط·آ¸ط¸آ¹ ط·آ¸أ¢â‚¬آ¦ط·آ·ط¹آ¾ط·آ·ط¢آ¬ط·آ·ط¢آ±ط·آ¸أ¢â‚¬آ ط·آ·ط¢آ§',
             'link' => '/store?sort=newest',
         ],
     ];
@@ -196,7 +228,7 @@ Route::get('/debug-admin-employee', function () {
             'login_test' => [
                 'email' => 'admin@tulipstore.com',
                 'password' => 'password123',
-                'password_check' => $passwordCheck ? '✅ CORRECT' : '❌ INCORRECT',
+                'password_check' => $passwordCheck ? 'ط£آ¢ط¥â€œأ¢â‚¬آ¦ CORRECT' : 'ط£آ¢أ¢â‚¬إ’ط¥â€™ INCORRECT',
             ],
         ]);
     } catch (\Exception $e) {
@@ -636,7 +668,7 @@ Route::get('/test-employee-system', function () {
         </style>
     </head>
     <body>
-        <h1>🧪 Employee Authentication System Test</h1>
+        <h1>ط¸â€¹ط¹ط›ط¢آ§ط¹آ¾ Employee Authentication System Test</h1>
         
         <div class="card">
             <h2>Test Instructions</h2>
@@ -790,6 +822,7 @@ Route::middleware(['web'])->group(function () {
     Route::post('/api/custom-bouquet/add-to-cart', [\App\Http\Controllers\CustomGiftController::class, 'addBouquetToCart']);
 
     // Order API routes
+    Route::post('/api/checkout/delivery-fee', [\App\Http\Controllers\OrderController::class, 'deliveryFeeQuote']);
     Route::post('/api/orders/create', [\App\Http\Controllers\OrderController::class, 'create']);
     Route::post('/api/orders/{id}/upload-receipt', [\App\Http\Controllers\OrderController::class, 'uploadReceipt']);
     Route::get('/api/user/profile', function () {
@@ -1178,10 +1211,10 @@ Route::get('/create-test-orders', function () {
         [
             'order_number' => 'ORD-TEST-'.rand(1000, 9999),
             'user_id' => $user->id,
-            'recipient_name' => 'أحمد محمود',
+            'recipient_name' => 'ط·آ·ط¢آ£ط·آ·ط¢آ­ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ¯ ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ­ط·آ¸أ¢â‚¬آ¦ط·آ¸ط«â€ ط·آ·ط¢آ¯',
             'phone' => '0912345678',
-            'village' => 'دمشق - المزة',
-            'address_note' => 'بناء رقم 5، الطابق الثالث',
+            'village' => 'ط·آ·ط¢آ¯ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ´ط·آ¸أ¢â‚¬ع‘ - ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ²ط·آ·ط¢آ©',
+            'address_note' => 'ط·آ·ط¢آ¨ط·آ¸أ¢â‚¬آ ط·آ·ط¢آ§ط·آ·ط·إ’ ط·آ·ط¢آ±ط·آ¸أ¢â‚¬ع‘ط·آ¸أ¢â‚¬آ¦ 5ط·آ·ط¥â€™ ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ·ط¢آ·ط·آ·ط¢آ§ط·آ·ط¢آ¨ط·آ¸أ¢â‚¬ع‘ ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ·ط¢آ«ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ·ط¢آ«',
             'latitude' => 33.5138,
             'longitude' => 36.2765,
             'delivery_method' => 'home_delivery',
@@ -1196,10 +1229,10 @@ Route::get('/create-test-orders', function () {
         [
             'order_number' => 'ORD-TEST-'.rand(1000, 9999),
             'user_id' => $user->id,
-            'recipient_name' => 'فاطمة علي',
+            'recipient_name' => 'ط·آ¸ط¸آ¾ط·آ·ط¢آ§ط·آ·ط¢آ·ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ© ط·آ·ط¢آ¹ط·آ¸أ¢â‚¬â€چط·آ¸ط¸آ¹',
             'phone' => '0923456789',
-            'village' => 'حلب - الشهباء',
-            'address_note' => 'شارع الجامعة، بناء 12',
+            'village' => 'ط·آ·ط¢آ­ط·آ¸أ¢â‚¬â€چط·آ·ط¢آ¨ - ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ·ط¢آ´ط·آ¸أ¢â‚¬طŒط·آ·ط¢آ¨ط·آ·ط¢آ§ط·آ·ط·إ’',
+            'address_note' => 'ط·آ·ط¢آ´ط·آ·ط¢آ§ط·آ·ط¢آ±ط·آ·ط¢آ¹ ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ·ط¢آ¬ط·آ·ط¢آ§ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ¹ط·آ·ط¢آ©ط·آ·ط¥â€™ ط·آ·ط¢آ¨ط·آ¸أ¢â‚¬آ ط·آ·ط¢آ§ط·آ·ط·إ’ 12',
             'latitude' => 36.2021,
             'longitude' => 37.1343,
             'delivery_method' => 'home_delivery',
@@ -1214,10 +1247,10 @@ Route::get('/create-test-orders', function () {
         [
             'order_number' => 'ORD-TEST-'.rand(1000, 9999),
             'user_id' => $user->id,
-            'recipient_name' => 'محمد حسن',
+            'recipient_name' => 'ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ­ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ¯ ط·آ·ط¢آ­ط·آ·ط¢آ³ط·آ¸أ¢â‚¬آ ',
             'phone' => '0934567890',
-            'village' => 'حمص - الوعر',
-            'address_note' => 'قرب المسجد الكبير',
+            'village' => 'ط·آ·ط¢آ­ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آµ - ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ¸ط«â€ ط·آ·ط¢آ¹ط·آ·ط¢آ±',
+            'address_note' => 'ط·آ¸أ¢â‚¬ع‘ط·آ·ط¢آ±ط·آ·ط¢آ¨ ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ³ط·آ·ط¢آ¬ط·آ·ط¢آ¯ ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ¸ط¦â€™ط·آ·ط¢آ¨ط·آ¸ط¸آ¹ط·آ·ط¢آ±',
             'latitude' => 34.7324,
             'longitude' => 36.7137,
             'delivery_method' => 'home_delivery',
@@ -1240,7 +1273,7 @@ Route::get('/create-test-orders', function () {
         \App\Models\OrderItem::create([
             'order_id' => $order->id,
             'product_id' => 1,
-            'product_name' => 'منتج تجريبي',
+            'product_name' => 'ط·آ¸أ¢â‚¬آ¦ط·آ¸أ¢â‚¬آ ط·آ·ط¹آ¾ط·آ·ط¢آ¬ ط·آ·ط¹آ¾ط·آ·ط¢آ¬ط·آ·ط¢آ±ط·آ¸ط¸آ¹ط·آ·ط¢آ¨ط·آ¸ط¸آ¹',
             'quantity' => 2,
             'price' => 25.00,
             'subtotal' => 50.00,
@@ -1249,8 +1282,8 @@ Route::get('/create-test-orders', function () {
 
     // Create test drivers using Driver model
     $driversData = [
-        ['name' => 'أحمد السائق', 'phone' => '0911111111', 'email' => 'driver1@test.com', 'license_number' => 'LIC001'],
-        ['name' => 'محمد السائق', 'phone' => '0922222222', 'email' => 'driver2@test.com', 'license_number' => 'LIC002'],
+        ['name' => 'ط·آ·ط¢آ£ط·آ·ط¢آ­ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ¯ ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ·ط¢آ³ط·آ·ط¢آ§ط·آ·ط¢آ¦ط·آ¸أ¢â‚¬ع‘', 'phone' => '0911111111', 'email' => 'driver1@test.com', 'license_number' => 'LIC001'],
+        ['name' => 'ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ­ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ¯ ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ·ط¢آ³ط·آ·ط¢آ§ط·آ·ط¢آ¦ط·آ¸أ¢â‚¬ع‘', 'phone' => '0922222222', 'email' => 'driver2@test.com', 'license_number' => 'LIC002'],
     ];
 
     foreach ($driversData as $driverData) {
@@ -1271,7 +1304,7 @@ Route::get('/create-test-orders', function () {
         }
     }
 
-    return '✅ تم إنشاء '.count($created).' طلبات تجريبية: '.implode(', ', $created).'<br><br><a href="/delivery/supervisor/dashboard" style="background:#ff6b35;color:white;padding:1rem 2rem;border-radius:8px;text-decoration:none;font-weight:bold;">انتقل إلى لوحة التحكم</a>';
+    return 'ط£آ¢ط¥â€œأ¢â‚¬آ¦ ط·آ·ط¹آ¾ط·آ¸أ¢â‚¬آ¦ ط·آ·ط¢آ¥ط·آ¸أ¢â‚¬آ ط·آ·ط¢آ´ط·آ·ط¢آ§ط·آ·ط·إ’ '.count($created).' ط·آ·ط¢آ·ط·آ¸أ¢â‚¬â€چط·آ·ط¢آ¨ط·آ·ط¢آ§ط·آ·ط¹آ¾ ط·آ·ط¹آ¾ط·آ·ط¢آ¬ط·آ·ط¢آ±ط·آ¸ط¸آ¹ط·آ·ط¢آ¨ط·آ¸ط¸آ¹ط·آ·ط¢آ©: '.implode(', ', $created).'<br><br><a href="/delivery/supervisor/dashboard" style="background:#ff6b35;color:white;padding:1rem 2rem;border-radius:8px;text-decoration:none;font-weight:bold;">ط·آ·ط¢آ§ط·آ¸أ¢â‚¬آ ط·آ·ط¹آ¾ط·آ¸أ¢â‚¬ع‘ط·آ¸أ¢â‚¬â€چ ط·آ·ط¢آ¥ط·آ¸أ¢â‚¬â€چط·آ¸أ¢â‚¬آ° ط·آ¸أ¢â‚¬â€چط·آ¸ط«â€ ط·آ·ط¢آ­ط·آ·ط¢آ© ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ·ط¹آ¾ط·آ·ط¢آ­ط·آ¸ط¦â€™ط·آ¸أ¢â‚¬آ¦</a>';
 });
 
 /*

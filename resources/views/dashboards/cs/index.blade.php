@@ -46,6 +46,10 @@
             <i class="fas fa-clipboard-check"></i>
             <span>مراجعة المنتجات</span>
         </a>
+        <a href="{{ route('dashboard.cs.traders.index') }}" class="inline-flex items-center gap-2 bg-amber-700 text-white px-4 py-2 rounded-xl hover:bg-amber-800 transition">
+            <i class="fas fa-store"></i>
+            <span>التجار</span>
+        </a>
         <a href="{{ route('dashboard.cs.payrolls') }}" class="inline-flex items-center gap-2 bg-sky-600 text-white px-4 py-2 rounded-xl hover:bg-sky-700 transition">
             <i class="fas fa-file-invoice-dollar"></i>
             <span>Invoices</span>

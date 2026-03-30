@@ -33,7 +33,7 @@ class AuditLog extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->morphTo('user', 'user_type', 'user_id');
     }
 
     public function model()
@@ -95,10 +95,7 @@ class AuditLog extends Model
         $employeeUser = Auth::guard('employee')->user();
         $actor = $webUser ?? $employeeUser;
 
-        $userId = $webUser?->id;
-        if ($userId && ! User::whereKey($userId)->exists()) {
-            $userId = null;
-        }
+        $userId = $actor?->id;
 
         $meta = is_array($metadata) ? $metadata : (is_null($metadata) ? [] : ['value' => $metadata]);
         if (! $webUser && $employeeUser) {

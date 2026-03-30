@@ -20,7 +20,7 @@ class InvoicePdfService
         }
 
         $pdf = \PDF::loadView($view, $data)
-            ->setOption('defaultFont', 'DejaVu Sans')
+            ->setOption('defaultFont', 'ElMessiri')
             ->setOption('isHtml5ParserEnabled', true);
 
         return $pdf->download($baseFileName.'.pdf');

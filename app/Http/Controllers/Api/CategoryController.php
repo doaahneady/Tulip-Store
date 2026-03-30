@@ -55,7 +55,14 @@ class CategoryController extends Controller
             ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', $market))
             ->when($market === 'store' && Schema::hasColumn('categories', 'slug'), fn ($q) => $q->whereNotIn('slug', $martSlugs))
             ->with(['products' => function ($query) use ($market) {
-                $query->active()->available();
+                if ($market === 'mart') {
+                    if (Schema::hasColumn('products', 'is_active')) {
+                        $query->where('is_active', true);
+                    }
+                } else {
+                    $query->active()->available();
+                }
+                
                 if (Schema::hasColumn('products', 'market')) {
                     $query->where('market', $market);
                 }
@@ -80,9 +87,17 @@ class CategoryController extends Controller
             ->when($market === 'store' && Schema::hasColumn('categories', 'slug'), fn ($q) => $q->whereNotIn('slug', $martSlugs))
             ->firstOrFail();
 
-        $products = $category->products()
-            ->active()
-            ->available()
+        $query = $category->products();
+
+        if ($market === 'mart') {
+            if (Schema::hasColumn('products', 'is_active')) {
+                $query->where('is_active', true);
+            }
+        } else {
+            $query->active()->available();
+        }
+
+        $products = $query
             ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', $market))
             ->get();
 

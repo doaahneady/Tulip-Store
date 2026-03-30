@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Schema;
 class CrossDepartmentFlowService
 {
     /**
-     * Flow: Order Completion → Revenue Recognition → Commission → Store Payout
+     * Flow: Order Completion â†’ Revenue Recognition â†’ Commission â†’ Store Payout
      *
      * Triggered when order is marked as delivered
      */
@@ -175,7 +175,7 @@ class CrossDepartmentFlowService
     }
 
     /**
-     * Flow: HR Payroll Submission → Finance Approval → Payment Processing
+     * Flow: HR Payroll Submission â†’ Finance Approval â†’ Payment Processing
      */
     public static function handlePayrollSubmissionToFinance($payrollRecordId, $userId = null)
     {
@@ -246,7 +246,7 @@ class CrossDepartmentFlowService
     }
 
     /**
-     * Flow: Support Ticket → Order Refund → Financial Transaction
+     * Flow: Support Ticket â†’ Order Refund â†’ Financial Transaction
      */
     public static function handleTicketRefund($ticketId, $refundAmount, $reason, $userId = null)
     {
@@ -340,7 +340,7 @@ class CrossDepartmentFlowService
     }
 
     /**
-     * Flow: Driver Assignment → Order Status → Driver Status
+     * Flow: Driver Assignment â†’ Order Status â†’ Driver Status
      */
     public static function handleDriverAssignment($orderId, $driverId, $assignedBy, $userId = null)
     {
@@ -364,20 +364,49 @@ class CrossDepartmentFlowService
                 $order = $order->fresh();
             }
 
+            // Get the user_id for assigned_by (convert employee ID to user ID if needed)
+            $assignedByUserId = null;
+            if ($assignedBy) {
+                // Check if assignedBy is an employee ID, convert to user_id
+                $employee = \App\Models\Employee::find($assignedBy);
+                if ($employee && $employee->user_id) {
+                    $assignedByUserId = $employee->user_id;
+                } elseif (\App\Models\User::find($assignedBy)) {
+                    // It's already a user ID
+                    $assignedByUserId = $assignedBy;
+                }
+            }
+            
+            // If still no valid user, try to get from auth
+            if (!$assignedByUserId) {
+                $authEmployee = auth('employee')->user();
+                if ($authEmployee && $authEmployee->user_id) {
+                    $assignedByUserId = $authEmployee->user_id;
+                } elseif (auth()->check()) {
+                    $assignedByUserId = auth()->id();
+                }
+            }
+
             // Create delivery assignment
-            $assignment = DeliveryAssignment::create([
+            $assignmentData = [
                 'order_id' => $orderId,
                 'driver_id' => $driverId,
                 'status' => 'assigned',
                 'assigned_at' => now(),
-                'assigned_by' => $assignedBy ?? auth('employee')->id(),
-            ]);
+            ];
+            
+            // Only add assigned_by if we have a valid user ID
+            if ($assignedByUserId) {
+                $assignmentData['assigned_by'] = $assignedByUserId;
+            }
+            
+            $assignment = DeliveryAssignment::create($assignmentData);
 
             // Update order status
             StatusTransitionService::transition($order, 'status', 'out_for_delivery', $userId);
             $order = $order->fresh();
 
-            // FK: assigned_driver_id → users.id
+            // FK: assigned_driver_id â†’ users.id
             if ($driver->user_id && Schema::hasColumn('orders', 'assigned_driver_id')) {
                 $order->update([
                     'assigned_driver_id' => $driver->user_id,
@@ -490,7 +519,7 @@ class CrossDepartmentFlowService
     }
 
     /**
-     * Flow: Admin Override → All Systems
+     * Flow: Admin Override â†’ All Systems
      */
     public static function handleAdminOverride($action, $modelType, $modelId, $overrideData, $userId)
     {
@@ -538,7 +567,7 @@ class CrossDepartmentFlowService
     }
 
     /**
-     * Flow: System Error → IT Alert → Resolution → Post-Mortem
+     * Flow: System Error â†’ IT Alert â†’ Resolution â†’ Post-Mortem
      */
     public static function handleSystemErrorIncident(int $apiErrorId, $userId = null): array
     {

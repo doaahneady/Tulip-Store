@@ -427,13 +427,17 @@ const API_BASE = window.location.origin + '/api';
 let productsData = { categories: { fruits: [], vegetables: [] }, date: null };
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing...');
     loadDate();
     fetchDailyPrices();
 });
 
 function loadDate() {
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('ar-SA', options);
+    const dateEl = document.getElementById('currentDate');
+    if (dateEl) {
+        dateEl.textContent = new Date().toLocaleDateString('ar-SA', options);
+    }
 }
 
 function resolvePublicImage(path) {
@@ -445,25 +449,70 @@ function resolvePublicImage(path) {
 }
 
 async function fetchDailyPrices() {
+    console.log('Starting fetch...');
     try {
-        const r = await fetch(`${API_BASE}/mart/daily-prices`);
+        const url = `${API_BASE}/mart/daily-prices`;
+        console.log('Fetching from:', url);
+        
+        const r = await fetch(url);
+        console.log('Response status:', r.status);
+        console.log('Response ok:', r.ok);
+        
+        if (!r.ok) {
+            throw new Error(`HTTP error! status: ${r.status}`);
+        }
+        
         const d = await r.json();
+        console.log('Response data:', d);
+        console.log('Categories:', d.categories);
+        console.log('Vegetables count:', d.categories?.vegetables?.length || 0);
+        console.log('Fruits count:', d.categories?.fruits?.length || 0);
+        
         productsData = d || productsData;
         renderCategories();
     } catch (e) {
+        console.error('Error fetching daily prices:', e);
+        console.error('Error stack:', e.stack);
+        // Still try to render with empty data
         renderCategories();
     }
 }
 
 function renderCategories() {
+    console.log('=== renderCategories called ===');
+    console.log('productsData:', productsData);
+    
     const container = document.getElementById('categoriesContainer');
+    if (!container) {
+        console.error('Container not found!');
+        return;
+    }
+    
     const categoryInfo = {
-        fruits: { title: 'الفواكه', emojiFallback: '' },
-        vegetables: { title: 'الخضروات', emojiFallback: '' }
+        fruits: { title: 'الفواكه', emojiFallback: '🍎' },
+        vegetables: { title: 'الخضروات', emojiFallback: '🥬' }
     };
-    const entries = Object.entries(productsData.categories || {});
-    container.innerHTML = entries.map(([key, items]) => {
-        const info = categoryInfo[key] || { title: key, emojiFallback: '' };
+    
+    const categories = productsData.categories || {};
+    console.log('Categories object:', categories);
+    
+    const entries = Object.entries(categories);
+    console.log('Category entries:', entries);
+    console.log('Number of categories:', entries.length);
+    
+    if (entries.length === 0) {
+        console.warn('No categories to render!');
+        container.innerHTML = '<div style="text-align:center;padding:3rem;color:#999;">لا توجد منتجات متاحة حالياً</div>';
+        return;
+    }
+    
+    const html = entries.map(([key, items]) => {
+        console.log(`Processing category: ${key}, items:`, items);
+        console.log(`Items count: ${items?.length || 0}`);
+        
+        const info = categoryInfo[key] || { title: key, emojiFallback: '📦' };
+        const itemsArray = Array.isArray(items) ? items : [];
+        
         return `
             <section class="category-section" id="${key}">
                 <div class="category-header">
@@ -471,16 +520,22 @@ function renderCategories() {
                         <span class="emoji">${info.emojiFallback}</span>
                         ${info.title}
                     </h2>
+                    <span class="category-count">${itemsArray.length} منتج</span>
                 </div>
                 <div class="products-grid">
-                    ${items.map(p => createCard(p)).join('')}
+                    ${itemsArray.length > 0 ? itemsArray.map(p => createCard(p)).join('') : '<p style="grid-column:1/-1;text-align:center;color:#999;padding:2rem;">لا توجد منتجات في هذا القسم</p>'}
                 </div>
             </section>
         `;
     }).join('');
+    
+    console.log('Generated HTML length:', html.length);
+    container.innerHTML = html;
+    console.log('Container updated');
 }
 
 function createCard(p) {
+    console.log('Creating card for product:', p);
     const photoUrl = resolvePublicImage(p.photo || p.image || p.imageUrl) || '/images/tulip_mart.jpg';
     return `
         <div class="price-card">
@@ -489,11 +544,11 @@ function createCard(p) {
             </div>
             <div class="info">
                 <div class="name">${p.name}</div>
-                <div class="origin"><i class="fas fa-map-marker-alt"></i> ${p.origin || ''}</div>
+                <div class="origin"><i class="fas fa-map-marker-alt"></i> ${p.origin || 'محلي'}</div>
                 <div class="prices">
-                    <span class="current">${window.formatMoney ? window.formatMoney(p.price) : (p.price + ' ل.س')}</span>
-                    ${p.oldPrice ? `<span class="old">${window.formatMoney ? window.formatMoney(p.oldPrice) : (p.oldPrice + ' ل.س')}</span>` : ''}
-                    <span class="unit">لكل 1 كغ</span>
+                    <span class="current">${p.price} ل.س</span>
+                    ${p.oldPrice ? `<span class="old">${p.oldPrice} ل.س</span>` : ''}
+                    <span class="unit">/ ${p.unit || 'كغ'}</span>
                 </div>
             </div>
             <button class="add-btn" onclick="addToCart('${p.id || p.name}', this)">
@@ -525,7 +580,7 @@ async function addToCart(id, btn) {
                 price: p?.price, 
                 quantity: 1,
                 image: photoUrl,
-                unit: 'كغ',
+                unit: p?.unit || 'كغ',
                 emoji: p?.emoji || ''
             })
         });
@@ -544,6 +599,7 @@ async function addToCart(id, btn) {
             btn.disabled = false;
         }, 2000);
     } catch (e) {
+        console.error('Error adding to cart:', e);
         btn.innerHTML = orig;
         btn.disabled = false;
     }

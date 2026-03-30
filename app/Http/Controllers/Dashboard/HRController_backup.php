@@ -257,7 +257,8 @@ class HRController_backup extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
+            'email' => 'required|email|unique:employees,email',
+            'password' => 'required|string|min:8|confirmed',
             'phone' => 'nullable|string',
             'department' => 'required|string',
             'position' => 'required|string',
@@ -275,19 +276,13 @@ class HRController_backup extends Controller
 
         DB::beginTransaction();
         try {
-            // Create user account
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'password' => Hash::make('password123'), // Default password
-                'status' => 'active',
-                'email_verified_at' => now(),
-            ]);
-
-            // Create employee record
+            // Create employee record directly as an Authenticatable
             $employee = Employee::create([
-                'user_id' => $user->id,
+                'first_name' => explode(' ', $request->name)[0],
+                'last_name' => explode(' ', $request->name)[1] ?? '',
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'phone' => $request->phone,
                 'employee_id' => $this->generateEmployeeId(),
                 'department' => $request->department,
                 'position' => $request->position,
@@ -295,12 +290,14 @@ class HRController_backup extends Controller
                 'hire_date' => $request->hire_date,
                 'hourly_rate' => $request->hourly_rate,
                 'monthly_salary' => $request->monthly_salary,
-                'emergency_contact' => $request->emergency_contact,
+                'emergency_contact_name' => $request->emergency_contact['name'],
+                'emergency_contact_phone' => $request->emergency_contact['phone'],
+                'emergency_contact_relation' => $request->emergency_contact['relationship'],
                 'status' => 'active',
             ]);
 
-            // Assign appropriate role based on department/position
-            $this->assignEmployeeRole($user, $request->department, $request->position);
+            // Assign role fields based on department
+            $this->assignDepartmentPermissions($employee, $request->department);
 
             if (Schema::hasTable('employee_skill') && is_array($request->skill_ids)) {
                 $employee->skillsCatalog()->sync($request->skill_ids);
@@ -311,13 +308,25 @@ class HRController_backup extends Controller
             \App\Models\AuditLog::log('create_employee', $employee, null, $employee->toArray(), ['department' => $employee->department, 'position' => $employee->position]);
 
             return redirect()->route('dashboard.hr.employees')
-                ->with('success', 'Employee created successfully! Default password: password123');
+                ->with('success', 'Employee created successfully!');
 
         } catch (\Exception $e) {
             DB::rollback();
-
             return back()->with('error', 'Failed to create employee: '.$e->getMessage());
         }
+    }
+
+    protected function assignDepartmentPermissions(Employee $employee, $department)
+    {
+        $dept = strtolower($department);
+        if (str_contains($dept, 'admin')) $employee->is_admin = true;
+        if (str_contains($dept, 'it')) $employee->is_it = true;
+        if (str_contains($dept, 'hr')) $employee->is_hr = true;
+        if (str_contains($dept, 'customer support') || str_contains($dept, 'cs')) $employee->is_cs = true;
+        if (str_contains($dept, 'finance')) $employee->is_finance = true;
+        if (str_contains($dept, 'driver supervisor')) $employee->is_driver_supervisor = true;
+        
+        $employee->save();
     }
 
     /**

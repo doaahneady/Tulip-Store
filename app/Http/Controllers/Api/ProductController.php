@@ -29,48 +29,55 @@ class ProductController extends Controller
         }
 
         if ($market === 'store') {
-            return $query->where(function ($q) use ($market) {
-                $q->where('market', $market)->orWhereNull('market');
+            return $query->where(function ($q) {
+                $q->where('market', 'store')->orWhereNull('market');
             });
         }
 
-        return $query->where('market', $market);
+        // For Mart, we want products that are:
+        // 1. Explicitly marked as 'mart'
+        // 2. OR belong to a category that is marked as 'mart'
+        // 3. OR belong to a category with a known mart slug (fallback)
+        $martKeywords = ['fruit', 'veget', 'khdr', 'khodr', 'mart', 'dairy', 'bakery', 'groc', 'meat', 'poult', 'fish', 'frozen', 'bev', 'snack', 'clean', 'care'];
+        
+        return $query->where(function ($q) use ($martKeywords) {
+            $q->where('market', 'mart')
+              ->orWhereHas('category', function ($q2) use ($martKeywords) {
+                  if (Schema::hasColumn('categories', 'market')) {
+                      $q2->where('market', 'mart');
+                  }
+                  
+                  if (Schema::hasColumn('categories', 'slug')) {
+                      $q2->orWhere(function ($q3) use ($martKeywords) {
+                          foreach ($martKeywords as $kw) {
+                              $q3->orWhere('slug', 'like', "%{$kw}%");
+                          }
+                      });
+                  }
+              });
+        });
     }
 
     public function index(Request $request)
     {
         $market = $this->resolveMarket($request);
 
-        $query = $this->applyMarketFilter(Product::query()->active()->available(), $market);
+        $query = Product::query();
 
-        if (Schema::hasTable('categories')) {
-            $categoryIds = null;
-            if (Schema::hasColumn('categories', 'market')) {
-                $ids = Category::query()->where('market', $market)->pluck('id');
-                if ($ids->count()) {
-                    $categoryIds = $ids;
-                }
+        if ($market === 'mart') {
+            // For Mart, we want to be very inclusive to ensure products show up
+            // We only filter by is_active if the column exists
+            if (Schema::hasColumn('products', 'is_active')) {
+                $query->where('is_active', true);
             }
-
-            if ($categoryIds === null && Schema::hasColumn('categories', 'slug')) {
-                $martSlugs = ['fruits', 'vegetables', 'khdroaat', 'khodraat', 'mart-fruits', 'mart-vegetables', 'dairy', 'bakery', 'grocery'];
-                if ($market === 'mart') {
-                    $ids = Category::query()->whereIn('slug', $martSlugs)->pluck('id');
-                    if ($ids->count()) {
-                        $categoryIds = $ids;
-                    }
-                } else {
-                    $ids = Category::query()->whereNotIn('slug', $martSlugs)->pluck('id');
-                    if ($ids->count()) {
-                        $categoryIds = $ids;
-                    }
-                }
-            }
-
-            if ($categoryIds !== null) {
-                $query->whereIn('category_id', $categoryIds);
-            }
+            
+            // We don't apply the 'available()' scope here because fresh produce 
+            // often doesn't have stock tracked correctly
+        } else {
+            $query->active()->available();
         }
+
+        $query = $this->applyMarketFilter($query, $market);
 
         // Search
         if ($request->has('search') && $request->search) {

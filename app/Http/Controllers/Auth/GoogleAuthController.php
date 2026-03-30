@@ -23,6 +23,7 @@ class GoogleAuthController extends Controller
     public function redirect()
     {
         return Socialite::driver('google')
+            ->redirectUrl(url('/auth/google/callback'))
             ->with(['prompt' => 'select_account'])
             ->redirect();
     }
@@ -35,7 +36,9 @@ class GoogleAuthController extends Controller
         try {
             // Use stateful OAuth handshake (do not force stateless in callback)
             // because redirect() stores the state in the session.
-            $googleUser = Socialite::driver('google')->user();
+            $googleUser = Socialite::driver('google')
+                ->redirectUrl(url('/auth/google/callback'))
+                ->user();
 
             // Find or create user
             $user = User::where('email', $googleUser->email)->first();

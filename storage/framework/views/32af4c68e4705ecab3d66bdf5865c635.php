@@ -22,8 +22,16 @@
             <input name="name" value="<?php echo e(old('name')); ?>" class="w-full mt-1 border rounded-xl px-4 py-2" required>
         </div>
         <div>
-            <label class="text-sm text-gray-600">البريد</label>
-            <input type="email" name="email" value="<?php echo e(old('email')); ?>" class="w-full mt-1 border rounded-xl px-4 py-2" required>
+            <label class="text-sm text-gray-600">اليوزر الخاص</label>
+            <input
+                type="text"
+                name="username"
+                value="<?php echo e(old('username')); ?>"
+                class="w-full mt-1 border rounded-xl px-4 py-2"
+                pattern="[A-Za-z0-9._-]+"
+                title="يسمح فقط بالأحرف الإنجليزية والأرقام و . _ -"
+                required
+            >
         </div>
         <div>
             <label class="text-sm text-gray-600">الهاتف</label>
@@ -42,7 +50,8 @@
         </div>
         <div>
             <label class="text-sm text-gray-600">انتهاء الرخصة</label>
-            <input type="date" name="license_expiry" value="<?php echo e(old('license_expiry')); ?>" class="w-full mt-1 border rounded-xl px-4 py-2" required>
+            <input type="date" name="license_expiry"  min="1000-01-01" max="9999-12-31" oninput="if(this.value.length > 10) this.value=this.value.slice(0,10)"
+             class="w-full mt-1 border rounded-xl px-4 py-2" required>
         </div>
         <div>
             <label class="text-sm text-gray-600">نوع المركبة</label>
@@ -76,7 +85,7 @@
         </div>
 
         <div class="md:col-span-2 mt-4 p-3 rounded-xl bg-indigo-50 border border-indigo-100 text-sm text-indigo-800">
-            <strong>تسجيل الدخول:</strong> بعد حفظ السائق، يمكنه تسجيل الدخول من <a href="<?php echo e(url('/employee/login')); ?>" class="underline font-semibold">/employee/login</a> باستخدام نفس البريد الإلكتروني وكلمة المرور أعلاه.
+            <strong>تسجيل الدخول:</strong> بعد حفظ السائق، يمكنه تسجيل الدخول من <a href="<?php echo e(url('/employee/login')); ?>" class="underline font-semibold">/employee/login</a> باستخدام نفس اليوزر وكلمة المرور أعلاه.
         </div>
     </form>
 </div>

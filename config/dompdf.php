@@ -16,7 +16,7 @@ return [
     'public_path' => null,  // Override the public path if needed
 
     /*
-     * Dejavu Sans font is missing glyphs for converted entities, turn it off if you need to show € and £.
+     * Dejavu Sans font is missing glyphs for converted entities, turn it off if you need to show â‚¬ and آ£.
      */
     'convert_entities' => true,
 
@@ -110,7 +110,7 @@ return [
         /**
          * Whether to enable font subsetting or not.
          */
-        'enable_font_subsetting' => false,
+        'enable_font_subsetting' => true,
 
         /**
          * The PDF rendering backend to use
@@ -179,7 +179,7 @@ return [
          *
          * @var string
          */
-        'default_font' => 'serif',
+        'default_font' => 'ElMessiri',
 
         /**
          * Image DPI setting

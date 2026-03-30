@@ -35,7 +35,7 @@
                 @forelse($logs as $log)
                     <tr class="border-t">
                         <td class="px-4 py-2">{{ $log->action }}</td>
-                        <td class="px-4 py-2">{{ $log->user->name ?? '-' }}</td>
+                        <td class="px-4 py-2">{{ $log->actor_display_name }}</td>
                         <td class="px-4 py-2">{{ $log->model_type ?? '-' }} #{{ $log->model_id ?? '-' }}</td>
                         <td class="px-4 py-2">{{ $log->created_at }}</td>
                     </tr>

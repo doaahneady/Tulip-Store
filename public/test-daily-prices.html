@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Daily Prices API</title>
+    <style>
+        body { font-family: Arial; padding: 20px; direction: rtl; }
+        pre { background: #f5f5f5; padding: 15px; border-radius: 5px; overflow: auto; }
+        .product { border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Test Daily Prices API</h1>
+    <button onclick="testAPI()">Test API</button>
+    <div id="output"></div>
+
+    <script>
+        async function testAPI() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<p>Loading...</p>';
+            
+            try {
+                const url = window.location.origin + '/api/mart/daily-prices';
+                console.log('Fetching:', url);
+                
+                const response = await fetch(url);
+                console.log('Status:', response.status);
+                
+                const data = await response.json();
+                console.log('Data:', data);
+                
+                let html = '<h2>API Response:</h2>';
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                html += '<h2>Parsed Data:</h2>';
+                html += '<p>Date: ' + data.date + '</p>';
+                
+                if (data.categories) {
+                    html += '<h3>Vegetables (' + (data.categories.vegetables?.length || 0) + '):</h3>';
+                    if (data.categories.vegetables && data.categories.vegetables.length > 0) {
+                        data.categories.vegetables.forEach(p => {
+                            html += `<div class="product">
+                                <strong>${p.name}</strong><br>
+                                Price: ${p.price} ل.س<br>
+                                ID: ${p.id}
+                            </div>`;
+                        });
+                    } else {
+                        html += '<p>No vegetables found</p>';
+                    }
+                    
+                    html += '<h3>Fruits (' + (data.categories.fruits?.length || 0) + '):</h3>';
+                    if (data.categories.fruits && data.categories.fruits.length > 0) {
+                        data.categories.fruits.forEach(p => {
+                            html += `<div class="product">
+                                <strong>${p.name}</strong><br>
+                                Price: ${p.price} ل.س<br>
+                                ID: ${p.id}
+                            </div>`;
+                        });
+                    } else {
+                        html += '<p>No fruits found</p>';
+                    }
+                }
+                
+                output.innerHTML = html;
+            } catch (error) {
+                output.innerHTML = '<p style="color:red">Error: ' + error.message + '</p>';
+                console.error('Error:', error);
+            }
+        }
+        
+        // Auto-run on load
+        window.addEventListener('load', testAPI);
+    </script>
+</body>
+</html>

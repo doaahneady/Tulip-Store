@@ -37,6 +37,10 @@
             <i class="fas fa-users"></i>
             <span>إدارة العملاء</span>
         </a>
+        <a href="{{ route('dashboard.admin.traders') }}" class="inline-flex items-center gap-2 bg-amber-700 text-white px-4 py-2 rounded-xl hover:bg-amber-800 transition">
+            <i class="fas fa-store"></i>
+            <span>إدارة التجار</span>
+        </a>
         <a href="{{ route('dashboard.admin.categories') }}" class="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition">
             <i class="fas fa-tags"></i>
             <span>التصنيفات</span>
@@ -68,6 +72,10 @@
         <a href="{{ route('dashboard.admin.roles') }}" class="inline-flex items-center gap-2 bg-slate-700 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition">
             <i class="fas fa-user-shield"></i>
             <span>Rules</span>
+        </a>
+        <a href="{{ route('dashboard.admin.activity-logs') }}" class="inline-flex items-center gap-2 bg-gray-800 text-white px-4 py-2 rounded-xl hover:bg-black transition">
+            <i class="fas fa-clipboard-list"></i>
+            <span>سجل النشاط</span>
         </a>
         <a href="{{ route('dashboard.administrative-approvals.manage') }}" class="inline-flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-xl hover:bg-amber-700 transition">
             <i class="fas fa-clipboard-check"></i>

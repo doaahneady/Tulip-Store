@@ -25,7 +25,7 @@ class RedirectIfAuthenticated
                     return redirect()->route('employee.dashboard');
                 }
                 if ($guard === 'trader') {
-                    return redirect()->route('dashboard.vendor.index');
+                    return redirect()->route('trader.dashboard');
                 }
 
                 return redirect('/');
