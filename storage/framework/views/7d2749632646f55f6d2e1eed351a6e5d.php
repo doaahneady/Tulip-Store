@@ -1,3 +1,4 @@
+
 <?php $__env->startSection('content'); ?>
 <?php $title = 'لوحة الإدارة'; $subtitle = 'نظرة عامة على المنصة'; ?>
 

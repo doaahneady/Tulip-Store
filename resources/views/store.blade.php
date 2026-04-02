@@ -26,31 +26,13 @@
         /* Product grid styling */
         .products-grid {
             display: grid !important;
-            grid-template-columns: repeat(5, 1fr) !important;
-            gap: 1.5rem !important;
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
             margin-top: 2rem !important;
         }
 
-        @media (max-width: 1400px) {
-            .products-grid { grid-template-columns: repeat(4, 1fr) !important; }
-        }
-
-        @media (max-width: 1024px) {
-            .products-grid { grid-template-columns: repeat(3, 1fr) !important; }
-        }
-
         @media (max-width: 768px) {
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 1rem !important;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 0.5rem !important;
-            }
+            .products-grid { gap: 0.75rem !important; }
         }
         
         /* Product card styling */
@@ -60,7 +42,10 @@
             border-radius: 15px !important;
             overflow: hidden !important;
             display: flex !important;
-            flex-direction: column !important;
+            flex-direction: row !important;
+            align-items: stretch !important;
+            gap: 0 !important;
+            min-width: 0 !important;
         }
 
         .product-image-wrapper {
@@ -91,6 +76,9 @@
             position: relative;
             background: #fff;
             cursor: pointer;
+            display: flex;
+            flex-direction: row !important;
+            align-items: stretch;
         }
         .store-section-cards .product-card:hover {
             transform: translateY(-5px);
@@ -99,15 +87,36 @@
         }
         .store-section-cards .product-image,
         .store-section-cards .product-image-wrapper {
+            width: 260px;
+            flex: 0 0 260px;
             aspect-ratio: 1 / 1;
-            width: 100%;
-            height: auto;
             background: linear-gradient(135deg, #eaf7f8, #f8f9fa);
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
             overflow: hidden;
+        }
+        @media (max-width: 1024px) {
+            .store-section-cards .product-image,
+            .store-section-cards .product-image-wrapper {
+                width: 200px;
+                flex-basis: 200px;
+            }
+        }
+        @media (max-width: 768px) {
+            .store-section-cards .product-image,
+            .store-section-cards .product-image-wrapper {
+                width: 140px;
+                flex-basis: 140px;
+            }
+        }
+        @media (max-width: 480px) {
+            .store-section-cards .product-image,
+            .store-section-cards .product-image-wrapper {
+                width: 120px;
+                flex-basis: 120px;
+            }
         }
         .store-section-cards .product-image img,
         .store-section-cards .product-image-wrapper img {
@@ -118,10 +127,12 @@
         }
         .store-section-cards .product-body,
         .store-section-cards .product-info {
-            padding: 0.8rem;
+            padding: 0.75rem;
             display: flex;
             flex-direction: column;
             min-height: auto;
+            flex: 1 1 auto;
+            min-width: 0;
         }
         .store-section-cards .product-name {
             font-size: 0.95rem;
@@ -129,14 +140,18 @@
             color: #1a1a1a;
             margin-bottom: 0.2rem;
             font-family: 'El Messiri', sans-serif;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .store-section-cards .product-footer {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding-top: 0.5rem;
+            padding-top: 0.35rem;
             border-top: 1px solid #e8e8e8;
-            margin-top: 0.5rem;
+            margin-top: 0.35rem;
+            margin-top: auto;
         }
         .store-section-cards .price-wrapper {
             display: flex;
@@ -202,15 +217,40 @@
 
     
     <!-- PRODUCTS SECTION -->
-    <div class="products-container" style="max-width: 1400px; margin: 2rem auto; padding: 0 2rem;">
+    <div class="products-container" style="max-width: 100%; margin: 2rem auto; padding: 0 2rem;">
         <!-- Products Content -->
         <div class="products-content">
             <h2 id="pageTitle" style="font-family: 'El Messiri', sans-serif; font-size: 2rem; color: #0f4f55; margin: 0 0 2rem 0;">جميع المنتجات</h2>
+            @if(isset($trader))
+                @php
+                    $avg = (float) ($traderAverageRating ?? 0);
+                    if ($avg < 0) { $avg = 0; }
+                    if ($avg > 5) { $avg = 5; }
+                    $filled = (int) floor($avg);
+                    $hasHalf = ($avg - $filled) >= 0.5 && $filled < 5;
+                @endphp
+                <div style="background:#fff; border:1px solid #e8e8e8; border-radius:16px; padding:1rem 1.25rem; margin:-0.75rem 0 1.5rem 0; display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+                    <div style="display:flex; flex-direction:column; gap:0.35rem;">
+                        <div style="font-family:'El Messiri',sans-serif; font-weight:800; color:#1a1a1a; font-size:1.1rem;">{{ $trader->name }}</div>
+                        <div style="display:flex; align-items:center; gap:0.4rem; color:#f59e0b; font-size:0.95rem;">
+                            @for($i = 1; $i <= 5; $i++)
+                                @php
+                                    $icon = $i <= $filled ? 'fas' : 'far';
+                                    if ($hasHalf && $i === $filled + 1) { $icon = 'fas'; }
+                                @endphp
+                                <i class="{{ $icon }} fa-star"></i>
+                            @endfor
+                            <span style="color:#64748b; font-size:0.85rem; font-weight:700;">{{ number_format($avg, 1) }}/5</span>
+                        </div>
+                    </div>
+                </div>
+            @endif
             <div class="store-section-cards" style="padding: 0;">
                 <div class="products-grid" id="productsGrid">
                     <!-- Products will be loaded here -->
                 </div>
             </div>
+            <div id="ratingsSection" style="display:none; background:#fff; border:1px solid #e8e8e8; border-radius:16px; padding:1rem 1.25rem; margin-top:1.25rem;"></div>
             <div id="loadingProducts" style="text-align: center; padding: 3rem; color: #999;">
                 <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
                 <p style="margin-top: 1rem;">جاري تحميل المنتجات...</p>
@@ -348,6 +388,7 @@
         const API_BASE = window.location.origin + '/api';
         const isAuthenticated = {!! auth()->check() ? 'true' : 'false' !!};
         window.__productsById = {};
+        const FIXED_TRADER_ID = {!! isset($trader) ? (int) $trader->id : 'null' !!};
 
         async function syncFavoritesFromServer() {
             if (!isAuthenticated) {
@@ -381,16 +422,24 @@
             // Check if there's a search query in URL
             const urlParams = new URLSearchParams(window.location.search);
             const searchQuery = urlParams.get('search');
+            const traderIdParam = urlParams.get('trader_id');
+            const traderId = FIXED_TRADER_ID !== null ? FIXED_TRADER_ID : (traderIdParam ? parseInt(traderIdParam, 10) : null);
             
             let apiUrl = `${API_BASE}/products`;
             if (searchQuery) {
                 apiUrl = `${API_BASE}/products/search?q=${encodeURIComponent(searchQuery)}`;
+                if (traderId) {
+                    apiUrl += `&trader_id=${encodeURIComponent(traderId)}`;
+                }
                 if (pageTitle) {
                     pageTitle.textContent = `نتائج البحث عن: "${searchQuery}"`;
                 }
             } else {
                 if (pageTitle) {
-                    pageTitle.textContent = 'جميع المنتجات';
+                    pageTitle.textContent = traderId ? 'منتجات التاجر' : 'جميع المنتجات';
+                }
+                if (traderId) {
+                    apiUrl += `?trader_id=${encodeURIComponent(traderId)}`;
                 }
             }
 
@@ -421,6 +470,21 @@
                             const oldPrice = parseFloat(product.price || 0);
                             const priceStr = window.formatMoney ? window.formatMoney(price) : ('$' + price.toFixed(2));
                             const oldPriceStr = window.formatMoney ? window.formatMoney(oldPrice) : ('$' + oldPrice.toFixed(2));
+                            const trader = product.trader || null;
+                            const traderId = trader && trader.id ? trader.id : null;
+                            const traderName = trader ? (trader.company_name || trader.name || trader.account_name_ar || trader.account_name_en || '') : '';
+                            const traderLine = traderName
+                                ? `<div style="margin-top:0.15rem; font-size:0.8rem; color:#64748b;">التاجر: ${traderId ? `<a href="/traders/${traderId}/products" onclick="event.stopPropagation();" style="color:#2a7080; font-weight:700; text-decoration:none;">${escapeHtml(traderName)}</a>` : escapeHtml(traderName)}</div>`
+                                : '';
+                            const rating = Math.max(0, Math.min(5, parseInt(product.rating ?? 0, 10) || 0));
+                            const reviewsCount = parseInt(product.reviews_count ?? 0, 10) || 0;
+                            const stars = Array.from({ length: 5 }).map((_, i) => i < rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>').join('');
+                            const ratingLine = (rating > 0 || reviewsCount > 0)
+                                ? `<div style="margin-top:0.35rem; display:flex; align-items:center; gap:0.45rem; color:#f59e0b; font-size:0.85rem;">
+                                        <span style="display:inline-flex; gap:0.15rem;">${stars}</span>
+                                        <span style="color:#64748b; font-weight:700; font-size:0.8rem;">(${reviewsCount})</span>
+                                   </div>`
+                                : '';
                             return `
                             <div class="product-card" data-product-id="${product.id}" onclick="window.location.href='/products/${product.id}'">
                                 <button class="product-favorite-btn ${isFavorite ? 'active' : ''}" onclick="event.stopPropagation(); toggleProductFavorite(event, ${product.id})">
@@ -431,6 +495,8 @@
                                 </div>
                                 <div class="product-body">
                                     <h3 class="product-name">${escapeHtml(product.name)}</h3>
+                                    ${traderLine}
+                                    ${ratingLine}
                                     <div class="product-footer">
                                         <div class="price-wrapper">
                                             <span class="price-current">${priceStr}</span>
@@ -443,6 +509,41 @@
                                 </div>
                             </div>
                         `}).join('');
+
+                        const ratingsSection = document.getElementById('ratingsSection');
+                        if (ratingsSection) {
+                            if (traderId) {
+                                const dist = [0, 0, 0, 0, 0, 0];
+                                products.forEach(p => {
+                                    const r = Math.max(0, Math.min(5, parseInt(p.rating ?? 0, 10) || 0));
+                                    if (r >= 1 && r <= 5) dist[r] += 1;
+                                });
+                                const ratedTotal = dist.slice(1).reduce((a, b) => a + b, 0);
+                                const rows = [5, 4, 3, 2, 1].map(stars => {
+                                    const count = dist[stars] || 0;
+                                    const pct = ratedTotal > 0 ? Math.round((count / ratedTotal) * 100) : 0;
+                                    return `
+                                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                                            <div style="min-width:70px; color:#334155; font-weight:800; font-size:0.9rem; display:flex; align-items:center; gap:0.35rem;">
+                                                <span>${stars}</span><i class="fas fa-star" style="color:#f59e0b;"></i>
+                                            </div>
+                                            <div style="flex:1; height:10px; background:#e2e8f0; border-radius:999px; overflow:hidden;">
+                                                <div style="height:100%; width:${pct}%; background:#f59e0b;"></div>
+                                            </div>
+                                            <div style="min-width:42px; text-align:left; color:#64748b; font-weight:800;">${count}</div>
+                                        </div>
+                                    `;
+                                }).join('');
+                                ratingsSection.innerHTML = `
+                                    <div style="font-family:'El Messiri',sans-serif; font-weight:900; color:#0f4f55; font-size:1.1rem; margin-bottom:0.75rem;">تقييمات منتجات هذا التاجر</div>
+                                    ${rows}
+                                `;
+                                ratingsSection.style.display = 'block';
+                            } else {
+                                ratingsSection.style.display = 'none';
+                                ratingsSection.innerHTML = '';
+                            }
+                        }
                     } else {
                         productsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #999;"><i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i><p>لا توجد نتائج</p></div>';
                     }

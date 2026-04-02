@@ -101,10 +101,16 @@ Route::prefix('administrative-approvals')->name('administrative-approvals.')->mi
 // Customer Support Dashboard (Flow 9/10)
 Route::prefix('cs')->name('cs.')->middleware('dashboard.role:cs')->group(function () {
     Route::get('/', [SupportDashboardController::class, 'index'])->name('index');
+    Route::get('/customer-balances', [SupportDashboardController::class, 'customerBalances'])->name('customer-balances')->middleware('dashboard.role:customer_support');
+    Route::post('/customers/{user}/balance', [SupportDashboardController::class, 'adjustCustomerBalance'])->name('customers.balance.adjust')->middleware('dashboard.role:customer_support');
     Route::get('/traders', [SupportDashboardController::class, 'traders'])->name('traders.index');
     Route::get('/traders/{trader}', [SupportDashboardController::class, 'traderDetails'])->name('traders.show');
     Route::post('/traders/{trader}/approve', [SupportDashboardController::class, 'approveTrader'])->name('traders.approve');
     Route::post('/traders/{trader}/reject', [SupportDashboardController::class, 'rejectTrader'])->name('traders.reject');
+    Route::get('/products', [SupportDashboardController::class, 'products'])->name('products');
+    Route::get('/products/{product}/edit', [SupportDashboardController::class, 'editProduct'])->name('products.edit');
+    Route::post('/products/{product}/update', [SupportDashboardController::class, 'updateProduct'])->name('products.update');
+    Route::post('/products/{product}/delete', [SupportDashboardController::class, 'deleteProduct'])->name('products.delete');
     Route::get('/tickets', [SupportDashboardController::class, 'tickets'])->name('tickets');
     Route::get('/tickets/{ticket}', [SupportDashboardController::class, 'showTicket'])->name('tickets.show');
     Route::post('/tickets/{ticket}/reply', [SupportDashboardController::class, 'replyTicket'])->name('tickets.reply');
@@ -112,6 +118,7 @@ Route::prefix('cs')->name('cs.')->middleware('dashboard.role:cs')->group(functio
     Route::post('/tickets/{ticket}/assign-to-me', [SupportDashboardController::class, 'assignToMe'])->name('tickets.assign-to-me');
     Route::post('/tickets/{ticket}/resolve', [SupportDashboardController::class, 'resolveTicket'])->name('tickets.resolve');
     Route::post('/tickets', [SupportDashboardController::class, 'createTicket'])->name('tickets.create');
+    Route::get('/coupons', [SupportDashboardController::class, 'coupons'])->name('coupons');
     Route::post('/tickets/{ticket}/initiate-refund', [SupportDashboardController::class, 'initiateRefund'])->name('tickets.initiate-refund');
 
     Route::get('/orders', [SupportDashboardController::class, 'orders'])->name('orders');

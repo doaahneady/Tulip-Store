@@ -142,6 +142,8 @@ class Order extends Model
         'confirmed_at' => 'datetime',
     ];
 
+    protected $with = ['couponUsage.coupon'];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -160,6 +162,11 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class);
     }
 
     /**
@@ -191,5 +198,10 @@ class Order extends Model
     public function deliveryAssignments()
     {
         return $this->hasMany(DeliveryAssignment::class, 'order_id');
+    }
+
+    public function couponUsage()
+    {
+        return $this->hasOne(CouponUsage::class, 'order_id');
     }
 }

@@ -3,6 +3,16 @@
 @php 
     $isTraderSession = auth('trader')->check() && !auth('employee')->check(); 
     $exchangeRate = \App\Models\SystemSetting::get('usd_to_syp_rate', 117);
+    $pageStoreCommissionTotal = 0.0;
+    $pageVendorProfitTotal = 0.0;
+    foreach (($orders ?? collect()) as $order) {
+        $items = $order->items ?? collect();
+        $goodsTotal = (float) ($order->subtotal ?? $items->sum('total_price') ?? 0);
+        $storeCommission = $goodsTotal * 0.02;
+        $vendorProfit = $goodsTotal - $storeCommission;
+        $pageStoreCommissionTotal += $storeCommission;
+        $pageVendorProfitTotal += $vendorProfit;
+    }
 @endphp
 
 <div class="bg-white rounded-xl shadow border border-gray-100">
@@ -65,8 +75,16 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">الحالة</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">الدفع</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">مجموع البضاعة ($)</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">نسبة المتجر ($)</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">صافي الربح ($)</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            <div>نسبة المتجر ($)</div>
+                            <div class="mt-1 text-[11px] font-semibold text-red-600 normal-case">الإجمالي: {{ number_format($pageStoreCommissionTotal, 2) }} $</div>
+                            <div class="text-[10px] font-normal text-red-400 normal-case">≈ {{ number_format($pageStoreCommissionTotal * $exchangeRate, 0) }} ل.س</div>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            <div>صافي الربح ($)</div>
+                            <div class="mt-1 text-[11px] font-semibold text-emerald-600 normal-case">الإجمالي: {{ number_format($pageVendorProfitTotal, 2) }} $</div>
+                            <div class="text-[10px] font-normal text-emerald-400 normal-case">≈ {{ number_format($pageVendorProfitTotal * $exchangeRate, 0) }} ل.س</div>
+                        </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">تاريخ الإنشاء</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">الإجراءات</th>
                     </tr>
@@ -186,7 +204,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-10 text-center text-gray-500">لا يوجد طلبات</td>
+                            <td colspan="9" class="px-6 py-10 text-center text-gray-500">لا يوجد طلبات</td>
                         </tr>
                     @endforelse
                 </tbody>

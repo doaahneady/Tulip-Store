@@ -15,7 +15,9 @@ class TraderDashboardController extends Controller
         if (! $user) {
             return redirect()->route('trader.login.form');
         }
-        $trader = Trader::where('user_id', $user->id)->firstOrFail();
+        $trader = $user instanceof Trader
+            ? $user
+            : Trader::where('user_id', $user->id)->firstOrFail();
         if ($trader->status !== Trader::STATUS_APPROVED) {
             return redirect()->route('trader.login.form')->with('error', 'حسابك غير مفعل للتاجر');
         }

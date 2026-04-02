@@ -27,9 +27,21 @@ class Store extends Model
 
     public function owner()
     {
-        $fk = Schema::hasColumn('stores', 'owner_id') ? 'owner_id' : 'user_id';
+        if (Schema::hasColumn('stores', 'owner_id')) {
+            return $this->belongsTo(Trader::class, 'owner_id');
+        }
 
-        return $this->belongsTo(User::class, $fk);
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function ownerUser()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function ownerTrader()
+    {
+        return $this->belongsTo(Trader::class, 'owner_id');
     }
 
     public function products()

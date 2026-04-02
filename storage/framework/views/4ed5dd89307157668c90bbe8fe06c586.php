@@ -1,3 +1,4 @@
+
 <?php $__env->startSection('content'); ?>
 <?php $title = 'لوحة اللوجستيات'; $subtitle = 'نظرة عامة على السائقين والتوصيلات والأداء'; ?>
 

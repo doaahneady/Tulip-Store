@@ -113,6 +113,19 @@
 
     <div class="totals">
         <div class="row"><span>Subtotal :</span><span>{{ number_format($subtotal, 2) }} {{ $currencySymbol }}</span></div>
+        @if($order->discount_amount > 0 && $order->couponUsage)
+        <div class="row" style="background:#f0f9ff; padding:8px; border-radius:6px; margin:4px 0;">
+            <span style="color:#2a7080;">
+                <strong>
+                    🏷️ Coupon discount 
+                    @if($order->couponUsage->coupon)
+                        ({{ $order->couponUsage->coupon->code }})
+                    @endif:
+                </strong>
+            </span>
+            <span style="color:#16a34a; font-weight:bold;">-{{ number_format($order->discount_amount, 2) }} {{ $currencySymbol }}</span>
+        </div>
+        @endif
         <div class="row"><span>Delivery fee :</span><span>{{ number_format($delivery, 2) }} {{ $currencySymbol }}</span></div>
         <div class="row"><span>Payment method :</span><span class="bidi">{{ $payMethod === 'payroll' ? 'Payroll' : ucfirst($payMethod) }}</span></div>
         <div class="row" style="border-top:1px solid #e5e7eb; padding-top:10px; margin-top:10px;">

@@ -25,7 +25,25 @@ class TraderAuthController extends Controller
     public function checkEmailAvailability(Request $request)
     {
         $request->validate(['email' => 'required|email']);
-        $exists = User::where('email', strtolower($request->email))->exists();
+        $email = strtolower((string) $request->email);
+        $exists = false;
+
+        if (Schema::hasTable('users')) {
+            $exists = $exists || User::where('email', $email)->exists();
+        }
+
+        if (Schema::hasTable('traders')) {
+            $exists = $exists || Trader::query()
+                ->where(function ($q) use ($email) {
+                    if (Schema::hasColumn('traders', 'email')) {
+                        $q->orWhere('email', $email);
+                    }
+                    if (Schema::hasColumn('traders', 'contact_email')) {
+                        $q->orWhere('contact_email', $email);
+                    }
+                })
+                ->exists();
+        }
         
         return response()->json([
             'available' => !$exists,
@@ -114,16 +132,22 @@ class TraderAuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $user = User::where('email', $request->email)->first();
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json(['success' => false, 'message' => 'Invalid credentials'], 401);
-        }
-        if (! $user->is_trader) {
-            return response()->json(['success' => false, 'message' => 'Not a trader account'], 403);
-        }
-        $trader = Trader::where('user_id', $user->id)->first();
+        $email = strtolower((string) $request->email);
+        $trader = Trader::query()
+            ->where(function ($q) use ($email) {
+                if (Schema::hasColumn('traders', 'email')) {
+                    $q->orWhere('email', $email);
+                }
+                if (Schema::hasColumn('traders', 'contact_email')) {
+                    $q->orWhere('contact_email', $email);
+                }
+            })
+            ->first();
         if (! $trader) {
             return response()->json(['success' => false, 'message' => 'Trader profile not found'], 404);
+        }
+        if (! Schema::hasColumn('traders', 'password') || ! Hash::check($request->password, $trader->password)) {
+            return response()->json(['success' => false, 'message' => 'Invalid credentials'], 401);
         }
         if ($trader->status === Trader::STATUS_PENDING) {
             return response()->json(['success' => false, 'message' => 'Your account is pending approval'], 403);
@@ -134,7 +158,7 @@ class TraderAuthController extends Controller
         if ($trader->status === Trader::STATUS_SUSPENDED) {
             return response()->json(['success' => false, 'message' => 'Your account is suspended. Contact support.'], 403);
         }
-        $token = $user->createToken('trader-token')->plainTextToken;
+        $token = $trader->createToken('trader-token')->plainTextToken;
 
         return response()->json([
             'success' => true,
@@ -154,7 +178,7 @@ class TraderAuthController extends Controller
         $validated = $request->validate([
             'business_name_en' => 'required|string|min:2|max:255|regex:/^[a-zA-Z0-9\s]+$/',
             'business_name_ar' => 'required|string|min:2|max:255|regex:/^[\x{0600}-\x{06FF}0-9\s]+$/u',
-            'email' => 'required|email|max:255|unique:users,email',
+            'email' => 'required|email|max:255',
             'phone' => 'required|string|regex:/^09\d{8}$/',
             'password' => [
                 'required',
@@ -191,18 +215,29 @@ class TraderAuthController extends Controller
         try {
             DB::beginTransaction();
 
-            $user = User::create([
-                'name' => $validated['business_name_en'],
-                'username' => Str::slug($validated['business_name_en']).'_'.Str::random(5),
-                'email' => strtolower($validated['email']),
-                'phone' => $validated['phone'],
-                'password' => Hash::make($validated['password']),
-                'verified' => false,
-                'is_trader' => true,
-            ]);
+            $email = strtolower((string) $validated['email']);
+            $emailExists = false;
+            if (Schema::hasTable('users')) {
+                $emailExists = $emailExists || User::where('email', $email)->exists();
+            }
+            if (Schema::hasTable('traders')) {
+                $emailExists = $emailExists || Trader::query()
+                    ->where(function ($q) use ($email) {
+                        if (Schema::hasColumn('traders', 'email')) {
+                            $q->orWhere('email', $email);
+                        }
+                        if (Schema::hasColumn('traders', 'contact_email')) {
+                            $q->orWhere('contact_email', $email);
+                        }
+                    })
+                    ->exists();
+            }
+            if ($emailExists) {
+                return response()->json(['success' => false, 'message' => 'هذا البريد الإلكتروني مستخدم بالفعل'], 422);
+            }
 
             $documents = [];
-            $userDir = 'trader_documents/' . $user->id;
+            $userDir = 'trader_documents/' . Str::uuid()->toString();
             
             // Log directory attempt
             \Log::info('Attempting to create directory: ' . $userDir);
@@ -222,11 +257,11 @@ class TraderAuthController extends Controller
             }
 
             $traderData = [
-                'user_id' => $user->id,
+                'user_id' => null,
                 'name' => $validated['business_name_en'],
                 'company_name' => $validated['business_name_ar'] ?? null,
-                'contact_email' => $user->email,
-                'contact_phone' => $user->phone,
+                'contact_email' => $email,
+                'contact_phone' => $validated['phone'],
                 'status' => Trader::STATUS_PENDING,
                 'payout_settings' => [
                     'bank' => [
@@ -247,8 +282,8 @@ class TraderAuthController extends Controller
 
             if (Schema::hasColumn('traders', 'account_name_en')) $traderData['account_name_en'] = $validated['business_name_en'];
             if (Schema::hasColumn('traders', 'account_name_ar')) $traderData['account_name_ar'] = $validated['business_name_ar'] ?? $validated['business_name_en'];
-            if (Schema::hasColumn('traders', 'email')) $traderData['email'] = $user->email;
-            if (Schema::hasColumn('traders', 'phone')) $traderData['phone'] = $user->phone;
+            if (Schema::hasColumn('traders', 'email')) $traderData['email'] = $email;
+            if (Schema::hasColumn('traders', 'phone')) $traderData['phone'] = $validated['phone'];
             if (Schema::hasColumn('traders', 'responsible_name')) $traderData['responsible_name'] = $validated['contact_person'];
             if (Schema::hasColumn('traders', 'work_address')) $traderData['work_address'] = $validated['business_address'];
             if (Schema::hasColumn('traders', 'activity')) $traderData['activity'] = 'mart';
@@ -262,7 +297,7 @@ class TraderAuthController extends Controller
                 'level' => 'info',
                 'action' => 'trader_registration_submitted',
                 'message' => 'New trader registration submitted (API)',
-                'user' => $user->email,
+                'user' => $email,
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'metadata' => ['trader_id' => $trader->id],
@@ -323,7 +358,7 @@ class TraderAuthController extends Controller
         $validated = $request->validate([
             'business_name_en' => 'required|string|min:2|max:255|regex:/^[a-zA-Z0-9\s]+$/',
             'business_name_ar' => 'required|string|min:2|max:255|regex:/^[\x{0600}-\x{06FF}0-9\s]+$/u',
-            'email' => 'required|email|max:255|unique:users,email',
+            'email' => 'required|email|max:255',
             'phone' => 'required|string|regex:/^09\d{8}$/',
             'password' => [
                 'required',
@@ -355,18 +390,29 @@ class TraderAuthController extends Controller
         try {
             DB::beginTransaction();
 
-            $user = User::create([
-                'name' => $validated['business_name_en'],
-                'username' => Str::slug($validated['business_name_en']).'_'.Str::random(5),
-                'email' => strtolower($validated['email']),
-                'phone' => $validated['phone'],
-                'password' => Hash::make($validated['password']),
-                'verified' => false,
-                'is_trader' => true,
-            ]);
+            $email = strtolower((string) $validated['email']);
+            $emailExists = false;
+            if (Schema::hasTable('users')) {
+                $emailExists = $emailExists || User::where('email', $email)->exists();
+            }
+            if (Schema::hasTable('traders')) {
+                $emailExists = $emailExists || Trader::query()
+                    ->where(function ($q) use ($email) {
+                        if (Schema::hasColumn('traders', 'email')) {
+                            $q->orWhere('email', $email);
+                        }
+                        if (Schema::hasColumn('traders', 'contact_email')) {
+                            $q->orWhere('contact_email', $email);
+                        }
+                    })
+                    ->exists();
+            }
+            if ($emailExists) {
+                return redirect()->back()->withErrors(['email' => 'هذا البريد الإلكتروني مستخدم بالفعل'])->withInput($request->only('email'));
+            }
 
             $documents = [];
-            $userDir = 'trader_documents/' . $user->id;
+            $userDir = 'trader_documents/' . Str::uuid()->toString();
             
             if (!Storage::disk('public')->exists($userDir)) {
                 Storage::disk('public')->makeDirectory($userDir, 0775, true);
@@ -382,11 +428,11 @@ class TraderAuthController extends Controller
             }
 
             $traderData = [
-                'user_id' => $user->id,
+                'user_id' => null,
                 'name' => $validated['business_name_en'],
                 'company_name' => $validated['business_name_ar'] ?? null,
-                'contact_email' => $user->email,
-                'contact_phone' => $user->phone,
+                'contact_email' => $email,
+                'contact_phone' => $validated['phone'],
                 'status' => Trader::STATUS_PENDING,
                 'payout_settings' => [
                     'bank' => [
@@ -407,8 +453,8 @@ class TraderAuthController extends Controller
 
             if (Schema::hasColumn('traders', 'account_name_en')) $traderData['account_name_en'] = $validated['business_name_en'];
             if (Schema::hasColumn('traders', 'account_name_ar')) $traderData['account_name_ar'] = $validated['business_name_ar'] ?? $validated['business_name_en'];
-            if (Schema::hasColumn('traders', 'email')) $traderData['email'] = $user->email;
-            if (Schema::hasColumn('traders', 'phone')) $traderData['phone'] = $user->phone;
+            if (Schema::hasColumn('traders', 'email')) $traderData['email'] = $email;
+            if (Schema::hasColumn('traders', 'phone')) $traderData['phone'] = $validated['phone'];
             if (Schema::hasColumn('traders', 'responsible_name')) $traderData['responsible_name'] = $validated['contact_person'];
             if (Schema::hasColumn('traders', 'work_address')) $traderData['work_address'] = $validated['business_address'];
             if (Schema::hasColumn('traders', 'activity')) $traderData['activity'] = 'mart';
@@ -422,7 +468,7 @@ class TraderAuthController extends Controller
                 'level' => 'info',
                 'action' => 'trader_registration_submitted',
                 'message' => 'New trader registration submitted',
-                'user' => $user->email,
+                'user' => $email,
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'metadata' => ['trader_id' => $trader->id],

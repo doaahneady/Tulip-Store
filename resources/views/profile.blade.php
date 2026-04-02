@@ -598,6 +598,20 @@
                         </div>
                         <button type="submit" class="btn-save"><i class="fas fa-save"></i> حفظ التغييرات</button>
                     </form>
+                    <div style="margin-top:1.5rem; padding:1.25rem; border:1px solid #e8e8e8; border-radius:14px; background:#fff;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+                            <div style="display:flex; align-items:center; gap:0.6rem; color:#0f4f55; font-weight:900;">
+                                <i class="fas fa-wallet" style="color:#ff6b35;"></i>
+                                <span>رصيدي</span>
+                            </div>
+                            <div style="font-size:1.25rem; font-weight:900; color:#1a1a1a;">
+                                {{ number_format((float) (Auth::user()->balance ?? 0), 2) }}
+                            </div>
+                        </div>
+                        <div style="margin-top:0.5rem; color:#64748b; font-size:0.9rem;">
+                            هذا الرصيد للعرض فقط ولا يمكن تعديله من حساب العميل.
+                        </div>
+                    </div>
                 </div>
             </div>
 

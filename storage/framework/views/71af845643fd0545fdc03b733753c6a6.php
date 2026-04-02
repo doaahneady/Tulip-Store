@@ -46,8 +46,8 @@
             margin: 2rem auto;
             padding: 0 2rem;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
+            grid-template-columns: minmax(0, 560px) 1fr;
+            gap: 3rem;
             align-items: start;
         }
 
@@ -60,10 +60,11 @@
             position: relative;
             background: linear-gradient(145deg, #fff 0%, #f5f5f5 100%);
             border-radius: 30px;
-            padding: 2rem;
+            padding: 0;
             margin-bottom: 1.5rem;
             box-shadow: 0 10px 50px rgba(0,0,0,0.06);
             overflow: hidden;
+            aspect-ratio: 1 / 1;
         }
         .main-image-container::before {
             content: '';
@@ -76,12 +77,13 @@
         }
         .main-image {
             width: 100%;
-            height: 350px;
-            object-fit: contain;
+            height: 100%;
+            object-fit: cover;
             transition: transform 0.5s ease;
             border-radius: 20px;
             position: relative;
             z-index: 1;
+            display: block;
         }
         .main-image-container:hover .main-image {
             transform: scale(1.03);
@@ -446,13 +448,12 @@
         }
 
         /* Responsive */
-        @media (max-width: 1024px) {
+        @media (max-width: 900px) {
             .product-section {
                 grid-template-columns: 1fr;
                 gap: 2rem;
             }
             .gallery { position: static; }
-            .main-image { height: 300px; }
         }
         @media (max-width: 600px) {
             .product-section { padding: 0 1rem; }
@@ -461,8 +462,7 @@
             .features-strip { grid-template-columns: repeat(2, 1fr); }
             /* .thumbnails { flex-wrap: wrap; } */
             .thumb { width: 60px; height: 60px; }
-            .main-image-container { padding: 1rem; border-radius: 20px; }
-            .main-image { height: 250px; }
+            .main-image-container { border-radius: 20px; }
         }
 
         /* Products Grid for Related Products */
@@ -738,6 +738,9 @@
                         <span class="category-badge"><?php echo e($product->category->name); ?></span>
                     <?php endif; ?>
                     <span class="sku">SKU: TLP-<?php echo e($product->id); ?></span>
+                    <?php if($product->trader): ?>
+                        <a href="<?php echo e(route('trader.products', $product->trader)); ?>" style="color:#2a7080; font-weight:700; text-decoration:none;"><?php echo e($product->trader->name); ?></a>
+                    <?php endif; ?>
                 </div>
 
                 <h1 class="product-title"><?php echo e($product->name); ?></h1>

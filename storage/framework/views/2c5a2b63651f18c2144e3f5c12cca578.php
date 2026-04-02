@@ -125,13 +125,16 @@ case ('pending'): ?>
 </span>
 </td>
 <td><strong style="color:#2a7080;font-size:1.1rem">$<?php echo e(number_format($order->total_amount ?? $order->total ?? 0, 2)); ?></strong></td>
-<td>
+<td style="font-family:'El Messiri',sans-serif">
 <?php switch($order->payment_method):
 case ('cash'): ?>
 <i class="fas fa-money-bill-wave" style="color:#28a745"></i> نقدي
 <?php break; ?>
 <?php case ('card'): ?>
 <i class="fas fa-credit-card" style="color:#007bff"></i> بطاقة
+<?php break; ?>
+<?php case ('balance'): ?>
+💰 الرصيد
 <?php break; ?>
 <?php case ('syriatel'): ?>
 <i class="fas fa-mobile-alt" style="color:#e31e24"></i> Syriatel
@@ -206,7 +209,7 @@ $daysLeft = \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($order->esti
 <script>
 const ordersData=<?php echo json_encode($orders->items(), 15, 512) ?>;
 const statusNames={'pending':'قيد الانتظار','confirmed':'تم التأكيد','processing':'قيد التجهيز','ready':'جاهز','shipped':'تم الشحن','out_for_delivery':'خارج للتوصيل','delivered':'تم التوصيل','done':'مكتمل','failed':'فشل','cancelled':'ملغي','refunded':'مسترجع','returned':'مُعاد'};
-const paymentNames={'cash':'الدفع عند الاستلام','card':'بطاقة ائتمان','syriatel':'Syriatel Cash','bank':'تحويل بنكي','payroll':'Payroll'};
+const paymentNames={'cash':'الدفع عند الاستلام','card':'بطاقة ائتمان','balance':'💰 الرصيد','syriatel':'Syriatel Cash','bank':'تحويل بنكي','payroll':'Payroll'};
 const deliveryNames={'normal':'توصيل عادي (7 أيام)','express':'توصيل مستعجل (3 أيام)','instant':'توصيل فوري (24 ساعة)'};
 const paymentStatusNames={'pending':'قيد الانتظار','paid':'تم الدفع','failed':'فشل'};
 
@@ -253,6 +256,18 @@ html+='<div style="text-align:left"><p style="margin:0;font-weight:700;color:#2a
 html+='</div></div>';
 html+='<div style="background:linear-gradient(135deg,#2a7080 0%,#1a5060 100%);padding:1.5rem;border-radius:12px;color:#fff">';
 html+='<div style="display:flex;justify-content:space-between;margin-bottom:0.6rem"><span>المجموع الفرعي:</span><span style="font-weight:700">'+money(effectiveSubtotal)+'</span></div>';
+// Add coupon discount if exists
+const discountAmount = n(order.discount_amount ?? 0);
+if (discountAmount > 0) {
+    let couponCode = '';
+    if (order.coupon_usage) {
+        if (order.coupon_usage.coupon && order.coupon_usage.coupon.code) {
+            couponCode = order.coupon_usage.coupon.code;
+        }
+    }
+    const displayCode = couponCode ? ' ('+couponCode+')' : '';
+    html+='<div style="display:flex;justify-content:space-between;margin-bottom:0.6rem;padding:0.5rem;background:rgba(255,255,255,0.1);border-radius:6px"><span>🏷️ خصم الكوبون'+displayCode+':</span><span style="font-weight:700;color:#90ee90">-'+money(discountAmount)+'</span></div>';
+}
 html+='<div style="display:flex;justify-content:space-between;margin-bottom:0.6rem"><span>تكلفة التوصيل:</span><span style="font-weight:700">'+money(effectiveDelivery)+'</span></div>';
 html+='<div style="display:flex;justify-content:space-between;padding-top:0.6rem;border-top:2px solid rgba(255,255,255,0.3);font-size:1.2rem"><span style="font-weight:700">المجموع الكلي:</span><span style="font-weight:700;color:#ffd700">'+money(effectiveTotal)+'</span></div></div>';
 document.getElementById('modalBody').innerHTML=html;

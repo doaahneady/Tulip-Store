@@ -702,6 +702,9 @@
 
     <script>
         const API_BASE = window.location.origin + '/api';
+        const CUSTOMER_BALANCE = {{ Auth::check() ? (float) (Auth::user()->balance ?? 0) : 'null' }};
+        const IS_AUTHENTICATED = {{ Auth::check() ? 'true' : 'false' }};
+        let selectedPaymentMethod = 'default';
 
         // Load cart on page load
         window.addEventListener('DOMContentLoaded', () => {
@@ -731,10 +734,24 @@
             }
         });
 
+        // Coupon variables
+        let appliedCoupon = null;
+        let couponDiscount = 0;
+        let finalTotal = 0;
+
         async function loadCart() {
             try {
                 const response = await fetch(`${API_BASE}/cart`, { credentials: 'same-origin' });
                 const data = await response.json();
+                
+                // Calculate discount if coupon is applied
+                if (appliedCoupon) {
+                    couponDiscount = (data.total * appliedCoupon.discount_percentage) / 100;
+                    finalTotal = data.total - couponDiscount;
+                } else {
+                    couponDiscount = 0;
+                    finalTotal = data.total;
+                }
                 
                 displayCart(data);
             } catch (error) {
@@ -873,9 +890,86 @@
                             <span>المجموع الفرعي (${data.count} ${data.count === 1 ? 'منتج' : 'منتجات'})</span>
                             <span class="summary-value">$${data.subtotal.toFixed(2)}</span>
                         </div>
+                        ${appliedCoupon ? `
+                        <div class="summary-row" style="color:#16a34a;">
+                            <span>
+                                <i class="fas fa-tag"></i>
+                                خصم (${appliedCoupon.discount_percentage}%)
+                            </span>
+                            <span class="summary-value">-$${couponDiscount.toFixed(2)}</span>
+                        </div>
+                        ` : ''}
                         <div class="summary-row total">
                             <span>الإجمالي</span>
-                            <span class="summary-value">$${data.total.toFixed(2)}</span>
+                            <span class="summary-value">$${finalTotal.toFixed(2)}</span>
+                        </div>
+                        
+                        <!-- Coupon Input Section -->
+                        <div style="margin-top:1rem; padding:0.9rem; border:2px solid #e8f4f5; border-radius:12px; background:#fff;">
+                            <div style="font-family:'El Messiri',sans-serif; font-weight:800; color:#0f4f55; margin-bottom:0.6rem; display:flex; align-items:center; gap:0.5rem;">
+                                <i class="fas fa-tag" style="color:#ff6b35;"></i>
+                                <span>كود الخصم</span>
+                            </div>
+                            ${appliedCoupon ? `
+                                <div style="padding:0.75rem; border:2px solid #16a34a; border-radius:12px; background:#f0fdf4;">
+                                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+                                        <div>
+                                            <div style="font-weight:700; color:#16a34a; font-size:1rem;">${appliedCoupon.code}</div>
+                                            <div style="font-size:0.85rem; color:#15803d;">خصم ${appliedCoupon.discount_percentage}%</div>
+                                        </div>
+                                        <button onclick="removeCoupon()" style="background:#dc2626; color:#fff; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-weight:600;">
+                                            <i class="fas fa-times"></i> إزالة
+                                        </button>
+                                    </div>
+                                    ${appliedCoupon.purpose ? `<div style="font-size:0.85rem; color:#15803d; margin-top:0.5rem;">${appliedCoupon.purpose}</div>` : ''}
+                                </div>
+                            ` : `
+                                <div style="display:flex; gap:0.5rem;">
+                                    <input type="text" id="couponInput" placeholder="أدخل كود الخصم" 
+                                           style="flex:1; padding:0.75rem; border:2px solid #e5e7eb; border-radius:8px; font-size:0.95rem; text-transform:uppercase; font-family:'El Messiri',sans-serif;">
+                                    <button onclick="applyCouponCode()" id="applyCouponBtn"
+                                            style="background:#0f4f55; color:#fff; border:none; padding:0.75rem 1.5rem; border-radius:8px; cursor:pointer; font-weight:600; white-space:nowrap; font-family:'El Messiri',sans-serif;">
+                                        تطبيق
+                                    </button>
+                                </div>
+                                <div id="couponMessage" style="margin-top:0.5rem; font-size:0.85rem; font-family:'El Messiri',sans-serif;"></div>
+                            `}
+                        </div>
+                        
+                        <div style="margin-top:1rem; padding:0.9rem; border:2px solid #e8f4f5; border-radius:12px; background:#f8fcfc;">
+                            <div style="font-family:'El Messiri',sans-serif; font-weight:800; color:#0f4f55; margin-bottom:0.6rem; display:flex; align-items:center; gap:0.5rem;">
+                                <i class="fas fa-wallet" style="color:#ff6b35;"></i>
+                                <span>معلومات الرصيد</span>
+                            </div>
+                            ${(function () {
+                                const total = parseFloat(data.total || 0);
+                                const balance = CUSTOMER_BALANCE === null ? 0 : parseFloat(CUSTOMER_BALANCE || 0);
+                                const canPay = IS_AUTHENTICATED && balance + 1e-9 >= total;
+                                const remaining = Math.max(0, balance - total);
+                                const disabledStyle = canPay ? '' : 'opacity:0.55; filter:grayscale(1); cursor:not-allowed;';
+                                const disabledAttr = canPay ? '' : 'disabled';
+                                const msg = !IS_AUTHENTICATED
+                                    ? 'سجّل الدخول لاستخدام الرصيد.'
+                                    : (canPay ? `المتبقي بعد الشراء: $${remaining.toFixed(2)}` : 'الرصيد غير كافٍ لإتمام هذا الطلب.');
+                                return `
+                                    <div style="padding:0.75rem; border:2px solid #e8f4f5; border-radius:12px; background:#fff;">
+                                        <input type="hidden" name="payment_method" value="balance" ${disabledAttr} style="display:none;">
+                                        <div style="flex:1;">
+                                            <div style="display:flex; align-items:center; justify-content:space-between; gap:0.75rem; flex-wrap:wrap; margin-bottom:0.5rem;">
+                                                <div style="font-weight:700; color:#1a1a1a; font-size:0.95rem;">رصيدك الحالي:</div>
+                                                <div style="font-weight:900; color:#0f4f55; font-size:1.1rem;">$${balance.toFixed(2)}</div>
+                                            </div>
+                                            <div style="color:${canPay ? '#16a34a' : '#64748b'}; font-size:0.9rem; font-weight:600;">
+                                                ${msg}
+                                            </div>
+                                            <div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid #f0f0f0; font-size:0.85rem; color:#64748b;">
+                                                <i class="fas fa-info-circle" style="margin-left:0.3rem;"></i>
+                                                يمكنك اختيار طريقة الدفع في صفحة الدفع
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            })()}
                         </div>
                         <button class="checkout-btn" onclick="checkout()">
                             <i class="fas fa-lock"></i>
@@ -898,6 +992,13 @@
                     </div>
                 </div>
             `;
+
+            const balanceRadio = cartContent.querySelector('input[name="payment_method"][value="balance"]');
+            if (balanceRadio) {
+                balanceRadio.addEventListener('change', () => {
+                    selectedPaymentMethod = balanceRadio.checked ? 'balance' : 'default';
+                });
+            }
         }
 
         async function updateQuantity(itemId, newQuantity) {
@@ -1002,8 +1103,89 @@
         });
 
         function checkout() {
-            // Redirect to checkout page
+            const totalText = document.querySelector('.cart-summary .summary-row.total .summary-value')?.textContent || '';
+            const total = parseFloat((totalText || '').replace(/[^0-9.]/g, '')) || 0;
+            const balance = CUSTOMER_BALANCE === null ? 0 : parseFloat(CUSTOMER_BALANCE || 0);
+            const canPay = IS_AUTHENTICATED && balance + 1e-9 >= total;
+
+            // Save coupon to session storage for checkout
+            if (appliedCoupon) {
+                sessionStorage.setItem('appliedCoupon', JSON.stringify(appliedCoupon));
+            }
+
+            if (selectedPaymentMethod === 'balance') {
+                if (!canPay) {
+                    const msg = !IS_AUTHENTICATED
+                        ? 'سجّل الدخول لاستخدام الرصيد.'
+                        : 'الرصيد غير كافٍ لإتمام هذا الطلب.';
+                    if (window.showToast) {
+                        window.showToast(msg);
+                    } else {
+                        alert(msg);
+                    }
+                    return;
+                }
+
+                window.location.href = '/checkout?payment=balance';
+                return;
+            }
+
             window.location.href = '/checkout';
+        }
+
+        // Coupon Functions
+        async function applyCouponCode() {
+            const code = document.getElementById('couponInput').value.trim().toUpperCase();
+            if (!code) {
+                showCouponMessage('الرجاء إدخال كود الخصم', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('applyCouponBtn');
+            btn.disabled = true;
+            btn.textContent = 'جاري التحقق...';
+            
+            try {
+                const response = await fetch('/api/coupons/validate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ code })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    appliedCoupon = result.coupon;
+                    showCouponMessage('تم تطبيق كود الخصم بنجاح!', 'success');
+                    await loadCart();
+                } else {
+                    showCouponMessage(result.message, 'error');
+                }
+            } catch (error) {
+                showCouponMessage('حدث خطأ أثناء التحقق من الكود', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'تطبيق';
+            }
+        }
+
+        function removeCoupon() {
+            appliedCoupon = null;
+            couponDiscount = 0;
+            sessionStorage.removeItem('appliedCoupon');
+            loadCart();
+        }
+
+        function showCouponMessage(message, type) {
+            const msgDiv = document.getElementById('couponMessage');
+            if (msgDiv) {
+                msgDiv.textContent = message;
+                msgDiv.style.color = type === 'success' ? '#16a34a' : '#dc2626';
+                msgDiv.style.fontWeight = '600';
+            }
         }
 
         // Update cart count in navbar

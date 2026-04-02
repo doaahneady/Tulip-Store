@@ -6,13 +6,18 @@ use App\Events\Dashboard\DashboardUpdated;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\InventoryMovement;
+use App\Models\Invoice;
 use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\User;
+use App\Models\CustomerBalanceAudit;
+use App\Mail\OrderPaidWithBalanceMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 class OrderController extends Controller
@@ -72,6 +77,11 @@ class OrderController extends Controller
 
     public function create(Request $request)
     {
+        $idempotencyKey = $request->header('Idempotency-Key') ?? $request->input('idempotency_key');
+        if ($idempotencyKey !== null) {
+            $request->merge(['idempotency_key' => $idempotencyKey]);
+        }
+
         $validated = $request->validate([
             'recipient_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
@@ -81,14 +91,41 @@ class OrderController extends Controller
             'location.lat' => 'required|numeric',
             'location.lng' => 'required|numeric',
             'delivery_method' => 'required|in:normal,express,instant',
-            'payment_method' => 'required|in:cash,card,syriatel,bank',
+            'payment_method' => 'required|in:cash,card,syriatel,bank,balance',
             'delivery_cost' => 'required|numeric|min:0',
             'distance_km' => 'nullable|numeric|min:0',
             'service_fee' => 'nullable|numeric|min:0',
+            'idempotency_key' => 'nullable|string|max:80',
+            'coupon_code' => 'nullable|string|max:50',
         ]);
 
         try {
             DB::beginTransaction();
+
+            if (! empty($validated['idempotency_key']) && \Illuminate\Support\Facades\Schema::hasColumn('orders', 'idempotency_key')) {
+                $key = (string) $validated['idempotency_key'];
+                $existing = null;
+                if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'user_id')) {
+                    $existing = Order::query()
+                        ->where('user_id', Auth::id())
+                        ->where('idempotency_key', $key)
+                        ->first();
+                } elseif (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'customer_id')) {
+                    $existing = Order::query()
+                        ->where('customer_id', Auth::id())
+                        ->where('idempotency_key', $key)
+                        ->first();
+                }
+
+                if ($existing) {
+                    DB::commit();
+                    return response()->json([
+                        'success' => true,
+                        'order_id' => $existing->id,
+                        'idempotent' => true,
+                    ]);
+                }
+            }
 
             $cart = session()->get('cart', []);
             $martProducts = session()->get('mart_products', []);
@@ -162,11 +199,29 @@ class OrderController extends Controller
             if ($isVip) {
                 $deliveryCost = 0;
             }
-            $total = $subtotal + $deliveryCost;
+            
+            // Handle coupon discount
+            $discountAmount = 0;
+            $appliedCoupon = null;
+            if (!empty($validated['coupon_code'])) {
+                $coupon = \App\Models\DiscountCoupon::where('code', strtoupper($validated['coupon_code']))->first();
+                
+                if ($coupon && $coupon->canBeUsedBy(Auth::id())) {
+                    $discountAmount = ($subtotal * $coupon->discount_percentage) / 100;
+                    $appliedCoupon = $coupon;
+                } else {
+                    // Coupon invalid or already used - log but don't fail the order
+                    \Illuminate\Support\Facades\Log::warning('Invalid coupon attempt during checkout', [
+                        'user_id' => Auth::id(),
+                        'coupon_code' => $validated['coupon_code'],
+                    ]);
+                }
+            }
+            
+            $total = $subtotal - $discountAmount + $deliveryCost;
 
-            // Card-like methods are paid immediately; cash remains pending until delivery collection.
-            $isCashPayment = $validated['payment_method'] === 'cash';
-            $paymentStatus = $isCashPayment ? 'pending' : 'paid';
+            $isBalancePayment = $validated['payment_method'] === 'balance';
+            $paymentStatus = $isBalancePayment ? 'paid' : 'pending';
 
             // Calculate estimated delivery time
             $deliveryDays = [
@@ -222,6 +277,9 @@ class OrderController extends Controller
             if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'payment_method')) {
                 $orderData['payment_method'] = $validated['payment_method'];
             }
+            if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'idempotency_key') && ! empty($validated['idempotency_key'])) {
+                $orderData['idempotency_key'] = (string) $validated['idempotency_key'];
+            }
             if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'subtotal')) {
                 $orderData['subtotal'] = $subtotal;
             }
@@ -235,7 +293,7 @@ class OrderController extends Controller
                 $orderData['service_fee'] = $serviceFee;
             }
             if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'discount_amount')) {
-                $orderData['discount_amount'] = 0;
+                $orderData['discount_amount'] = $discountAmount;
             }
             if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'total')) {
                 $orderData['total'] = $total;
@@ -261,6 +319,44 @@ class OrderController extends Controller
                 ];
             }
             $order = Order::create($orderData);
+
+            $invoiceId = null;
+            if ($isBalancePayment) {
+                $lockedUser = User::query()->lockForUpdate()->findOrFail(Auth::id());
+                $currentBalance = (float) ($lockedUser->balance ?? 0);
+                if ($currentBalance + 1e-9 < $total) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'The balance is not enough to submit this order.',
+                    ], 422);
+                }
+
+                $newBalance = $currentBalance - $total;
+                $lockedUser->forceFill(['balance' => $newBalance])->save();
+
+                if (\Illuminate\Support\Facades\Schema::hasTable('customer_balance_audits')) {
+                    CustomerBalanceAudit::create([
+                        'customer_id' => $lockedUser->id,
+                        'amount' => $total,
+                        'type' => 'purchase',
+                        'support_user_id' => null,
+                        'created_at' => now(),
+                    ]);
+                }
+
+                if (\Illuminate\Support\Facades\Schema::hasTable('invoices')) {
+                    $invoice = Invoice::create([
+                        'order_id' => $order->id,
+                        'invoice_number' => 'INV-'.strtoupper(uniqid()),
+                        'amount' => $total,
+                        'currency' => 'USD',
+                        'status' => 'issued',
+                        'issued_at' => now(),
+                    ]);
+                    $invoiceId = $invoice->id;
+                }
+            }
 
             // 3. Process Items & Inventory
             foreach ($orderItemsData as $item) {
@@ -289,6 +385,21 @@ class OrderController extends Controller
                     );
                 }
             }
+            
+            // Record coupon usage if coupon was applied
+            if ($appliedCoupon && $discountAmount > 0) {
+                \App\Models\CouponUsage::create([
+                    'coupon_id' => $appliedCoupon->id,
+                    'user_id' => Auth::id(),
+                    'order_id' => $order->id,
+                    'discount_amount' => $discountAmount,
+                    'order_total' => $total,
+                    'used_at' => now(),
+                ]);
+                
+                // Increment coupon usage count
+                $appliedCoupon->incrementUsage();
+            }
 
             // 4. Create Financial Transaction
             $ftData = [
@@ -296,7 +407,7 @@ class OrderController extends Controller
                 'user_id' => Auth::id(),
                 'order_id' => $order->id,
                 'type' => 'order_payment',
-                'status' => $isCashPayment ? 'pending' : 'completed',
+                'status' => $isBalancePayment ? 'completed' : 'pending',
                 'amount' => $total,
                 'currency' => 'SYP', // Assuming default currency
                 'description' => "Order Payment #{$order->order_number}",
@@ -320,6 +431,23 @@ class OrderController extends Controller
             }
 
             DB::commit();
+
+            if ($isBalancePayment && $invoiceId && $user && ! empty($user->email)) {
+                $orderId = $order->id;
+                DB::afterCommit(function () use ($orderId, $invoiceId, $user) {
+                    try {
+                        $order = Order::find($orderId);
+                        $invoice = Invoice::find($invoiceId);
+                        if (! $order) {
+                            return;
+                        }
+
+                        Mail::to($user->email)->send(new OrderPaidWithBalanceMail($order, $invoice));
+                    } catch (\Throwable $e) {
+                        Log::warning('Failed to send balance order confirmation email: '.$e->getMessage());
+                    }
+                });
+            }
 
             event(new DashboardUpdated('admin', [
                 'type' => 'order_created',
@@ -395,15 +523,20 @@ class OrderController extends Controller
     {
         // If user is logged in, show only their orders
         // Otherwise show all orders (for testing)
-        $query = Order::with('items.product');
-
         $userId = $this->currentOrderUserId();
         if ($userId === null) {
             return $this->redirectToLogin();
         }
-        $query->where('user_id', $userId);
 
-        $orders = $query->orderBy('created_at', 'desc')->paginate(10);
+        $orders = Order::with(['items.product', 'couponUsage.coupon'])
+            ->where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        // Ensure coupon data is loaded for each order
+        foreach ($orders as $order) {
+            $order->load('couponUsage.coupon');
+        }
 
         return view('my-orders', compact('orders'));
     }
@@ -447,7 +580,7 @@ class OrderController extends Controller
 
     public function downloadInvoice($id)
     {
-        $order = Order::with(['items.product', 'user'])->findOrFail($id);
+        $order = Order::with(['items.product', 'user', 'couponUsage.coupon'])->findOrFail($id);
 
         // Check if user owns this order or is admin
         if (! $this->orderOwnerOrAdmin($order)) {
@@ -468,7 +601,7 @@ class OrderController extends Controller
 
     public function viewInvoice($id)
     {
-        $order = Order::with(['items.product', 'user'])->findOrFail($id);
+        $order = Order::with(['items.product', 'user', 'couponUsage.coupon'])->findOrFail($id);
 
         // Check if user owns this order or is admin
         if (! $this->orderOwnerOrAdmin($order)) {

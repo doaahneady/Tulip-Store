@@ -1,3 +1,4 @@
+
 <?php $__env->startSection('content'); ?>
 <?php($title = 'لوحة خدمة العملاء')
 @php($subtitle = 'إدارة التذاكر والردود والمرتجعات')
@@ -40,6 +41,18 @@
         <a href="<?php echo e(route('dashboard.cs.tickets')); ?>?assigned_to=<?php echo e(auth('employee')->id()); ?>" class="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition">
             <i class="fas fa-user-check"></i>
             <span>تذاكري</span>
+        </a>
+        <a href="<?php echo e(route('dashboard.cs.products')); ?>" class="inline-flex items-center gap-2 bg-blue-700 text-white px-4 py-2 rounded-xl hover:bg-blue-800 transition">
+            <i class="fas fa-boxes"></i>
+            <span>المنتجات</span>
+        </a>
+        <a href="<?php echo e(route('dashboard.cs.customer-balances')); ?>" class="inline-flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-black transition">
+            <i class="fas fa-wallet"></i>
+            <span>أرصدة العملاء</span>
+        </a>
+        <a href="<?php echo e(route('dashboard.cs.coupons')); ?>" class="inline-flex items-center gap-2 bg-rose-600 text-white px-4 py-2 rounded-xl hover:bg-rose-700 transition">
+            <i class="fas fa-tag"></i>
+            <span>أكواد الخصم</span>
         </a>
         <a href="<?php echo e(route('dashboard.cs.trader-products')); ?>" class="inline-flex items-center gap-2 bg-slate-700 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition">
             <i class="fas fa-clipboard-check"></i>

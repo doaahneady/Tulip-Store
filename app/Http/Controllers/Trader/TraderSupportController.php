@@ -17,7 +17,9 @@ class TraderSupportController extends Controller
         $user = Auth::guard('trader')->user();
         abort_unless($user && ($user->is_trader ?? false), 403);
 
-        $trader = Trader::where('user_id', $user->id)->first();
+        $trader = $user instanceof Trader
+            ? $user
+            : Trader::where('user_id', $user->id)->first();
         abort_unless($trader, 404);
         abort_unless($trader->status === Trader::STATUS_APPROVED, 403);
 

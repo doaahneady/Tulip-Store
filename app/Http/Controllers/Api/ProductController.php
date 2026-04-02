@@ -62,29 +62,14 @@ class ProductController extends Controller
     {
         $market = $this->resolveMarket($request);
 
-        $query = Product::query();
-
-        if ($market === 'mart') {
-            // For Mart, we want to be very inclusive to ensure products show up
-            // We only filter by is_active if the column exists
-            if (Schema::hasColumn('products', 'is_active')) {
-                $query->where('is_active', true);
-            }
-            
-            // We don't apply the 'available()' scope here because fresh produce 
-            // often doesn't have stock tracked correctly
-        } else {
-            $query->active()->available();
-        }
-
-        $query = $this->applyMarketFilter($query, $market);
+        $baseQuery = $this->applyMarketFilter(Product::query(), $market);
 
         // Search
         if ($request->has('search') && $request->search) {
             $search = $request->search;
             $hasDetails = Schema::hasColumn('products', 'details');
             $hasSlug = Schema::hasColumn('products', 'slug');
-            $query->where(function ($q) use ($search, $hasDetails, $hasSlug) {
+            $baseQuery->where(function ($q) use ($search, $hasDetails, $hasSlug) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");
                 if ($hasDetails) {
@@ -101,7 +86,7 @@ class ProductController extends Controller
 
         // Filter by category
         if ($request->has('category_id') && $request->category_id) {
-            $query->where('category_id', $request->category_id);
+            $baseQuery->where('category_id', $request->category_id);
         }
 
         // Filter by category slug
@@ -111,8 +96,12 @@ class ProductController extends Controller
                 ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', $market))
                 ->first();
             if ($category) {
-                $query->where('category_id', $category->id);
+                $baseQuery->where('category_id', $category->id);
             }
+        }
+
+        if ($request->filled('trader_id') && Schema::hasColumn('products', 'trader_id')) {
+            $baseQuery->where('trader_id', (int) $request->input('trader_id'));
         }
 
         $attrFilters = $request->input('attributes');
@@ -122,7 +111,7 @@ class ProductController extends Controller
                 if ($key === '') {
                     continue;
                 }
-                $query->whereHas('attributes', function ($q) use ($key, $v) {
+                $baseQuery->whereHas('attributes', function ($q) use ($key, $v) {
                     $q->where('attribute_key', $key)->orWhere('name', $key);
                     if (is_array($v)) {
                         $vals = array_values(array_filter(array_map(fn ($x) => trim((string) $x), $v), fn ($x) => $x !== ''));
@@ -147,7 +136,7 @@ class ProductController extends Controller
             $key = trim((string) $request->input('attr_key'));
             $val = trim((string) $request->input('attr_value', ''));
             if ($key !== '') {
-                $query->whereHas('attributes', function ($q) use ($key, $val) {
+                $baseQuery->whereHas('attributes', function ($q) use ($key, $val) {
                     $q->where('attribute_key', $key)->orWhere('name', $key);
                     if ($val !== '') {
                         $q->where(function ($inner) use ($val) {
@@ -169,7 +158,6 @@ class ProductController extends Controller
         if (! in_array($sortOrder, ['asc', 'desc'], true)) {
             $sortOrder = 'desc';
         }
-        $query->orderBy($sortBy, $sortOrder);
 
         // Paginate
         $perPage = (int) $request->get('per_page', 12);
@@ -181,10 +169,30 @@ class ProductController extends Controller
         }
 
         $with = ['category', 'reviews'];
+        if (Schema::hasTable('traders') && Schema::hasColumn('products', 'trader_id')) {
+            $with[] = 'trader';
+        }
         if ($market === 'mart' || (bool) $request->boolean('include_attributes')) {
             $with[] = 'attributes';
         }
-        $products = $query->with($with)->paginate($perPage);
+
+        $scopedQuery = clone $baseQuery;
+        if ($market === 'mart') {
+            if (Schema::hasColumn('products', 'is_active')) {
+                $scopedQuery->where('is_active', true);
+            }
+        } else {
+            $scopedQuery->active()->available();
+        }
+
+        $baseQuery->orderBy($sortBy, $sortOrder);
+        $scopedQuery->orderBy($sortBy, $sortOrder);
+
+        $products = $scopedQuery->with($with)->paginate($perPage);
+
+        if ($market === 'store' && $products->isEmpty()) {
+            $products = $baseQuery->with($with)->paginate($perPage);
+        }
 
         return response()->json($products);
     }
@@ -321,7 +329,7 @@ class ProductController extends Controller
 
         try {
             $select = ['id', 'name', 'category_id'];
-            foreach (['price', 'discount_price', 'stock_quantity', 'track_inventory', 'rating', 'reviews_count', 'description', 'details', 'slug', 'image', 'images'] as $col) {
+            foreach (['price', 'discount_price', 'stock_quantity', 'track_inventory', 'rating', 'reviews_count', 'description', 'details', 'slug', 'image', 'images', 'trader_id'] as $col) {
                 if (Schema::hasColumn('products', $col)) {
                     $select[] = $col;
                 }
@@ -329,8 +337,16 @@ class ProductController extends Controller
             $hasDetails = Schema::hasColumn('products', 'details');
             $hasSlug = Schema::hasColumn('products', 'slug');
 
+            $with = ['category'];
+            if (Schema::hasTable('traders') && Schema::hasColumn('products', 'trader_id')) {
+                $with[] = 'trader';
+            }
+
             $products = $this->applyMarketFilter(Product::query()->active(), $market)
-                ->with('category')
+                ->with($with)
+                ->when($request->filled('trader_id') && Schema::hasColumn('products', 'trader_id'), function ($q) use ($request) {
+                    $q->where('trader_id', (int) $request->input('trader_id'));
+                })
                 ->where(function ($q) use ($search, $hasDetails, $hasSlug) {
                     $q->where('name', 'like', "%{$search}%")
                         ->orWhere('description', 'like', "%{$search}%");

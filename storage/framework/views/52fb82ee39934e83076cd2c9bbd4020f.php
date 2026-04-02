@@ -114,6 +114,19 @@
 
     <div class="totals">
         <div class="row"><span>Subtotal :</span><span><?php echo e(number_format($subtotal, 2)); ?> <?php echo e($currencySymbol); ?></span></div>
+        <?php if($order->discount_amount > 0 && $order->couponUsage): ?>
+        <div class="row" style="background:#f0f9ff; padding:8px; border-radius:6px; margin:4px 0;">
+            <span style="color:#2a7080;">
+                <strong>
+                    🏷️ Coupon discount 
+                    <?php if($order->couponUsage->coupon): ?>
+                        (<?php echo e($order->couponUsage->coupon->code); ?>)
+                    <?php endif; ?>:
+                </strong>
+            </span>
+            <span style="color:#16a34a; font-weight:bold;">-<?php echo e(number_format($order->discount_amount, 2)); ?> <?php echo e($currencySymbol); ?></span>
+        </div>
+        <?php endif; ?>
         <div class="row"><span>Delivery fee :</span><span><?php echo e(number_format($delivery, 2)); ?> <?php echo e($currencySymbol); ?></span></div>
         <div class="row"><span>Payment method :</span><span class="bidi"><?php echo e($payMethod === 'payroll' ? 'Payroll' : ucfirst($payMethod)); ?></span></div>
         <div class="row" style="border-top:1px solid #e5e7eb; padding-top:10px; margin-top:10px;">

@@ -111,6 +111,46 @@ Route::middleware('auth:sanctum')->prefix('cart')->group(function () {
     Route::put('/items/{itemId}', [CartController::class, 'updateItem']);
     Route::delete('/items/{itemId}', [CartController::class, 'removeItem']);
     Route::delete('/clear', [CartController::class, 'clear']);
+    Route::post('/apply-coupon', [CartController::class, 'applyCoupon']);
+    Route::delete('/remove-coupon', [CartController::class, 'removeCoupon']);
+});
+
+// Coupon Validation (Public for cart page)
+Route::post('/coupons/validate', function(\Illuminate\Http\Request $request) {
+    $request->validate(['code' => 'required|string']);
+    
+    $coupon = \App\Models\DiscountCoupon::where('code', $request->code)->first();
+    
+    if (!$coupon) {
+        return response()->json([
+            'success' => false,
+            'message' => 'كود الخصم غير صحيح'
+        ], 404);
+    }
+    
+    if (!$coupon->isValid()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'كود الخصم منتهي الصلاحية أو غير نشط'
+        ], 400);
+    }
+    
+    $userId = auth()->id();
+    if ($userId && !$coupon->canBeUsedBy($userId)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'لقد استخدمت هذا الكود من قبل'
+        ], 400);
+    }
+    
+    return response()->json([
+        'success' => true,
+        'coupon' => [
+            'code' => $coupon->code,
+            'discount_percentage' => $coupon->discount_percentage,
+            'purpose' => $coupon->purpose,
+        ]
+    ]);
 });
 
 // Gifts API

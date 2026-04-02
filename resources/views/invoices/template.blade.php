@@ -301,6 +301,19 @@
                 <td style="text-align: right; width: 60%;"><strong>المجموع الفرعي:</strong></td>
                 <td style="text-align: left;">@money($order->subtotal)</td>
             </tr>
+            @if($order->discount_amount > 0 && $order->couponUsage)
+            <tr style="background:#f0f9ff;">
+                <td style="text-align: right; color:#2a7080;">
+                    <strong>
+                        <i style="font-style:normal;">🏷️</i> خصم الكوبون 
+                        @if($order->couponUsage->coupon)
+                            ({{ $order->couponUsage->coupon->code }})
+                        @endif:
+                    </strong>
+                </td>
+                <td style="text-align: left; color:#16a34a; font-weight:bold;">-@money($order->discount_amount)</td>
+            </tr>
+            @endif
             <tr>
                 <td style="text-align: right;"><strong>تكلفة التوصيل:</strong></td>
                 <td style="text-align: left;">@money($order->delivery_cost)</td>

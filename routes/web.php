@@ -833,6 +833,7 @@ Route::middleware(['web'])->group(function () {
                 'name' => $user->name ?? $user->user_full_name,
                 'phone' => $user->phone ?? $user->mobile,
                 'email' => $user->email,
+                'balance' => (float) ($user->balance ?? 0),
             ]);
         }
 
@@ -894,6 +895,9 @@ Route::get('/about', function () {
 
 // Product details page route
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('product.show');
+Route::get('/product/{id}', function ($id) {
+    return redirect()->route('product.show', ['id' => $id]);
+});
 
 // Favorites page route
 Route::get('/favorites', function () {
@@ -906,6 +910,28 @@ Route::get('/cart', function () {
 })->name('cart');
 
 // Store page route
+Route::get('/traders/{trader}/products', function (\App\Models\Trader $trader) {
+    $avg = 0.0;
+    if (Schema::hasColumn('products', 'trader_id')) {
+        $base = PublicProduct::query()->where('trader_id', $trader->id)
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'));
+
+        if (Schema::hasColumn('products', 'rating')) {
+            $avgActive = (clone $base)->active()->avg('rating');
+            $avg = $avgActive !== null ? (float) $avgActive : 0.0;
+            if ($avg <= 0) {
+                $avgAll = (clone $base)->avg('rating');
+                $avg = $avgAll !== null ? (float) $avgAll : 0.0;
+            }
+        }
+    }
+
+    return view('store', [
+        'trader' => $trader,
+        'traderAverageRating' => $avg,
+    ]);
+})->name('trader.products');
+
 Route::get('/store', function () {
     return view('store');
 })->name('store');
@@ -1192,6 +1218,119 @@ Route::prefix('api/support')->middleware('auth:employee')->group(function () {
     Route::get('/traders/pending', [\App\Http\Controllers\Api\SupportApprovalsController::class, 'pendingTraders']);
     Route::post('/traders/{trader}/approve', [\App\Http\Controllers\Api\SupportApprovalsController::class, 'approveTrader']);
     Route::post('/traders/{trader}/reject', [\App\Http\Controllers\Api\SupportApprovalsController::class, 'rejectTrader']);
+    
+    // Coupon Management Routes
+    Route::prefix('coupons')->group(function () {
+        Route::get('/', function() {
+            $coupons = \App\Models\DiscountCoupon::with('creator')->orderBy('created_at', 'desc')->get();
+            return response()->json(['coupons' => $coupons]);
+        });
+        
+        Route::post('/', function(\Illuminate\Http\Request $request) {
+            try {
+                $validated = $request->validate([
+                    'code' => 'required|string|max:50|unique:discount_coupons,code',
+                    'discount_percentage' => 'required|numeric|min:0.01|max:100',
+                    'purpose' => 'nullable|string',
+                    'max_uses' => 'nullable|integer|min:1',
+                    'expires_at' => 'nullable|date',
+                ]);
+                
+                $validated['code'] = strtoupper($validated['code']);
+                $validated['is_active'] = true;
+                $validated['used_count'] = 0;
+                
+                // Try to get authenticated employee ID from different guards
+                $employee = auth('employee')->user() ?? auth()->user();
+                if ($employee && isset($employee->id)) {
+                    $validated['created_by'] = $employee->id;
+                }
+                
+                $coupon = \App\Models\DiscountCoupon::create($validated);
+                
+                return response()->json([
+                    'success' => true,
+                    'coupon' => $coupon,
+                    'message' => 'تم إنشاء كود الخصم بنجاح'
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Coupon creation error: ' . $e->getMessage());
+                \Log::error('Stack trace: ' . $e->getTraceAsString());
+                return response()->json([
+                    'success' => false,
+                    'message' => 'حدث خطأ أثناء إنشاء الكود: ' . $e->getMessage()
+                ], 500);
+            }
+        });
+        
+        Route::put('/{id}', function(\Illuminate\Http\Request $request, $id) {
+            try {
+                $coupon = \App\Models\DiscountCoupon::findOrFail($id);
+                
+                $validated = $request->validate([
+                    'is_active' => 'sometimes|boolean',
+                    'discount_percentage' => 'sometimes|numeric|min:0.01|max:100',
+                    'purpose' => 'sometimes|nullable|string',
+                    'max_uses' => 'sometimes|nullable|integer|min:1',
+                    'expires_at' => 'sometimes|nullable|date',
+                ]);
+                
+                $coupon->update($validated);
+                
+                return response()->json([
+                    'success' => true,
+                    'coupon' => $coupon,
+                    'message' => 'تم تحديث الكود بنجاح'
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Coupon update error: ' . $e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => 'حدث خطأ أثناء تحديث الكود'
+                ], 500);
+            }
+        });
+        
+        Route::delete('/{id}', function($id) {
+            try {
+                $coupon = \App\Models\DiscountCoupon::findOrFail($id);
+                $coupon->delete();
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'تم حذف الكود بنجاح'
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Coupon delete error: ' . $e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => 'حدث خطأ أثناء حذف الكود'
+                ], 500);
+            }
+        });
+        
+        Route::get('/{id}/usage', function($id) {
+            try {
+                $coupon = \App\Models\DiscountCoupon::findOrFail($id);
+                $usages = \App\Models\CouponUsage::where('coupon_id', $id)
+                    ->with('user')
+                    ->orderBy('used_at', 'desc')
+                    ->get();
+                
+                return response()->json([
+                    'coupon' => $coupon,
+                    'usages' => $usages
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Coupon usage error: ' . $e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => 'حدث خطأ أثناء تحميل الاستخدامات'
+                ], 500);
+            }
+        });
+    });
+
     Route::post('/traders/{trader}/request-info', [\App\Http\Controllers\Api\SupportApprovalsController::class, 'requestInfoTrader']);
 
     Route::get('/trader-products/pending', [\App\Http\Controllers\Api\SupportApprovalsController::class, 'pendingTraderProducts']);

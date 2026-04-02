@@ -71,7 +71,7 @@
             <h4 class="font-semibold text-gray-900">إضافة تصنيف</h4>
             <button type="button" onclick="document.getElementById('createCategoryModal').classList.add('hidden')" class="text-gray-500 hover:text-gray-700">&times;</button>
         </div>
-        <form method="POST" action="{{ route('dashboard.admin.categories.create') }}">
+        <form method="POST" action="{{ route('dashboard.admin.categories.create') }}" enctype="multipart/form-data">
             @csrf
             <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -101,6 +101,12 @@
                         </select>
                     </div>
                 @endif
+                @if(\Illuminate\Support\Facades\Schema::hasColumn('categories', 'image'))
+                    <div class="md:col-span-2">
+                        <label class="block text-sm text-gray-600 mb-1">صورة التصنيف</label>
+                        <input type="file" name="image" accept="image/*" class="form-input w-full" required>
+                    </div>
+                @endif
             </div>
             <div class="p-4 border-t border-gray-100 flex items-center justify-end gap-2">
                 <button type="button" class="px-4 py-2 rounded-xl border" onclick="document.getElementById('createCategoryModal').classList.add('hidden')">إلغاء</button>
@@ -117,7 +123,7 @@
             <h4 class="font-semibold text-gray-900">تعديل تصنيف</h4>
             <button type="button" onclick="document.getElementById('editCategoryModal-{{ $category->id }}').classList.add('hidden')" class="text-gray-500 hover:text-gray-700">&times;</button>
         </div>
-        <form method="POST" action="{{ route('dashboard.admin.categories.update', $category) }}">
+        <form method="POST" action="{{ route('dashboard.admin.categories.update', $category) }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -146,6 +152,12 @@
                             <option value="1" @selected((bool) $category->is_active)>نشط</option>
                             <option value="0" @selected(!(bool) $category->is_active)>غير نشط</option>
                         </select>
+                    </div>
+                @endif
+                @if(\Illuminate\Support\Facades\Schema::hasColumn('categories', 'image'))
+                    <div class="md:col-span-2">
+                        <label class="block text-sm text-gray-600 mb-1">تحديث صورة التصنيف</label>
+                        <input type="file" name="image" accept="image/*" class="form-input w-full">
                     </div>
                 @endif
             </div>

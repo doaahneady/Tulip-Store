@@ -15,6 +15,7 @@ use App\Models\SupportTicket;
 use App\Models\SystemAlert;
 use App\Models\SystemLog;
 use App\Models\User;
+use App\Models\CustomerBalanceAudit;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -286,6 +287,40 @@ class CrossDepartmentFlowService
                 'approval_status' => 'pending',
             ]);
 
+            if (Schema::hasTable('users') && ($order->payment_method ?? null) === 'balance') {
+                $lockedUser = User::query()->lockForUpdate()->findOrFail($order->user_id);
+                $current = (float) ($lockedUser->balance ?? 0);
+                $new = $current + (float) $refundAmount;
+                $lockedUser->forceFill(['balance' => $new])->save();
+
+                if (Schema::hasTable('customer_balance_audits')) {
+                    CustomerBalanceAudit::create([
+                        'customer_id' => $lockedUser->id,
+                        'amount' => (float) $refundAmount,
+                        'type' => $refundAmount >= $order->total ? 'refund_full' : 'refund_partial',
+                        'support_user_id' => null,
+                        'created_at' => now(),
+                    ]);
+                }
+
+                $update = [];
+                if (Schema::hasColumn('financial_transactions', 'status')) {
+                    $update['status'] = 'completed';
+                }
+                if (Schema::hasColumn('financial_transactions', 'approval_status')) {
+                    $update['approval_status'] = 'approved';
+                }
+                if (Schema::hasColumn('financial_transactions', 'metadata')) {
+                    $meta = is_array($refundTransaction->metadata ?? null) ? $refundTransaction->metadata : [];
+                    $meta['refunded_to_balance'] = true;
+                    $update['metadata'] = $meta;
+                }
+                if ($update !== []) {
+                    $refundTransaction->update($update);
+                    $refundTransaction->refresh();
+                }
+            }
+
             // Update order status if full refund
             if ($refundAmount >= $order->total) {
                 StatusTransitionService::transition($order, 'status', 'refunded', $userId);
@@ -370,9 +405,12 @@ class CrossDepartmentFlowService
                 // Check if assignedBy is an employee ID, convert to user_id
                 $employee = \App\Models\Employee::find($assignedBy);
                 if ($employee && $employee->user_id) {
-                    $assignedByUserId = $employee->user_id;
-                } elseif (\App\Models\User::find($assignedBy)) {
-                    // It's already a user ID
+                    // Validate that the user_id exists in users table
+                    if (\App\Models\User::where('id', $employee->user_id)->exists()) {
+                        $assignedByUserId = $employee->user_id;
+                    }
+                } elseif (\App\Models\User::where('id', $assignedBy)->exists()) {
+                    // It's already a user ID and it exists
                     $assignedByUserId = $assignedBy;
                 }
             }
@@ -381,9 +419,15 @@ class CrossDepartmentFlowService
             if (!$assignedByUserId) {
                 $authEmployee = auth('employee')->user();
                 if ($authEmployee && $authEmployee->user_id) {
-                    $assignedByUserId = $authEmployee->user_id;
+                    // Validate that the user_id exists
+                    if (\App\Models\User::where('id', $authEmployee->user_id)->exists()) {
+                        $assignedByUserId = $authEmployee->user_id;
+                    }
                 } elseif (auth()->check()) {
-                    $assignedByUserId = auth()->id();
+                    $authUserId = auth()->id();
+                    if ($authUserId && \App\Models\User::where('id', $authUserId)->exists()) {
+                        $assignedByUserId = $authUserId;
+                    }
                 }
             }
 
@@ -496,20 +540,34 @@ class CrossDepartmentFlowService
                 ]);
             }
 
-            // Audit log
-            AuditLog::create([
-                'user_id' => $userId ?? $assignedBy,
-                'action' => 'driver_assigned',
-                'model_type' => Order::class,
-                'model_id' => $order->id,
-                'old_values' => ['status' => $order->getOriginal('status')],
-                'new_values' => [
-                    'status' => 'out_for_delivery',
-                    'driver_id' => $driverId,
-                    'assignment_id' => $assignment->id,
-                ],
-            ]);
-
+            // Audit log - ensure user_id is valid or null
+            $auditUserId = null;
+            $candidateId = $userId ?? $assignedBy;
+            if ($candidateId && \App\Models\User::where('id', $candidateId)->exists()) {
+                $auditUserId = $candidateId;
+            }
+            
+            try {
+                AuditLog::create([
+                    'user_id' => $auditUserId,
+                    'action' => 'driver_assigned',
+                    'model_type' => Order::class,
+                    'model_id' => $order->id,
+                    'old_values' => ['status' => $order->getOriginal('status')],
+                    'new_values' => [
+                        'status' => 'out_for_delivery',
+                        'driver_id' => $driverId,
+                        'assignment_id' => $assignment->id,
+                    ],
+                ]);
+            } catch (\Illuminate\Database\QueryException $e) {
+                // Log warning if audit log fails, but don't break the flow
+                \Illuminate\Support\Facades\Log::warning('Audit log creation failed during driver assignment', [
+                    'error' => $e->getMessage(),
+                    'user_id' => $auditUserId,
+                    'order_id' => $orderId,
+                ]);
+            }
             return [
                 'order' => $order->fresh(),
                 'driver' => $driver->fresh(),

@@ -4,14 +4,17 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\Category;
 use App\Models\DeliveryAssignment;
 use App\Models\DriverLocation;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Store;
 use App\Models\SupportTicket;
 use App\Models\SystemSetting;
 use App\Models\Trader;
 use App\Models\User;
+use App\Services\CustomerBalanceService;
 use App\Services\Dashboard\CSDashboardService;
 use App\Services\StatusTransitionService;
 use Illuminate\Http\Request;
@@ -23,7 +26,8 @@ use Illuminate\Support\Facades\Mail;
 class SupportDashboardController extends Controller
 {
     public function __construct(
-        protected CSDashboardService $dashboardService
+        protected CSDashboardService $dashboardService,
+        protected CustomerBalanceService $customerBalanceService
     ) {}
 
     public function index(Request $request)
@@ -119,6 +123,47 @@ class SupportDashboardController extends Controller
             ->paginate(20);
 
         return view('dashboards.cs.traders.index', compact('traders'));
+    }
+
+    public function customerBalances(Request $request)
+    {
+        $customers = User::query()
+            ->when($request->search, function ($q, $search) {
+                $q->where(function ($qq) use ($search) {
+                    $qq->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('username', 'like', "%{$search}%");
+                });
+            })
+            ->orderByDesc('balance')
+            ->orderByDesc('created_at')
+            ->paginate(30)
+            ->withQueryString();
+
+        return view('dashboards.cs.customer-balances', compact('customers'));
+    }
+
+    public function adjustCustomerBalance(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'action' => 'required|in:add,deduct',
+            'amount' => 'required|numeric|min:0.01|max:100000000',
+        ]);
+
+        $amount = (float) $validated['amount'];
+        $supportEmployeeId = auth('employee')->id();
+
+        try {
+            if ($validated['action'] === 'add') {
+                $this->customerBalanceService->add($user, $amount, 'add', $supportEmployeeId);
+            } else {
+                $this->customerBalanceService->deduct($user, $amount, 'deduct', $supportEmployeeId);
+            }
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Balance updated');
     }
 
     public function traderDetails(Trader $trader)
@@ -300,6 +345,183 @@ class SupportDashboardController extends Controller
             ->withQueryString();
 
         return view('dashboards.cs.trader-products', compact('products'));
+    }
+
+    public function products(Request $request)
+    {
+        abort_unless(Schema::hasTable('products'), 404);
+
+        $products = Product::query()
+            ->with(['category', 'store'])
+            ->when(Schema::hasColumn('products', 'market'), function ($q) {
+                $q->where(function ($qq) {
+                    $qq->where('market', 'store')->orWhereNull('market');
+                });
+            })
+            ->when($request->search, function ($q, $search) {
+                $s = trim((string) $search);
+                if ($s === '') {
+                    return;
+                }
+
+                if (ctype_digit($s)) {
+                    $q->whereKey((int) $s);
+                    return;
+                }
+
+                $q->where(function ($inner) use ($s) {
+                    $inner->where('name', 'like', "%{$s}%")
+                        ->orWhere('sku', 'like', "%{$s}%");
+                });
+            })
+            ->orderByDesc('created_at')
+            ->paginate(30)
+            ->withQueryString();
+
+        return view('dashboards.cs.products', compact('products'));
+    }
+
+    public function editProduct(Product $product)
+    {
+        $categories = collect();
+        if (Schema::hasTable('categories')) {
+            $categories = Category::query()
+                ->when(Schema::hasColumn('categories', 'market'), function ($q) {
+                    $q->where(function ($qq) {
+                        $qq->where('market', 'store')->orWhereNull('market');
+                    });
+                })
+                ->orderBy('name')
+                ->get(['id', 'name']);
+        }
+
+        $stores = collect();
+        if (Schema::hasTable('stores')) {
+            $stores = Store::query()->orderBy('name')->limit(200)->get(['id', 'name']);
+        }
+
+        return view('dashboards.cs.products-edit', compact('product', 'categories', 'stores'));
+    }
+
+    public function updateProduct(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'sku' => 'nullable|string|max:255',
+            'category_id' => Schema::hasTable('categories') ? 'nullable|integer|exists:categories,id' : 'nullable|integer',
+            'store_id' => Schema::hasTable('stores') ? 'nullable|integer|exists:stores,id' : 'nullable|integer',
+            'price' => 'nullable|numeric|min:0',
+            'discount_price' => 'nullable|numeric|min:0',
+            'cost_price' => 'nullable|numeric|min:0',
+            'stock_quantity' => 'nullable|integer|min:0',
+            'low_stock_threshold' => 'nullable|integer|min:0',
+            'track_inventory' => 'nullable|boolean',
+            'is_active' => 'nullable|boolean',
+            'status' => 'nullable|string|max:32',
+            'market' => 'nullable|in:store,mart',
+            'description' => 'nullable|string|max:10000',
+            'details' => 'nullable|string|max:20000',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:8192',
+        ]);
+
+        $updates = [];
+        $updates['name'] = $validated['name'];
+
+        if (Schema::hasColumn('products', 'sku')) {
+            $updates['sku'] = $validated['sku'] ?? $product->sku;
+        }
+        if (Schema::hasColumn('products', 'category_id')) {
+            $updates['category_id'] = $validated['category_id'] ?? $product->category_id;
+        }
+        if (Schema::hasColumn('products', 'store_id')) {
+            $updates['store_id'] = $validated['store_id'] ?? $product->store_id;
+        }
+        if (Schema::hasColumn('products', 'price') && array_key_exists('price', $validated) && $validated['price'] !== null) {
+            $updates['price'] = $validated['price'];
+        }
+        if (Schema::hasColumn('products', 'discount_price')) {
+            $updates['discount_price'] = $validated['discount_price'] ?? null;
+        }
+        if (Schema::hasColumn('products', 'cost_price')) {
+            $updates['cost_price'] = $validated['cost_price'] ?? null;
+        }
+        if (Schema::hasColumn('products', 'stock_quantity')) {
+            $updates['stock_quantity'] = $validated['stock_quantity'] ?? $product->stock_quantity;
+        }
+        if (Schema::hasColumn('products', 'low_stock_threshold')) {
+            $updates['low_stock_threshold'] = $validated['low_stock_threshold'] ?? $product->low_stock_threshold;
+        }
+        if (Schema::hasColumn('products', 'track_inventory')) {
+            $updates['track_inventory'] = $request->boolean('track_inventory');
+        }
+        if (Schema::hasColumn('products', 'is_active')) {
+            $updates['is_active'] = $request->boolean('is_active');
+        }
+        if (Schema::hasColumn('products', 'status') && $validated['status'] !== null) {
+            $updates['status'] = $validated['status'];
+        }
+        if (Schema::hasColumn('products', 'market')) {
+            $updates['market'] = $validated['market'] ?? $product->market;
+        }
+        if (Schema::hasColumn('products', 'description')) {
+            $updates['description'] = $validated['description'] ?? $product->description;
+        }
+        if (Schema::hasColumn('products', 'details')) {
+            $updates['details'] = $validated['details'] ?? $product->details;
+        }
+
+        if (Schema::hasColumn('products', 'slug')) {
+            $newName = (string) $validated['name'];
+            if ($newName !== '' && (string) $product->name !== $newName) {
+                $base = \Illuminate\Support\Str::slug($newName);
+                if ($base === '') {
+                    $base = 'product';
+                }
+                $slug = $base;
+                $i = 0;
+                while (Product::where('slug', $slug)->where('id', '!=', $product->id)->exists() && $i < 50) {
+                    $slug = $base.'-'.\Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(6));
+                    $i++;
+                }
+                $updates['slug'] = $slug;
+            }
+        }
+
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('products', 'public');
+            if (Schema::hasColumn('products', 'image')) {
+                $updates['image'] = $path;
+            }
+            if (Schema::hasColumn('products', 'images')) {
+                $updates['images'] = [$path];
+            }
+        }
+
+        $product->update($updates);
+
+        return redirect()->route('dashboard.cs.products.edit', $product)->with('success', 'تم تحديث المنتج');
+    }
+
+    public function deleteProduct(Product $product)
+    {
+        try {
+            $product->delete();
+            return redirect()->route('dashboard.cs.products')->with('success', 'تم حذف المنتج');
+        } catch (\Throwable $e) {
+            $updates = [];
+            if (Schema::hasColumn('products', 'is_active')) {
+                $updates['is_active'] = false;
+            }
+            if (Schema::hasColumn('products', 'status')) {
+                $updates['status'] = 'inactive';
+            }
+            if ($updates) {
+                $product->update($updates);
+                return redirect()->route('dashboard.cs.products')->with('success', 'تعذر حذف المنتج بسبب ارتباطات، وتم إيقافه بدلاً من ذلك');
+            }
+
+            return redirect()->route('dashboard.cs.products')->with('error', 'تعذر حذف المنتج');
+        }
     }
 
     public function approveTraderProduct(Product $product)
@@ -799,5 +1021,10 @@ class SupportDashboardController extends Controller
         });
 
         return back()->with('success', 'ط·ع¾ط¸â€¦ ط·ع¾ط·آ­ط·آ¯ط¸ظ¹ط·آ« ط·آ­ط·آ§ط¸â€‍ط·آ© ط·آ§ط¸â€‍ط·آ·ط¸â€‍ط·آ¨');
+    }
+
+    public function coupons(Request $request)
+    {
+        return view('dashboard.support.coupons');
     }
 }

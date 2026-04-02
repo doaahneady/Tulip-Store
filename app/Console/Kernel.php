@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('compliance:enforce-retention')->dailyAt('02:00');
         $schedule->command('trader:payouts:generate')->monthlyOn(1, '03:00');
+        $schedule->command('coupons:generate-birthday')->dailyAt('00:01'); // Run at 12:01 AM every day
     }
 
     /**

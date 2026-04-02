@@ -71,10 +71,19 @@
                         display:block;
                         transition:transform 0.25s ease, box-shadow 0.25s ease;
                     " onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 18px 40px rgba(15,23,42,0.12)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(15,23,42,0.06)';">
-                        <div style="background:linear-gradient(135deg,#0D464C,#1a6b75); height:150px; display:flex; align-items:center; justify-content:center;">
-                            <div style="font-size:3rem; color:#fff;">
-                                <i class="fas fa-box"></i>
-                            </div>
+                        <div style="height:150px; background:#f1f5f9; position:relative;">
+                            <img
+                                src="${(function () {
+                                    const raw = (cat.image_url || cat.image || '').toString().trim();
+                                    if (!raw) return '/images/tulip_store.jpg';
+                                    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+                                    return raw.startsWith('/') ? raw : ('/storage/' + raw.replace(/^storage\//, ''));
+                                })()}"
+                                alt="${(cat.name || '').toString().replace(/"/g, '&quot;')}"
+                                style="width:100%; height:100%; object-fit:cover; display:block;"
+                                onerror="this.onerror=null; this.src='/images/tulip_store.jpg';"
+                            >
+                            <div style="position:absolute; inset:0; background:linear-gradient(135deg, rgba(13,70,76,0.15), rgba(26,107,117,0.25));"></div>
                         </div>
                         <div style="padding:1.4rem 1.5rem;">
                             <h2 style="font-size:1.2rem; font-weight:700; color:#0f172a; margin-bottom:0.5rem;">

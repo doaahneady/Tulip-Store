@@ -419,6 +419,13 @@
                         <span style="font-family:'El Messiri',sans-serif; font-size:0.9rem;">المجموع الفرعي:</span>
                         <span id="subtotalAmount" style="font-family:'El Messiri',sans-serif; font-weight:700; font-size:0.9rem;">0</span>
                     </div>
+                    <div id="couponDiscountRow" style="display:none; justify-content:space-between; margin-bottom:0.6rem; padding:0.5rem; background:rgba(255,255,255,0.1); border-radius:6px;">
+                        <span style="font-family:'El Messiri',sans-serif; font-size:0.9rem;">
+                            <i class="fas fa-tag" style="margin-left:0.3rem;"></i>
+                            خصم الكوبون (<span id="couponCode"></span>):
+                        </span>
+                        <span id="couponDiscountAmount" style="font-family:'El Messiri',sans-serif; font-weight:700; font-size:0.9rem; color:#90ee90;">-0</span>
+                    </div>
                     <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem;">
                         <span style="font-family:'El Messiri',sans-serif; font-size:0.9rem;">التوصيل:</span>
                         <span id="shippingAmount" style="font-family:'El Messiri',sans-serif; font-weight:700; font-size:0.9rem;">0</span>
@@ -569,8 +576,24 @@
                                 <i class="fas fa-check-circle" style="font-size:1.5rem; color:#ff6b35;"></i>
                             </div>
                         </div>
+
+                        <!-- Option 2: الدفع بالرصيد -->
+                        <div onclick="selectPayment('balance')" class="payment-option" data-type="balance" style="background:#fff; padding:1.5rem; border-radius:12px; margin-bottom:1rem; cursor:pointer; border:3px solid #e0e0e0; transition:all 0.3s; display:flex; align-items:center; gap:1rem;">
+                            <div style="flex-shrink:0;">
+                                <i class="fas fa-wallet" style="font-size:2.5rem; color:#2a7080;"></i>
+                            </div>
+                            <div style="flex:1;">
+                                <h3 style="font-family:'El Messiri',sans-serif; font-size:1.2rem; font-weight:700; color:#1a1a1a; margin:0 0 0.3rem 0;">الدفع بالرصيد</h3>
+                                <p id="balancePaymentHint" style="font-family:'El Messiri',sans-serif; font-size:0.95rem; color:#666; margin:0;">رصيدك الحالي: <span id="balancePaymentCurrent">0.00</span></p>
+                                <p id="balancePaymentRemainingRow" style="font-family:'El Messiri',sans-serif; font-size:0.92rem; color:#16a34a; margin:0.35rem 0 0 0; display:none;">المتبقي بعد الشراء: <span id="balancePaymentRemaining">0.00</span></p>
+                                <p id="balancePaymentInsufficient" style="font-family:'El Messiri',sans-serif; font-size:0.92rem; color:#64748b; margin:0.35rem 0 0 0; display:none;">The balance is not enough to submit this order.</p>
+                            </div>
+                            <div style="flex-shrink:0;">
+                                <i class="far fa-circle" style="font-size:1.5rem; color:#ccc;"></i>
+                            </div>
+                        </div>
                         
-                        <!-- Option 2: بطاقة ائتمان -->
+                        <!-- Option 3: بطاقة ائتمان -->
                         <div onclick="selectPayment('card')" class="payment-option" data-type="card" style="background:#fff; padding:1.5rem; border-radius:12px; margin-bottom:1rem; cursor:pointer; border:3px solid #e0e0e0; transition:all 0.3s; display:flex; align-items:center; gap:1rem;">
                             <div style="flex-shrink:0;">
                                 <i class="fas fa-credit-card" style="font-size:2.5rem; color:#2a7080;"></i>
@@ -880,7 +903,8 @@
     window.userData = {
         name: '{{ auth()->user()->name ?? "" }}',
         email: '{{ auth()->user()->email ?? "" }}',
-        phone: '{{ auth()->user()->phone ?? "" }}'
+        phone: '{{ auth()->user()->phone ?? "" }}',
+        balance: {{ (float) (auth()->user()->balance ?? 0) }}
     };
 </script>
 

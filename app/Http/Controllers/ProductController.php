@@ -10,6 +10,17 @@ use Illuminate\Support\Facades\Schema;
 
 class ProductController extends Controller
 {
+    private function applyStoreMarketFilter($query)
+    {
+        if (Schema::hasColumn('products', 'market')) {
+            $query->where(function ($q) {
+                $q->where('market', 'store')->orWhereNull('market');
+            });
+        }
+
+        return $query;
+    }
+
     /**
      * Search products by name
      */
@@ -24,7 +35,7 @@ class ProductController extends Controller
         $products = Product::with('category')
             ->active()
             ->available()
-            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
+            ->tap(fn ($q) => $this->applyStoreMarketFilter($q))
             ->where('name', 'LIKE', "%{$query}%")
             ->limit(10)
             ->get();
@@ -41,7 +52,7 @@ class ProductController extends Controller
 
         $baseQuery = Product::with('category')
             ->available()
-            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'));
+            ->tap(fn ($q) => $this->applyStoreMarketFilter($q));
         $query = (clone $baseQuery)->active();
 
         if ($categorySlug) {
@@ -91,7 +102,7 @@ class ProductController extends Controller
             ->where('category_id', $category->id)
             ->active()
             ->available()
-            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'));
+            ->tap(fn ($q) => $this->applyStoreMarketFilter($q));
 
         // Apply price filters
         if ($request->has('min_price')) {
@@ -222,12 +233,14 @@ class ProductController extends Controller
         if (Schema::hasTable('product_attributes')) {
             $with[] = 'attributes';
         }
+        if (Schema::hasTable('traders') && Schema::hasColumn('products', 'trader_id')) {
+            $with[] = 'trader';
+        }
 
         $product = Product::with($with)
-            ->active()
-            ->available()
-            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
-            ->findOrFail($id);
+            ->tap(fn ($q) => $this->applyStoreMarketFilter($q))
+            ->whereKey($id)
+            ->firstOrFail();
 
         $unitsSold = (int) OrderItem::query()
             ->where('product_id', $product->id)
@@ -239,7 +252,7 @@ class ProductController extends Controller
         $relatedProducts = Product::query()
             ->active()
             ->available()
-            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
+            ->tap(fn ($q) => $this->applyStoreMarketFilter($q))
             ->where('id', '!=', $product->id)
             ->when($product->category_id, fn ($q) => $q->where('category_id', $product->category_id))
             ->orderByDesc('created_at')

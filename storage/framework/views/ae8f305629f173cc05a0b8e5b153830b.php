@@ -353,17 +353,16 @@
 </div>
         
         <div class="marquee-container">
+            <?php
+                $categoryColors = [
+                    '#ff6b35', '#2a7080', '#9b59b6', '#e74c3c', '#3498db',
+                    '#f39c12', '#1abc9c', '#e91e63', '#00bcd4', '#ff5722',
+                ];
+                $categoriesData = ($categories && $categories->count() > 0) ? $categories : collect();
+            ?>
             <div class="marquee-track">
-                <?php
-                    $categoryColors = [
-                        '#ff6b35', '#2a7080', '#9b59b6', '#e74c3c', '#3498db',
-                        '#f39c12', '#1abc9c', '#e91e63', '#00bcd4', '#ff5722',
-                    ];
-                    $categoriesData = ($categories && $categories->count() > 0) ? $categories : collect();
-                ?>
                 
                 <?php if($categoriesData->isNotEmpty()): ?>
-                    
                     <?php $__currentLoopData = $categoriesData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <?php
                             $name = (string) ($category->name ?? '');
@@ -381,37 +380,15 @@
                             } elseif (str_contains($name, 'هدايا') || str_contains($name, 'هدية')) {
                                 $icon = 'fa-gift';
                             }
+                            $imageUrl = $category->image_url;
                         ?>
                         <div class="category-card" onclick="window.location.href='/category/<?php echo e($slug); ?>'" style="--cat-color:<?php echo e($color); ?>;">
                             <div class="category-icon">
-                                <i class="fas <?php echo e($icon); ?>"></i>
-                            </div>
-                            <p class="category-name"><?php echo e($name); ?></p>
-                        </div>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-
-                    
-                    <?php $__currentLoopData = $categoriesData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <?php
-                            $name = (string) ($category->name ?? '');
-                            $slug = (string) ($category->slug ?? '');
-                            $color = $categoryColors[$index % count($categoryColors)];
-                            $icon = 'fa-box';
-                            if (str_contains($name, 'ورد') || str_contains($name, 'زهور')) {
-                                $icon = 'fa-seedling';
-                            } elseif (str_contains($name, 'شوكولات')) {
-                                $icon = 'fa-cookie-bite';
-                            } elseif (str_contains($name, 'عطر')) {
-                                $icon = 'fa-spray-can-sparkles';
-                            } elseif (str_contains($name, 'مجوهر') || str_contains($name, 'اكسسو') || str_contains($name, 'إكسسو')) {
-                                $icon = 'fa-gem';
-                            } elseif (str_contains($name, 'هدايا') || str_contains($name, 'هدية')) {
-                                $icon = 'fa-gift';
-                            }
-                        ?>
-                        <div class="category-card" onclick="window.location.href='/category/<?php echo e($slug); ?>'" style="--cat-color:<?php echo e($color); ?>;">
-                            <div class="category-icon">
-                                <i class="fas <?php echo e($icon); ?>"></i>
+                                <?php if($imageUrl): ?>
+                                    <img src="<?php echo e($imageUrl); ?>" alt="<?php echo e($name); ?>" loading="lazy" width="80" height="80" onerror="this.onerror=null;this.src='/images/tulip_store.jpg';">
+                                <?php else: ?>
+                                    <i class="fas <?php echo e($icon); ?>"></i>
+                                <?php endif; ?>
                             </div>
                             <p class="category-name"><?php echo e($name); ?></p>
                         </div>
@@ -433,7 +410,8 @@
 .marquee-container {
     position: relative;
     width: 100%;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     padding: 0.1rem 0;
 }
 
@@ -442,17 +420,10 @@
     gap: 1.2rem;
     width: max-content;
     flex-wrap: nowrap;
-    animation: marquee 50s linear infinite;
+    animation: none;
 }
 
-.marquee-track:hover {
-    animation-play-state: paused;
-}
-
-@keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(50%); }
-}
+.marquee-container::-webkit-scrollbar { display: none; }
 
 /* Ensure consistent spacing on mobile */
 @media (max-width: 768px) {
@@ -555,6 +526,14 @@
     transition:all 0.4s ease;
     font-size:2.5rem;
     color:var(--cat-color, #2a7080);
+    overflow:hidden;
+}
+
+.category-icon img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
 }
 
 .category-card:hover .category-icon {

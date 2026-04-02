@@ -27,6 +27,7 @@ class DashboardRoleMiddleware
         'it_super' => 'is_it_super',
         'hr' => 'is_hr',
         'cs' => 'is_cs',
+        'customer_support' => 'is_cs',
         'finance' => 'is_finance',
         'accountant' => 'is_accountant',
         'delivery_supervisor' => 'is_driver_supervisor',

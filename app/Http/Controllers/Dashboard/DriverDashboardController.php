@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrderDeliveredMail;
 use App\Models\DeliveryAssignment;
 use App\Models\Driver;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 
 class DriverDashboardController extends Controller
@@ -102,6 +105,18 @@ class DriverDashboardController extends Controller
         if (Schema::hasColumn('drivers', 'availability')) {
             $driver->update(['availability' => 'available']);
         }
+
+        // Send email notification to customer after order is delivered
+        DB::afterCommit(function () use ($order) {
+            $user = $order->user ?? $order->customer;
+            if ($user && !empty($user->email)) {
+                try {
+                    Mail::to($user->email)->send(new OrderDeliveredMail($order));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send order delivered email: ' . $e->getMessage());
+                }
+            }
+        });
 
         return redirect()->route('dashboard.driver.orders.show', $order)->with('success', 'تم حفظ التوقيعات وتسجيل التسليم، وتم إرسال الطلب للمالية للاعتماد.');
     }

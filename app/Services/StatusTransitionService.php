@@ -203,18 +203,44 @@ class StatusTransitionService
                     'employee_code' => $employee?->employee_code,
                 ], fn ($v) => $v !== null && $v !== '');
             }
-            AuditLog::create([
-                'user_id' => $userId ?? auth()->id(),
-                'action' => 'status_transition',
-                'model_type' => get_class($model),
-                'model_id' => $model->id,
-                'old_values' => [$statusField => $oldStatus],
-                'new_values' => [$statusField => $newStatus],
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-                'session_id' => session()->getId(),
-                'metadata' => $metadata,
-            ]);
+            
+            // Ensure user_id is valid or null - check BEFORE creating audit log
+            $auditUserId = null;
+            try {
+                if ($userId) {
+                    // If userId is explicitly provided, validate it
+                    if (\App\Models\User::where('id', $userId)->exists()) {
+                        $auditUserId = $userId;
+                    }
+                } elseif (auth()->check()) {
+                    // If no userId provided, try to get from auth
+                    $authId = auth()->id();
+                    if ($authId && \App\Models\User::where('id', $authId)->exists()) {
+                        $auditUserId = $authId;
+                    }
+                }
+                
+                AuditLog::create([
+                    'user_id' => $auditUserId,
+                    'action' => 'status_transition',
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
+                    'old_values' => [$statusField => $oldStatus],
+                    'new_values' => [$statusField => $newStatus],
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'session_id' => session()->getId(),
+                    'metadata' => $metadata,
+                ]);
+            } catch (\Illuminate\Database\QueryException $e) {
+                // If foreign key constraint fails, log but don't break the flow
+                Log::warning('Audit log creation failed due to foreign key constraint', [
+                    'error' => $e->getMessage(),
+                    'user_id' => $auditUserId,
+                    'model' => get_class($model),
+                    'model_id' => $model->id,
+                ]);
+            }
         } catch (Exception $e) {
             // Log error but don't fail the transition
             Log::error('Failed to create audit log for status transition', [

@@ -52,6 +52,63 @@ let nearestStorage = null;
 let deliveryDistance = 0;
 let deliveryCost = 0;
 let usdToSyp = (window.TULIP_USD_TO_SYP || 117);
+let checkoutIdempotencyKey = null;
+let lastCheckoutTotalUSD = 0;
+
+function ensureCheckoutIdempotencyKey() {
+    if (checkoutIdempotencyKey) return checkoutIdempotencyKey;
+    try {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+            checkoutIdempotencyKey = window.crypto.randomUUID();
+            return checkoutIdempotencyKey;
+        }
+    } catch (e) {
+    }
+
+    checkoutIdempotencyKey = 'order_' + Date.now() + '_' + Math.random().toString(16).slice(2);
+    return checkoutIdempotencyKey;
+}
+
+function applyInitialPaymentFromQuery() {
+    try {
+        const params = new URLSearchParams(window.location.search || '');
+        const p = String(params.get('payment') || '').toLowerCase();
+        if (p === 'balance') {
+            selectPayment('balance');
+        }
+    } catch (e) {
+    }
+}
+
+function updateBalancePaymentAvailability(totalUSD) {
+    lastCheckoutTotalUSD = parseFloat(totalUSD || 0) || 0;
+    const balance = parseFloat(window.userData?.balance || 0) || 0;
+    const canPay = balance + 1e-9 >= lastCheckoutTotalUSD && lastCheckoutTotalUSD > 0;
+
+    const option = document.querySelector('.payment-option[data-type="balance"]');
+    if (option) {
+        option.dataset.disabled = canPay ? '0' : '1';
+        option.style.opacity = canPay ? '1' : '0.55';
+        option.style.filter = canPay ? '' : 'grayscale(1)';
+        option.style.cursor = canPay ? 'pointer' : 'not-allowed';
+    }
+
+    const currentEl = document.getElementById('balancePaymentCurrent');
+    if (currentEl) currentEl.textContent = balance.toFixed(2);
+
+    const remainingRow = document.getElementById('balancePaymentRemainingRow');
+    const remainingEl = document.getElementById('balancePaymentRemaining');
+    const insufficientEl = document.getElementById('balancePaymentInsufficient');
+
+    if (canPay) {
+        if (remainingRow) remainingRow.style.display = 'block';
+        if (remainingEl) remainingEl.textContent = Math.max(0, balance - lastCheckoutTotalUSD).toFixed(2);
+        if (insufficientEl) insufficientEl.style.display = 'none';
+    } else {
+        if (remainingRow) remainingRow.style.display = 'none';
+        if (insufficientEl) insufficientEl.style.display = 'block';
+    }
+}
 
 // All villages and cities in Sweida governorate (accurate coordinates)
 const allVillages = [
@@ -882,11 +939,39 @@ async function loadCartSummary() {
         const deliveryCostUSD = deliveryCost / usdToSyp;
         document.getElementById('deliveryCost').textContent = formatPrice(deliveryCostUSD);
         
-        // Update totals (subtotal + delivery)
-        const total = subtotal + deliveryCostUSD;
+        // Retrieve coupon from sessionStorage
+        let couponDiscount = 0;
+        const appliedCouponData = sessionStorage.getItem('appliedCoupon');
+        const appliedCoupon = appliedCouponData ? JSON.parse(appliedCouponData) : null;
+        
+        // Calculate coupon discount if applied
+        if (appliedCoupon && appliedCoupon.discount_percentage) {
+            couponDiscount = (subtotal * appliedCoupon.discount_percentage) / 100;
+            
+            // Show coupon discount row
+            const couponRow = document.getElementById('couponDiscountRow');
+            const couponCodeSpan = document.getElementById('couponCode');
+            const couponDiscountAmount = document.getElementById('couponDiscountAmount');
+            
+            if (couponRow && couponCodeSpan && couponDiscountAmount) {
+                couponRow.style.display = 'flex';
+                couponCodeSpan.textContent = appliedCoupon.code || '';
+                couponDiscountAmount.textContent = '-' + formatPrice(couponDiscount);
+            }
+        } else {
+            // Hide coupon discount row if no coupon
+            const couponRow = document.getElementById('couponDiscountRow');
+            if (couponRow) {
+                couponRow.style.display = 'none';
+            }
+        }
+        
+        // Update totals (subtotal - discount + delivery)
+        const total = subtotal - couponDiscount + deliveryCostUSD;
         document.getElementById('subtotalAmount').textContent = formatPrice(subtotal);
         document.getElementById('shippingAmount').textContent = formatPrice(deliveryCostUSD);
         document.getElementById('totalAmount').textContent = formatPrice(total);
+        updateBalancePaymentAvailability(total);
         
     } catch (error) {
         console.error('Error loading cart summary:', error);
@@ -1058,6 +1143,12 @@ function selectDelivery(type) {
 
 // Select payment
 function selectPayment(type) {
+    const selectedOption = document.querySelector(`.payment-option[data-type="${type}"]`);
+    if (selectedOption && selectedOption.dataset && selectedOption.dataset.disabled === '1') {
+        showAlert('The balance is not enough to submit this order.', 'error');
+        return;
+    }
+
     selectedPayment = type;
     
     // Update payment option styles
@@ -1100,6 +1191,8 @@ window.proceedWithPayment = function() {
             cardDetails.style.display = 'block';
             setTimeout(() => cardDetails.classList.add('active'), 50);
             loadSavedCards();
+        } else if (selectedPayment === 'balance') {
+            goToStep(4);
         } else if (selectedPayment === 'syriatel') {
             // Force switch to SYP for Syriatel Cash
             if (selectedCurrency !== 'SYP') {
@@ -1446,6 +1539,7 @@ function displayOrderSummary() {
     
     const paymentNames = {
         'cash': 'الدفع عند الاستلام',
+        'balance': 'الدفع بالرصيد',
         'card': 'بطاقة ائتمان',
         'syriatel': 'Syriatel Cash',
         'bank': 'تحويل بنكي'
@@ -1681,10 +1775,12 @@ async function saveAddressIfPossible(orderData) {
 // Initialize map when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     console.log('📄 DOM loaded, initializing...');
+    ensureCheckoutIdempotencyKey();
     refreshHasMartItems();
     fetchExchangeRate();
     populateVillagesDropdown();
     loadUserData();
+    applyInitialPaymentFromQuery();
     loadSavedAddresses().then(items => {
         savedAddresses = items;
         renderSavedAddressesUI(items);
@@ -1927,9 +2023,22 @@ async function submitOrder() {
     
     console.log('Validation passed, preparing order data...');
     
+    if (selectedPayment === 'balance') {
+        const option = document.querySelector('.payment-option[data-type="balance"]');
+        if (option && option.dataset && option.dataset.disabled === '1') {
+            showAlert('The balance is not enough to submit this order.', 'error');
+            return;
+        }
+    }
+
     // Prepare order data
     // Convert delivery cost from SYP to USD
     const deliveryCostUSD = deliveryCost / usdToSyp;
+    const idempotencyKey = ensureCheckoutIdempotencyKey();
+    
+    // Retrieve coupon from sessionStorage
+    const appliedCouponData = sessionStorage.getItem('appliedCoupon');
+    const appliedCoupon = appliedCouponData ? JSON.parse(appliedCouponData) : null;
     
     const orderData = {
         recipient_name: recipientName,
@@ -1940,8 +2049,14 @@ async function submitOrder() {
         delivery_method: selectedDelivery,
         payment_method: selectedPayment,
         delivery_cost: deliveryCostUSD,
-        service_fee: 0
+        service_fee: 0,
+        idempotency_key: idempotencyKey
     };
+    
+    // Add coupon code if applied
+    if (appliedCoupon && appliedCoupon.code) {
+        orderData.coupon_code = appliedCoupon.code;
+    }
     
     console.log('Order data:', orderData);
     
@@ -1952,7 +2067,8 @@ async function submitOrder() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Idempotency-Key': idempotencyKey
             },
             body: JSON.stringify(orderData)
         });
@@ -1961,6 +2077,9 @@ async function submitOrder() {
         
         if (result.success) {
         console.log('✅ Order created successfully!', result);
+        
+        // Clear coupon from sessionStorage after successful order
+        sessionStorage.removeItem('appliedCoupon');
         
         // Show success card
         showOrderSuccessCard(result.order_id);

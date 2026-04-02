@@ -486,9 +486,14 @@ class VendorController extends Controller
             $ownerUser = auth('trader')->user() ?? auth('employee')->user();
             abort_unless($ownerUser && ($ownerUser->is_trader ?? false), 403);
 
-            $trader = Schema::hasTable('traders')
-                ? Trader::where('user_id', $ownerUser->id ?? $ownerUser->user_id)->first()
-                : null;
+            if ($ownerUser instanceof Trader) {
+                $trader = $ownerUser;
+            } else {
+                $userId = $ownerUser->user_id ?? null;
+                $trader = Schema::hasTable('traders') && $userId
+                    ? Trader::where('user_id', $userId)->first()
+                    : null;
+            }
             abort_unless($trader && ($trader->status ?? null) === Trader::STATUS_APPROVED, 403);
 
             $data = [
@@ -1055,18 +1060,6 @@ class VendorController extends Controller
 
     private function getUserStore()
     {
-        $ownerId = null;
-        if (auth('trader')->check()) {
-            $ownerId = auth('trader')->id();
-        } else {
-            $employee = auth('employee')->user();
-            $ownerId = $employee?->user_id;
-        }
-
-        if (! $ownerId) {
-            abort(403, 'Unauthorized access');
-        }
-
         $q = Store::query();
         $hasOwnerId = Schema::hasColumn('stores', 'owner_id');
         $hasUserId = Schema::hasColumn('stores', 'user_id');
@@ -1075,14 +1068,25 @@ class VendorController extends Controller
             abort(500, 'Store ownership columns are not configured');
         }
 
-        if ($hasOwnerId) {
-            $q->where('owner_id', $ownerId);
-        }
-        if ($hasUserId) {
+        $trader = auth('trader')->user();
+        $employee = auth('employee')->user();
+
+        if ($trader) {
             if ($hasOwnerId) {
-                $q->orWhere('user_id', $ownerId);
-            } else {
-                $q->where('user_id', $ownerId);
+                $q->where('owner_id', $trader->id);
+            }
+            if ($hasUserId && ! empty($trader->user_id)) {
+                $q->orWhere('user_id', $trader->user_id);
+            }
+        } else {
+            $userId = $employee?->user_id;
+            if (! $userId) {
+                abort(403, 'Unauthorized access');
+            }
+            if ($hasUserId) {
+                $q->where('user_id', $userId);
+            } elseif ($hasOwnerId) {
+                $q->where('owner_id', $userId);
             }
         }
 
@@ -1092,6 +1096,7 @@ class VendorController extends Controller
                 abort(403, 'Store not found');
             }
 
+            $allowedStatuses = $this->getEnumValues('stores', 'status');
             $storeData = [
                 'name' => 'My Store',
                 'slug' => 'store-'.Str::lower(Str::random(10)),
@@ -1114,18 +1119,31 @@ class VendorController extends Controller
                 $storeData['organization_id'] = $orgId;
             }
 
-            if ($hasOwnerId) {
-                $storeData['owner_id'] = $ownerId;
-            }
-            if ($hasUserId) {
-                $storeData['user_id'] = $ownerId;
+            if ($trader) {
+                if ($hasOwnerId) {
+                    $storeData['owner_id'] = $trader->id;
+                } elseif ($hasUserId && ! empty($trader->user_id)) {
+                    $storeData['user_id'] = $trader->user_id;
+                } else {
+                    abort(500, 'Store ownership is not configured for trader accounts');
+                }
             }
 
             if (Schema::hasColumn('stores', 'status')) {
-                if (Schema::hasColumn('stores', 'organization_id') && $hasOwnerId && ! $hasUserId) {
-                    $storeData['status'] = 'active';
+                $preferred = auth('trader')->check() ? 'approved' : 'pending';
+                if (auth('trader')->check()) {
+                    $trader = auth('trader')->user();
+                    if (($trader->status ?? null) !== Trader::STATUS_APPROVED) {
+                        $preferred = 'pending';
+                    }
+                }
+
+                if ($allowedStatuses) {
+                    $storeData['status'] = in_array($preferred, $allowedStatuses, true)
+                        ? $preferred
+                        : (in_array('active', $allowedStatuses, true) ? 'active' : $allowedStatuses[0]);
                 } else {
-                    $storeData['status'] = 'approved';
+                    $storeData['status'] = $preferred;
                 }
             }
 
@@ -1133,6 +1151,35 @@ class VendorController extends Controller
         }
 
         return $store;
+    }
+
+    private function getEnumValues(string $table, string $column): array
+    {
+        if (! Schema::hasTable($table) || ! Schema::hasColumn($table, $column)) {
+            return [];
+        }
+
+        try {
+            if (DB::getDriverName() !== 'mysql') {
+                return [];
+            }
+
+            $dbName = DB::getDatabaseName();
+            $row = DB::selectOne(
+                'SELECT COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1',
+                [$dbName, $table, $column]
+            );
+            $type = (string) ($row->COLUMN_TYPE ?? '');
+            if (! str_starts_with($type, 'enum(')) {
+                return [];
+            }
+
+            preg_match_all("/'((?:\\\\'|[^'])*)'/", $type, $m);
+            $vals = array_map(fn ($v) => str_replace("\\'", "'", $v), $m[1] ?? []);
+            return array_values(array_filter(array_map('strval', $vals), fn ($v) => $v !== ''));
+        } catch (\Throwable $e) {
+            return [];
+        }
     }
 
     private function generateSKU($storeId)

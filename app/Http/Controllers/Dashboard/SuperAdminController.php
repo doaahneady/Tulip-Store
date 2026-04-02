@@ -975,6 +975,7 @@ class SuperAdminController extends Controller
             'description' => 'nullable|string',
             'display_order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',
+            'image' => Schema::hasColumn('categories', 'image') ? 'required|image|mimes:jpg,jpeg,png,webp|max:4096' : 'nullable',
         ]);
 
         $slugBase = $validated['slug'] ? Str::slug($validated['slug']) : Str::slug($validated['name']);
@@ -999,13 +1000,21 @@ class SuperAdminController extends Controller
         if (Schema::hasColumn('categories', 'market')) {
             $data['market'] = 'store';
         }
+        if ($request->file('image') && Schema::hasColumn('categories', 'image')) {
+            $data['image'] = Storage::disk('public')->putFile('categories', $request->file('image'));
+        }
 
         $category = Category::create($data);
 
         Cache::flush();
 
+        $employee = auth('employee')->user();
+        $userId = auth()->id() ?? ($employee?->user_id ?? null);
+        if ($userId !== null && ! \App\Models\User::whereKey($userId)->exists()) {
+            $userId = null;
+        }
         AuditLog::create([
-            'user_id' => auth('employee')->id(),
+            'user_id' => $userId,
             'action' => 'category_create',
             'model_type' => 'Category',
             'model_id' => $category->id,
@@ -1024,6 +1033,7 @@ class SuperAdminController extends Controller
             'description' => 'nullable|string',
             'display_order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',
+            'image' => Schema::hasColumn('categories', 'image') ? 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096' : 'nullable',
         ]);
 
         $old = $category->only(['name', 'slug', 'description', 'display_order', 'is_active']);
@@ -1047,13 +1057,21 @@ class SuperAdminController extends Controller
         if (Schema::hasColumn('categories', 'is_active')) {
             $data['is_active'] = (bool) ($validated['is_active'] ?? ($category->is_active ?? true));
         }
+        if ($request->file('image') && Schema::hasColumn('categories', 'image')) {
+            $data['image'] = Storage::disk('public')->putFile('categories', $request->file('image'));
+        }
 
         $category->update($data);
 
         Cache::flush();
 
+        $employee = auth('employee')->user();
+        $userId = auth()->id() ?? ($employee?->user_id ?? null);
+        if ($userId !== null && ! \App\Models\User::whereKey($userId)->exists()) {
+            $userId = null;
+        }
         AuditLog::create([
-            'user_id' => auth('employee')->id(),
+            'user_id' => $userId,
             'action' => 'category_update',
             'model_type' => 'Category',
             'model_id' => $category->id,
@@ -1072,8 +1090,13 @@ class SuperAdminController extends Controller
 
         Cache::flush();
 
+        $employee = auth('employee')->user();
+        $userId = auth()->id() ?? ($employee?->user_id ?? null);
+        if ($userId !== null && ! \App\Models\User::whereKey($userId)->exists()) {
+            $userId = null;
+        }
         AuditLog::create([
-            'user_id' => auth('employee')->id(),
+            'user_id' => $userId,
             'action' => 'category_delete',
             'model_type' => 'Category',
             'model_id' => $old['id'] ?? null,
