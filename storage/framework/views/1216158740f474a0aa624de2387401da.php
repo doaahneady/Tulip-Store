@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>Tulip Store - أرسل ابتسامتك أينما كنت</title>
 
     <!-- fav icon -->
     <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
     
   
-    <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
+    <link rel="stylesheet" href="/css/store.css?v=<?php echo e(time()); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -72,7 +72,7 @@
     </style>
 </head>
 <body class="bg-white">
-    @include('components.navbar')
+    <?php echo $__env->make('components.navbar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
 
 <!-- SMOOTH INTRO ANIMATION - SHOW ONLY ONCE -->
@@ -218,11 +218,11 @@
 <section style="position:relative; height:300px; overflow:hidden; background:white; padding:1.5rem 1rem;">
     <div style="max-width:100%; margin:0 auto; position:relative; height:100%;">
         <div id="modernSlider" style="position:relative; height:100%; display:flex; align-items:center; justify-content:center;">
-            @php
+            <?php
                 $slidesData = is_array($slides ?? null) ? array_values($slides) : [];
-            @endphp
-            @foreach($slidesData as $i => $slide)
-                @php
+            ?>
+            <?php $__currentLoopData = $slidesData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $slide): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <?php
                     $slideClass = 'hidden';
                     if ($i === 0) {
                         $slideClass = 'active';
@@ -242,17 +242,17 @@
                     } elseif ($slideFile === 'banner1.jpg') {
                         $slideLink = '/mart';
                     }
-                @endphp
-                <div class="modern-slide {{ $slideClass }}">
-                    <a href="{{ $slideLink }}" style="display:block; width:100%; height:100%; text-decoration:none;">
-                        <img src="{{ $slide['image'] ?? '' }}" alt="{{ $slide['title'] ?? '' }}">
+                ?>
+                <div class="modern-slide <?php echo e($slideClass); ?>">
+                    <a href="<?php echo e($slideLink); ?>" style="display:block; width:100%; height:100%; text-decoration:none;">
+                        <img src="<?php echo e($slide['image'] ?? ''); ?>" alt="<?php echo e($slide['title'] ?? ''); ?>">
                         <div class="modern-slide-content">
-                            <h2 style="font-family:'El Messiri', sans-serif; font-size:2rem; font-weight:900; margin:0 0 0.8rem 0;">{{ $slide['title'] ?? '' }}</h2>
-                            <p style="font-family:'El Messiri', sans-serif; font-size:1.1rem; margin:0;">{{ $slide['subtitle'] ?? '' }}</p>
+                            <h2 style="font-family:'El Messiri', sans-serif; font-size:2rem; font-weight:900; margin:0 0 0.8rem 0;"><?php echo e($slide['title'] ?? ''); ?></h2>
+                            <p style="font-family:'El Messiri', sans-serif; font-size:1.1rem; margin:0;"><?php echo e($slide['subtitle'] ?? ''); ?></p>
                         </div>
                     </a>
                 </div>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div> 
         <!-- Dots -->
         <div id="modernSliderDots"
@@ -353,18 +353,18 @@
 </div>
         
         <div class="marquee-container">
-            @php
+            <?php
                 $categoryColors = [
                     '#ff6b35', '#2a7080', '#9b59b6', '#e74c3c', '#3498db',
                     '#f39c12', '#1abc9c', '#e91e63', '#00bcd4', '#ff5722',
                 ];
                 $categoriesData = ($categories && $categories->count() > 0) ? $categories : collect();
-            @endphp
+            ?>
             <div class="marquee-track">
                 
-                @if($categoriesData->isNotEmpty())
-                    @foreach($categoriesData as $index => $category)
-                        @php
+                <?php if($categoriesData->isNotEmpty()): ?>
+                    <?php $__currentLoopData = $categoriesData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
                             $name = (string) ($category->name ?? '');
                             $slug = (string) ($category->slug ?? '');
                             $color = $categoryColors[$index % count($categoryColors)];
@@ -381,21 +381,21 @@
                                 $icon = 'fa-gift';
                             }
                             $imageUrl = $category->image_url;
-                        @endphp
-                        <div class="category-card" onclick="window.location.href='/category/{{ $slug }}'" style="--cat-color:{{ $color }};">
+                        ?>
+                        <div class="category-card" onclick="window.location.href='/category/<?php echo e($slug); ?>'" style="--cat-color:<?php echo e($color); ?>;">
                             <div class="category-icon">
-                                @if($imageUrl)
-                                    <img src="{{ $imageUrl }}" alt="{{ $name }}" loading="lazy" width="80" height="80" onerror="this.onerror=null;this.src='/images/tulip_store.jpg';">
-                                @else
-                                    <i class="fas {{ $icon }}"></i>
-                                @endif
+                                <?php if($imageUrl): ?>
+                                    <img src="<?php echo e($imageUrl); ?>" alt="<?php echo e($name); ?>" loading="lazy" width="80" height="80" onerror="this.onerror=null;this.src='/images/tulip_store.jpg';">
+                                <?php else: ?>
+                                    <i class="fas <?php echo e($icon); ?>"></i>
+                                <?php endif; ?>
                             </div>
-                            <p class="category-name">{{ $name }}</p>
+                            <p class="category-name"><?php echo e($name); ?></p>
                         </div>
-                    @endforeach
-                @else
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php else: ?>
                     <p style="text-align:center;width:100%;color:#666;font-family:'El Messiri',sans-serif;font-size:0.95rem;margin:1.5rem 0;">لا توجد تصنيفات متاحة حالياً.</p>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
             
@@ -683,12 +683,12 @@
             <p style="font-family:'El Messiri',sans-serif; font-size:1.1rem; color:#666; margin:0;">بناءً على اهتماماتك وتصفحك السابق</p>
         </div>
         <div id="personalizedProducts" class="products-grid">
-            @php
+            <?php
                 $productsData = $products ?? collect();
                 $personalized = $productsData->take(5);
-            @endphp
-            @forelse($personalized as $product)
-                @php
+            ?>
+            <?php $__empty_1 = true; $__currentLoopData = $personalized; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <?php
                     $stock = (int) ($product->stock_quantity ?? 0);
                     $trackInv = (bool) ($product->track_inventory ?? false);
                     $isOutOfStock = $trackInv && $stock <= 0;
@@ -697,37 +697,37 @@
                     $img = $product->primary_image_url ?? '';
                     $img = $img ?: '/images/banner1.jpg';
                     $imgUrl = (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) ? $img : url($img);
-                @endphp
-                <div class="product-card" data-product-id="{{ $product->id }}" onclick="window.location.href='/products/{{ $product->id }}'">
-                    <button class="product-favorite-btn" onclick="event.stopPropagation(); toggleProductFavorite(event, {{ $product->id }})">
+                ?>
+                <div class="product-card" data-product-id="<?php echo e($product->id); ?>" onclick="window.location.href='/products/<?php echo e($product->id); ?>'">
+                    <button class="product-favorite-btn" onclick="event.stopPropagation(); toggleProductFavorite(event, <?php echo e($product->id); ?>)">
                         <i class="far fa-heart"></i>
                     </button>
                     <div class="product-image">
-                        <img src="{{ $imgUrl }}"
-                             alt="{{ $product->name }}"
+                        <img src="<?php echo e($imgUrl); ?>"
+                             alt="<?php echo e($product->name); ?>"
                              loading="lazy"
                              width="320"
                              height="320"
-                             onerror="this.onerror=null; this.src='{{ url('/images/banner1.jpg') }}';">
+                             onerror="this.onerror=null; this.src='<?php echo e(url('/images/banner1.jpg')); ?>';">
                     </div>
                     <div class="product-body">
-                        <h3 class="product-name">{{ $product->name }}</h3>
+                        <h3 class="product-name"><?php echo e($product->name); ?></h3>
                         <div class="product-footer">
                             <div class="price-wrapper">
-                                <span class="price-current js-home-price" data-usd="{{ $price }}">@money($price)</span>
-                                @if(!empty($product->discount_price))
-                                    <span class="price-old js-home-price-old" data-usd="{{ $oldPrice }}">@money($oldPrice)</span>
-                                @endif
+                                <span class="price-current js-home-price" data-usd="<?php echo e($price); ?>"><?php echo app(App\Services\CurrencyService::class)->formatUsd((float)($price)); ?></span>
+                                <?php if(!empty($product->discount_price)): ?>
+                                    <span class="price-old js-home-price-old" data-usd="<?php echo e($oldPrice); ?>"><?php echo app(App\Services\CurrencyService::class)->formatUsd((float)($oldPrice)); ?></span>
+                                <?php endif; ?>
                             </div>
-                            <button type="button" class="add-cart-btn" onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)" data-product-id="{{ $product->id }}" {{ $isOutOfStock ? 'disabled' : '' }} style="{{ $isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : '' }}">
+                            <button type="button" class="add-cart-btn" onclick="event.stopPropagation(); addToCart(<?php echo e($product->id); ?>, this)" data-product-id="<?php echo e($product->id); ?>" <?php echo e($isOutOfStock ? 'disabled' : ''); ?> style="<?php echo e($isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : ''); ?>">
                                 <i class="fas fa-plus"></i> أضف
                             </button>
                         </div>
                     </div>
                 </div>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div style="grid-column:1/-1; text-align:center; padding:2.5rem; color:#999;">لا توجد منتجات متاحة حالياً.</div>
-            @endforelse
+            <?php endif; ?>
         </div>
     </div>
 </section>
@@ -742,15 +742,15 @@
             <p style="font-family:'El Messiri',sans-serif; font-size:1.1rem; color:#666; margin:0;">المنتجات الأكثر طلباً هذا الأسبوع</p>
         </div>
         <div id="trendingProducts" class="products-grid">
-            @php
+            <?php
                 $productsData = $products ?? collect();
                 $trending = $productsData->slice(5, 5);
                 if ($trending->isEmpty()) {
                     $trending = $productsData->take(5);
                 }
-            @endphp
-            @forelse($trending as $product)
-                @php
+            ?>
+            <?php $__empty_1 = true; $__currentLoopData = $trending; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <?php
                     $stock = (int) ($product->stock_quantity ?? 0);
                     $trackInv = (bool) ($product->track_inventory ?? false);
                     $isOutOfStock = $trackInv && $stock <= 0;
@@ -759,37 +759,37 @@
                     $img = $product->primary_image_url ?? '';
                     $img = $img ?: '/images/banner1.jpg';
                     $imgUrl = (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) ? $img : url($img);
-                @endphp
-                <div class="product-card" data-product-id="{{ $product->id }}" onclick="window.location.href='/products/{{ $product->id }}'">
-                    <button class="product-favorite-btn" onclick="event.stopPropagation(); toggleProductFavorite(event, {{ $product->id }})">
+                ?>
+                <div class="product-card" data-product-id="<?php echo e($product->id); ?>" onclick="window.location.href='/products/<?php echo e($product->id); ?>'">
+                    <button class="product-favorite-btn" onclick="event.stopPropagation(); toggleProductFavorite(event, <?php echo e($product->id); ?>)">
                         <i class="far fa-heart"></i>
                     </button>
                     <div class="product-image">
-                        <img src="{{ $imgUrl }}"
-                             alt="{{ $product->name }}"
+                        <img src="<?php echo e($imgUrl); ?>"
+                             alt="<?php echo e($product->name); ?>"
                              loading="lazy"
                              width="320"
                              height="320"
-                             onerror="this.onerror=null; this.src='{{ url('/images/banner1.jpg') }}';">
+                             onerror="this.onerror=null; this.src='<?php echo e(url('/images/banner1.jpg')); ?>';">
                     </div>
                     <div class="product-body">
-                        <h3 class="product-name">{{ $product->name }}</h3>
+                        <h3 class="product-name"><?php echo e($product->name); ?></h3>
                         <div class="product-footer">
                             <div class="price-wrapper">
-                                <span class="price-current js-home-price" data-usd="{{ $price }}">@money($price)</span>
-                                @if(!empty($product->discount_price))
-                                    <span class="price-old js-home-price-old" data-usd="{{ $oldPrice }}">@money($oldPrice)</span>
-                                @endif
+                                <span class="price-current js-home-price" data-usd="<?php echo e($price); ?>"><?php echo app(App\Services\CurrencyService::class)->formatUsd((float)($price)); ?></span>
+                                <?php if(!empty($product->discount_price)): ?>
+                                    <span class="price-old js-home-price-old" data-usd="<?php echo e($oldPrice); ?>"><?php echo app(App\Services\CurrencyService::class)->formatUsd((float)($oldPrice)); ?></span>
+                                <?php endif; ?>
                             </div>
-                            <button type="button" class="add-cart-btn" onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)" data-product-id="{{ $product->id }}" {{ $isOutOfStock ? 'disabled' : '' }} style="{{ $isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : '' }}">
+                            <button type="button" class="add-cart-btn" onclick="event.stopPropagation(); addToCart(<?php echo e($product->id); ?>, this)" data-product-id="<?php echo e($product->id); ?>" <?php echo e($isOutOfStock ? 'disabled' : ''); ?> style="<?php echo e($isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : ''); ?>">
                                 <i class="fas fa-plus"></i> أضف
                             </button>
                         </div>
                     </div>
                 </div>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div style="grid-column:1/-1; text-align:center; padding:2.5rem; color:#999;">لا توجد منتجات متاحة حالياً.</div>
-            @endforelse
+            <?php endif; ?>
         </div>
     </div>
 </section>
@@ -820,11 +820,11 @@
 
 <!-- FOOTER -->
 <div style="position:relative; z-index:1001;">
-    @include('components.footer')
+    <?php echo $__env->make('components.footer', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 </div>
 
-<script>window.isAuthenticated = {!! auth()->check() ? 'true' : 'false' !!};</script>
-<script src="/js/home-final.js?v={{ time() }}"></script>
+<script>window.isAuthenticated = <?php echo auth()->check() ? 'true' : 'false'; ?>;</script>
+<script src="/js/home-final.js?v=<?php echo e(time()); ?>"></script>
 <script>
 function rerenderHomePrices() {
     document.querySelectorAll('.js-home-price, .js-home-price-old').forEach((node) => {
@@ -838,3 +838,4 @@ window.addEventListener('tulip:currency-changed', rerenderHomePrices);
 window.addEventListener('tulip:exchange-rate-changed', rerenderHomePrices);
 </script></body>
 </html>
+<?php /**PATH C:\Users\Doaa\StudioProjects\Tulip-Store\resources\views/home-new.blade.php ENDPATH**/ ?>
