@@ -89,12 +89,12 @@
                 <div class="space-y-2">
                     <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <?php $selected = (string) request('category_id') === (string) $cat->id; ?>
-                        <div class="block p-3 rounded-xl border <?php if($selected): ?> border-indigo-400 bg-indigo-50 <?php else: ?> border-gray-200 hover:bg-gray-50 <?php endif; ?>">
+                        <div class="block p-3 rounded-xl border <?php if($selected): ?> border-indigo-400 bg-indigo-50 <?php else: ?> border-gray-200 hover:bg-gray-50 <?php endif; ?>" <?php if($selected): ?> style="background: rgba(34, 195, 166, 0.12) !important; border-color: rgba(34, 195, 166, 0.55) !important;" <?php endif; ?>>
                             <div class="flex items-center justify-between gap-2 mb-2">
-                                <a href="<?php echo e(route('dashboard.admin.mart.index', array_merge(request()->query(), ['category_id' => $cat->id]))); ?>" class="font-bold text-gray-900">
+                                <a href="<?php echo e(route('dashboard.admin.mart.index', array_merge(request()->query(), ['category_id' => $cat->id]))); ?>" class="font-bold text-gray-900" <?php if($selected): ?> style="color: rgba(255, 255, 255, 0.95) !important;" <?php endif; ?>>
                                     <?php echo e($cat->name); ?>
 
-                                    <span class="text-xs text-gray-400 font-normal ms-1">(<?php echo e($cat->slug); ?>)</span>
+                                    <span class="text-xs text-gray-400 font-normal ms-1" <?php if($selected): ?> style="color: rgba(255, 255, 255, 0.62) !important;" <?php endif; ?>>(<?php echo e($cat->slug); ?>)</span>
                                 </a>
                             </div>
                             <div class="flex items-center gap-2">

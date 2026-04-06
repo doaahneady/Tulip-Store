@@ -230,18 +230,24 @@ Route::prefix('mart')->group(function () {
                 $items = \App\Models\Product::query()
                     ->with('attributes')
                     ->where('category_id', $cat->id)
-                    ->active()
-                    ->when(\Illuminate\Support\Facades\Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'mart'))
+                    ->when(\Illuminate\Support\Facades\Schema::hasColumn('products', 'is_active'), fn ($q) => $q->where('is_active', true))
                     ->orderBy('name')
                     ->get()
                     ->map(function($p) use ($cat){
                         $rel = $p->relationLoaded('attributes') ? $p->getRelation('attributes') : null;
-                        $attrs = ($rel instanceof \Illuminate\Support\Collection)
-                            ? $rel->pluck('value', 'name')
-                            : $p->attributes()->pluck('value', 'name');
-                        $price = $p->price;
-                        $old = $p->discount_price ?: null;
-                        $photo = $p->image ? (url('/storage/'.$p->image)) : null;
+                        $attrsCollection = ($rel instanceof \Illuminate\Support\Collection) ? $rel : $p->attributes()->get();
+                        $attrs = [];
+                        foreach ($attrsCollection as $a) {
+                            $k = (string) ($a->attribute_key ?: $a->name ?: '');
+                            if ($k === '') {
+                                continue;
+                            }
+                            $attrs[$k] = $a->value_text ?? $a->value ?? $a->value_number ?? $a->value_date ?? '';
+                        }
+                        $hasDiscount = $p->discount_price !== null && $p->discount_price !== '' && (float) $p->discount_price > 0;
+                        $price = $hasDiscount ? $p->discount_price : $p->price;
+                        $old = $hasDiscount ? $p->price : null;
+                        $photo = $p->primary_image_url ?: null;
                         return [
                             'id' => (string) $p->id,
                             'name' => $p->name,

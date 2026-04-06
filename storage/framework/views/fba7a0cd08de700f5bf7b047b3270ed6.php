@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>توليب مارت - Tulip Mart</title>
    
       <!-- fav icon -->
         <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
-    <link rel="stylesheet" href="/css/store.css?v=999&fix=store&t={{ time() }}">
+    <link rel="stylesheet" href="/css/store.css?v=999&fix=store&t=<?php echo e(time()); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    @include('components.navbar')
+    <?php echo $__env->make('components.navbar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <style>
         :root {
             --primary: #059669;
@@ -800,7 +800,7 @@
         }
     </style>
 
-    <div ><img src="{{ asset('images/panner_mart.png') }}" alt="" style="width: 100%;"></div>
+    <div ><img src="<?php echo e(asset('images/panner_mart.png')); ?>" alt="" style="width: 100%;"></div>
     <div class="main-content">
         <!-- Categories Section -->
         <section class="section">
@@ -875,14 +875,14 @@
     </div>
     <!-- Footer -->
    <div style="position:relative; z-index:1001;">
-    @include('components.footer')
+    <?php echo $__env->make('components.footer', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 </div>
     <script>
         let products = {};
         let categories = [];
         let allProductsFlat = [];
         const categoryImageBySlug = {};
-        const isAuthenticated = @json(auth()->check());
+        const isAuthenticated = <?php echo json_encode(auth()->check(), 15, 512) ?>;
         let favoriteIds = new Set();
 
         function resolvePublicImage(p) {
@@ -1438,3 +1438,4 @@
     </script>
 </body>
 </html>
+<?php /**PATH E:\Tulip-Store\resources\views/mart/index.blade.php ENDPATH**/ ?>

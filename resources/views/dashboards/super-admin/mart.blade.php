@@ -89,11 +89,11 @@
                 <div class="space-y-2">
                     @foreach($categories as $cat)
                         @php $selected = (string) request('category_id') === (string) $cat->id; @endphp
-                        <div class="block p-3 rounded-xl border @if($selected) border-indigo-400 bg-indigo-50 @else border-gray-200 hover:bg-gray-50 @endif">
+                        <div class="block p-3 rounded-xl border @if($selected) border-indigo-400 bg-indigo-50 @else border-gray-200 hover:bg-gray-50 @endif" @if($selected) style="background: rgba(34, 195, 166, 0.12) !important; border-color: rgba(34, 195, 166, 0.55) !important;" @endif>
                             <div class="flex items-center justify-between gap-2 mb-2">
-                                <a href="{{ route('dashboard.admin.mart.index', array_merge(request()->query(), ['category_id' => $cat->id])) }}" class="font-bold text-gray-900">
+                                <a href="{{ route('dashboard.admin.mart.index', array_merge(request()->query(), ['category_id' => $cat->id])) }}" class="font-bold text-gray-900" @if($selected) style="color: rgba(255, 255, 255, 0.95) !important;" @endif>
                                     {{ $cat->name }}
-                                    <span class="text-xs text-gray-400 font-normal ms-1">({{ $cat->slug }})</span>
+                                    <span class="text-xs text-gray-400 font-normal ms-1" @if($selected) style="color: rgba(255, 255, 255, 0.62) !important;" @endif>({{ $cat->slug }})</span>
                                 </a>
                             </div>
                             <div class="flex items-center gap-2">

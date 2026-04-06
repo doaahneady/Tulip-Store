@@ -203,6 +203,13 @@
   background-clip: padding-box;
 }
 
+html[dir="rtl"] .db-next select {
+  text-align: right;
+  background-position: left 0.85rem center;
+  padding-left: 2.6rem;
+  padding-right: 0.85rem;
+}
+
 .db-next input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"])::placeholder,
 .db-next textarea::placeholder {
   color: rgba(255, 255, 255, 0.48);
