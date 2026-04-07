@@ -88,6 +88,44 @@
             flex-direction: column;
             justify-content: center;
         }
+        .back-btn {
+            position: fixed;
+            top: 40px;
+            left: 40px;
+            background: #ff6f35;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-family: 'El Messiri', sans-serif;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(255,111,53,0.3);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        .back-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255,111,53,0.5);
+            color: #fff;
+        }
+        .back-btn i {
+            font-size: 1.2rem;
+        }
+        @media (max-width: 768px) {
+            .back-btn {
+                padding: 10px;
+                width: 40px;
+                height: 40px;
+                justify-content: center;
+                border-radius: 50%;
+            }
+            .back-btn span {
+                display: none;
+            }
+        }
         .auth-card h1 {
             font-family: 'El Messiri', sans-serif;
             font-weight: 600;
@@ -207,7 +245,7 @@
     </style>
 </head>
 <body>
-
+    <a href="/ar-login" class="back-btn"><span>رجوع</span><i class="fas fa-arrow-left"></i> </a>
     <div class="auth-shell">
         <div class="auth-card-wrap">
             <div class="auth-illustration">

@@ -27,8 +27,8 @@
         }
         .back-btn {
             position: fixed;
-            top: 30px;
-            right: 30px;
+            top: 40px;
+            left: 40px;
             background: #ff6f35;
             color: #fff;
             padding: 10px 20px;
@@ -44,12 +44,24 @@
             z-index: 1001;
         }
         .back-btn:hover {
-            transform: translateX(-5px);
+            transform: scale(1.05);
             box-shadow: 0 6px 20px rgba(255,111,53,0.5);
             color: #fff;
         }
         .back-btn i {
             font-size: 1.2rem;
+        }
+        @media (max-width: 768px) {
+            .back-btn {
+                padding: 10px;
+                width: 40px;
+                height: 40px;
+                justify-content: center;
+                border-radius: 50%;
+            }
+            .back-btn span {
+                display: none;
+            }
         }
         .auth-shell {
             height: 100vh;
@@ -266,7 +278,7 @@
     </style>
 </head>
 <body>
-    <a href="/register" class="back-btn"><i class="fas fa-arrow-right"></i> رجوع</a>
+    <a href="/register" class="back-btn"><span>رجوع</span><i class="fas fa-arrow-left"></i> </a>
     <div class="auth-shell">
         <div class="auth-card-wrap">
             <div class="auth-illustration">

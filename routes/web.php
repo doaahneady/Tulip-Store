@@ -766,6 +766,7 @@ use App\Http\Controllers\ProductController;
 Route::middleware(['web'])->group(function () {
     Route::post('/api/register', [CustomAuthController::class, 'register']);
     Route::post('/api/verify-registration', [CustomAuthController::class, 'verifyRegistration']);
+    Route::get('/api/get-verification-info', [CustomAuthController::class, 'getVerificationInfo']);
     Route::post('/api/login', [CustomAuthController::class, 'login']);
     Route::post('/api/forgot-password', [CustomAuthController::class, 'forgotPassword']);
     Route::post('/api/verify-code', [CustomAuthController::class, 'verifyCode']);
