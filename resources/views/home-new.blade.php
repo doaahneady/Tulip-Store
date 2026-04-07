@@ -66,7 +66,7 @@
                 margin-bottom: 2rem !important;
             }
             #mainLogo img {
-                height: 80px !important;
+                height: 120px !important;
             }
         }
     </style>
@@ -92,7 +92,7 @@
     <div class="intro-content-wrapper" style="position:relative; z-index:2; text-align:center; max-width:900px; padding:3rem;">
         <!-- Logo - Drops from Top with Bounce -->
         <div id="mainLogo" style="margin-bottom:4rem; opacity:0; transform:translateY(-150px) scale(0.8);">
-            <img src="/images/white_orange_logo.png" style="height:120px; filter:drop-shadow(0 10px 30px rgba(255,107,53,0.5));">
+            <img src="/images/white_orange_logo.png" style="height:180px; filter:drop-shadow(0 10px 30px rgba(255,107,53,0.5));">
         </div>
         
         <!-- Text - Types Out in White -->
@@ -795,7 +795,8 @@
 </section>
 
 <!-- MERCHANT SECTION - PHOTO ONLY BACKGROUND -->
-<section style="position:relative; height:230px; display:flex; align-items:center; justify-content:center; margin:2rem 1rem; border-radius:16px; overflow:hidden;">
+<section style="position:relative; height:230px; display:flex; align-items:center; justify-content:center; 
+       margin:2rem 1rem; border-radius:16px; overflow:hidden;padding:60px;">
 
     <!-- Background -->
     <div style="position:absolute; inset:0; background: url('/images/banner_ask.jpg') center/cover no-repeat;"></div>
@@ -810,7 +811,9 @@
             إبدأ بعرض منتجاتك لدينا لربح أكثر.. نظام الكتروني سهل الاستخدام.. متابعة للأرباح و المبيعات من خلال حسابك
         </p>
 
-        <a href="/trader/login" target="_blank" style="display:inline-flex; align-items:center; gap:0.6rem; background:#ff6b35; color:#fff; padding:0.7rem 1.9rem; border-radius:999px; text-decoration:none; font-size:1rem; font-weight:700; box-shadow:0 8px 20px rgba(0,0,0,0.25); transition:all 0.3s;">
+        <a href="/trader/login" target="_blank" style="display:inline-flex; align-items:center; gap:0.6rem; background:#ff6b35; color:#fff;
+         padding:0.7rem 1.9rem; border-radius:999px; text-decoration:none; font-size:1rem; font-weight:700;
+          box-shadow:0 8px 20px rgba(0,0,0,0.25); transition:all 0.3s;">
             بوابة التجار
             <i class="fas fa-store"></i>
         </a>
