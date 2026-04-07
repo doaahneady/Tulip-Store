@@ -25,6 +25,32 @@
             font-weight: 400;
             height: 100%;
         }
+        .back-btn {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: #ff6f35;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-family: 'El Messiri', sans-serif;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(255,111,53,0.3);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        .back-btn:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 6px 20px rgba(255,111,53,0.5);
+            color: #fff;
+        }
+        .back-btn i {
+            font-size: 1.2rem;
+        }
         .auth-shell {
             height: 100vh;
             width: 100vw;
@@ -240,6 +266,7 @@
     </style>
 </head>
 <body>
+    <a href="/register" class="back-btn"><i class="fas fa-arrow-right"></i> رجوع</a>
     <div class="auth-shell">
         <div class="auth-card-wrap">
             <div class="auth-illustration">
@@ -248,7 +275,7 @@
             <div class="auth-card">
                 <div id="codeForm">
                     <h1>تأكيد التسجيل</h1>
-                    <p>تم إرسال رمز التحقق إلى بريدك الإلكتروني</p>
+                    <p id="verifyMsg">تم إرسال رمز التحقق</p>
                     <form onsubmit="event.preventDefault();handleVerifyCode();">
                         <div class="code-inputs">
                             <input type="text" maxlength="1" id="code1" required>
@@ -275,6 +302,22 @@
     </div>
     <script>
         const inputs = document.querySelectorAll('.code-inputs input');
+        
+        // Show correct message based on session method
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/get-verification-info');
+                const data = await response.json();
+                if (data.success) {
+                    const msg = data.method === 'sms' 
+                        ? `تم إرسال رمز التحقق إلى رقم الجوال: ${data.target}`
+                        : `تم إرسال رمز التحقق إلى البريد الإلكتروني: ${data.target}`;
+                    document.getElementById('verifyMsg').textContent = msg;
+                }
+            } catch (e) {
+                console.error('Failed to get verification info');
+            }
+        });
         
         inputs.forEach((input, index) => {
             input.addEventListener('input', (e) => {

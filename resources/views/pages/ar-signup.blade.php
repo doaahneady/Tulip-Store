@@ -91,6 +91,79 @@
             flex-direction: column;
             justify-content: center;
         }
+        .back-btn {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: #ff6f35;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-family: 'El Messiri', sans-serif;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(255,111,53,0.3);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        .back-btn:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 6px 20px rgba(255,111,53,0.5);
+            color: #fff;
+        }
+        .back-btn i {
+            font-size: 1.2rem;
+        }
+        .method-row {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin: 1rem 0;
+            background: rgba(255,255,255,0.05);
+            padding: 0.8rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .method-row label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: #d3e7e2;
+            transition: all 0.3s ease;
+        }
+        .method-row label:hover {
+            color: #fff;
+        }
+        .method-row input[type="radio"] {
+            display: none;
+        }
+        .method-row .radio-custom {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ff6f35;
+            border-radius: 50%;
+            position: relative;
+        }
+        .method-row input[type="radio"]:checked + .radio-custom::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background: #ff6f35;
+            border-radius: 50%;
+        }
+        .method-row label.selected {
+            color: #fff;
+            font-weight: 600;
+        }
         h1 {
             font-family: 'El Messiri', sans-serif;
             font-weight: 600;
@@ -504,6 +577,7 @@
     </style>
 </head>
 <body>
+    <a href="/ar-login" class="back-btn"><i class="fas fa-arrow-right"></i> رجوع</a>
     <div class="auth-shell">
         <div class="auth-card-wrap">
             <div class="auth-card">
@@ -578,6 +652,21 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <label style="text-align: center; display: block; margin-top: 1rem; color: #d3e7e2;">طريقة التحقق (اختياري)</label>
+                    <div class="method-row">
+                        <label for="methodEmail" class="selected">
+                            <input type="radio" id="methodEmail" name="verification_method" value="email" checked>
+                            <span class="radio-custom"></span>
+                            <span>عبر الإيميل</span>
+                        </label>
+                        <label for="methodSms">
+                            <input type="radio" id="methodSms" name="verification_method" value="sms">
+                            <span class="radio-custom"></span>
+                            <span>عبر الرسائل</span>
+                        </label>
+                    </div>
+
                     <button class="action-btn" type="submit" id="submitBtn">متابعة</button>
                     <div class="sign-row" style="margin-top:1rem;">
                         <span>لديك حساب ؟</span>
@@ -647,6 +736,15 @@
                 this.classList.add('selected');
                 // Remove error state when gender is selected
                 document.querySelector('.gender-row').classList.remove('error');
+            });
+        });
+
+        // Verification Method selection
+        const methodLabels = document.querySelectorAll('.method-row label');
+        methodLabels.forEach(label => {
+            label.addEventListener('click', function() {
+                methodLabels.forEach(l => l.classList.remove('selected'));
+                this.classList.add('selected');
             });
         });
 
@@ -819,6 +917,7 @@
             const password_confirmation = document.getElementById('signupPassConfirm').value;
             const birth_date = document.getElementById('signupBirth').value;
             const gender = document.querySelector('input[name="gender"]:checked')?.value;
+            const verification_method = document.querySelector('input[name="verification_method"]:checked')?.value || 'email';
             const errorMsg = document.getElementById('errorMsg');
             const submitBtn = document.getElementById('submitBtn');
 
@@ -889,7 +988,8 @@
                         password,
                         password_confirmation,
                         birth_date,
-                        gender
+                        gender,
+                        verification_method
                     })
                 });
 

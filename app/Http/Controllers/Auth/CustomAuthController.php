@@ -40,8 +40,34 @@ class CustomAuthController extends Controller
                 'password' => Hash::make($validated['password']),
                 'birth_date' => $validated['birth_date'] ?? null,
                 'gender' => $validated['gender'] ?? null,
-                'verified' => false,
+                'verified' => false, // Set to false to require OTP
             ]);
+
+            // Generate 6-digit verification code
+            $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $method = $request->input('verification_method', 'email');
+
+            // Store code and user info in session
+            $request->session()->put('verification_code', $code);
+            $request->session()->put('verification_email', $user->email);
+            $request->session()->put('verification_phone', $user->phone);
+            $request->session()->put('verification_user_id', $user->id);
+            $request->session()->put('verification_method', $method);
+            $request->session()->put('code_expires_at', now()->addMinutes(10));
+
+            // Send verification code
+            if ($method === 'sms' && $user->phone) {
+                // Mock SMS sending - in real app use Twilio/Infobip etc.
+                \Log::info("SMS OTP for {$user->phone}: {$code}");
+                // Here you would call your SMS provider API
+            } else {
+                // Default to Email
+                try {
+                    Mail::to($user->email)->send(new VerificationCodeMail($code, $user->name));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send verification email: '.$e->getMessage());
+                }
+            }
 
             // Admin activity feed: new registration
             if (Schema::hasTable('activity_feeds')) {
@@ -50,13 +76,13 @@ class CustomAuthController extends Controller
                     'activity_type' => 'user',
                     'action' => 'created',
                     'title' => 'New User Registration',
-                    'description' => $user->name.' signed up',
+                    'description' => $user->name.' signed up (Method: '.$method.')',
                     'actor_type' => User::class,
                     'actor_id' => $user->id,
                     'target_type' => User::class,
                     'target_id' => $user->id,
                     'severity' => 'info',
-                    'metadata' => ['email' => $user->email],
+                    'metadata' => ['email' => $user->email, 'method' => $method],
                 ]);
             }
             // IT: system log + security audit (account_created)
@@ -64,11 +90,11 @@ class CustomAuthController extends Controller
                 SystemLog::create([
                     'level' => 'info',
                     'action' => 'user_registered',
-                    'message' => 'User registered via email/password',
+                    'message' => 'User registered via '.$method,
                     'user' => $user->email,
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent(),
-                    'metadata' => ['method' => 'email_password'],
+                    'metadata' => ['method' => $method],
                 ]);
             }
             if (Schema::hasTable('security_audit_logs')) {
@@ -79,31 +105,15 @@ class CustomAuthController extends Controller
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                     'status' => 'success',
-                    'description' => 'Account created via email/password',
-                    'metadata' => ['email' => $user->email],
+                    'description' => 'Account created, OTP sent via '.$method,
+                    'metadata' => ['email' => $user->email, 'method' => $method],
                     'risk_level' => 'low',
                 ]);
             }
 
-            // Generate 6-digit verification code
-            $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-
-            // Store code and user info in session
-            $request->session()->put('verification_code', $code);
-            $request->session()->put('verification_email', $user->email);
-            $request->session()->put('verification_user_id', $user->id);
-            $request->session()->put('code_expires_at', now()->addMinutes(10));
-
-            // Send verification email
-            try {
-                Mail::to($user->email)->send(new VerificationCodeMail($code, $user->name));
-            } catch (\Exception $e) {
-                \Log::error('Failed to send verification email: '.$e->getMessage());
-            }
-
             return response()->json([
                 'success' => true,
-                'message' => 'تم إرسال رمز التحقق إلى بريدك الإلكتروني',
+                'message' => $method === 'sms' ? 'تم إرسال رمز التحقق إلى رقم جوالك' : 'تم إرسال رمز التحقق إلى بريدك الإلكتروني',
                 'redirect' => '/ar-verify-registration',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -380,6 +390,24 @@ class CustomAuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'تم تغيير كلمة المرور بنجاح',
+        ]);
+    }
+
+    public function getVerificationInfo(Request $request)
+    {
+        $method = $request->session()->get('verification_method');
+        $target = $method === 'sms' 
+            ? $request->session()->get('verification_phone') 
+            : $request->session()->get('verification_email');
+
+        if (!$target) {
+            return response()->json(['success' => false], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'method' => $method,
+            'target' => $target
         ]);
     }
 
