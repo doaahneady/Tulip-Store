@@ -343,15 +343,14 @@
 
 <!-- CATEGORIES - SMALLER, ICON-BASED, BLUE LINE, SMALLER BUTTONS -->
 <section id="categories" style="padding:2rem 1.5rem; background:#fff;">
-<div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+ <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
     <h2 style="font-family:'El Messiri',sans-serif; font-size:1.6rem; font-weight:800; color:#1a1a1a; margin:0;">
         تسوق حسب الفئة
     </h2>
     <a href="/categories" style="color:#2a7080; font-size:1rem; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:0.5rem; transition:all 0.3s;" onmouseover="this.style.gap='0.8rem'" onmouseout="this.style.gap='0.5rem'">
         عرض الكل <i class="fas fa-arrow-left"></i>
     </a>
-</div>
-        
+ 
         <div class="marquee-container">
             @php
                 $categoryColors = [
@@ -400,9 +399,11 @@
         </div>
             
             <!-- Gradient Overlays -->
-            <div style="position:absolute; left:0; top:0; bottom:0; width:60px; background:linear-gradient(to right, rgba(255, 255, 255, 0.8), transparent); pointer-events:none; z-index:2;"></div>
-            <div style="position:absolute; right:0; top:0; bottom:0; width:60px; background:linear-gradient(to left, rgba(255, 255, 255, 0.8), transparent); pointer-events:none; z-index:2;"></div>
-        </div>
+            <div style="position:absolute; left:0; top:0; bottom:0; width:60px;
+             background:linear-gradient(to right, rgba(255, 255, 255, 0.8), transparent); pointer-events:none; z-index:2;"></div>
+            <div style="position:absolute; right:0; top:0; bottom:0; 
+            width:60px; background:linear-gradient(to left, rgba(255, 255, 255, 0.8), transparent); pointer-events:none; z-index:2;"></div>
+       
     </div>
 </section>
 
@@ -796,13 +797,13 @@
 
 <!-- MERCHANT SECTION - PHOTO ONLY BACKGROUND -->
 <section style="position:relative; height:230px; display:flex; align-items:center; justify-content:center; 
-       margin:2rem 1rem; border-radius:16px; overflow:hidden;padding:60px;">
+       margin:10px 5px; border-radius:16px; overflow:hidden;">
 
     <!-- Background -->
     <div style="position:absolute; inset:0; background: url('/images/banner_ask.jpg') center/cover no-repeat;"></div>
 
     <!-- Content -->
-    <div style="position:relative; text-align:center; padding:2rem; max-width:650px;">
+    <div style="position:relative; text-align:center; padding:10rem 0; max-width:650px;">
         <h2 style="font-size:2rem; font-weight:700; color:#fff; margin:0 0 1rem 0; text-shadow:0 4px 15px rgba(0,0,0,0.6);">
             كن تاجر معنا
         </h2>

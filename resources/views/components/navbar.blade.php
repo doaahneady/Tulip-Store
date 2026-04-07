@@ -433,9 +433,9 @@ function handleLogout() {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
             }
         }).then(() => {
-            window.location.href = '/ar-login';
+            window.location.href = '/';
         }).catch(() => {
-            window.location.href = '/ar-login';
+            window.location.href = '/';
         });
     }
 }
