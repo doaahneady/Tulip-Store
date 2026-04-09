@@ -208,6 +208,7 @@
             position: relative;
             display: flex;
             flex-direction: column;
+            cursor: pointer;
         }
 
         .product-card:hover {
@@ -711,11 +712,11 @@
                             $price = $product->discount_price ?? $product->price;
                             $oldPrice = $product->discount_price ? $product->price : null;
                         @endphp
-                        <div class="product-card" data-product-id="{{ $product->id }}" data-product="{{ rawurlencode($product->toJson()) }}">
+                        <div class="product-card" data-product-id="{{ $product->id }}" data-product="{{ rawurlencode($product->toJson()) }}" tabindex="0" onclick="goToProductDetails({{ $product->id }})" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); goToProductDetails({{ $product->id }}); }">
                             <button class="product-favorite-btn" onclick="event.stopPropagation(); toggleProductFavorite(event, {{ $product->id }})">
                                 <i class="far fa-heart"></i>
                             </button>
-                            <div class="product-image-wrapper" onclick="openFloatingViewFromCard(this)">
+                            <div class="product-image-wrapper">
                                 <img src="{{ $product->primary_image_url }}" alt="{{ $product->name }}" class="product-img" loading="lazy">
                             </div>
                             <div class="product-info">
@@ -792,6 +793,11 @@
             }
             loadCartCount();
         });
+
+        function goToProductDetails(productId) {
+            if (!productId) return;
+            window.location.href = `/products/${productId}`;
+        }
 
         // Open floating view
         let currentProductId = null;
@@ -1132,11 +1138,11 @@
                         const formattedOldPrice = oldPrice ? (window.formatMoney ? window.formatMoney(oldPrice) : ('$' + parseFloat(oldPrice).toFixed(2))) : null;
                         
                         return `
-                        <div class="product-card" data-product-id="${product.id}" data-product="${encodeURIComponent(JSON.stringify(product))}">
+                        <div class="product-card" data-product-id="${product.id}" data-product="${encodeURIComponent(JSON.stringify(product))}" tabindex="0" onclick="goToProductDetails(${product.id})" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); goToProductDetails(${product.id}); }">
                             <button class="product-favorite-btn ${isFavorite ? 'active' : ''}" onclick="event.stopPropagation(); toggleProductFavorite(event, ${product.id})">
                                 <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
                             </button>
-                            <div class="product-image-wrapper" onclick="openFloatingViewFromCard(this)">
+                            <div class="product-image-wrapper">
                                 <img src="${product.primary_image_url || product.image || '/images/tulip_store.jpg'}" alt="${product.name}" class="product-img" loading="lazy">
                             </div>
                             <div class="product-info">

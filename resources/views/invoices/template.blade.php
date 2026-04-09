@@ -9,7 +9,7 @@
         @page { size: A4; margin: 15mm; }
         * { box-sizing: border-box; }
         body { 
-            font-family:"Montserrat-Alt1 SemBd"; 
+            font-family: "DejaVu Sans", Tahoma, Arial, sans-serif; 
             font-size: 12px; 
             line-height: 1.5;
             color: #333;
@@ -212,7 +212,7 @@
         <div class="invoice-header">
             <div style="display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap;">
                 @if($logoGirlData)
-                    <h1 style="margin:0; color:#2a7080; font-size:28px; display:flex; align-items:center; gap:3px;font-family:'Montserrat-Alt1 SemBd';">
+                    <h1 style="margin:0; color:#2a7080; font-size:28px; display:flex; align-items:center; gap:3px; font-family: 'DejaVu Sans', Tahoma, Arial, sans-serif;">
                         <span>T</span><img src="{{ $logoGirlData }}" alt="" style="height:1.2em; width:auto; vertical-align:middle; display:inline-block;"><span>lip</span>
                     </h1>
                 @elseif($invoiceLogoData)

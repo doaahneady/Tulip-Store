@@ -144,6 +144,16 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        .store-section-cards .product-meta {
+            margin-top: 0.25rem;
+            color: #475569;
+            font-size: 0.82rem;
+            line-height: 1.25rem;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
         .store-section-cards .product-footer {
             display: flex;
             align-items: center;
@@ -476,6 +486,25 @@
                             const traderLine = traderName
                                 ? `<div style="margin-top:0.15rem; font-size:0.8rem; color:#64748b;">التاجر: ${traderId ? `<a href="/traders/${traderId}/products" onclick="event.stopPropagation();" style="color:#2a7080; font-weight:700; text-decoration:none;">${escapeHtml(traderName)}</a>` : escapeHtml(traderName)}</div>`
                                 : '';
+                            const normalize = (s) => String(s ?? '').replace(/\s+/g, ' ').trim();
+                            const truncate = (s, n) => (s.length > n ? (s.slice(0, Math.max(0, n - 1)) + '…') : s);
+                            const description = normalize(product.description);
+                            let infoText = description;
+                            if (!infoText) {
+                                const categoryName = normalize(product?.category?.name);
+                                const parts = [
+                                    categoryName,
+                                    normalize(product.brand),
+                                    normalize(product.size),
+                                    normalize(product.color),
+                                    normalize(product.material),
+                                    normalize(product.condition),
+                                    normalize(product.author),
+                                    normalize(product.genre),
+                                ].filter(Boolean);
+                                infoText = parts.join(' • ');
+                            }
+                            const infoLine = infoText ? `<div class="product-meta">${escapeHtml(truncate(infoText, 140))}</div>` : '';
                             const rating = Math.max(0, Math.min(5, parseInt(product.rating ?? 0, 10) || 0));
                             const reviewsCount = parseInt(product.reviews_count ?? 0, 10) || 0;
                             const stars = Array.from({ length: 5 }).map((_, i) => i < rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>').join('');
@@ -496,6 +525,7 @@
                                 <div class="product-body">
                                     <h3 class="product-name">${escapeHtml(product.name)}</h3>
                                     ${traderLine}
+                                    ${infoLine}
                                     ${ratingLine}
                                     <div class="product-footer">
                                         <div class="price-wrapper">

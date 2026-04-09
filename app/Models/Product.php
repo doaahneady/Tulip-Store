@@ -194,7 +194,9 @@ class Product extends Model
         }
 
         if (Schema::hasColumn('products', 'status')) {
-            $query->whereIn('status', ['approved', 'active']);
+            $query->where(function ($q) {
+                $q->whereNull('status')->orWhereIn('status', ['approved', 'active']);
+            });
         }
 
         return $query;

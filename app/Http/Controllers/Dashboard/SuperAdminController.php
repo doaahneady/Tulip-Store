@@ -615,6 +615,34 @@ class SuperAdminController extends Controller
         return view('dashboards.super-admin.users', compact('users', 'roles', 'userSpendingMap'));
     }
 
+    public function traders(Request $request)
+    {
+        $statusOptions = [
+            \App\Models\Trader::STATUS_PENDING,
+            \App\Models\Trader::STATUS_APPROVED,
+            \App\Models\Trader::STATUS_REJECTED,
+            \App\Models\Trader::STATUS_SUSPENDED,
+        ];
+
+        $traders = \App\Models\Trader::query()
+            ->when($request->search, function ($q, $search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('company_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            })
+            ->when($request->filled('status'), fn ($q) => $q->where('status', (string) $request->input('status')))
+            ->orderByDesc('created_at')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('dashboards.super-admin.traders.index', compact('traders', 'statusOptions'));
+    }
+
+    public function traderDetails(\App\Models\Trader $trader)
+    {
+        return view('dashboards.super-admin.traders.show', compact('trader'));
+    }
+
     /**
      * Create new user
      */

@@ -66,7 +66,7 @@
                 margin-bottom: 2rem !important;
             }
             #mainLogo img {
-                height: 80px !important;
+                height: 120px !important;
             }
         }
     </style>
@@ -92,7 +92,7 @@
     <div class="intro-content-wrapper" style="position:relative; z-index:2; text-align:center; max-width:900px; padding:3rem;">
         <!-- Logo - Drops from Top with Bounce -->
         <div id="mainLogo" style="margin-bottom:4rem; opacity:0; transform:translateY(-150px) scale(0.8);">
-            <img src="/images/white_orange_logo.png" style="height:120px; filter:drop-shadow(0 10px 30px rgba(255,107,53,0.5));">
+            <img src="/images/white_orange_logo.png" style="height:180px; filter:drop-shadow(0 10px 30px rgba(255,107,53,0.5));">
         </div>
         
         <!-- Text - Types Out in White -->
@@ -343,15 +343,14 @@
 
 <!-- CATEGORIES - SMALLER, ICON-BASED, BLUE LINE, SMALLER BUTTONS -->
 <section id="categories" style="padding:2rem 1.5rem; background:#fff;">
-<div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+ <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
     <h2 style="font-family:'El Messiri',sans-serif; font-size:1.6rem; font-weight:800; color:#1a1a1a; margin:0;">
         تسوق حسب الفئة
     </h2>
     <a href="/categories" style="color:#2a7080; font-size:1rem; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:0.5rem; transition:all 0.3s;" onmouseover="this.style.gap='0.8rem'" onmouseout="this.style.gap='0.5rem'">
         عرض الكل <i class="fas fa-arrow-left"></i>
     </a>
-</div>
-        
+ 
         <div class="marquee-container">
             <?php
                 $categoryColors = [
@@ -400,9 +399,11 @@
         </div>
             
             <!-- Gradient Overlays -->
-            <div style="position:absolute; left:0; top:0; bottom:0; width:120px; background:linear-gradient(to right, #fff, transparent); pointer-events:none; z-index:2;"></div>
-            <div style="position:absolute; right:0; top:0; bottom:0; width:120px; background:linear-gradient(to left, #fff, transparent); pointer-events:none; z-index:2;"></div>
-        </div>
+            <div style="position:absolute; left:0; top:0; bottom:0; width:60px;
+             background:linear-gradient(to right, rgba(255, 255, 255, 0.8), transparent); pointer-events:none; z-index:2;"></div>
+            <div style="position:absolute; right:0; top:0; bottom:0; 
+            width:60px; background:linear-gradient(to left, rgba(255, 255, 255, 0.8), transparent); pointer-events:none; z-index:2;"></div>
+       
     </div>
 </section>
 
@@ -795,13 +796,14 @@
 </section>
 
 <!-- MERCHANT SECTION - PHOTO ONLY BACKGROUND -->
-<section style="position:relative; height:230px; display:flex; align-items:center; justify-content:center; margin:2rem 1rem; border-radius:16px; overflow:hidden;">
+<section style="position:relative; height:230px; display:flex; align-items:center; justify-content:center; 
+       margin:10px 5px; border-radius:16px; overflow:hidden;">
 
     <!-- Background -->
     <div style="position:absolute; inset:0; background: url('/images/banner_ask.jpg') center/cover no-repeat;"></div>
 
     <!-- Content -->
-    <div style="position:relative; text-align:center; padding:2rem; max-width:650px;">
+    <div style="position:relative; text-align:center; padding:10rem 0; max-width:650px;">
         <h2 style="font-size:2rem; font-weight:700; color:#fff; margin:0 0 1rem 0; text-shadow:0 4px 15px rgba(0,0,0,0.6);">
             كن تاجر معنا
         </h2>
@@ -810,7 +812,9 @@
             إبدأ بعرض منتجاتك لدينا لربح أكثر.. نظام الكتروني سهل الاستخدام.. متابعة للأرباح و المبيعات من خلال حسابك
         </p>
 
-        <a href="/trader/login" target="_blank" style="display:inline-flex; align-items:center; gap:0.6rem; background:#ff6b35; color:#fff; padding:0.7rem 1.9rem; border-radius:999px; text-decoration:none; font-size:1rem; font-weight:700; box-shadow:0 8px 20px rgba(0,0,0,0.25); transition:all 0.3s;">
+        <a href="/trader/login" target="_blank" style="display:inline-flex; align-items:center; gap:0.6rem; background:#ff6b35; color:#fff;
+         padding:0.7rem 1.9rem; border-radius:999px; text-decoration:none; font-size:1rem; font-weight:700;
+          box-shadow:0 8px 20px rgba(0,0,0,0.25); transition:all 0.3s;">
             بوابة التجار
             <i class="fas fa-store"></i>
         </a>

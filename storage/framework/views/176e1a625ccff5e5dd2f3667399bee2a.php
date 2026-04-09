@@ -16,181 +16,356 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        .category-header {
-            background: linear-gradient(135deg, #0f4f55 0%, #1a6b73 100%);
-            padding: 2rem;
+        :root {
+            --primary-color: #0f4f55;
+            --primary-light: #1a6b73;
+            --accent-color: #ff6b35;
+            --text-dark: #1a1a1a;
+            --text-muted: #666;
+            --bg-light: #f8f9fa;
+            --white: #ffffff;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 15px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 30px rgba(0,0,0,0.12);
+            --radius-md: 12px;
+            --radius-lg: 24px;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Changa', sans-serif;
+            color: var(--text-dark);
+        }
+
+        .category-page-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            padding: 4rem 2rem;
             text-align: center;
-            color: white;
-            margin-bottom: 2rem;
+            color: var(--white);
+            margin-bottom: 0;
+            position: relative;
+            overflow: hidden;
         }
-        .category-title {
+
+        .category-page-header::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: var(--bg-light);
+            border-radius: 100% 100% 0 0;
+        }
+
+        .category-page-title {
             font-family: 'El Messiri', sans-serif;
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
         }
-        .category-description {
-            font-size: 1rem;
+
+        .category-page-description {
+            font-family: 'El Messiri', sans-serif;
+            font-size: 1.2rem;
             opacity: 0.9;
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
+
+        .mobile-filter-trigger {
+            display: none;
+        }
+
+        .close-sidebar {
+            display: none;
+        }
+
         .products-container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
             display: grid;
-            grid-template-columns: 1fr 260px;
-            gap: 2rem;
+            grid-template-columns: 280px 1fr;
+            gap: 2.5rem;
+            align-items: start;
         }
+
+        /* Sidebar & Filters */
         .filters-sidebar {
-            background: #ffffff;
-            padding: 0;
-            border-radius: 12px;
-            height: fit-content;
-            width: 260px;
-            box-shadow: 0 2px 8px rgba(15, 79, 85, 0.08);
-            overflow: hidden;
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 100px;
         }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sidebar-header h3 {
+            font-family: 'El Messiri', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
         .filter-section {
-            border-bottom: 1px solid #e8f4f5;
-            padding: 1.2rem 0;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
         }
-        .filter-section:first-child {
-            padding-top: 1.2rem;
-        }
+
         .filter-section:last-child {
             border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
+
         .filter-section-title {
             font-family: 'El Messiri', sans-serif;
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            color: #0f4f55;
-            margin-bottom: 0.9rem;
-            padding: 0 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
         }
+
         .filter-option {
             display: flex;
-            align-items: flex-start;
-            gap: 0.6rem;
-            padding: 0.5rem 1.2rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .filter-option:hover {
-            background: #f0f9fa;
-        }
-        .filter-option input[type="checkbox"] {
-            width: 17px;
-            height: 17px;
-            cursor: pointer;
-            margin-top: 2px;
-            flex-shrink: 0;
-            border: 2px solid #0f4f55;
-            border-radius: 3px;
-            accent-color: #0f4f55;
-        }
-        .filter-option input[type="checkbox"]:checked {
-            background: #0f4f55;
-        }
-        .filter-option label {
-            cursor: pointer;
-            font-family:"El Messiri", sans-serif;
-            font-size: 0.9rem;
-            color: #2c3e50;
-            line-height: 1.5;
-            flex: 1;
-            font-weight: 400;
-        }
-        .filter-option label:hover {
-            color: #0f4f55;
-        }
-        .filter-see-more {
-            color: #0f4f55;
-            font-family:"El Messiri", sans-serif;
-            font-size: 0.875rem;
-            cursor: pointer;
-            padding: 0.5rem 1.2rem;
-            display: inline-block;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        .filter-see-more:hover {
-            color: #1a6b73;
-            text-decoration: underline;
-        }
-        .price-inputs {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0 1.2rem;
-            margin-bottom: 0.8rem;
+            gap: 0.8rem;
+            padding: 0.4rem 0;
+            cursor: pointer;
+            transition: color 0.2s;
         }
-        .price-input-wrapper {
+
+        .filter-option:hover {
+            color: var(--primary-light);
+        }
+
+        .filter-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            accent-color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .filter-option label {
+            font-size: 0.95rem;
+            cursor: pointer;
             flex: 1;
-            position: relative;
         }
+
+        .price-inputs {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
         .price-input {
             width: 100%;
-            padding: 0.5rem 0.4rem;
-            border: 2px solid #d1e7e9;
+            padding: 0.6rem;
+            border: 1px solid #ddd;
             border-radius: 8px;
-            font-family:"El Messiri", sans-serif;
-            font-size: 0.8rem;
-            transition: all 0.2s ease;
-            background: #fafafa;
-            text-align: center;
-        }
-        .price-input::placeholder {
-            font-size: 0.75rem;
-        }
-        .price-input:focus {
+            font-family: 'Changa', sans-serif;
+            font-size: 0.9rem;
             outline: none;
-            border-color: #0f4f55;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(15, 79, 85, 0.1);
+            transition: border-color 0.3s;
         }
-        .price-separator {
-            color: #7f8c8d;
-            font-size: 0.75rem;
-            font-weight: 600;
+
+        .price-input:focus {
+            border-color: var(--primary-color);
         }
-        .filters-sidebar,
-        .filter-section,
-        .price-inputs,
-        .price-input-wrapper,
-        .price-input {
-            box-sizing: border-box;
+
+        /* Product Cards Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
         }
-        .price-inputs { max-width: 100%; }
-        .price-input-wrapper { min-width: 0; }
-        .price-input { min-width: 0; }
-        .products-content {
-            min-width: 0;
+
+        /* Reusing Product Card Styles from Home */
+        .product-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            border: 1px solid #eee;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
         }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-light);
+        }
+
+        .product-image-wrapper {
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            position: relative;
+            background: #f9f9f9;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-img {
+            transform: scale(1.1);
+        }
+
+        .product-favorite-btn {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 10;
+            width: 36px;
+            height: 36px;
+            background: var(--white);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ccc;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .product-favorite-btn.active, .product-favorite-btn:hover {
+            color: #ef4444;
+            transform: scale(1.1);
+        }
+
+        .product-info {
+            padding: 1.2rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-name {
+            font-family: 'El Messiri', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.8rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 3rem;
+        }
+
+        .product-price-wrapper {
+            display: flex;
+            align-items: baseline;
+            gap: 0.8rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        .product-old-price {
+            font-size: 0.9rem;
+            color: #999;
+            text-decoration: line-through;
+        }
+
+        .product-card-actions {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.8rem;
+            margin-top: auto;
+        }
+
+        .product-card-btn {
+            padding: 0.7rem 1rem;
+            border-radius: 50px;
+            font-family: 'El Messiri', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border: none;
+        }
+
+        .product-card-btn-cart {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+
+        .product-card-btn-cart:hover {
+            background: var(--primary-light);
+            transform: scale(1.03);
+        }
+
+        .product-card-btn-share {
+            background: #f0f0f0;
+            color: var(--text-dark);
+            width: 42px;
+            padding: 0;
+        }
+
+        .product-card-btn-share:hover {
+            background: #e0e0e0;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1024px) {
+            .products-container {
+                grid-template-columns: 240px 1fr;
+                gap: 1.5rem;
+            }
+        }
+
         @media (max-width: 768px) {
+            .category-page-title { font-size: 2.2rem; }
             .products-container {
                 grid-template-columns: 1fr;
                 padding: 1rem;
-                gap: 1rem;
-                position: relative;
             }
-            
-            /* Sidebar Styles for Mobile */
+
             .filters-sidebar {
-                display: block; /* Change from none to block but position it off-screen */
                 position: fixed;
                 top: 0;
-                right: -300px; /* Start off-screen */
-                width: 280px;
+                right: -100%;
+                width: 300px;
                 height: 100vh;
-                background: white;
                 z-index: 10001;
-                transition: right 0.3s ease;
-                box-shadow: -5px 0 15px rgba(0,0,0,0.1);
-                padding: 1.5rem;
+                border-radius: 0;
+                transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
                 overflow-y: auto;
             }
 
@@ -201,11 +376,9 @@
             .sidebar-overlay {
                 display: none;
                 position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
+                inset: 0;
                 background: rgba(0,0,0,0.5);
+                backdrop-filter: blur(4px);
                 z-index: 10000;
             }
 
@@ -213,104 +386,253 @@
                 display: block;
             }
 
-            .sidebar-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 1.5rem;
-                padding-bottom: 1rem;
-                border-bottom: 1px solid #eee;
-            }
-
-            .sidebar-header h3 {
-                font-family: 'El Messiri', sans-serif;
-                font-size: 1.2rem;
-                color: #0f4f55;
-                margin: 0;
-            }
-
-            .close-sidebar {
-                background: none;
-                border: none;
-                font-size: 1.5rem;
-                color: #666;
-                cursor: pointer;
-            }
-
             .mobile-filter-trigger {
                 display: flex;
                 align-items: center;
-                justify-content: center;
-                gap: 0.5rem;
-                background: white;
-                border: 1px solid #d1e7e9;
-                padding: 0.6rem 1.2rem;
+                gap: 0.8rem;
+                background: var(--white);
+                padding: 0.8rem 1.5rem;
                 border-radius: 50px;
                 font-family: 'El Messiri', sans-serif;
-                font-size: 0.9rem;
-                color: #0f4f55;
+                font-weight: 700;
+                color: var(--primary-color);
+                box-shadow: var(--shadow-md);
+                border: 1px solid #eee;
                 margin-bottom: 1.5rem;
+                cursor: pointer;
                 width: fit-content;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             }
 
-            .mobile-filters-wrapper {
-                display: none; /* Hide the old horizontal filters */
+            .close-sidebar {
+                display: block;
+                background: none;
+                border: none;
+                font-size: 1.8rem;
+                color: var(--text-muted);
+                cursor: pointer;
             }
-        }
-        @media (min-width: 769px) {
-            .mobile-filters-wrapper {
-                display: none;
-            }
-        }
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        @media (max-width: 1400px) {
-            .products-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-        
-        @media (max-width: 1024px) {
-            .products-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        
-        @media (max-width: 768px) {
+
             .products-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 1.5rem 1rem;
+                gap: 1rem;
             }
-        }
-        .no-products {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: #666;
-        }
-        .no-products i {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.3;
-        }
-        @media (max-width: 768px) {
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 1rem !important;
+
+            .product-name {
+                font-size: 0.95rem;
+                height: 2.6rem;
             }
-            .category-title {
-                font-size: 1.5rem;
-            }
+
+            .product-price { font-size: 1.1rem; }
+            
+            .product-card-btn span { display: none; }
+            .product-card-btn { width: 42px; padding: 0; }
+            .product-card-actions { grid-template-columns: repeat(2, 1fr); }
+            .product-card-btn-cart { width: auto; }
+            .product-card-btn-cart span { display: inline; }
         }
+
         @media (max-width: 480px) {
             .products-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 0.5rem !important;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.6rem;
             }
+            .product-info { padding: 0.8rem; }
+            .product-card-btn-cart span { display: none; }
+        }
+
+        .no-products {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 5rem 2rem;
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .no-products i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 1.5rem;
+        }
+
+        .no-products h2 {
+            font-family: 'El Messiri', sans-serif;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Floating View Styles */
+        .product-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 10002;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        .product-modal-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .product-floating-view {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -40%);
+            width: min(900px, 95vw);
+            max-height: 90vh;
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            z-index: 10003;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .product-floating-view.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%);
+        }
+
+        @media (max-width: 768px) {
+            .product-floating-view {
+                grid-template-columns: 1fr;
+                overflow-y: auto;
+            }
+        }
+
+        .floating-image-container {
+            background: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .floating-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .floating-details {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 768px) {
+            .floating-details { padding: 1.5rem; }
+        }
+
+        .floating-name {
+            font-family: 'El Messiri', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .floating-description {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .floating-price-wrapper {
+            display: flex;
+            align-items: baseline;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .floating-price {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--accent-color);
+        }
+
+        .floating-old-price {
+            font-size: 1.4rem;
+            color: #ccc;
+            text-decoration: line-through;
+        }
+
+        .floating-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .floating-btn {
+            flex: 1;
+            padding: 1rem;
+            border-radius: 50px;
+            font-family: 'El Messiri', sans-serif;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .floating-btn-cart {
+            background: var(--primary-color);
+            color: var(--white);
+            font-size: 1.1rem;
+        }
+
+        .floating-btn-cart:hover {
+            background: var(--primary-light);
+            transform: scale(1.02);
+        }
+
+        .floating-btn-share {
+            background: #f0f0f0;
+            color: var(--text-dark);
+            max-width: 60px;
+        }
+
+        .floating-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: var(--white);
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        .floating-view-details {
+            text-align: center;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 700;
+            font-family: 'El Messiri', sans-serif;
+            margin-top: auto;
+        }
+
+        .floating-view-details:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -318,71 +640,25 @@
     <?php if(View::exists('components.navbar')): ?>
     <?php echo $__env->make('components.navbar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 <?php endif; ?>
+    <div class="category-page-header">
+        <h1 class="category-page-title"><?php echo e($category->name); ?></h1>
+        <?php if($category->description): ?>
+            <p class="category-page-description"><?php echo e($category->description); ?></p>
+        <?php else: ?>
+            <p class="category-page-description">اكتشف تشكيلتنا المميزة من <?php echo e($category->name); ?> المختارة بعناية لتناسب ذوقك</p>
+        <?php endif; ?>
+    </div>
+
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    
     <div class="products-container">
-        <!-- Products Content -->
-        <div class="products-content">
-            <h2 style="font-family: 'El Messiri', sans-serif; font-size: 2rem; color: #0f4f55; margin: 0 0 2rem 0;"><?php echo e($category->name); ?></h2>
-            
-            <!-- Mobile Filter Trigger -->
-            <button class="mobile-filter-trigger" onclick="toggleSidebar()">
-                <i class="fas fa-filter"></i>
-                <span>تصفية النتائج</span>
-            </button>
-
-            <?php if($products->count() > 0): ?>
-                <div class="products-grid">
-                    <?php $__currentLoopData = $products; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <div class="product-card" data-product-id="<?php echo e($product->id); ?>" data-product="<?php echo e(rawurlencode($product->toJson())); ?>">
-                            <button class="product-favorite-btn" onclick="event.stopPropagation(); toggleProductFavorite(event, <?php echo e($product->id); ?>)">
-                                <i class="far fa-heart"></i>
-                            </button>
-                            <div class="product-image-wrapper" onclick="openFloatingViewFromCard(this)">
-                                <img src="<?php echo e($product->primary_image_url); ?>" srcset="<?php echo e($product->primary_image_srcset); ?>" sizes="(max-width: 768px) 50vw, 25vw" alt="<?php echo e($product->name); ?>" class="product-img" loading="lazy" width="320" height="320" onerror="this.src='/images/tulip_store.jpg'">
-                            </div>
-                            <div class="product-info">
-                                <h3 class="product-name"><?php echo e($product->name); ?></h3>
-                                <div class="product-price-rating-wrapper">
-                                    <div class="product-price-wrapper">
-                                        <span class="product-price">$<?php echo e(number_format($product->discount_price ?? $product->price, 2)); ?></span>
-                                        <?php if($product->discount_price): ?>
-                                            <span class="product-old-price">$<?php echo e(number_format($product->price, 2)); ?></span>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="product-card-actions">
-                                <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart(event, <?php echo e($product->id); ?>)">
-                                    إضافة للسلة
-                                </button>
-                                <button class="product-card-btn product-card-btn-share" onclick="event.stopPropagation(); shareProduct(event, '<?php echo e($product->name); ?>')">
-                                    شاركه الآن
-                                </button>
-                            </div>
-                        </div>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                </div>
-
-                <!-- Pagination -->
-                <div style="margin-top: 3rem; text-align: center;">
-                    <?php echo e($products->links()); ?>
-
-                </div>
-            <?php else: ?>
-                <div class="no-products">
-                    <i class="fas fa-box-open"></i>
-                    <h2>لا توجد منتجات في هذا القسم حالياً</h2>
-                    <p>نعمل على إضافة منتجات جديدة قريباً</p>
-                </div>
-            <?php endif; ?>
-        </div>
-
         <!-- Filters Sidebar -->
         <div class="filters-sidebar" id="filtersSidebar">
             <div class="sidebar-header">
-                <h3>تصفية المنتجات</h3>
+                <h3>تصفية النتائج</h3>
                 <button class="close-sidebar" onclick="toggleSidebar()">×</button>
             </div>
+
             <?php
                 $brands = $products->pluck('brand')->unique()->filter()->sort()->values()->take(12);
             ?>
@@ -400,15 +676,11 @@
             <?php endif; ?>
 
             <div class="filter-section">
-                <div class="filter-section-title">نطاق السعر (ل.س)</div>
+                <div class="filter-section-title">نطاق السعر</div>
                 <div class="price-inputs">
-                    <div class="price-input-wrapper">
-                        <input type="number" class="price-input" id="minPrice" placeholder="من" min="0">
-                    </div>
-                    <span class="price-separator">-</span>
-                    <div class="price-input-wrapper">
-                        <input type="number" class="price-input" id="maxPrice" placeholder="إلى" min="0">
-                    </div>
+                    <input type="number" class="price-input" id="minPrice" placeholder="من">
+                    <span>-</span>
+                    <input type="number" class="price-input" id="maxPrice" placeholder="إلى">
                 </div>
             </div>
 
@@ -416,14 +688,73 @@
                 <div class="filter-section-title">التوفر</div>
                 <div class="filter-option">
                     <input type="checkbox" id="inStock" onchange="toggleAvailabilityFilter('in-stock')">
-                    <label for="inStock">متوفر</label>
+                    <label for="inStock">متوفر حالياً</label>
                 </div>
                 <div class="filter-option">
                     <input type="checkbox" id="includeOutOfStock" onchange="toggleAvailabilityFilter('include-out')">
-                    <label for="includeOutOfStock">تضمين غير المتوفر</label>
+                    <label for="includeOutOfStock">عرض غير المتوفر</label>
                 </div>
             </div>
         </div>
+
+        <!-- Products Content -->
+        <div class="products-content">
+            <!-- Mobile Filter Trigger -->
+            <button class="mobile-filter-trigger" onclick="toggleSidebar()">
+                <i class="fas fa-sliders-h"></i>
+                <span>تصفية النتائج</span>
+            </button>
+
+            <?php if($products->count() > 0): ?>
+                <div class="products-grid">
+                    <?php $__currentLoopData = $products; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
+                            $price = $product->discount_price ?? $product->price;
+                            $oldPrice = $product->discount_price ? $product->price : null;
+                        ?>
+                        <div class="product-card" data-product-id="<?php echo e($product->id); ?>" data-product="<?php echo e(rawurlencode($product->toJson())); ?>" tabindex="0" onclick="goToProductDetails(<?php echo e($product->id); ?>)" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); goToProductDetails(<?php echo e($product->id); ?>); }">
+                            <button class="product-favorite-btn" onclick="event.stopPropagation(); toggleProductFavorite(event, <?php echo e($product->id); ?>)">
+                                <i class="far fa-heart"></i>
+                            </button>
+                            <div class="product-image-wrapper">
+                                <img src="<?php echo e($product->primary_image_url); ?>" alt="<?php echo e($product->name); ?>" class="product-img" loading="lazy">
+                            </div>
+                            <div class="product-info">
+                                <h3 class="product-name"><?php echo e($product->name); ?></h3>
+                                <div class="product-price-wrapper">
+                                    <span class="product-price"><?php echo app(App\Services\CurrencyService::class)->formatUsd((float)($price)); ?></span>
+                                    <?php if($oldPrice): ?>
+                                        <span class="product-old-price"><?php echo app(App\Services\CurrencyService::class)->formatUsd((float)($oldPrice)); ?></span>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="product-card-actions">
+                                    <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart(event, <?php echo e($product->id); ?>)">
+                                        <i class="fas fa-shopping-basket"></i>
+                                        <span>أضف للسلة</span>
+                                    </button>
+                                    <button class="product-card-btn product-card-btn-share" onclick="event.stopPropagation(); shareProduct(event, '<?php echo e($product->name); ?>')">
+                                        <i class="fas fa-share-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </div>
+
+                <!-- Pagination -->
+                <div style="margin-top: 4rem;">
+                    <?php echo e($products->links()); ?>
+
+                </div>
+            <?php else: ?>
+                <div class="no-products">
+                    <i class="fas fa-search"></i>
+                    <h2>لا توجد منتجات</h2>
+                    <p>عذراً، لم نجد أي منتجات في هذا القسم حالياً.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
 
 
 
@@ -463,6 +794,11 @@
             }
             loadCartCount();
         });
+
+        function goToProductDetails(productId) {
+            if (!productId) return;
+            window.location.href = `/products/${productId}`;
+        }
 
         // Open floating view
         let currentProductId = null;
@@ -625,11 +961,11 @@
         async function addToCart(event, productId) {
             event.stopPropagation();
             
-            const btn = event.target.closest('.product-btn-cart');
+            const btn = event.target.closest('.product-card-btn-cart');
             const originalText = btn.innerHTML;
             
             // Show loading
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإضافة...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             btn.disabled = true;
             
             try {
@@ -650,7 +986,7 @@
                 
                 if (data.success) {
                     // Show success
-                    btn.innerHTML = '<i class="fas fa-check"></i> تمت الإضافة';
+                    btn.innerHTML = '<i class="fas fa-check"></i>';
                     btn.style.background = '#27ae60';
                     
                     // Update cart count using global function
@@ -679,7 +1015,7 @@
                 }
             } catch (error) {
                 console.error('Error adding to cart:', error);
-                btn.innerHTML = '<i class="fas fa-times"></i> فشلت الإضافة';
+                btn.innerHTML = '<i class="fas fa-times"></i>';
                 btn.style.background = '#e74c3c';
                 
                 setTimeout(() => {
@@ -695,7 +1031,9 @@
             try {
                 const response = await fetch('/api/cart');
                 const data = await response.json();
-                updateCartCount(data.count || 0);
+                if (window.updateCartCount) {
+                    window.updateCartCount(data.count || 0);
+                }
             } catch (error) {
                 console.error('Error loading cart count:', error);
             }
@@ -714,9 +1052,9 @@
             } else {
                 // Fallback: copy link to clipboard
                 navigator.clipboard.writeText(window.location.href).then(() => {
-                    const btn = event.target.closest('.product-btn-share');
+                    const btn = event.target.closest('.product-card-btn-share');
                     const originalText = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
+                    btn.innerHTML = '<i class="fas fa-check"></i>';
                     
                     setTimeout(() => {
                         btn.innerHTML = originalText;
@@ -795,44 +1133,44 @@
                     const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
                     productsGrid.innerHTML = data.products.map(product => {
                         const isFavorite = favorites.some(p => String(p.id) === String(product.id));
+                        const price = product.discount_price || product.price;
+                        const oldPrice = product.discount_price ? product.price : null;
+                        const formattedPrice = window.formatMoney ? window.formatMoney(price) : ('$' + parseFloat(price).toFixed(2));
+                        const formattedOldPrice = oldPrice ? (window.formatMoney ? window.formatMoney(oldPrice) : ('$' + parseFloat(oldPrice).toFixed(2))) : null;
+                        
                         return `
-                        <div class="product-card" data-product-id="${product.id}" data-product="${encodeURIComponent(JSON.stringify(product))}">
+                        <div class="product-card" data-product-id="${product.id}" data-product="${encodeURIComponent(JSON.stringify(product))}" tabindex="0" onclick="goToProductDetails(${product.id})" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); goToProductDetails(${product.id}); }">
                             <button class="product-favorite-btn ${isFavorite ? 'active' : ''}" onclick="event.stopPropagation(); toggleProductFavorite(event, ${product.id})">
                                 <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
                             </button>
-                            <div class="product-image-wrapper" onclick="openFloatingViewFromCard(this)">
-                                <img src="${product.primary_image_url || product.image || (Array.isArray(product.images) ? product.images[0] : null) || '/images/tulip_store.jpg'}" srcset="${product.primary_image_srcset || ''}" sizes="(max-width: 768px) 50vw, 25vw" alt="${product.name}" class="product-img" loading="lazy" width="320" height="320" onerror="this.src='/images/tulip_store.jpg'">
+                            <div class="product-image-wrapper">
+                                <img src="${product.primary_image_url || product.image || '/images/tulip_store.jpg'}" alt="${product.name}" class="product-img" loading="lazy">
                             </div>
                             <div class="product-info">
                                 <h3 class="product-name">${product.name}</h3>
-                                <div class="product-price-rating-wrapper">
-                                    <div class="product-price-wrapper">
-                                        <span class="product-price">${window.formatMoney ? window.formatMoney(product.discount_price || product.price) : ('$' + parseFloat(product.discount_price || product.price).toFixed(2))}</span>
-                                        ${product.discount_price ? 
-                                            `<span class="product-old-price">${window.formatMoney ? window.formatMoney(product.price) : ('$' + parseFloat(product.price).toFixed(2))}</span>` : ''
-                                        }
-                                    </div>
-                                    <div class="product-rating">
-                                        ${'<i class="fas fa-star"></i>'.repeat(5)}
-                                    </div>
+                                <div class="product-price-wrapper">
+                                    <span class="product-price">${formattedPrice}</span>
+                                    ${formattedOldPrice ? `<span class="product-old-price">${formattedOldPrice}</span>` : ''}
                                 </div>
-                            </div>
-                            <div class="product-card-actions">
-                                <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart(event, ${product.id})">
-                                    إضافة للسلة
-                                </button>
-                                <button class="product-card-btn product-card-btn-share" onclick="event.stopPropagation(); shareProduct(event, '${product.name}')">
-                                    شاركه الآن
-                                </button>
+                                <div class="product-card-actions">
+                                    <button class="product-card-btn product-card-btn-cart" onclick="event.stopPropagation(); addToCart(event, ${product.id})">
+                                        <i class="fas fa-shopping-basket"></i>
+                                        <span>أضف للسلة</span>
+                                    </button>
+                                    <button class="product-card-btn product-card-btn-share" onclick="event.stopPropagation(); shareProduct(event, '${product.name.replace(/'/g, "\\'")}')">
+                                        <i class="fas fa-share-alt"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         `;
                     }).join('');
                 } else {
                     productsGrid.innerHTML = `
-                        <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #999;">
-                            <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
-                            <p>لا توجد منتجات تطابق الفلاتر المحددة</p>
+                        <div class="no-products">
+                            <i class="fas fa-search"></i>
+                            <h2>لا توجد منتجات</h2>
+                            <p>عذراً، لم نجد أي منتجات تطابق الفلاتر المختارة.</p>
                         </div>
                     `;
                 }
