@@ -350,61 +350,56 @@
     <a href="/categories" style="color:#2a7080; font-size:1rem; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:0.5rem; transition:all 0.3s;" onmouseover="this.style.gap='0.8rem'" onmouseout="this.style.gap='0.5rem'">
         عرض الكل <i class="fas fa-arrow-left"></i>
     </a>
- 
-        <div class="marquee-container">
-            @php
-                $categoryColors = [
-                    '#ff6b35', '#2a7080', '#9b59b6', '#e74c3c', '#3498db',
-                    '#f39c12', '#1abc9c', '#e91e63', '#00bcd4', '#ff5722',
-                ];
-                $categoriesData = ($categories && $categories->count() > 0) ? $categories : collect();
-            @endphp
-            <div class="marquee-track">
-                
-                @if($categoriesData->isNotEmpty())
-                    @foreach($categoriesData as $index => $category)
-                        @php
-                            $name = (string) ($category->name ?? '');
-                            $slug = (string) ($category->slug ?? '');
-                            $color = $categoryColors[$index % count($categoryColors)];
-                            $icon = 'fa-box';
-                            if (str_contains($name, 'ورد') || str_contains($name, 'زهور')) {
-                                $icon = 'fa-seedling';
-                            } elseif (str_contains($name, 'شوكولات')) {
-                                $icon = 'fa-cookie-bite';
-                            } elseif (str_contains($name, 'عطر')) {
-                                $icon = 'fa-spray-can-sparkles';
-                            } elseif (str_contains($name, 'مجوهر') || str_contains($name, 'اكسسو') || str_contains($name, 'إكسسو')) {
-                                $icon = 'fa-gem';
-                            } elseif (str_contains($name, 'هدايا') || str_contains($name, 'هدية')) {
-                                $icon = 'fa-gift';
-                            }
-                            $imageUrl = $category->image_url;
-                        @endphp
-                        <div class="category-card" onclick="window.location.href='/category/{{ $slug }}'" style="--cat-color:{{ $color }};">
-                            <div class="category-icon">
-                                @if($imageUrl)
-                                    <img src="{{ $imageUrl }}" alt="{{ $name }}" loading="lazy" width="80" height="80" onerror="this.onerror=null;this.src='/images/tulip_store.jpg';">
-                                @else
-                                    <i class="fas {{ $icon }}"></i>
-                                @endif
-                            </div>
-                            <p class="category-name">{{ $name }}</p>
-                        </div>
-                    @endforeach
-                @else
-                    <p style="text-align:center;width:100%;color:#666;font-family:'El Messiri',sans-serif;font-size:0.95rem;margin:1.5rem 0;">لا توجد تصنيفات متاحة حالياً.</p>
-                @endif
-            </div>
-        </div>
-            
-            <!-- Gradient Overlays -->
-            <div style="position:absolute; left:0; top:0; bottom:0; width:60px;
-             background:linear-gradient(to right, rgba(255, 255, 255, 0.8), transparent); pointer-events:none; z-index:2;"></div>
-            <div style="position:absolute; right:0; top:0; bottom:0; 
-            width:60px; background:linear-gradient(to left, rgba(255, 255, 255, 0.8), transparent); pointer-events:none; z-index:2;"></div>
-       
-    </div>
+ </div>
+
+ <div class="marquee-container">
+     @php
+         $categoryColors = [
+             '#ff6b35', '#2a7080', '#9b59b6', '#e74c3c', '#3498db',
+             '#f39c12', '#1abc9c', '#e91e63', '#00bcd4', '#ff5722',
+         ];
+         $categoriesData = ($categories && $categories->count() > 0) ? $categories : collect();
+     @endphp
+     <div class="marquee-track">
+         @if($categoriesData->isNotEmpty())
+             @foreach($categoriesData as $index => $category)
+                 @php
+                     $name = (string) ($category->name ?? '');
+                     $slug = (string) ($category->slug ?? '');
+                     $color = $categoryColors[$index % count($categoryColors)];
+                     $icon = 'fa-box';
+                     if (str_contains($name, 'ورد') || str_contains($name, 'زهور')) {
+                         $icon = 'fa-seedling';
+                     } elseif (str_contains($name, 'شوكولات')) {
+                         $icon = 'fa-cookie-bite';
+                     } elseif (str_contains($name, 'عطر')) {
+                         $icon = 'fa-spray-can-sparkles';
+                     } elseif (str_contains($name, 'مجوهر') || str_contains($name, 'اكسسو') || str_contains($name, 'إكسسو')) {
+                         $icon = 'fa-gem';
+                     } elseif (str_contains($name, 'هدايا') || str_contains($name, 'هدية')) {
+                         $icon = 'fa-gift';
+                     }
+                     $imageUrl = $category->image_url;
+                 @endphp
+                 <div class="category-card" onclick="window.location.href='/category/{{ $slug }}'" style="--cat-color:{{ $color }};">
+                     <div class="category-icon">
+                         @if($imageUrl)
+                             <img src="{{ $imageUrl }}" alt="{{ $name }}" loading="lazy" width="80" height="80" onerror="this.onerror=null;this.src='/images/tulip_store.jpg';">
+                         @else
+                             <i class="fas {{ $icon }}"></i>
+                         @endif
+                     </div>
+                     <p class="category-name">{{ $name }}</p>
+                 </div>
+             @endforeach
+         @else
+             <p style="text-align:center;width:100%;color:#666;font-family:'El Messiri',sans-serif;font-size:0.95rem;margin:1.5rem 0;">لا توجد تصنيفات متاحة حالياً.</p>
+         @endif
+     </div>
+
+     <div style="position:absolute; left:0; top:0; bottom:0; width:60px; background:linear-gradient(to right, rgba(255, 255, 255, 0.8), transparent); pointer-events:none; z-index:2;"></div>
+     <div style="position:absolute; right:0; top:0; bottom:0; width:60px; background:linear-gradient(to left, rgba(255, 255, 255, 0.8), transparent); pointer-events:none; z-index:2;"></div>
+ </div>
 </section>
 
 <style>

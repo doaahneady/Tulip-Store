@@ -227,12 +227,12 @@
         .product-img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             transition: transform 0.5s ease;
         }
 
         .product-card:hover .product-img {
-            transform: scale(1.1);
+            transform: none;
         }
 
         .product-favorite-btn {
