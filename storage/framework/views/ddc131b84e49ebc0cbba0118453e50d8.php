@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>جميع المنتجات - توليب مارت</title>
     
     <!-- fav icon -->
     <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
-    <link rel="stylesheet" href="{{ asset('css/store.min.css') }}?v={{ filemtime(public_path('css/store.min.css')) }}&t={{ time() }}" onerror="this.onerror=null;this.href='{{ asset('css/store.css') }}?fallback=1';">
+    <link rel="stylesheet" href="<?php echo e(asset('css/store.min.css')); ?>?v=<?php echo e(filemtime(public_path('css/store.min.css'))); ?>&t=<?php echo e(time()); ?>" onerror="this.onerror=null;this.href='<?php echo e(asset('css/store.css')); ?>?fallback=1';">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     
@@ -39,7 +39,7 @@
     </script>
 </head>
 <body>
-    @include('components.navbar')
+    <?php echo $__env->make('components.navbar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
     <div class="page-header">
         <div class="header-container">
@@ -994,7 +994,7 @@
         let subcategoriesByCategory = {};
         let selectedCategory = null;
         let selectedSubcategory = null;
-        const isAuthenticated = @json(auth()->check());
+        const isAuthenticated = <?php echo json_encode(auth()->check(), 15, 512) ?>;
         let favoriteIds = new Set();
 
         function guessEmoji(slug, name) {
@@ -1780,3 +1780,4 @@
     </script>
 </body>
 </html>
+<?php /**PATH E:\Tulip-Store\resources\views/mart/products.blade.php ENDPATH**/ ?>

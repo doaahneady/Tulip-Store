@@ -16,13 +16,24 @@
             </div>
             <div>
                 <label class="block text-sm text-gray-600 mb-1">التصنيف</label>
-                <select name="category_id" class="form-select w-full">
+                <select name="category_id" class="form-select w-full" id="categorySelect">
                     <option value="">بدون</option>
                     @foreach($categories as $cat)
                         <option value="{{ $cat->id }}" @selected(old('category_id')==$cat->id)>{{ $cat->name }}</option>
                     @endforeach
                 </select>
             </div>
+            @if(!empty($subcategories) && $subcategories->count())
+            <div>
+                <label class="block text-sm text-gray-600 mb-1">التصنيف الفرعي</label>
+                <select name="subcategory_id" class="form-select w-full" id="subcategorySelect">
+                    <option value="">بدون</option>
+                    @foreach($subcategories as $sub)
+                        <option value="{{ $sub->id }}" data-category="{{ $sub->category_id }}" @selected((string)old('subcategory_id')===(string)$sub->id)>{{ $sub->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
             <input type="hidden" name="sku" value="{{ old('sku') }}">
             <div>
                 <label class="block text-sm text-gray-600 mb-1">السعر</label>
@@ -94,4 +105,39 @@
         </div>
     </form>
 </div>
+
+@if(!empty($subcategories) && $subcategories->count())
+<script>
+    (function () {
+        const categorySelect = document.getElementById('categorySelect');
+        const subcategorySelect = document.getElementById('subcategorySelect');
+        if (!categorySelect || !subcategorySelect) return;
+
+        const allOptions = Array.from(subcategorySelect.querySelectorAll('option'));
+        const placeholder = allOptions.shift();
+
+        function syncSubcategories() {
+            const categoryId = categorySelect.value;
+            const selected = subcategorySelect.value;
+
+            subcategorySelect.innerHTML = '';
+            if (placeholder) subcategorySelect.appendChild(placeholder.cloneNode(true));
+
+            const filtered = allOptions.filter((opt) => {
+                const c = opt.getAttribute('data-category') || '';
+                return categoryId === '' || c === categoryId;
+            });
+            filtered.forEach((opt) => subcategorySelect.appendChild(opt.cloneNode(true)));
+
+            if (selected) {
+                const exists = Array.from(subcategorySelect.options).some((o) => o.value === selected);
+                subcategorySelect.value = exists ? selected : '';
+            }
+        }
+
+        categorySelect.addEventListener('change', syncSubcategories);
+        syncSubcategories();
+    })();
+</script>
+@endif
 @endsection

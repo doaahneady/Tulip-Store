@@ -969,6 +969,31 @@ Route::get('/mart', function () {
     return view('mart.index');
 })->name('mart.index');
 
+Route::get('/mart/category/{category}', function ($category) {
+    $categoryModel = \App\Models\Category::where('slug', $category)->firstOrFail();
+    $subcategories = $categoryModel->subcategories()->where('is_active', true)->orderBy('display_order')->get();
+    return view('mart.subcategories', [
+        'category' => $categoryModel,
+        'subcategories' => $subcategories
+    ]);
+})->name('mart.category');
+
+Route::get('/mart/category/{category}/{subcategory}', function ($category, $subcategory) {
+    $categoryModel = \App\Models\Category::where('slug', $category)->firstOrFail();
+    $subcategoryModel = \App\Models\Subcategory::where('slug', $subcategory)
+        ->where('category_id', $categoryModel->id)
+        ->firstOrFail();
+    $products = $subcategoryModel->products()
+        ->where('is_active', true)
+        ->with(['attributes', 'category'])
+        ->get();
+    return view('mart.subcategory-products', [
+        'category' => $categoryModel,
+        'subcategory' => $subcategoryModel,
+        'products' => $products
+    ]);
+})->name('mart.subcategory');
+
 Route::get('/mart/products', function () {
     return view('mart.products');
 })->name('mart.products');

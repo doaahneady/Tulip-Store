@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\SystemLog;
+use App\Models\Subcategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -54,6 +55,20 @@ class ProductController extends Controller
                           }
                       });
                   }
+              })
+              ->when(Schema::hasTable('subcategories'), function ($q4) use ($martKeywords) {
+                  $q4->orWhereHas('subcategory.category', function ($q5) use ($martKeywords) {
+                      if (Schema::hasColumn('categories', 'market')) {
+                          $q5->where('market', 'mart');
+                      }
+                      if (Schema::hasColumn('categories', 'slug')) {
+                          $q5->orWhere(function ($q6) use ($martKeywords) {
+                              foreach ($martKeywords as $kw) {
+                                  $q6->orWhere('slug', 'like', "%{$kw}%");
+                              }
+                          });
+                      }
+                  });
               });
         });
     }
@@ -87,6 +102,29 @@ class ProductController extends Controller
         // Filter by category
         if ($request->has('category_id') && $request->category_id) {
             $baseQuery->where('category_id', $request->category_id);
+        }
+
+        // Filter by subcategory (id)
+        if ($request->filled('subcategory_id') && Schema::hasColumn('products', 'subcategory_id')) {
+            $baseQuery->where('subcategory_id', (int) $request->input('subcategory_id'));
+        }
+
+        // Filter by subcategory slug
+        if ($request->filled('subcategory') && Schema::hasTable('subcategories') && Schema::hasColumn('products', 'subcategory_id')) {
+            $subcategorySlug = trim((string) $request->input('subcategory'));
+            if ($subcategorySlug !== '') {
+                $subcategory = Subcategory::query()
+                    ->where('slug', $subcategorySlug)
+                    ->when($request->filled('category') && Schema::hasTable('categories'), function ($q) use ($request) {
+                        $q->whereHas('category', function ($cq) use ($request) {
+                            $cq->where('slug', $request->input('category'));
+                        });
+                    })
+                    ->first();
+                if ($subcategory) {
+                    $baseQuery->where('subcategory_id', $subcategory->id);
+                }
+            }
         }
 
         // Filter by category slug
@@ -175,6 +213,9 @@ class ProductController extends Controller
         if ($market === 'mart' || (bool) $request->boolean('include_attributes')) {
             $with[] = 'attributes';
         }
+        if ($market === 'mart' && Schema::hasTable('subcategories') && Schema::hasColumn('products', 'subcategory_id')) {
+            $with[] = 'subcategory';
+        }
 
         $scopedQuery = clone $baseQuery;
         if ($market === 'mart') {
@@ -252,10 +293,18 @@ class ProductController extends Controller
     {
         $market = $this->resolveMarket($request);
 
+        $with = ['category'];
+        if ($market === 'mart') {
+            $with[] = 'attributes';
+            if (Schema::hasTable('subcategories') && Schema::hasColumn('products', 'subcategory_id')) {
+                $with[] = 'subcategory';
+            }
+        }
+
         $query = Product::featured()
             ->active()
             ->tap(fn ($q) => $this->applyMarketFilter($q, $market))
-            ->with($market === 'mart' ? ['category', 'attributes'] : ['category']);
+            ->with($with);
 
         if (Schema::hasTable('categories')) {
             if (Schema::hasColumn('categories', 'market')) {
@@ -288,10 +337,18 @@ class ProductController extends Controller
     {
         $market = $this->resolveMarket($request);
 
-        $products = Product::where('category_id', $categoryId)
+        $products = Product::query()
+            ->when($market === 'mart' && Schema::hasTable('subcategories') && Schema::hasColumn('products', 'subcategory_id'), function ($q) use ($categoryId) {
+                $q->where(function ($inner) use ($categoryId) {
+                    $inner->where('category_id', $categoryId)
+                        ->orWhereHas('subcategory', function ($sq) use ($categoryId) {
+                            $sq->where('category_id', $categoryId);
+                        });
+                });
+            }, fn ($q) => $q->where('category_id', $categoryId))
             ->active()
             ->tap(fn ($q) => $this->applyMarketFilter($q, $market))
-            ->with($market === 'mart' ? ['category', 'attributes'] : ['category'])
+            ->with($market === 'mart' ? ['category', 'subcategory', 'attributes'] : ['category'])
             ->paginate(12);
 
         // Extra guard: if category does not belong to the current market, return empty set
@@ -329,6 +386,9 @@ class ProductController extends Controller
 
         try {
             $select = ['id', 'name', 'category_id'];
+            if (Schema::hasColumn('products', 'subcategory_id')) {
+                $select[] = 'subcategory_id';
+            }
             foreach (['price', 'discount_price', 'stock_quantity', 'track_inventory', 'rating', 'reviews_count', 'description', 'details', 'slug', 'image', 'images', 'trader_id'] as $col) {
                 if (Schema::hasColumn('products', $col)) {
                     $select[] = $col;
@@ -338,6 +398,9 @@ class ProductController extends Controller
             $hasSlug = Schema::hasColumn('products', 'slug');
 
             $with = ['category'];
+            if ($market === 'mart' && Schema::hasTable('subcategories') && Schema::hasColumn('products', 'subcategory_id')) {
+                $with[] = 'subcategory';
+            }
             if (Schema::hasTable('traders') && Schema::hasColumn('products', 'trader_id')) {
                 $with[] = 'trader';
             }

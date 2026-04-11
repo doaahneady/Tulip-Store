@@ -98,12 +98,7 @@
         
         <!-- Recent Searches -->
         <div class="search-chips" id="recentChips">
-          <button class="search-chip">تنسيق الهدايا والحفلات</button>
-          <button class="search-chip">هدايا أطفال</button>
-          <button class="search-chip">سلة ورد</button>
-          <button class="search-chip">سلة فواكه</button>
-          <button class="search-chip">عطور</button>
-          <button class="search-chip">شوكولاتة</button>
+          <!-- Chips will be populated by JavaScript based on market -->
         </div>
 
         <!-- Search Results -->
@@ -188,6 +183,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchBar = document.getElementById('searchBar');
 
     let searchTimeout;
+    
+    // Detect market based on current URL - GLOBAL SCOPE
+    const isMart = window.location.pathname.startsWith('/mart');
+    const market = isMart ? 'mart' : 'store';
+    const searchRedirectBase = isMart ? '/mart/products' : '/store';
 
     // Show dropdown on focus
     searchInput.addEventListener('focus', function() {
@@ -220,10 +220,6 @@ document.addEventListener('DOMContentLoaded', function() {
             performSearch(query);
         }, 300);
     });
-
-    const isMart = window.location.pathname.startsWith('/mart');
-    const market = isMart ? 'mart' : 'store';
-    const searchRedirectBase = isMart ? '/mart/products' : '/store';
 
     // Search on Enter key
     searchInput.addEventListener('keypress', function(e) {

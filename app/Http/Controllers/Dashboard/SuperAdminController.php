@@ -24,6 +24,7 @@ use App\Models\PayrollRecord;
 use App\Models\Permission;
 use App\Models\DashboardRolePermission;
 use App\Models\Product;
+use App\Models\Subcategory;
 use App\Models\Review;
 use App\Models\Role;
 use App\Models\SecurityAuditLog;
@@ -1594,16 +1595,30 @@ class SuperAdminController extends Controller
         $products = null;
 
         if (Schema::hasTable('categories')) {
-            $categories = Category::query()
+            $categoriesQuery = Category::query()
                 ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'mart'))
-                ->orderBy('display_order')
-                ->orderBy('name')
-                ->get();
+                ->when(Schema::hasColumn('categories', 'is_active'), fn ($q) => $q->where('is_active', true))
+                ->when(Schema::hasColumn('categories', 'display_order'), fn ($q) => $q->orderBy('display_order'))
+                ->orderBy('name');
+
+            if (Schema::hasTable('subcategories')) {
+                $categoriesQuery->with(['subcategories' => function ($q) {
+                    if (Schema::hasColumn('subcategories', 'is_active')) {
+                        $q->where('is_active', true);
+                    }
+                    if (Schema::hasColumn('subcategories', 'display_order')) {
+                        $q->orderBy('display_order');
+                    }
+                    $q->orderBy('name');
+                }]);
+            }
+
+            $categories = $categoriesQuery->get();
         }
 
         if (Schema::hasTable('products')) {
             $products = Product::query()
-                ->with('category')
+                ->with(Schema::hasTable('subcategories') ? ['category', 'subcategory'] : ['category'])
                 ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'mart'))
                 ->when($request->search, function ($q, $search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -1611,6 +1626,7 @@ class SuperAdminController extends Controller
                         ->orWhere('description', 'like', "%{$search}%");
                 })
                 ->when($request->category_id, fn ($q, $id) => $q->where('category_id', $id))
+                ->when($request->subcategory_id && Schema::hasColumn('products', 'subcategory_id'), fn ($q, $id) => $q->where('subcategory_id', $id))
                 ->orderBy('created_at', 'desc')
                 ->paginate(25)
                 ->withQueryString();
@@ -1661,7 +1677,15 @@ class SuperAdminController extends Controller
                 ->orderBy('name')
                 ->get()
             : collect();
-        return view('dashboards.super-admin.mart-product-create', compact('categories'));
+        $subcategories = Schema::hasTable('subcategories')
+            ? Subcategory::query()
+                ->whereIn('category_id', $categories->pluck('id')->all())
+                ->when(Schema::hasColumn('subcategories', 'is_active'), fn ($q) => $q->where('is_active', true))
+                ->orderBy('display_order')
+                ->orderBy('name')
+                ->get()
+            : collect();
+        return view('dashboards.super-admin.mart-product-create', compact('categories', 'subcategories'));
     }
 
     public function storeMartProduct(Request $request)
@@ -1674,6 +1698,7 @@ class SuperAdminController extends Controller
             'description' => 'nullable|string',
             'details' => 'nullable|string',
             'category_id' => 'nullable|integer|exists:categories,id',
+            'subcategory_id' => 'nullable|integer|exists:subcategories,id',
             'sku' => ['nullable', 'string', 'max:255'],
             'price' => 'nullable|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0',
@@ -1686,10 +1711,40 @@ class SuperAdminController extends Controller
             'unit' => 'nullable|string|max:50',
             'origin' => 'nullable|string|max:100',
         ];
+        if (! Schema::hasTable('subcategories') || ! Schema::hasColumn('products', 'subcategory_id')) {
+            unset($rules['subcategory_id']);
+        }
         if (Schema::hasColumn('products', 'sku')) {
             $rules['sku'][] = Rule::unique('products', 'sku');
         }
         $validated = $request->validate($rules);
+
+        if (Schema::hasTable('subcategories') && Schema::hasColumn('products', 'subcategory_id')) {
+            $subId = isset($validated['subcategory_id']) ? (int) $validated['subcategory_id'] : 0;
+            if ($subId > 0) {
+                $sub = Subcategory::query()->with('category')->find($subId);
+                if (! $sub) {
+                    return back()->withErrors(['subcategory_id' => 'Invalid subcategory'])->withInput();
+                }
+                if (Schema::hasColumn('categories', 'market') && (string) (optional($sub->category)->market ?? '') !== 'mart') {
+                    return back()->withErrors(['subcategory_id' => 'Subcategory must belong to Mart'])->withInput();
+                }
+                $validated['category_id'] = $sub->category_id;
+            } elseif (! empty($validated['category_id'])) {
+                $catId = (int) $validated['category_id'];
+                $default = Subcategory::query()->where('category_id', $catId)->where('slug', 'general')->first();
+                if (! $default) {
+                    $default = Subcategory::create([
+                        'category_id' => $catId,
+                        'name' => 'عام',
+                        'slug' => 'general',
+                        'display_order' => 0,
+                        'is_active' => true,
+                    ]);
+                }
+                $validated['subcategory_id'] = $default->id;
+            }
+        }
 
         $slug = trim((string) ($validated['slug'] ?? ''));
         $slug = $slug === '' ? Str::slug($validated['name']) : Str::slug($slug);
@@ -1725,7 +1780,7 @@ class SuperAdminController extends Controller
             'slug' => $slug,
             'sku' => $sku,
         ];
-        foreach (['description','details','category_id'] as $col) {
+        foreach (['description','details','category_id','subcategory_id'] as $col) {
             if (Schema::hasColumn('products', $col) && array_key_exists($col, $validated)) {
                 $data[$col] = $validated[$col];
             }
@@ -1761,6 +1816,8 @@ class SuperAdminController extends Controller
             $product->attributes()->create(['name' => 'origin', 'value' => $validated['origin']]);
         }
 
+        Cache::forget('mart:navigation:v1');
+
         return redirect()->route('dashboard.admin.mart.index')->with('success', 'Product created');
     }
 
@@ -1774,8 +1831,16 @@ class SuperAdminController extends Controller
                 ->orderBy('name')
                 ->get()
             : collect();
+        $subcategories = Schema::hasTable('subcategories')
+            ? Subcategory::query()
+                ->whereIn('category_id', $categories->pluck('id')->all())
+                ->when(Schema::hasColumn('subcategories', 'is_active'), fn ($q) => $q->where('is_active', true))
+                ->orderBy('display_order')
+                ->orderBy('name')
+                ->get()
+            : collect();
         $attrs = $product->attributes()->get()->pluck('value','name');
-        return view('dashboards.super-admin.mart-product-edit', compact('product','categories','attrs'));
+        return view('dashboards.super-admin.mart-product-edit', compact('product','categories','subcategories','attrs'));
     }
 
     public function updateMartProduct(Request $request, Product $product)
@@ -1788,6 +1853,7 @@ class SuperAdminController extends Controller
             'description' => 'nullable|string',
             'details' => 'nullable|string',
             'category_id' => 'nullable|integer|exists:categories,id',
+            'subcategory_id' => 'nullable|integer|exists:subcategories,id',
             'sku' => ['nullable', 'string', 'max:255'],
             'price' => 'nullable|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0',
@@ -1800,10 +1866,40 @@ class SuperAdminController extends Controller
             'unit' => 'nullable|string|max:50',
             'origin' => 'nullable|string|max:100',
         ];
+        if (! Schema::hasTable('subcategories') || ! Schema::hasColumn('products', 'subcategory_id')) {
+            unset($rules['subcategory_id']);
+        }
         if (Schema::hasColumn('products', 'sku')) {
             $rules['sku'][] = Rule::unique('products', 'sku')->ignore($product->id);
         }
         $validated = $request->validate($rules);
+
+        if (Schema::hasTable('subcategories') && Schema::hasColumn('products', 'subcategory_id')) {
+            $subId = isset($validated['subcategory_id']) ? (int) $validated['subcategory_id'] : 0;
+            if ($subId > 0) {
+                $sub = Subcategory::query()->with('category')->find($subId);
+                if (! $sub) {
+                    return back()->withErrors(['subcategory_id' => 'Invalid subcategory'])->withInput();
+                }
+                if (Schema::hasColumn('categories', 'market') && (string) (optional($sub->category)->market ?? '') !== 'mart') {
+                    return back()->withErrors(['subcategory_id' => 'Subcategory must belong to Mart'])->withInput();
+                }
+                $validated['category_id'] = $sub->category_id;
+            } elseif (! empty($validated['category_id'])) {
+                $catId = (int) $validated['category_id'];
+                $default = Subcategory::query()->where('category_id', $catId)->where('slug', 'general')->first();
+                if (! $default) {
+                    $default = Subcategory::create([
+                        'category_id' => $catId,
+                        'name' => 'عام',
+                        'slug' => 'general',
+                        'display_order' => 0,
+                        'is_active' => true,
+                    ]);
+                }
+                $validated['subcategory_id'] = $default->id;
+            }
+        }
 
         $slug = trim((string) ($validated['slug'] ?? ''));
         $slug = $slug === '' ? Str::slug($validated['name']) : Str::slug($slug);
@@ -1837,7 +1933,7 @@ class SuperAdminController extends Controller
         }
         $updates['sku'] = $sku;
 
-        foreach (['description','details','category_id'] as $col) {
+        foreach (['description','details','category_id','subcategory_id'] as $col) {
             if (Schema::hasColumn('products', $col) && array_key_exists($col, $validated)) {
                 $updates[$col] = $validated[$col];
             }
@@ -1870,6 +1966,8 @@ class SuperAdminController extends Controller
         if (isset($validated['origin'])) {
             $product->attributes()->updateOrCreate(['name'=>'origin'], ['value'=>$validated['origin']]);
         }
+
+        Cache::forget('mart:navigation:v1');
 
         return redirect()->route('dashboard.admin.mart.index')->with('success', 'Product updated');
     }
@@ -1931,6 +2029,8 @@ class SuperAdminController extends Controller
 
         Category::create($data);
 
+        Cache::forget('mart:navigation:v1');
+
         return redirect()->route('dashboard.admin.mart.index')->with('success', 'Category created');
     }
 
@@ -1990,7 +2090,237 @@ class SuperAdminController extends Controller
 
         $category->update($updates);
 
+        Cache::forget('mart:navigation:v1');
+
         return redirect()->route('dashboard.admin.mart.index')->with('success', 'Category updated');
+    }
+
+    public function createMartSubcategory(Request $request)
+    {
+        abort_unless(Schema::hasTable('subcategories') && Schema::hasTable('categories'), 404);
+
+        $categories = Category::query()
+            ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'mart'))
+            ->orderBy('display_order')
+            ->orderBy('name')
+            ->get();
+
+        $prefillCategoryId = $request->query('category_id');
+
+        return view('dashboards.super-admin.mart-subcategory-create', compact('categories', 'prefillCategoryId'));
+    }
+
+    public function storeMartSubcategory(Request $request)
+    {
+        abort_unless(Schema::hasTable('subcategories') && Schema::hasTable('categories'), 404);
+
+        $validated = $request->validate([
+            'category_id' => 'required|integer|exists:categories,id',
+            'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'display_order' => 'nullable|integer|min:0',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        $category = Category::query()->findOrFail((int) $validated['category_id']);
+        if (Schema::hasColumn('categories', 'market') && (string) ($category->market ?? '') !== 'mart') {
+            return back()->withErrors(['category_id' => 'Category must be Mart'])->withInput();
+        }
+
+        $slug = trim((string) ($validated['slug'] ?? ''));
+        $slug = $slug === '' ? Str::slug($validated['name']) : Str::slug($slug);
+        if ($slug === '') {
+            $slug = 'subcategory';
+        }
+
+        $baseSlug = $slug;
+        $i = 0;
+        while (Subcategory::where('category_id', $category->id)->where('slug', $slug)->exists() && $i < 50) {
+            $slug = $baseSlug.'-'.random_int(1000, 9999);
+            $i++;
+        }
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('subcategories', 'public');
+        }
+
+        Subcategory::create([
+            'category_id' => $category->id,
+            'name' => $validated['name'],
+            'slug' => $slug,
+            'image' => $imagePath,
+            'display_order' => $validated['display_order'] ?? 0,
+            'is_active' => (bool) ($validated['is_active'] ?? true),
+        ]);
+
+        Cache::forget('mart:navigation:v1');
+
+        return redirect()->route('dashboard.admin.mart.index', ['category_id' => $category->id])->with('success', 'Subcategory created');
+    }
+
+    public function editMartSubcategory(Subcategory $subcategory)
+    {
+        abort_unless(Schema::hasTable('subcategories') && Schema::hasTable('categories'), 404);
+
+        $categories = Category::query()
+            ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'mart'))
+            ->orderBy('display_order')
+            ->orderBy('name')
+            ->get();
+
+        return view('dashboards.super-admin.mart-subcategory-edit', compact('subcategory', 'categories'));
+    }
+
+    public function updateMartSubcategory(Request $request, Subcategory $subcategory)
+    {
+        abort_unless(Schema::hasTable('subcategories') && Schema::hasTable('categories'), 404);
+
+        $validated = $request->validate([
+            'category_id' => 'required|integer|exists:categories,id',
+            'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'remove_image' => 'nullable|boolean',
+            'display_order' => 'nullable|integer|min:0',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        $category = Category::query()->findOrFail((int) $validated['category_id']);
+        if (Schema::hasColumn('categories', 'market') && (string) ($category->market ?? '') !== 'mart') {
+            return back()->withErrors(['category_id' => 'Category must be Mart'])->withInput();
+        }
+
+        $slug = trim((string) ($validated['slug'] ?? ''));
+        $slug = $slug === '' ? Str::slug($validated['name']) : Str::slug($slug);
+        if ($slug === '') {
+            $slug = 'subcategory';
+        }
+
+        $baseSlug = $slug;
+        $i = 0;
+        while (Subcategory::where('category_id', $category->id)->where('slug', $slug)->where('id', '!=', $subcategory->id)->exists() && $i < 50) {
+            $slug = $baseSlug.'-'.random_int(1000, 9999);
+            $i++;
+        }
+
+        $imagePath = $subcategory->image;
+        
+        // Handle image removal
+        if ($request->has('remove_image') && $request->remove_image) {
+            if ($imagePath && Storage::disk('public')->exists($imagePath)) {
+                Storage::disk('public')->delete($imagePath);
+            }
+            $imagePath = null;
+        }
+        
+        // Handle new image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($imagePath && Storage::disk('public')->exists($imagePath)) {
+                Storage::disk('public')->delete($imagePath);
+            }
+            $imagePath = $request->file('image')->store('subcategories', 'public');
+        }
+
+        $subcategory->update([
+            'category_id' => $category->id,
+            'name' => $validated['name'],
+            'slug' => $slug,
+            'image' => $imagePath,
+            'display_order' => $validated['display_order'] ?? 0,
+            'is_active' => (bool) ($validated['is_active'] ?? true),
+        ]);
+
+        if (Schema::hasColumn('products', 'subcategory_id')) {
+            Product::query()->where('subcategory_id', $subcategory->id)->update(['category_id' => $category->id]);
+        }
+
+        Cache::forget('mart:navigation:v1');
+
+        return redirect()->route('dashboard.admin.mart.index', ['category_id' => $category->id])->with('success', 'Subcategory updated');
+    }
+
+    public function deleteMartSubcategory(Subcategory $subcategory)
+    {
+        abort_unless(Schema::hasTable('subcategories'), 404);
+
+        $categoryId = (int) ($subcategory->category_id ?? 0);
+        $subcategory->delete();
+
+        Cache::forget('mart:navigation:v1');
+
+        return redirect()->route('dashboard.admin.mart.index', ['category_id' => $categoryId ?: null])->with('success', 'Subcategory deleted');
+    }
+
+    public function reorderMartCategories(Request $request)
+    {
+        abort_unless(Schema::hasTable('categories') && Schema::hasColumn('categories', 'display_order'), 404);
+
+        $validated = $request->validate([
+            'order' => 'required|array',
+            'order.*' => 'integer|exists:categories,id',
+        ]);
+
+        foreach (array_values($validated['order']) as $i => $id) {
+            Category::query()->whereKey((int) $id)->update(['display_order' => $i]);
+        }
+
+        Cache::forget('mart:navigation:v1');
+
+        return response()->json(['success' => true]);
+    }
+
+    public function reorderMartSubcategories(Request $request, Category $category)
+    {
+        abort_unless(Schema::hasTable('subcategories') && Schema::hasColumn('subcategories', 'display_order'), 404);
+
+        $validated = $request->validate([
+            'order' => 'required|array',
+            'order.*' => 'integer|exists:subcategories,id',
+        ]);
+
+        $allowed = Subcategory::query()->where('category_id', $category->id)->pluck('id')->map(fn ($x) => (int) $x)->all();
+        $allowedSet = array_fill_keys($allowed, true);
+
+        $filtered = array_values(array_filter($validated['order'], fn ($id) => isset($allowedSet[(int) $id])));
+
+        foreach ($filtered as $i => $id) {
+            Subcategory::query()->whereKey((int) $id)->update(['display_order' => $i]);
+        }
+
+        Cache::forget('mart:navigation:v1');
+
+        return response()->json(['success' => true]);
+    }
+
+    public function bulkMoveMartProducts(Request $request)
+    {
+        abort_unless(Schema::hasTable('products') && Schema::hasTable('subcategories') && Schema::hasColumn('products', 'subcategory_id'), 404);
+
+        $validated = $request->validate([
+            'product_ids' => 'required|array|min:1',
+            'product_ids.*' => 'integer|exists:products,id',
+            'target_subcategory_id' => 'required|integer|exists:subcategories,id',
+        ]);
+
+        $target = Subcategory::query()->with('category')->findOrFail((int) $validated['target_subcategory_id']);
+        if (Schema::hasColumn('categories', 'market') && (string) (optional($target->category)->market ?? '') !== 'mart') {
+            return back()->with('error', 'Target subcategory must belong to Mart');
+        }
+
+        Product::query()
+            ->whereIn('id', array_map('intval', $validated['product_ids']))
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'mart'))
+            ->update([
+                'subcategory_id' => $target->id,
+                'category_id' => $target->category_id,
+            ]);
+
+        Cache::forget('mart:navigation:v1');
+
+        return back()->with('success', 'Products moved');
     }
 
     public function toggleGiftActive(Gift $gift)
@@ -2152,6 +2482,8 @@ class SuperAdminController extends Controller
             'is_featured' => ! (bool) ($product->is_featured ?? false),
         ]);
 
+        Cache::forget('mart:navigation:v1');
+
         return back()->with('success', 'Product featured status updated');
     }
 
@@ -2160,6 +2492,8 @@ class SuperAdminController extends Controller
         abort_unless(Schema::hasTable('products'), 404);
 
         $product->delete();
+
+        Cache::forget('mart:navigation:v1');
 
         return back()->with('success', 'Product deleted');
     }
@@ -2279,6 +2613,8 @@ class SuperAdminController extends Controller
             'is_active' => ! (bool) ($category->is_active ?? false),
         ]);
 
+        Cache::forget('mart:navigation:v1');
+
         return back()->with('success', 'Category status updated');
     }
 
@@ -2287,6 +2623,8 @@ class SuperAdminController extends Controller
         abort_unless(Schema::hasTable('categories'), 404);
 
         $category->delete();
+
+        Cache::forget('mart:navigation:v1');
 
         return back()->with('success', 'Category deleted');
     }

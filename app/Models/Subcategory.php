@@ -5,37 +5,33 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Category extends Model
+class Subcategory extends Model
 {
     use HasFactory;
 
-    protected $appends = [
-        'image_url',
-    ];
-
     protected $fillable = [
+        'category_id',
         'name',
         'slug',
-        'description',
         'image',
         'display_order',
         'is_active',
-        'market',
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
+        'category_id' => 'integer',
         'display_order' => 'integer',
+        'is_active' => 'boolean',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 
     public function products()
     {
         return $this->hasMany(Product::class);
-    }
-
-    public function subcategories()
-    {
-        return $this->hasMany(Subcategory::class);
     }
 
     public function getImageUrlAttribute(): ?string
@@ -74,3 +70,4 @@ class Category extends Model
         return null;
     }
 }
+

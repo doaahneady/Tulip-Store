@@ -1,20 +1,20 @@
-@extends('dashboards.layouts.app', ['title' => 'إدارة المارت', 'subtitle' => 'إدارة قسم Mart (التصنيفات والمنتجات)'])
 
-@section('content')
-@php
+
+<?php $__env->startSection('content'); ?>
+<?php
     $categoriesCount = is_countable($categories ?? null) ? count($categories) : 0;
     $productsTotal = method_exists(($products ?? null), 'total') ? ($products->total() ?? 0) : 0;
-@endphp
+?>
 
 <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
     <div class="flex flex-wrap items-center gap-2">
        
        
-        <a href="{{ route('dashboard.admin.mart.index') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">
+        <a href="<?php echo e(route('dashboard.admin.mart.index')); ?>" class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">
             <i class="fas fa-store"></i>
             <span>Tulip Mart</span>
         </a>
-        <a href="{{ route('dashboard.admin.mart.daily-prices.manage') }}" class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition">
+        <a href="<?php echo e(route('dashboard.admin.mart.daily-prices.manage')); ?>" class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition">
             <i class="fas fa-tags"></i>
             <span>أسعار يومية</span>
         </a>
@@ -26,7 +26,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-500 text-xs">التصنيفات</p>
-                <h3 class="text-3xl font-bold text-gray-800 mt-1">{{ number_format($categoriesCount) }}</h3>
+                <h3 class="text-3xl font-bold text-gray-800 mt-1"><?php echo e(number_format($categoriesCount)); ?></h3>
             </div>
             <div class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-tags text-indigo-600 text-lg"></i>
@@ -37,7 +37,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-500 text-xs">المنتجات</p>
-                <h3 class="text-3xl font-bold text-gray-800 mt-1">{{ number_format($productsTotal) }}</h3>
+                <h3 class="text-3xl font-bold text-gray-800 mt-1"><?php echo e(number_format($productsTotal)); ?></h3>
             </div>
             <div class="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-boxes text-emerald-600 text-lg"></i>
@@ -48,7 +48,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-500 text-xs">منتجات فعالة</p>
-                <h3 class="text-3xl font-bold text-gray-800 mt-1">{{ number_format(method_exists(($products ?? null), 'getCollection') ? $products->getCollection()->where('is_active', true)->count() : 0) }}</h3>
+                <h3 class="text-3xl font-bold text-gray-800 mt-1"><?php echo e(number_format(method_exists(($products ?? null), 'getCollection') ? $products->getCollection()->where('is_active', true)->count() : 0)); ?></h3>
             </div>
             <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-check-circle text-amber-600 text-lg"></i>
@@ -59,7 +59,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-500 text-xs">مخزون منخفض</p>
-                <h3 class="text-3xl font-bold text-gray-800 mt-1">{{ number_format(method_exists(($products ?? null), 'getCollection') ? $products->getCollection()->filter(fn ($p) => (int) ($p->stock_quantity ?? 0) <= (int) ($p->low_stock_threshold ?? 0))->count() : 0) }}</h3>
+                <h3 class="text-3xl font-bold text-gray-800 mt-1"><?php echo e(number_format(method_exists(($products ?? null), 'getCollection') ? $products->getCollection()->filter(fn ($p) => (int) ($p->stock_quantity ?? 0) <= (int) ($p->low_stock_threshold ?? 0))->count() : 0)); ?></h3>
             </div>
             <div class="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-triangle-exclamation text-red-600 text-lg"></i>
@@ -73,70 +73,71 @@
         <div class="p-4 border-b border-gray-100 flex items-center justify-between">
             <h3 class="text-lg font-bold text-gray-800">التصنيفات</h3>
             <div class="flex items-center gap-2">
-                <a href="{{ route('dashboard.admin.mart.categories.create') }}" class="btn btn-ghost btn-xs">
+                <a href="<?php echo e(route('dashboard.admin.mart.categories.create')); ?>" class="btn btn-ghost btn-xs">
                     <i class="fas fa-plus"></i>
                     إضافة
                 </a>
-                <span class="text-sm text-gray-500">{{ number_format($categoriesCount) }}</span>
+                <span class="text-sm text-gray-500"><?php echo e(number_format($categoriesCount)); ?></span>
             </div>
         </div>
         <div class="p-4">
-            @if($categories === null)
+            <?php if($categories === null): ?>
                 <div class="text-center text-gray-500 py-8">جدول التصنيفات غير موجود</div>
-            @elseif($categoriesCount === 0)
+            <?php elseif($categoriesCount === 0): ?>
                 <div class="text-center text-gray-500 py-8">لا توجد بيانات</div>
-            @else
+            <?php else: ?>
                 <div class="space-y-2" id="martCategoriesList">
-                    @foreach($categories as $cat)
-                        @php $selected = (string) request('category_id') === (string) $cat->id; @endphp
-                        <div class="block p-3 rounded-xl border @if($selected) border-indigo-400 bg-indigo-50 @else border-gray-200 hover:bg-gray-50 @endif mart-category-item" draggable="true" data-id="{{ $cat->id }}" @if($selected) style="background: rgba(34, 195, 166, 0.12) !important; border-color: rgba(34, 195, 166, 0.55) !important;" @endif>
+                    <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php $selected = (string) request('category_id') === (string) $cat->id; ?>
+                        <div class="block p-3 rounded-xl border <?php if($selected): ?> border-indigo-400 bg-indigo-50 <?php else: ?> border-gray-200 hover:bg-gray-50 <?php endif; ?> mart-category-item" draggable="true" data-id="<?php echo e($cat->id); ?>" <?php if($selected): ?> style="background: rgba(34, 195, 166, 0.12) !important; border-color: rgba(34, 195, 166, 0.55) !important;" <?php endif; ?>>
                             <div class="flex items-center justify-between gap-2 mb-2">
-                                <a href="{{ route('dashboard.admin.mart.index', array_merge(request()->query(), ['category_id' => $cat->id])) }}" class="font-bold text-gray-900" @if($selected) style="color: rgba(255, 255, 255, 0.95) !important;" @endif>
-                                    {{ $cat->name }}
-                                    <span class="text-xs text-gray-400 font-normal ms-1" @if($selected) style="color: rgba(255, 255, 255, 0.62) !important;" @endif>({{ $cat->slug }})</span>
+                                <a href="<?php echo e(route('dashboard.admin.mart.index', array_merge(request()->query(), ['category_id' => $cat->id]))); ?>" class="font-bold text-gray-900" <?php if($selected): ?> style="color: rgba(255, 255, 255, 0.95) !important;" <?php endif; ?>>
+                                    <?php echo e($cat->name); ?>
+
+                                    <span class="text-xs text-gray-400 font-normal ms-1" <?php if($selected): ?> style="color: rgba(255, 255, 255, 0.62) !important;" <?php endif; ?>>(<?php echo e($cat->slug); ?>)</span>
                                 </a>
                             </div>
                             <div class="flex items-center gap-2">
-                                <a href="{{ route('dashboard.admin.mart.categories.edit', $cat) }}" class="btn btn-primary btn-sm flex-1">
+                                <a href="<?php echo e(route('dashboard.admin.mart.categories.edit', $cat)); ?>" class="btn btn-primary btn-sm flex-1">
                                     <i class="fas fa-edit me-1"></i> تعديل
                                 </a>
-                                <form method="POST" action="{{ route('dashboard.admin.mart.categories.delete', $cat) }}" class="flex-1">
-                                    @csrf
-                                    @method('DELETE')
+                                <form method="POST" action="<?php echo e(route('dashboard.admin.mart.categories.delete', $cat)); ?>" class="flex-1">
+                                    <?php echo csrf_field(); ?>
+                                    <?php echo method_field('DELETE'); ?>
                                     <button type="submit" class="btn btn-outline btn-error btn-sm w-full" onclick="return confirm('حذف التصنيف؟')">
                                         <i class="fas fa-trash me-1"></i> حذف
                                     </button>
                                 </form>
                             </div>
-                            @if(!empty($cat->subcategories) && $cat->subcategories->count())
+                            <?php if(!empty($cat->subcategories) && $cat->subcategories->count()): ?>
                                 <div class="mt-3 rounded-xl border border-gray-200 bg-white/60 p-2">
                                     <div class="flex items-center justify-between gap-2 mb-2">
                                         <div class="text-xs font-bold text-gray-700">التصنيفات الفرعية</div>
-                                        <a class="text-xs text-indigo-600 hover:underline" href="{{ route('dashboard.admin.mart.subcategories.create', ['category_id' => $cat->id]) }}">إضافة</a>
+                                        <a class="text-xs text-indigo-600 hover:underline" href="<?php echo e(route('dashboard.admin.mart.subcategories.create', ['category_id' => $cat->id])); ?>">إضافة</a>
                                     </div>
-                                    <div class="space-y-1 mart-subcategories-list" data-category="{{ $cat->id }}">
-                                        @foreach($cat->subcategories as $sub)
-                                            <div class="flex items-center gap-2 p-2 rounded-lg border border-gray-200 bg-white mart-subcategory-item" draggable="true" data-id="{{ $sub->id }}" data-category="{{ $cat->id }}">
-                                                <a class="flex-1 text-xs font-semibold text-gray-800 truncate" href="{{ route('dashboard.admin.mart.subcategories.edit', $sub) }}">{{ $sub->name }}</a>
-                                                <form method="POST" action="{{ route('dashboard.admin.mart.subcategories.delete', $sub) }}">
-                                                    @csrf
-                                                    @method('DELETE')
+                                    <div class="space-y-1 mart-subcategories-list" data-category="<?php echo e($cat->id); ?>">
+                                        <?php $__currentLoopData = $cat->subcategories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sub): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <div class="flex items-center gap-2 p-2 rounded-lg border border-gray-200 bg-white mart-subcategory-item" draggable="true" data-id="<?php echo e($sub->id); ?>" data-category="<?php echo e($cat->id); ?>">
+                                                <a class="flex-1 text-xs font-semibold text-gray-800 truncate" href="<?php echo e(route('dashboard.admin.mart.subcategories.edit', $sub)); ?>"><?php echo e($sub->name); ?></a>
+                                                <form method="POST" action="<?php echo e(route('dashboard.admin.mart.subcategories.delete', $sub)); ?>">
+                                                    <?php echo csrf_field(); ?>
+                                                    <?php echo method_field('DELETE'); ?>
                                                     <button type="submit" class="text-xs text-red-600 hover:underline" onclick="return confirm('حذف التصنيف الفرعي؟')">حذف</button>
                                                 </form>
                                             </div>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </div>
                                 </div>
-                            @else
+                            <?php else: ?>
                                 <div class="mt-3">
-                                    <a class="text-xs text-indigo-600 hover:underline" href="{{ route('dashboard.admin.mart.subcategories.create', ['category_id' => $cat->id]) }}">إضافة تصنيف فرعي</a>
+                                    <a class="text-xs text-indigo-600 hover:underline" href="<?php echo e(route('dashboard.admin.mart.subcategories.create', ['category_id' => $cat->id])); ?>">إضافة تصنيف فرعي</a>
                                 </div>
-                            @endif
+                            <?php endif; ?>
                         </div>
-                    @endforeach
-                    <a href="{{ route('dashboard.admin.mart.index', array_diff_key(request()->query(), ['category_id' => true])) }}" class="block text-center text-sm text-indigo-600 mt-3">عرض الكل</a>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    <a href="<?php echo e(route('dashboard.admin.mart.index', array_diff_key(request()->query(), ['category_id' => true]))); ?>" class="block text-center text-sm text-indigo-600 mt-3">عرض الكل</a>
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 
@@ -144,15 +145,15 @@
         <div class="p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
             <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <h3 class="text-base font-bold text-gray-900">المنتجات</h3>
-                <form method="GET" action="{{ route('dashboard.admin.mart.index') }}" class="flex flex-wrap items-center gap-2">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="بحث بالاسم أو SKU" class="form-input text-xs w-48 md:w-64">
+                <form method="GET" action="<?php echo e(route('dashboard.admin.mart.index')); ?>" class="flex flex-wrap items-center gap-2">
+                    <input type="text" name="search" value="<?php echo e(request('search')); ?>" placeholder="بحث بالاسم أو SKU" class="form-input text-xs w-48 md:w-64">
                     <select name="category_id" class="form-select text-xs w-40">
                         <option value="">كل التصنيفات</option>
-                        @foreach(($categories ?? []) as $cat)
-                            <option value="{{ $cat->id }}" @selected((string) request('category_id') === (string) $cat->id)>{{ $cat->name }}</option>
-                        @endforeach
+                        <?php $__currentLoopData = ($categories ?? []); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($cat->id); ?>" <?php if((string) request('category_id') === (string) $cat->id): echo 'selected'; endif; ?>><?php echo e($cat->name); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
-                    @php
+                    <?php
                         $subs = collect();
                         if (is_iterable($categories ?? null)) {
                             foreach ($categories as $c) {
@@ -163,24 +164,24 @@
                                 }
                             }
                         }
-                    @endphp
-                    @if($subs->count())
+                    ?>
+                    <?php if($subs->count()): ?>
                         <select name="subcategory_id" class="form-select text-xs w-40">
                             <option value="">كل التصنيفات الفرعية</option>
-                            @foreach($subs as $sub)
-                                <option value="{{ $sub->id }}" @selected((string) request('subcategory_id') === (string) $sub->id)>{{ $sub->name }}</option>
-                            @endforeach
+                            <?php $__currentLoopData = $subs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sub): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($sub->id); ?>" <?php if((string) request('subcategory_id') === (string) $sub->id): echo 'selected'; endif; ?>><?php echo e($sub->name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
-                    @endif
+                    <?php endif; ?>
                     <button type="submit" class="btn btn-ghost btn-xs text-[10px]">
                         <i class="fas fa-filter"></i>
                         تصفية
                     </button>
-                    <a class="btn btn-secondary btn-xs text-[10px]" href="{{ route('dashboard.admin.export.products', array_merge(request()->query(), ['format' => 'csv'])) }}">
+                    <a class="btn btn-secondary btn-xs text-[10px]" href="<?php echo e(route('dashboard.admin.export.products', array_merge(request()->query(), ['format' => 'csv']))); ?>">
                         <i class="fas fa-download"></i>
                         تصدير
                     </a>
-                    <a href="{{ route('dashboard.admin.mart.products.create') }}" class="btn btn-primary btn-xs text-[10px]">
+                    <a href="<?php echo e(route('dashboard.admin.mart.products.create')); ?>" class="btn btn-primary btn-xs text-[10px]">
                         <i class="fas fa-plus"></i>
                         إضافة منتج
                     </a>
@@ -188,22 +189,22 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ route('dashboard.admin.mart.products.bulk-move') }}">
-            @csrf
+        <form method="POST" action="<?php echo e(route('dashboard.admin.mart.products.bulk-move')); ?>">
+            <?php echo csrf_field(); ?>
             <div class="p-4 border-b border-gray-100 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div class="flex items-center gap-2 flex-wrap">
                     <div class="text-xs font-bold text-gray-800">نقل جماعي</div>
                     <select name="target_subcategory_id" class="form-select text-xs w-60" required>
                         <option value="">اختر تصنيف فرعي</option>
-                        @foreach(($categories ?? []) as $cat)
-                            @if(!empty($cat->subcategories) && $cat->subcategories->count())
-                                <optgroup label="{{ $cat->name }}">
-                                    @foreach($cat->subcategories as $sub)
-                                        <option value="{{ $sub->id }}">{{ $sub->name }}</option>
-                                    @endforeach
+                        <?php $__currentLoopData = ($categories ?? []); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php if(!empty($cat->subcategories) && $cat->subcategories->count()): ?>
+                                <optgroup label="<?php echo e($cat->name); ?>">
+                                    <?php $__currentLoopData = $cat->subcategories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sub): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($sub->id); ?>"><?php echo e($sub->name); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </optgroup>
-                            @endif
-                        @endforeach
+                            <?php endif; ?>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
                     <button type="submit" class="btn btn-primary btn-xs text-[10px]">نقل</button>
                 </div>
@@ -229,37 +230,38 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if($products === null)
+                    <?php if($products === null): ?>
                         <tr>
                             <td colspan="10" class="py-8 text-center text-gray-500">جدول المنتجات غير موجود</td>
                         </tr>
-                    @else
-                        @forelse($products as $p)
+                    <?php else: ?>
+                        <?php $__empty_1 = true; $__currentLoopData = $products; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr>
                                 <td>
-                                    <input type="checkbox" class="product-checkbox" name="product_ids[]" value="{{ $p->id }}">
+                                    <input type="checkbox" class="product-checkbox" name="product_ids[]" value="<?php echo e($p->id); ?>">
                                 </td>
-                                <td class="font-semibold text-gray-900">{{ $p->name }}</td>
-                                <td class="text-gray-600">{{ $p->sku ?? '-' }}</td>
-                                <td class="text-gray-600">{{ $p->category->name ?? '-' }}</td>
-                                <td class="text-gray-600">{{ $p->subcategory->name ?? '-' }}</td>
-                                <td>{{ number_format((float) ($p->discount_price ?? $p->price), 2) }}</td>
-                                <td>{{ number_format((int) ($p->stock_quantity ?? 0)) }}</td>
+                                <td class="font-semibold text-gray-900"><?php echo e($p->name); ?></td>
+                                <td class="text-gray-600"><?php echo e($p->sku ?? '-'); ?></td>
+                                <td class="text-gray-600"><?php echo e($p->category->name ?? '-'); ?></td>
+                                <td class="text-gray-600"><?php echo e($p->subcategory->name ?? '-'); ?></td>
+                                <td><?php echo e(number_format((float) ($p->discount_price ?? $p->price), 2)); ?></td>
+                                <td><?php echo e(number_format((int) ($p->stock_quantity ?? 0))); ?></td>
                                 <td>
-                                    @php $active = (bool) ($p->is_active ?? true); @endphp
-                                    <span class="px-2 py-0.5 rounded text-[10px] @if($active) bg-emerald-100 text-emerald-700 @else bg-gray-100 text-gray-700 @endif">
-                                        {{ $active ? 'نشط' : 'غير نشط' }}
+                                    <?php $active = (bool) ($p->is_active ?? true); ?>
+                                    <span class="px-2 py-0.5 rounded text-[10px] <?php if($active): ?> bg-emerald-100 text-emerald-700 <?php else: ?> bg-gray-100 text-gray-700 <?php endif; ?>">
+                                        <?php echo e($active ? 'نشط' : 'غير نشط'); ?>
+
                                     </span>
                                 </td>
-                                <td class="text-gray-600">{{ optional($p->created_at)->format('Y-m-d') }}</td>
+                                <td class="text-gray-600"><?php echo e(optional($p->created_at)->format('Y-m-d')); ?></td>
                                 <td>
                                     <div class="flex items-center gap-1">
-                                        <a href="{{ route('dashboard.admin.mart.products.edit', $p) }}" class="btn btn-ghost btn-xs text-[10px] px-1 h-6 min-h-0">
+                                        <a href="<?php echo e(route('dashboard.admin.mart.products.edit', $p)); ?>" class="btn btn-ghost btn-xs text-[10px] px-1 h-6 min-h-0">
                                             تعديل
                                         </a>
-                                        <form method="POST" action="{{ route('dashboard.admin.mart.products.delete', $p) }}">
-                                            @csrf
-                                            @method('DELETE')
+                                        <form method="POST" action="<?php echo e(route('dashboard.admin.mart.products.delete', $p)); ?>">
+                                            <?php echo csrf_field(); ?>
+                                            <?php echo method_field('DELETE'); ?>
                                             <button type="submit" class="btn btn-ghost btn-xs text-[10px] px-1 h-6 min-h-0 text-red-600" onclick="return confirm('حذف المنتج؟')">
                                                 حذف
                                             </button>
@@ -267,21 +269,22 @@
                                     </div>
                                 </td>
                             </tr>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr>
                                 <td colspan="10" class="py-8 text-center text-gray-500">لا توجد منتجات</td>
                             </tr>
-                        @endforelse
-                    @endif
+                        <?php endif; ?>
+                    <?php endif; ?>
                 </tbody>
                 </table>
             </div>
         </form>
 
         <div class="p-4">
-            @if(method_exists(($products ?? null), 'links'))
-                {{ $products->links() }}
-            @endif
+            <?php if(method_exists(($products ?? null), 'links')): ?>
+                <?php echo e($products->links()); ?>
+
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -312,7 +315,7 @@
                 if (!dragging) return;
                 dragging = null;
                 const order = Array.from(categoriesList.querySelectorAll('.mart-category-item')).map((x) => Number(x.getAttribute('data-id')));
-                await fetch(@json(route('dashboard.admin.mart.categories.reorder')), {
+                await fetch(<?php echo json_encode(route('dashboard.admin.mart.categories.reorder'), 15, 512) ?>, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
                     body: JSON.stringify({ order })
@@ -342,7 +345,7 @@
                 const categoryId = list.getAttribute('data-category');
                 dragging = null;
                 const order = Array.from(list.querySelectorAll('.mart-subcategory-item')).map((x) => Number(x.getAttribute('data-id')));
-                await fetch(@json(url('/dashboard/admin/mart/categories')).replace(/\/categories$/, '') + '/categories/' + categoryId + '/subcategories/reorder', {
+                await fetch(<?php echo json_encode(url('/dashboard/admin/mart/categories'), 15, 512) ?>.replace(/\/categories$/, '') + '/categories/' + categoryId + '/subcategories/reorder', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
                     body: JSON.stringify({ order })
@@ -359,4 +362,6 @@
         }
     })();
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('dashboards.layouts.app', ['title' => 'إدارة المارت', 'subtitle' => 'إدارة قسم Mart (التصنيفات والمنتجات)'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH E:\Tulip-Store\resources\views/dashboards/super-admin/mart.blade.php ENDPATH**/ ?>

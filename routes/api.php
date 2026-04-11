@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\AdminMartSubcategoryController;
 use App\Http\Controllers\Api\EmployeeAuthController as EmployeeApiAuthController;
+use App\Http\Controllers\Api\MartNavigationController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Auth\TraderAuthController;
@@ -179,6 +181,9 @@ Route::get('/countries', [CountryController::class, 'index']);
 
 // Mart Daily Prices
 Route::prefix('mart')->group(function () {
+    Route::get('/navigation', [MartNavigationController::class, 'navigation']);
+    Route::get('/subcategories/{idOrSlug}/products', [MartNavigationController::class, 'productsBySubcategory']);
+
     Route::get('/daily-prices', function () {
         $data = [
             'date' => now()->toDateString(),
@@ -266,6 +271,15 @@ Route::prefix('mart')->group(function () {
         }
         return response()->json($data);
     });
+});
+
+Route::middleware('auth:sanctum')->prefix('admin/mart')->group(function () {
+    Route::get('/subcategories', [AdminMartSubcategoryController::class, 'index']);
+    Route::post('/subcategories', [AdminMartSubcategoryController::class, 'store']);
+    Route::get('/subcategories/{subcategory}', [AdminMartSubcategoryController::class, 'show']);
+    Route::put('/subcategories/{subcategory}', [AdminMartSubcategoryController::class, 'update']);
+    Route::delete('/subcategories/{subcategory}', [AdminMartSubcategoryController::class, 'destroy']);
+    Route::post('/categories/{category}/subcategories/reorder', [AdminMartSubcategoryController::class, 'reorder']);
 });
 
 // User Activity & Personalization

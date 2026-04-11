@@ -179,44 +179,48 @@ return new class extends Migration
         }
 
         // Database backup tracking
-        Schema::create('database_backups', function (Blueprint $table) {
-            $table->id();
-            $table->string('backup_name');
-            $table->string('database_name');
-            $table->enum('type', ['full', 'incremental', 'differential']);
-            $table->bigInteger('file_size'); // Bytes
-            $table->string('file_path');
-            $table->string('checksum')->nullable(); // For integrity verification
-            $table->enum('status', ['in_progress', 'completed', 'failed', 'corrupted']);
-            $table->timestamp('started_at');
-            $table->timestamp('completed_at')->nullable();
-            $table->integer('duration_seconds')->nullable();
-            $table->text('error_message')->nullable();
-            $table->timestamps();
+        if (! Schema::hasTable('database_backups')) {
+            Schema::create('database_backups', function (Blueprint $table) {
+                $table->id();
+                $table->string('backup_name');
+                $table->string('database_name');
+                $table->enum('type', ['full', 'incremental', 'differential']);
+                $table->bigInteger('file_size'); // Bytes
+                $table->string('file_path');
+                $table->string('checksum')->nullable(); // For integrity verification
+                $table->enum('status', ['in_progress', 'completed', 'failed', 'corrupted']);
+                $table->timestamp('started_at');
+                $table->timestamp('completed_at')->nullable();
+                $table->integer('duration_seconds')->nullable();
+                $table->text('error_message')->nullable();
+                $table->timestamps();
 
-            $table->index(['database_name', 'status']);
-            $table->index(['type', 'completed_at']);
-        });
+                $table->index(['database_name', 'status']);
+                $table->index(['type', 'completed_at']);
+            });
+        }
 
         // API error tracking
-        Schema::create('api_errors', function (Blueprint $table) {
-            $table->id();
-            $table->string('endpoint');
-            $table->string('method'); // GET, POST, PUT, DELETE
-            $table->integer('status_code');
-            $table->text('error_message');
-            $table->json('request_data')->nullable();
-            $table->json('response_data')->nullable();
-            $table->string('user_id')->nullable();
-            $table->string('ip_address', 45);
-            $table->text('user_agent')->nullable();
-            $table->decimal('response_time', 8, 3); // Milliseconds
-            $table->timestamp('occurred_at')->useCurrent();
+        if (! Schema::hasTable('api_errors')) {
+            Schema::create('api_errors', function (Blueprint $table) {
+                $table->id();
+                $table->string('endpoint');
+                $table->string('method'); // GET, POST, PUT, DELETE
+                $table->integer('status_code');
+                $table->text('error_message');
+                $table->json('request_data')->nullable();
+                $table->json('response_data')->nullable();
+                $table->string('user_id')->nullable();
+                $table->string('ip_address', 45);
+                $table->text('user_agent')->nullable();
+                $table->decimal('response_time', 8, 3); // Milliseconds
+                $table->timestamp('occurred_at')->useCurrent();
 
-            $table->index(['endpoint', 'status_code']);
-            $table->index(['occurred_at', 'status_code']);
-            $table->index(['user_id', 'occurred_at']);
-        });
+                $table->index(['endpoint', 'status_code']);
+                $table->index(['occurred_at', 'status_code']);
+                $table->index(['user_id', 'occurred_at']);
+            });
+        }
 
         // Slow query tracking
         if (! Schema::hasTable('slow_queries')) {
