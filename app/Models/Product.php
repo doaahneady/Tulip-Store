@@ -144,7 +144,7 @@ class Product extends Model
             return '/storage/'.$clean;
         }
 
-        return '/images/banner1.jpg';
+        return '/images/tulip_store.jpg';
     }
 
     public function getPrimaryImageSrcsetAttribute(): string

@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice - {{ $order->order_number }}</title>
       <!-- fav icon -->
-        <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
+        <link rel="icon" type="image/png" sizes="48x48" href="/images/fav_icon-v1.png">
+            <meta name="description" content="اكتشف Tulip Store، منصة تسوق إلكتروني متكاملة تتيح لك الشراء أو إنشاء متجرك الخاص والربح بسهولة، مع توصيل سريع وطرق دفع آمنة وتجربة استخدام مريحة.">
+
     <style>
         body { font-family: "DejaVu Sans", sans-serif; margin: 0; padding: 24px; color: #111827; }
         .header { display:flex; justify-content:space-between; align-items:flex-start; gap: 16px; margin-bottom: 18px; }

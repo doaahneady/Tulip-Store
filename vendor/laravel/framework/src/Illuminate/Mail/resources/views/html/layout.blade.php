@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
  <!-- fav icon -->
-        <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
+        <link rel="icon" type="image/png" sizes="48x48" href="/images/fav_icon-v1.png">
 <title>{{ config('app.name') }}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />

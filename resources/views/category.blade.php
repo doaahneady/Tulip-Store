@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $category->name }} - Tulip Store</title>
+    <meta name="description" content="اكتشف Tulip Store، منصة تسوق إلكتروني متكاملة تتيح لك الشراء أو إنشاء متجرك الخاص والربح بسهولة، مع توصيل سريع وطرق دفع آمنة وتجربة استخدام مريحة.">
 
     <!-- fav icon -->
-    <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/images/fav_icon-v1.png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Changa:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/store.css?v=2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         :root {
             --primary-color: #0f4f55;
@@ -197,7 +198,7 @@
             gap: 1.5rem;
         }
 
-        /* Reusing Product Card Styles from Home */
+        /* Product Card */
         .product-card {
             background: var(--white);
             border-radius: var(--radius-lg);
@@ -254,7 +255,8 @@
             transition: all 0.3s;
         }
 
-        .product-favorite-btn.active, .product-favorite-btn:hover {
+        .product-favorite-btn.active,
+        .product-favorite-btn:hover {
             color: #ef4444;
             transform: scale(1.1);
         }
@@ -342,7 +344,8 @@
             background: #e0e0e0;
         }
 
-        /* Responsive Adjustments */
+        /* ===== RESPONSIVE ===== */
+
         @media (max-width: 1024px) {
             .products-container {
                 grid-template-columns: 240px 1fr;
@@ -351,7 +354,12 @@
         }
 
         @media (max-width: 768px) {
-            .category-page-title { font-size: 2.2rem; }
+
+            /* ✅ إخفاء البانر في الموبايل والتابلت */
+            .category-page-header {
+                display: none;
+            }
+
             .products-container {
                 grid-template-columns: 1fr;
                 padding: 1rem;
@@ -422,13 +430,33 @@
                 height: 2.6rem;
             }
 
-            .product-price { font-size: 1.1rem; }
-            
-            .product-card-btn span { display: none; }
-            .product-card-btn { width: 42px; padding: 0; }
-            .product-card-actions { grid-template-columns: repeat(2, 1fr); }
-            .product-card-btn-cart { width: auto; }
-            .product-card-btn-cart span { display: inline; }
+            .product-price {
+                font-size: 1.1rem;
+            }
+
+            /* ✅ أزرار كرت المنتج — حجم صغير مع إظهار النص */
+            .product-card-actions {
+                grid-template-columns: 1fr auto;
+                gap: 0.5rem;
+            }
+
+            .product-card-btn-cart {
+                font-size: 0.72rem;
+                padding: 0.45rem 0.6rem;
+                gap: 0.3rem;
+            }
+
+            .product-card-btn-cart span {
+                display: inline;
+            }
+
+            .product-card-btn-share {
+                width: 34px;
+                height: 34px;
+                font-size: 0.75rem;
+                padding: 0;
+                flex-shrink: 0;
+            }
         }
 
         @media (max-width: 480px) {
@@ -436,8 +464,25 @@
                 grid-template-columns: repeat(2, 1fr);
                 gap: 0.6rem;
             }
-            .product-info { padding: 0.8rem; }
-            .product-card-btn-cart span { display: none; }
+
+            .product-info {
+                padding: 0.8rem;
+            }
+
+            /* ✅ على أصغر الشاشات — نخفي النص ونبقي الأيقونة */
+            .product-card-btn-cart {
+                font-size: 0.68rem;
+                padding: 0.4rem 0.5rem;
+            }
+
+            .product-card-btn-cart span {
+                display: none;
+            }
+
+            .product-card-btn-share {
+                width: 30px;
+                height: 30px;
+            }
         }
 
         .no-products {
@@ -472,6 +517,7 @@
             visibility: hidden;
             transition: all 0.3s;
         }
+
         .product-modal-backdrop.active {
             opacity: 1;
             visibility: visible;
@@ -639,7 +685,8 @@
 <body>
     @if(View::exists('components.navbar'))
     @include('components.navbar')
-@endif
+    @endif
+
     <div class="category-page-header">
         <h1 class="category-page-title">{{ $category->name }}</h1>
         @if($category->description)
@@ -650,7 +697,7 @@
     </div>
 
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-    
+
     <div class="products-container">
         <!-- Filters Sidebar -->
         <div class="filters-sidebar" id="filtersSidebar">
@@ -712,7 +759,12 @@
                             $price = $product->discount_price ?? $product->price;
                             $oldPrice = $product->discount_price ? $product->price : null;
                         @endphp
-                        <div class="product-card" data-product-id="{{ $product->id }}" data-product="{{ rawurlencode($product->toJson()) }}" tabindex="0" onclick="goToProductDetails({{ $product->id }})" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); goToProductDetails({{ $product->id }}); }">
+                        <div class="product-card"
+                             data-product-id="{{ $product->id }}"
+                             data-product="{{ rawurlencode($product->toJson()) }}"
+                             tabindex="0"
+                             onclick="goToProductDetails({{ $product->id }})"
+                             onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); goToProductDetails({{ $product->id }}); }">
                             <button class="product-favorite-btn" onclick="event.stopPropagation(); toggleProductFavorite(event, {{ $product->id }})">
                                 <i class="far fa-heart"></i>
                             </button>
@@ -755,8 +807,6 @@
         </div>
     </div>
 
-
-
     <!-- Floating Product View -->
     <div class="product-modal-backdrop" id="productModalBackdrop" onclick="closeFloatingView()"></div>
     <div class="product-floating-view" id="productFloatingView">
@@ -771,13 +821,12 @@
                 <span id="floatingOldPrice" class="floating-old-price" style="display: none;"></span>
                 <span id="floatingPrice" class="floating-price"></span>
             </div>
-            <!-- <div id="floatingRating" class="floating-rating" style="display: none;"></div> -->
             <div class="floating-actions">
                 <button id="floatingCartBtn" class="floating-btn floating-btn-cart">
                     <i class="fas fa-shopping-cart"></i> أضف للسلة
                 </button>
                 <button id="floatingShareBtn" class="floating-btn floating-btn-share">
-                    <i class="fas fa-share-alt"></i> مشاركة
+                    <i class="fas fa-share-alt"></i>
                 </button>
             </div>
             <a href="#" class="floating-view-details" onclick="viewAllDetails(event)">عرض جميع التفاصيل</a>
@@ -785,10 +834,9 @@
     </div>
 
     <script>
-        // Load saved theme and cart count
         window.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('theme');
-            if(savedTheme === 'dark') {
+            if (savedTheme === 'dark') {
                 document.body.classList.add('dark-mode');
             }
             loadCartCount();
@@ -799,19 +847,18 @@
             window.location.href = `/products/${productId}`;
         }
 
-        // Open floating view
         let currentProductId = null;
-        
+
         function openFloatingView(product) {
             currentProductId = product.id;
-            
+
             document.getElementById('floatingImage').src = product.primary_image_url || product.image || (Array.isArray(product.images) ? product.images[0] : null) || '/images/tulip_store.jpg';
             document.getElementById('floatingName').textContent = product.name;
             document.getElementById('floatingDescription').textContent = product.description || 'منتج رائع من Tulip Store';
-            
+
             const priceEl = document.getElementById('floatingPrice');
             const oldPriceEl = document.getElementById('floatingOldPrice');
-            
+
             if (product.discount_price) {
                 oldPriceEl.textContent = window.formatMoney ? window.formatMoney(product.price) : ('$' + parseFloat(product.price).toFixed(2));
                 oldPriceEl.style.display = 'inline';
@@ -820,52 +867,43 @@
                 oldPriceEl.style.display = 'none';
                 priceEl.textContent = window.formatMoney ? window.formatMoney(product.price) : ('$' + parseFloat(product.price).toFixed(2));
             }
-            
-            const ratingEl = document.getElementById('floatingRating');
-            if (product.rating > 0) {
-                ratingEl.innerHTML = '<i class="fas fa-star"></i>'.repeat(product.rating) + `<span>(${product.reviews_count})</span>`;
-                ratingEl.style.display = 'flex';
-            } else {
-                ratingEl.style.display = 'none';
-            }
-            
+
             document.getElementById('productModalBackdrop').classList.add('active');
             document.getElementById('productFloatingView').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
-        
+
         function closeFloatingView() {
             document.getElementById('productModalBackdrop').classList.remove('active');
             document.getElementById('productFloatingView').classList.remove('active');
             document.body.style.overflow = '';
             currentProductId = null;
         }
-        
+
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeFloatingView();
             }
         });
-        
+
         document.getElementById('floatingCartBtn').addEventListener('click', () => {
             if (currentProductId) {
                 addToCartFromFloating(currentProductId);
             }
         });
-        
+
         document.getElementById('floatingShareBtn').addEventListener('click', () => {
             const productName = document.getElementById('floatingName').textContent;
             shareProductFromFloating(productName);
         });
 
-        // Add to cart from floating view
         async function addToCartFromFloating(productId) {
             const btn = document.getElementById('floatingCartBtn');
             const originalText = btn.innerHTML;
-            
+
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإضافة...';
             btn.disabled = true;
-            
+
             try {
                 const response = await fetch('/api/cart/add', {
                     method: 'POST',
@@ -874,28 +912,22 @@
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                     },
-                    body: JSON.stringify({
-                        product_id: productId,
-                        quantity: 1
-                    })
+                    body: JSON.stringify({ product_id: productId, quantity: 1 })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     btn.innerHTML = '<i class="fas fa-check"></i> تمت الإضافة';
                     btn.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
-                    
-                    // Update cart count using global function
+
                     if (window.updateCartCount) {
                         window.updateCartCount(data.cart_count || data.count || 0);
                     }
-                    
+
                     setTimeout(() => {
                         closeFloatingView();
-                        if (typeof openCart === 'function') {
-                            openCart();
-                        }
+                        if (typeof openCart === 'function') openCart();
                     }, 800);
                 } else {
                     throw new Error(data.message || 'فشلت الإضافة');
@@ -904,7 +936,7 @@
                 console.error('Error adding to cart:', error);
                 btn.innerHTML = '<i class="fas fa-times"></i> فشلت الإضافة';
                 btn.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
-                
+
                 setTimeout(() => {
                     btn.innerHTML = originalText;
                     btn.style.background = '';
@@ -912,7 +944,7 @@
                 }, 2000);
             }
         }
-        
+
         function shareProductFromFloating(productName) {
             if (navigator.share) {
                 navigator.share({
@@ -924,16 +956,12 @@
                 navigator.clipboard.writeText(window.location.href).then(() => {
                     const btn = document.getElementById('floatingShareBtn');
                     const originalText = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
-                    
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                    }, 2000);
+                    btn.innerHTML = '<i class="fas fa-check"></i>';
+                    setTimeout(() => { btn.innerHTML = originalText; }, 2000);
                 });
             }
         }
-        
-        // View all details function
+
         function viewAllDetails(event) {
             event.preventDefault();
             if (currentProductId) {
@@ -941,32 +969,25 @@
             }
         }
 
-        // Sidebar Toggle Function
         function toggleSidebar() {
             const sidebar = document.getElementById('filtersSidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            
+
             sidebar.classList.toggle('active');
             overlay.classList.toggle('active');
-            
-            if (sidebar.classList.contains('active')) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = '';
-            }
+
+            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
         }
 
-        // Add to cart function
         async function addToCart(event, productId) {
             event.stopPropagation();
-            
+
             const btn = event.target.closest('.product-card-btn-cart');
             const originalText = btn.innerHTML;
-            
-            // Show loading
+
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             btn.disabled = true;
-            
+
             try {
                 const response = await fetch('/api/cart/add', {
                     method: 'POST',
@@ -975,35 +996,26 @@
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                     },
-                    body: JSON.stringify({
-                        product_id: productId,
-                        quantity: 1
-                    })
+                    body: JSON.stringify({ product_id: productId, quantity: 1 })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
-                    // Show success
                     btn.innerHTML = '<i class="fas fa-check"></i>';
                     btn.style.background = '#27ae60';
-                    
-                    // Update cart count using global function
+
                     if (window.updateCartCount) {
                         window.updateCartCount(data.cart_count || data.count || 0);
                     }
-                    
-                    // Trigger cart update event
+
                     localStorage.setItem('cart-updated', Date.now().toString());
                     window.dispatchEvent(new Event('cart-updated'));
-                    
-                    // Open cart sidebar
+
                     setTimeout(() => {
-                        if (typeof openCart === 'function') {
-                            openCart();
-                        }
+                        if (typeof openCart === 'function') openCart();
                     }, 500);
-                    
+
                     setTimeout(() => {
                         btn.innerHTML = originalText;
                         btn.style.background = '';
@@ -1016,7 +1028,7 @@
                 console.error('Error adding to cart:', error);
                 btn.innerHTML = '<i class="fas fa-times"></i>';
                 btn.style.background = '#e74c3c';
-                
+
                 setTimeout(() => {
                     btn.innerHTML = originalText;
                     btn.style.background = '';
@@ -1024,8 +1036,7 @@
                 }, 2000);
             }
         }
-        
-        // Load cart count on page load
+
         async function loadCartCount() {
             try {
                 const response = await fetch('/api/cart');
@@ -1038,10 +1049,9 @@
             }
         }
 
-        // Share product function
         function shareProduct(event, productName) {
             event.stopPropagation();
-            
+
             if (navigator.share) {
                 navigator.share({
                     title: productName,
@@ -1049,27 +1059,15 @@
                     url: window.location.href
                 }).catch(err => console.log('Error sharing:', err));
             } else {
-                // Fallback: copy link to clipboard
                 navigator.clipboard.writeText(window.location.href).then(() => {
                     const btn = event.target.closest('.product-card-btn-share');
                     const originalText = btn.innerHTML;
                     btn.innerHTML = '<i class="fas fa-check"></i>';
-                    
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                    }, 2000);
+                    setTimeout(() => { btn.innerHTML = originalText; }, 2000);
                 });
             }
         }
 
-        // Close modal on ESC key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeAllProducts();
-            }
-        });
-
-        // Amazon-style Filter Functions
         let activeFilters = {
             brands: [],
             availability: [],
@@ -1079,8 +1077,8 @@
 
         function toggleAvailabilityFilter(type) {
             const checkbox = document.getElementById(type === 'in-stock' ? 'inStock' : 'includeOutOfStock');
-            
             const index = activeFilters.availability.indexOf(type);
+
             if (checkbox.checked && index === -1) {
                 activeFilters.availability.push(type);
             } else if (!checkbox.checked && index > -1) {
@@ -1090,33 +1088,27 @@
         }
 
         async function applyFilters() {
-            // Get price values
             const minPriceInput = document.getElementById('minPrice');
             const maxPriceInput = document.getElementById('maxPrice');
-            
+
             if (minPriceInput && minPriceInput.value) activeFilters.minPrice = minPriceInput.value;
             if (maxPriceInput && maxPriceInput.value) activeFilters.maxPrice = maxPriceInput.value;
-            
-            // Collect all checked filters
+
             activeFilters.brands = Array.from(document.querySelectorAll('[id^="brand-"]:checked')).map(el => el.value);
-            
-            // Build query string
+
             const params = new URLSearchParams();
-            
             if (activeFilters.minPrice) params.append('min_price', activeFilters.minPrice);
             if (activeFilters.maxPrice) params.append('max_price', activeFilters.maxPrice);
             if (activeFilters.brands.length) params.append('brands', activeFilters.brands.join(','));
             if (activeFilters.availability.length) params.append('availability', activeFilters.availability.join(','));
-            
-            // Show loading state
+
             const productsGrid = document.querySelector('.products-grid');
             if (productsGrid) {
                 productsGrid.style.opacity = '0.5';
                 productsGrid.style.pointerEvents = 'none';
             }
-            
+
             try {
-                // Fetch filtered products via AJAX
                 const currentUrl = window.location.pathname;
                 const response = await fetch(`${currentUrl}?${params.toString()}`, {
                     headers: {
@@ -1124,10 +1116,9 @@
                         'Accept': 'application/json'
                     }
                 });
-                
+
                 const data = await response.json();
-                
-                // Update products grid
+
                 if (data.products && data.products.length > 0) {
                     const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
                     productsGrid.innerHTML = data.products.map(product => {
@@ -1136,7 +1127,7 @@
                         const oldPrice = product.discount_price ? product.price : null;
                         const formattedPrice = window.formatMoney ? window.formatMoney(price) : ('$' + parseFloat(price).toFixed(2));
                         const formattedOldPrice = oldPrice ? (window.formatMoney ? window.formatMoney(oldPrice) : ('$' + parseFloat(oldPrice).toFixed(2))) : null;
-                        
+
                         return `
                         <div class="product-card" data-product-id="${product.id}" data-product="${encodeURIComponent(JSON.stringify(product))}" tabindex="0" onclick="goToProductDetails(${product.id})" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); goToProductDetails(${product.id}); }">
                             <button class="product-favorite-btn ${isFavorite ? 'active' : ''}" onclick="event.stopPropagation(); toggleProductFavorite(event, ${product.id})">
@@ -1173,15 +1164,13 @@
                         </div>
                     `;
                 }
-                
-                // Update URL without reload
+
                 const newUrl = params.toString() ? `${currentUrl}?${params.toString()}` : currentUrl;
                 window.history.pushState({}, '', newUrl);
-                
+
             } catch (error) {
                 console.error('Error filtering products:', error);
             } finally {
-                // Remove loading state
                 if (productsGrid) {
                     productsGrid.style.opacity = '1';
                     productsGrid.style.pointerEvents = 'auto';
@@ -1189,13 +1178,12 @@
             }
         }
 
-        // Price input listeners with debounce
         let priceTimeout;
         function debouncedApplyFilters() {
             clearTimeout(priceTimeout);
             priceTimeout = setTimeout(applyFilters, 500);
         }
-        
+
         document.getElementById('minPrice').addEventListener('input', debouncedApplyFilters);
         document.getElementById('maxPrice').addEventListener('input', debouncedApplyFilters);
 
@@ -1215,29 +1203,25 @@
             if (p) openFloatingView(p);
         }
 
-        // Toggle product favorite
         function toggleProductFavorite(event, productId) {
             event.stopPropagation();
             const btn = event.currentTarget;
             const icon = btn.querySelector('i');
-            
+
             let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
             const isFavorite = favorites.some(p => String(p.id) === String(productId));
             const card = btn.closest ? btn.closest('.product-card') : null;
             const resolvedProduct = decodeProductFromCard(card) || {};
-            
-            // Add animation
+
             btn.classList.add('animating');
             setTimeout(() => btn.classList.remove('animating'), 600);
-            
+
             if (isFavorite) {
-                // Remove from favorites
                 favorites = favorites.filter(p => String(p.id) !== String(productId));
                 btn.classList.remove('active');
                 icon.classList.remove('fas');
                 icon.classList.add('far');
             } else {
-                // Add to favorites
                 favorites.push({
                     id: resolvedProduct.id ?? productId,
                     name: resolvedProduct.name || '',
@@ -1248,18 +1232,16 @@
                 icon.classList.remove('far');
                 icon.classList.add('fas');
             }
-            
+
             localStorage.setItem('favorites', JSON.stringify(favorites));
-            
-            // Update navbar count
+
             const countElement = document.getElementById('favoritesCount');
             if (countElement) {
                 countElement.textContent = favorites.length > 99 ? '+99' : favorites.length;
             }
         }
 
-        // Check favorites on page load
-        window.addEventListener('DOMContentLoaded', function() {
+        window.addEventListener('DOMContentLoaded', function () {
             const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
             document.querySelectorAll('.product-card').forEach(card => {
                 const productId = String(card.dataset.productId || '');
@@ -1274,11 +1256,11 @@
             });
         });
     </script>
-    </div>
+
     <!-- FOOTER -->
-<div style="position:relative; z-index:1001;">
-    @include('components.footer')
-</div>
+    <div style="position:relative; z-index:1001;">
+        @include('components.footer')
+    </div>
 
 </body>
 </html>

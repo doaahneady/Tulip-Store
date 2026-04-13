@@ -7,9 +7,11 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <meta name="description" content="اكتشف Tulip Store، منصة تسوق إلكتروني متكاملة تتيح لك الشراء أو إنشاء متجرك الخاص والربح بسهولة،
+     مع توصيل سريع وطرق دفع آمنة وتجربة استخدام مريحة.">
     <title>هدايا توليب - Tulip Gifts</title>
     <!-- fav icon -->
-        <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
+        <link rel="icon" type="image/png" sizes="48x48" href="/images/fav_icon-v1.png">
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}&fix=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -403,7 +405,7 @@
          <!--  comming sooon!!!!!!!!!!!!!!!!  -->
         <div class="premium-cards">
             <!-- Custom Box Card -->
-            <!-- <div class="premium-card box-card" onclick="window.location.href='/gifts/box-arrangement'">
+            <div class="premium-card box-card" onclick="window.location.href='/gifts/box-arrangement'">
                 <div class="card-visual">
                    
                     <img id="boxCardImage" src="/images/box.jpg" alt="Gift Box" class="card-image" loading="lazy" >
@@ -417,15 +419,15 @@
                         <span class="feature"><i class="fas fa-gift"></i> +50 عنصر</span>
                         <span class="feature"><i class="fas fa-envelope"></i> بطاقة مجانية</span>
                     </div>
-                    <button class="card-btn">
-                        ابدأ التصميم
-                        <i class="fas fa-arrow-left"></i>
+                    <button class="card-btn" disabled>
+                       قريباً..
+                        <!-- <i class="fas fa-arrow-left"></i> -->
                     </button>
                 </div>
-            </div> -->
+            </div>
 
             <!-- Custom Bouquet Card -->
-            <!-- <div class="premium-card flower-card" onclick="window.location.href='/gifts/flower-bouquet'">
+            <div class="premium-card flower-card" onclick="window.location.href='/gifts/flower-bouquet'">
                 <div class="card-visual">
                    
                     <img id="bouquetCardImage" src="/images/Bouquet.jpg" alt="Rose Bouquet" class="card-image" loading="lazy">
@@ -439,15 +441,15 @@
                         <span class="feature"><i class="fas fa-palette"></i> ألوان متعددة</span>
                         <span class="feature"><i class="fas fa-truck"></i> توصيل سريع</span>
                     </div>
-                    <button class="card-btn">
-                        ابدأ التصميم
-                        <i class="fas fa-arrow-left"></i>
+                    <button class="card-btn" disabled>
+                       قريباً..
+                        <!-- <i class="fas fa-arrow-left"></i> -->
                     </button>
                 </div>
-            </div> -->
+            </div>
 
             <!-- Ready Made Card -->
-            <!-- <div class="premium-card ready-card" onclick="document.getElementById('readyGifts').scrollIntoView({behavior: 'smooth'})">
+            <div class="premium-card ready-card" onclick="document.getElementById('readyGifts').scrollIntoView({behavior: 'smooth'})">
                 <div class="card-visual">
                   
                     <img id="readyCardImage" src="/images/ready.jpg" alt="Ready Gifts" class="card-image" loading="lazy">
@@ -466,7 +468,7 @@
                         <i class="fas fa-arrow-left"></i>
                     </button>
                 </div>
-            </div> -->
+            </div>
         </div>
         
 

@@ -2,9 +2,10 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8">
+   <meta name="description" content="اكتشف Tulip Store، منصة تسوق إلكتروني متكاملة تتيح لك الشراء أو إنشاء متجرك الخاص والربح بسهولة، مع توصيل سريع وطرق دفع آمنة وتجربة استخدام مريحة.">
     <title>{{ $metadata['title'] ?? 'Export Report' }}</title>
     <!-- fav icon -->
-        <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
+        <link rel="icon" type="image/png" sizes="48x48" href="/images/fav_icon-v1.png">
     <style>
         * { box-sizing: border-box; }
         body { font-family: "El Messiri", sans-serif; color: #111827; margin: 24px; }

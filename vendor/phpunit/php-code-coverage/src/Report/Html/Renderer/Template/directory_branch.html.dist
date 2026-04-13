@@ -10,6 +10,7 @@
   <link href="{{path_to_root}}_css/octicons.css?v={{version}}" rel="stylesheet" type="text/css">
   <link href="{{path_to_root}}_css/style.css?v={{version}}" rel="stylesheet" type="text/css">
   <link href="{{path_to_root}}_css/custom.css" rel="stylesheet" type="text/css">
+  <meta name="description" content="اكتشف Tulip Store، منصة تسوق إلكتروني متكاملة تتيح لك الشراء أو إنشاء متجرك الخاص والربح بسهولة، مع توصيل سريع وطرق دفع آمنة وتجربة استخدام مريحة.">
  </head>
  <body>
   <header>

@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="اكتشف Tulip Store، منصة تسوق إلكتروني متكاملة تتيح لك الشراء أو إنشاء متجرك الخاص والربح بسهولة،
+     مع توصيل سريع وطرق دفع آمنة وتجربة استخدام مريحة.">
     <title>Tulip Store</title>
     <!-- Google Fonts: El Messiri and Changa (same as auth pages) -->
      <!-- fav icon -->
-     <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
+     <link rel="icon" type="image/png" sizes="48x48" href="/images/fav_icon-v1.png">
+<meta name="description" content="اكتشف Tulip Store، منصة تسوق إلكتروني متكاملة تتيح لك الشراء أو إنشاء متجرك الخاص والربح بسهولة، مع توصيل سريع وطرق دفع آمنة وتجربة استخدام مريحة.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

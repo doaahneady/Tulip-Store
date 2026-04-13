@@ -7,7 +7,9 @@
     <title>توليب مارت - Tulip Mart</title>
    
       <!-- fav icon -->
-        <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
+        <link rel="icon" type="image/png" sizes="48x48" href="/images/fav_icon-v1.png">
+            <meta name="description" content="اكتشف Tulip Store، منصة تسوق إلكتروني متكاملة تتيح لك الشراء أو إنشاء متجرك الخاص والربح بسهولة، مع توصيل سريع وطرق دفع آمنة وتجربة استخدام مريحة.">
+
     <link rel="stylesheet" href="/css/store.css?v=999&fix=store&t={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -344,12 +346,33 @@
             margin: 0 auto;
         }
 
-        /* Categories Grid */
+        /* Categories Grid - Horizontal Scroll */
         .categories-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 2rem;
+            display: flex;
+            gap: 1.5rem;
             margin-top: 3rem;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 1rem;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #e5e7eb transparent;
+        }
+        .categories-grid::-webkit-scrollbar {
+            height: 8px;
+        }
+        .categories-grid::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .categories-grid::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+        .categories-grid::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
         .category-card {
             background: var(--card);
@@ -364,6 +387,9 @@
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
+            min-width: 180px;
+            max-width: 180px;
+            flex-shrink: 0;
         }
         .category-card::before {
             content: '';
@@ -701,7 +727,6 @@
         }
         /* Responsive Design */
         @media (max-width: 1200px) {
-            .categories-grid { grid-template-columns: repeat(4, 1fr); }
             .products-grid { grid-template-columns: repeat(4, 1fr); }
             .prices-grid { grid-template-columns: 1fr; }
         }
@@ -713,7 +738,6 @@
             }
             .hero-visual { order: -1; }
             .hero-title { font-size: 3rem; }
-            .categories-grid { grid-template-columns: repeat(4, 1fr) !important; }
             .products-grid { grid-template-columns: repeat(3, 1fr); }
             .price-items { grid-template-columns: 1fr; }
             .hero-stats { grid-template-columns: 1fr; gap: 1rem; }
@@ -721,13 +745,18 @@
         @media (max-width: 768px) {
             .hero-title { font-size: 2.5rem; }
             .categories-grid { 
-                grid-template-columns: repeat(4, 1fr) !important; 
-                gap: 0.8rem !important;
+                gap: 1rem !important;
+                padding: 0 1rem 1rem 1rem;
+                margin: 3rem -1rem 0 -1rem;
+            }
+            .category-card {
+                min-width: 140px !important;
+                max-width: 140px !important;
+                border-radius: 12px !important;
             }
             .category-name { font-size: 0.85rem !important; }
             .category-count { display: none; } /* Hide count on mobile to save space */
             .category-info { padding: 0 0.4rem 0.6rem !important; }
-            .category-card { border-radius: 12px !important; }
             .products-grid { 
                 grid-template-columns: repeat(2, 1fr) !important; 
                 gap: 1rem !important;
@@ -786,8 +815,13 @@
         }
         @media (max-width: 480px) {
             .categories-grid { 
-                grid-template-columns: repeat(4, 1fr) !important; 
-                gap: 0.4rem !important;
+                gap: 0.8rem !important;
+                padding: 0 1rem 1rem 1rem;
+                margin: 3rem -1rem 0 -1rem;
+            }
+            .category-card {
+                min-width: 120px !important;
+                max-width: 120px !important;
             }
             .products-grid { 
                 grid-template-columns: repeat(2, 1fr) !important; 
@@ -944,7 +978,7 @@
                 category: categoryName,
                 categorySlug,
                 imageUrl: resolvePublicImage(imagePath),
-                fallbackImage: '/images/panner_mart.png'
+                fallbackImage: '/images/tulip_mart.jpg'
             };
         }
 
@@ -1184,7 +1218,7 @@
                     type: 'product',
                     name: product?.name || '',
                     price: Number(product?.price || 0),
-                    image: getProductImage(product || {}) || '/images/panner_mart.png',
+                    image: getProductImage(product || {}) || '/images/tulip_mart.jpg',
                 });
                 favoriteIds.add(id);
             }

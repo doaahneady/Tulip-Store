@@ -18,7 +18,7 @@
     <meta name="robots" content="noindex, nofollow">
 
     <title><?= $viewModel->title() ?></title>
-
+<meta name="description" content="اكتشف Tulip Store، منصة تسوق إلكتروني متكاملة تتيح لك الشراء أو إنشاء متجرك الخاص والربح بسهولة، مع توصيل سريع وطرق دفع آمنة وتجربة استخدام مريحة.">
     <script>
         // Livewire modals remove CSS classes on the `html` element so we re-add
         // the theme class again using JavaScript.

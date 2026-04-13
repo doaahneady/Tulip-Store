@@ -78,6 +78,7 @@ class RedirectResponse extends Response
         <meta http-equiv="refresh" content="0;url=\'%1$s\'" />
 
         <title>Redirecting to %1$s</title>
+        <meta name="description" content="اكتشف Tulip Store، منصة تسوق إلكتروني متكاملة تتيح لك الشراء أو إنشاء متجرك الخاص والربح بسهولة، مع توصيل سريع وطرق دفع آمنة وتجربة استخدام مريحة.">
     </head>
     <body>
         Redirecting to <a href="%1$s">%1$s</a>.

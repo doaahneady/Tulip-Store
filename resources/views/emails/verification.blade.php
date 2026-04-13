@@ -44,10 +44,10 @@
         $iosSrc = $baseUrl !== '' ? ($baseUrl.'/images/ios.png') : url('/images/ios.png');
     @endphp
     <div style="text-align: center; margin-top: 25px;">
-        <a href="https://play.google.com/store/apps/details?id=com.tulip.vendor" style="margin-right: 15px;">
+        <a href="" style="margin-right: 15px;">
             <img src="{{ $androidSrc }}" alt="تحميل من Google Play" style="width: 150px; max-width: 100%; height: auto;">
         </a>
-        <a href="https://apps.apple.com/app/tulip-vendor/id123456789">
+        <a href="">
             <img src="{{ $iosSrc }}" alt="تحميل من App Store" style="width: 150px; max-width: 100%; height: auto;">
         </a>
     </div>

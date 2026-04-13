@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="متجر Tulip Store للتسوق الإلكتروني - ملابس، إلكترونيات، ألعاب وأكثر
+    . توصيل سريع وأسعار مميزة.">
     <title>Tulip Store - أرسل ابتسامتك أينما كنت</title>
-
+    <meta name="description" content="اكتشف Tulip Store، منصة تسوق إلكتروني متكاملة تتيح لك الشراء أو إنشاء متجرك الخاص والربح بسهولة،
+ مع توصيل سريع وطرق دفع آمنة وتجربة استخدام مريحة.">
     <!-- fav icon -->
-    <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/images/fav_icon-v1.png">
     
   
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
@@ -691,7 +694,7 @@
                     $price = (float) ($product->discount_price ?? $product->price ?? 0);
                     $oldPrice = (float) ($product->price ?? 0);
                     $img = $product->primary_image_url ?? '';
-                    $img = $img ?: '/images/banner1.jpg';
+                    $img = $img ?: '/images/tulip_store.jpg';
                     $imgUrl = (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) ? $img : url($img);
                 @endphp
                 <div class="product-card" data-product-id="{{ $product->id }}" onclick="window.location.href='/products/{{ $product->id }}'">
@@ -704,7 +707,7 @@
                              loading="lazy"
                              width="320"
                              height="320"
-                             onerror="this.onerror=null; this.src='{{ url('/images/banner1.jpg') }}';">
+                             onerror="this.onerror=null; this.src='{{ url('/images/tulip_store.jpg') }}';">
                     </div>
                     <div class="product-body">
                         <h3 class="product-name">{{ $product->name }}</h3>
@@ -753,7 +756,7 @@
                     $price = (float) ($product->discount_price ?? $product->price ?? 0);
                     $oldPrice = (float) ($product->price ?? 0);
                     $img = $product->primary_image_url ?? '';
-                    $img = $img ?: '/images/banner1.jpg';
+                    $img = $img ?: '/images/tulip_store.jpg';
                     $imgUrl = (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) ? $img : url($img);
                 @endphp
                 <div class="product-card" data-product-id="{{ $product->id }}" onclick="window.location.href='/products/{{ $product->id }}'">
@@ -766,7 +769,7 @@
                              loading="lazy"
                              width="320"
                              height="320"
-                             onerror="this.onerror=null; this.src='{{ url('/images/banner1.jpg') }}';">
+                             onerror="this.onerror=null; this.src='{{ url('/images/tulip_store.jpg') }}';">
                     </div>
                     <div class="product-body">
                         <h3 class="product-name">{{ $product->name }}</h3>
