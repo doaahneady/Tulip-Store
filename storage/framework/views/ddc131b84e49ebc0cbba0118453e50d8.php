@@ -386,7 +386,9 @@
         }
         .products-grid.list-view .product-card {
             display: grid;
-            grid-template-columns: 120px 1fr;
+            /* عرض أفقي (list view): صورة أكبر + محتوى بجانبها */
+            grid-template-columns: 240px 1fr;
+            align-items: stretch;
         }
         .product-badges {
             position: absolute;
@@ -424,7 +426,23 @@
             object-fit: cover;
             display: block;
         }
-        .products-grid.list-view .product-image { height: 100%; }
+        .products-grid.list-view .product-image {
+            /* منع قص الصورة في العرض الأفقي */
+            aspect-ratio: auto;
+            height: 240px;
+        }
+        .products-grid.list-view .product-image img {
+            object-fit: contain;
+            background: #fff;
+        }
+
+        .products-grid.list-view .add-cart-btn{
+            width: auto;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.8rem;
+            border-radius: 18px;
+            align-self: flex-start;
+        }
 
         .product-favorite {
             position: absolute;

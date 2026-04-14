@@ -32,7 +32,9 @@ return [
 
         'sanctum' => [
             'driver' => 'sanctum',
-            'provider' => 'users',
+            // Allow Sanctum personal access tokens for multiple tokenable models (User/Employee/Trader).
+            // If a provider is set, Sanctum will reject tokens whose tokenable model doesn't match it.
+            'provider' => null,
         ],
 
         'employee' => [

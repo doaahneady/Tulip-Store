@@ -2008,7 +2008,8 @@ class FinanceController extends Controller
                 $driverName = $driver?->user?->name ?? $driver?->name ?? ('Driver user #'.(int) $driverUserId);
 
                 $cashDue = (float) $orders
-                    ->filter(fn ($o) => ($o->payment_method ?? null) === 'cash' && ($o->payment_status ?? null) !== 'paid')
+                    // المطلوب كاش = مجموع إجمالي الطلبات التي طريقة دفعها cash (بدون الاعتماد على payment_status)
+                    ->filter(fn ($o) => ($o->payment_method ?? null) === 'cash')
                     ->sum(fn ($o) => $this->orderMoney($o));
 
                 $ordersPayload = $orders->map(function ($o) {
