@@ -914,6 +914,7 @@
     <script>
         let products = {};
         let categories = [];
+        let sliderItems = [];
         let allProductsFlat = [];
         const categoryImageBySlug = {};
         const isAuthenticated = @json(auth()->check());
@@ -1013,6 +1014,32 @@
                 return { id: slug, name: c.name || slug, image, color: p.color, gradient: p.gradient, productsCount: countsByCategory[slug] };
             });
 
+            sliderItems = [];
+            apiCategories.forEach((c, i) => {
+                const p = palette[i % palette.length];
+                const parentSlug = c.slug;
+                if (!parentSlug) return;
+                const parentName = c.name || parentSlug;
+                const image = resolvePublicImage(c.image_url || c.image) || '/images/tulip_mart.jpg';
+                const subs = Array.isArray(c.subcategories) ? c.subcategories : [];
+
+                subs.forEach((s) => {
+                    const subSlug = s.slug;
+                    if (!subSlug) return;
+                    sliderItems.push({
+                        id: `${parentSlug}/${subSlug}`,
+                        parentSlug,
+                        parentName,
+                        subSlug,
+                        name: s.name || subSlug,
+                        image,
+                        color: p.color,
+                        gradient: p.gradient,
+                        productsCount: Number(s.products_count || 0),
+                    });
+                });
+            });
+
             products = {};
             allProductsFlat = apiProducts.map(normalizeApiProduct);
             allProductsFlat.forEach((p) => {
@@ -1023,6 +1050,7 @@
 
             window.martProducts = products;
             window.martCategories = categories;
+            window.martSubcategories = sliderItems;
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -1049,19 +1077,21 @@
         }
 
         function loadCategories() {
-            document.getElementById('categoriesGrid').innerHTML = categories.map(c => `
-                <div class="category-card" style="--cat-color: ${c.color}; --cat-gradient: ${c.gradient}" onclick="filterCategory('${c.id}')">
+            document.getElementById('categoriesGrid').innerHTML = sliderItems.map(c => `
+                <div class="category-card" style="--cat-color: ${c.color}; --cat-gradient: ${c.gradient}" onclick="openMartSection('${c.parentSlug}', '${c.subSlug || ''}')">
                     <img src="${c.image}" alt="${c.name}" class="category-photo">
                     <div class="category-info">
                         <div class="category-name">${c.name}</div>
-                        <div class="category-count">${Number(c.productsCount || 0)} منتج</div>
+                        ${c.subSlug ? `<div class="category-count">${c.parentName}</div>` : ''}
                     </div>
                 </div>
             `).join('');
         }
 
-        function filterCategory(catId) {
-            window.location.href = `/mart/category/${catId}`;
+        function openMartSection(categorySlug, subSlug) {
+            const cat = encodeURIComponent(String(categorySlug || '').trim());
+            const sub = encodeURIComponent(String(subSlug || '').trim());
+            window.location.href = sub ? `/mart/products?category=${cat}&subcategory=${sub}` : `/mart/products?category=${cat}`;
         }
 
         function loadSpecialPrices() {

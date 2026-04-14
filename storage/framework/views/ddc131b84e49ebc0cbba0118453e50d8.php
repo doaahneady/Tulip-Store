@@ -7,7 +7,9 @@
     <title>جميع المنتجات - توليب مارت</title>
     
     <!-- fav icon -->
-    <link rel="icon" type="image/png" href="/images/fav_icon-v1.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/images/fav_icon-v1.png">
+        <meta name="description" content="اكتشف Tulip Store، منصة تسوق إلكتروني متكاملة تتيح لك الشراء أو إنشاء متجرك الخاص والربح بسهولة، مع توصيل سريع وطرق دفع آمنة وتجربة استخدام مريحة.">
+
     <link rel="stylesheet" href="<?php echo e(asset('css/store.min.css')); ?>?v=<?php echo e(filemtime(public_path('css/store.min.css'))); ?>&t=<?php echo e(time()); ?>" onerror="this.onerror=null;this.href='<?php echo e(asset('css/store.css')); ?>?fallback=1';">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -994,6 +996,8 @@
         let subcategoriesByCategory = {};
         let selectedCategory = null;
         let selectedSubcategory = null;
+        let isGlobalSearchMode = false;
+        let globalSearchQuery = '';
         const isAuthenticated = <?php echo json_encode(auth()->check(), 15, 512) ?>;
         let favoriteIds = new Set();
 
@@ -1094,8 +1098,22 @@
             const price = parseFloat(p.discount_price || p.price || 0);
             const oldPrice = p.discount_price ? parseFloat(p.price || 0) : null;
             const attrs = Array.isArray(p.attributes) ? p.attributes : [];
-            const unit = (attrs.find(a => a.name === 'unit')?.value) || p.unit || 'حبة';
-            const origin = (attrs.find(a => a.name === 'origin')?.value) || p.origin || 'محلي';
+            const getAttrValue = (keys) => {
+                const wanted = new Set((Array.isArray(keys) ? keys : [keys]).map((k) => String(k || '').toLowerCase().trim()).filter(Boolean));
+                for (const a of attrs) {
+                    const n = String(a?.name || '').toLowerCase().trim();
+                    const k = String(a?.attribute_key || '').toLowerCase().trim();
+                    if (!n && !k) continue;
+                    if (wanted.has(n) || wanted.has(k)) {
+                        const v = a?.value ?? a?.value_text ?? a?.value_number ?? a?.value_date;
+                        const s = String(v ?? '').trim();
+                        if (s !== '' && s !== 'null' && s !== 'undefined') return s;
+                    }
+                }
+                return '';
+            };
+            const unit = getAttrValue(['unit', 'units', 'الوحدة', 'وحدة', 'unit_name']) || String(p.unit || '').trim() || 'حبة';
+            const origin = getAttrValue(['origin', 'country', 'source', 'المنشأ', 'بلد المنشأ', 'المصدر']) || String(p.origin || '').trim() || 'محلي';
             const firstImage = Array.isArray(p.images) ? (p.images[0]?.path || p.images[0]?.url || p.images[0]) : null;
             const imageSource = p.primary_image_url || firstImage || p.image || p.photo || '';
             const image = resolveProductImage(imageSource) || martFallbackImage(categorySlug, categoryName);
@@ -1123,7 +1141,12 @@
         async function loadMartNavigation() {
             const res = await fetch('/api/mart/navigation', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
             const payload = await res.json().catch(() => ({ data: [] }));
-            const data = Array.isArray(payload.data) ? payload.data : [];
+            const raw = Array.isArray(payload.data) ? payload.data : [];
+            const data = raw.filter((c) => {
+                const slug = String(c?.slug || '').trim();
+                const subs = Array.isArray(c?.subcategories) ? c.subcategories : [];
+                return slug !== '' && subs.length > 0;
+            });
             martNavigation = data;
             categories = [{ id: 'all', name: 'الكل', emoji: '' }].concat(
                 data.map((c) => ({
@@ -1177,6 +1200,54 @@
             updateBreadcrumb();
         }
 
+        async function loadProductsForGlobalSearch(query) {
+            const productsGrid = document.getElementById('productsGrid');
+            const q = String(query || '').trim();
+            if (q.length < 2) {
+                isGlobalSearchMode = false;
+                globalSearchQuery = '';
+                allProducts = [];
+                filteredProducts = [];
+                currentPage = 1;
+                loadOrigins();
+                displayProducts();
+                updateBreadcrumb();
+                return;
+            }
+
+            isGlobalSearchMode = true;
+            globalSearchQuery = q;
+            selectedSubcategory = null;
+
+            if (productsGrid) {
+                productsGrid.innerHTML = `
+                    <div class="no-results" style="grid-column: 1 / -1;">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <h3>جارٍ البحث في توليب مارت</h3>
+                        <p>يرجى الانتظار...</p>
+                    </div>
+                `;
+            }
+
+            const url = new URL('/api/products', window.location.origin);
+            url.searchParams.set('market', 'mart');
+            url.searchParams.set('per_page', '1000');
+            url.searchParams.set('sort_by', 'created_at');
+            url.searchParams.set('sort_order', 'desc');
+            url.searchParams.set('include_attributes', '1');
+            url.searchParams.set('search', q);
+
+            const r = await fetch(url.toString(), { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
+            const d = await r.json().catch(() => ({}));
+            const items = Array.isArray(d?.data) ? d.data : [];
+            allProducts = items.map(normalizeApiProduct);
+            filteredProducts = [...allProducts];
+            currentPage = 1;
+            loadOrigins();
+            applyFilters();
+            updateBreadcrumb();
+        }
+
         // State
         let currentView = 'grid';
         let currentPage = 1;
@@ -1193,8 +1264,10 @@
             loadCategories();
             renderSubcategories();
             loadOrigins();
-            applyURLFilters();
-            applyFilters();
+            const handledGlobalSearch = applyURLFilters();
+            if (!handledGlobalSearch) {
+                applyFilters();
+            }
             initMartSearch();
         });
 
@@ -1272,7 +1345,7 @@
         }
 
         function applyFilters() {
-            if (!selectedSubcategory) {
+            if (!selectedSubcategory && !isGlobalSearchMode) {
                 filteredProducts = [];
                 currentPage = 1;
                 displayProducts();
@@ -1364,30 +1437,48 @@
                         </label>
                     `;
                 }).join('')
-                : `<div style="color: var(--muted); font-size: 0.9rem;">اختر تصنيفًا فرعيًا لعرض خيارات المصدر</div>`;
+                : `<div style="color: var(--muted); font-size: 0.9rem;">${isGlobalSearchMode ? 'لا توجد خيارات مصدر متاحة' : 'اختر تصنيفًا فرعيًا لعرض خيارات المصدر'}</div>`;
         }
 
         function applyURLFilters() {
             const urlParams = new URLSearchParams(window.location.search);
+            const search = urlParams.get('search');
+            if (search) {
+                const term = String(search || '').trim();
+                if (term) {
+                    const s = document.getElementById('searchFilter');
+                    const ms = document.getElementById('m-searchFilter');
+                    if (s) s.value = term;
+                    if (ms) ms.value = term;
+                    const allEls = document.querySelectorAll(`[data-category="all"]`);
+                    allEls.forEach((el) => el.classList.add('active'));
+                    selectedCategory = categories.find((c) => String(c.id) === 'all') || categories[0] || null;
+                    selectedSubcategory = null;
+                    loadProductsForGlobalSearch(term);
+                }
+                return true;
+            }
             const category = urlParams.get('category');
             if (category) selectCategory(category);
             const subcategory = urlParams.get('subcategory');
             if (subcategory) {
                 selectSubcategory(subcategory);
             }
-            const search = urlParams.get('search');
-            if (search) document.getElementById('searchFilter').value = search;
             const filter = urlParams.get('filter');
             if (filter === 'fresh') document.getElementById('filterFresh').checked = true;
+            return false;
         }
 
         function selectCategory(categoryId) {
+            isGlobalSearchMode = false;
+            globalSearchQuery = '';
             document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
             document.querySelectorAll(`[data-category="${categoryId}"]`).forEach(el => el.classList.add('active'));
             selectedCategory = categories.find((c) => String(c.id) === String(categoryId)) || null;
             selectedSubcategory = null;
             renderSubcategories();
             const url = new URL(window.location.href);
+            url.searchParams.delete('search');
             if (categoryId && categoryId !== 'all') {
                 url.searchParams.set('category', String(categoryId));
             } else {
@@ -1403,12 +1494,15 @@
             if (!selectedCategory) {
                 return;
             }
+            isGlobalSearchMode = false;
+            globalSearchQuery = '';
             document.querySelectorAll('[data-subcategory]').forEach((item) => item.classList.remove('active'));
             document.querySelectorAll(`[data-subcategory="${subcategoryId}"]`).forEach((el) => el.classList.add('active'));
             const subs = subcategoriesByCategory[String(selectedCategory.id)] || [];
             const found = subs.find((s) => String(s.slug || s.id) === String(subcategoryId));
             selectedSubcategory = found ? { id: (found.slug || String(found.id)), name: found.name || '' } : { id: String(subcategoryId), name: '' };
             const url = new URL(window.location.href);
+            url.searchParams.delete('search');
             url.searchParams.set('category', String(selectedCategory.id));
             url.searchParams.set('subcategory', String(selectedSubcategory.id));
             window.history.replaceState({}, '', url.toString());
@@ -1425,9 +1519,9 @@
                 if (!selectedSubcategory) {
                     productsGrid.innerHTML = `
                         <div class="no-results" style="grid-column: 1 / -1;">
-                            <i class="fas fa-layer-group"></i>
-                            <h3>اختر تصنيفًا فرعيًا</h3>
-                            <p>المنتجات تظهر بعد اختيار القسم والتصنيف الفرعي</p>
+                            <i class="fas ${isGlobalSearchMode ? 'fa-search' : 'fa-layer-group'}"></i>
+                            <h3>${isGlobalSearchMode ? 'لا توجد نتائج' : 'اختر تصنيفًا فرعيًا'}</h3>
+                            <p>${isGlobalSearchMode ? 'جرّب كلمة بحث أخرى' : 'المنتجات تظهر بعد اختيار القسم والتصنيف الفرعي'}</p>
                         </div>
                     `;
                 } else {
@@ -1473,7 +1567,7 @@
                             <div class="price-wrapper">
                                 <span class="price-current">${window.formatMoney ? window.formatMoney(p.price) : (p.price + ' ل.س')}</span>
                                 ${p.oldPrice ? `<span class="price-old">${window.formatMoney ? window.formatMoney(p.oldPrice) : (p.oldPrice + ' ل.س')}</span>` : ''}
-                                <span class="price-unit">لكل 1 كغ</span>
+                                <span class="price-unit">${p.unit ? `لكل ${p.unit}` : ''}</span>
                             </div>
                             <button class="add-cart-btn" onclick="addToCart('${p.id}', this)" id="btn-${p.id}">
                                 <i class="fas fa-plus"></i>
@@ -1589,6 +1683,13 @@
             const title = document.getElementById('pageTitle');
             const subtitle = document.getElementById('pageSubtitle');
             if (!tail || !title || !subtitle) return;
+
+            if (isGlobalSearchMode) {
+                tail.innerHTML = `<span>›</span><span>نتائج البحث</span>`;
+                title.textContent = 'نتائج البحث';
+                subtitle.textContent = globalSearchQuery ? `بحث عن: ${globalSearchQuery}` : 'عرض نتائج البحث في توليب مارت';
+                return;
+            }
 
             const parts = [];
             if (selectedCategory && selectedCategory.id !== 'all') {
@@ -1766,11 +1867,43 @@
 
         function initMartSearch() {
             const searchInput = document.getElementById('searchFilter');
+            const mobileSearchInput = document.getElementById('m-searchFilter');
             let searchTimeout;
-            searchInput.addEventListener('input', function() {
+            const handle = (value) => {
+                const q = String(value || '').trim();
+                if (!selectedSubcategory) {
+                    const url = new URL(window.location.href);
+                    if (q.length >= 2) {
+                        url.searchParams.set('search', q);
+                        url.searchParams.delete('category');
+                        url.searchParams.delete('subcategory');
+                        window.history.replaceState({}, '', url.toString());
+                        loadProductsForGlobalSearch(q);
+                        return;
+                    }
+                    url.searchParams.delete('search');
+                    window.history.replaceState({}, '', url.toString());
+                    isGlobalSearchMode = false;
+                    globalSearchQuery = '';
+                    allProducts = [];
+                    filteredProducts = [];
+                    currentPage = 1;
+                    loadOrigins();
+                    displayProducts();
+                    updateBreadcrumb();
+                    return;
+                }
+                applyFilters();
+            };
+
+            const onInput = function () {
                 clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => applyFilters(), 300);
-            });
+                const v = this.value;
+                searchTimeout = setTimeout(() => handle(v), 350);
+            };
+
+            if (searchInput) searchInput.addEventListener('input', onInput);
+            if (mobileSearchInput) mobileSearchInput.addEventListener('input', onInput);
         }
 
         document.addEventListener('DOMContentLoaded', function() {

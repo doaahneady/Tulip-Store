@@ -145,6 +145,9 @@
             <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <h3 class="text-base font-bold text-gray-900">المنتجات</h3>
                 <form method="GET" action="{{ route('dashboard.admin.mart.index') }}" class="flex flex-wrap items-center gap-2">
+                    @if(request()->has('missing_photo'))
+                        <input type="hidden" name="missing_photo" value="{{ request('missing_photo') }}">
+                    @endif
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="بحث بالاسم أو SKU" class="form-input text-xs w-48 md:w-64">
                     <select name="category_id" class="form-select text-xs w-40">
                         <option value="">كل التصنيفات</option>
@@ -176,6 +179,17 @@
                         <i class="fas fa-filter"></i>
                         تصفية
                     </button>
+                    @if(($missingPhoto ?? false) === true)
+                        <a href="{{ route('dashboard.admin.mart.index', array_diff_key(request()->query(), ['missing_photo' => true])) }}" class="btn btn-ghost btn-xs text-[10px]">
+                            <i class="fas fa-list"></i>
+                            عرض الكل
+                        </a>
+                    @else
+                        <a href="{{ route('dashboard.admin.mart.index', array_merge(request()->query(), ['missing_photo' => 1])) }}" class="btn btn-warning btn-xs text-[10px]">
+                            <i class="fas fa-image"></i>
+                            بدون صورة
+                        </a>
+                    @endif
                     <a class="btn btn-secondary btn-xs text-[10px]" href="{{ route('dashboard.admin.export.products', array_merge(request()->query(), ['format' => 'csv'])) }}">
                         <i class="fas fa-download"></i>
                         تصدير
@@ -239,7 +253,15 @@
                                 <td>
                                     <input type="checkbox" class="product-checkbox" name="product_ids[]" value="{{ $p->id }}">
                                 </td>
-                                <td class="font-semibold text-gray-900">{{ $p->name }}</td>
+                                <td class="font-semibold text-gray-900">
+                                    @php $hasPhoto = (bool) ($p->has_uploaded_photo ?? false); @endphp
+                                    <div class="flex items-center gap-2">
+                                        <span class="truncate">{{ $p->name }}</span>
+                                        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] @if($hasPhoto) bg-emerald-100 text-emerald-700 @else bg-red-100 text-red-700 @endif" title="{{ $hasPhoto ? 'يوجد صورة' : 'بدون صورة' }}">
+                                            <i class="fas fa-image"></i>
+                                        </span>
+                                    </div>
+                                </td>
                                 <td class="text-gray-600">{{ $p->sku ?? '-' }}</td>
                                 <td class="text-gray-600">{{ $p->category->name ?? '-' }}</td>
                                 <td class="text-gray-600">{{ $p->subcategory->name ?? '-' }}</td>

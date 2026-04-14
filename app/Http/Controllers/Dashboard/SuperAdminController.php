@@ -1593,6 +1593,7 @@ class SuperAdminController extends Controller
     {
         $categories = null;
         $products = null;
+        $missingPhoto = $request->boolean('missing_photo');
 
         if (Schema::hasTable('categories')) {
             $categoriesQuery = Category::query()
@@ -1627,12 +1628,83 @@ class SuperAdminController extends Controller
                 })
                 ->when($request->category_id, fn ($q, $id) => $q->where('category_id', $id))
                 ->when($request->subcategory_id && Schema::hasColumn('products', 'subcategory_id'), fn ($q, $id) => $q->where('subcategory_id', $id))
+                ->when($missingPhoto, function ($q) {
+                    if (Schema::hasColumn('products', 'image')) {
+                        $q->where(function ($qq) {
+                            $qq->whereNull('image')->orWhere('image', '');
+                        });
+                    }
+                    if (Schema::hasColumn('products', 'photo')) {
+                        $q->where(function ($qq) {
+                            $qq->whereNull('photo')->orWhere('photo', '');
+                        });
+                    }
+                    if (Schema::hasColumn('products', 'image_path')) {
+                        $q->where(function ($qq) {
+                            $qq->whereNull('image_path')->orWhere('image_path', '');
+                        });
+                    }
+                    if (Schema::hasColumn('products', 'images')) {
+                        $q->where(function ($qq) {
+                            $qq->whereNull('images')->orWhere('images', '')->orWhere('images', '[]');
+                        });
+                    }
+                })
                 ->orderBy('created_at', 'desc')
                 ->paginate(25)
                 ->withQueryString();
         }
 
-        return view('dashboards.super-admin.mart', compact('categories', 'products'));
+        if ($products && method_exists($products, 'getCollection')) {
+            $products->setCollection(
+                $products->getCollection()->map(function ($p) {
+                    $p->has_uploaded_photo = $this->productHasUploadedPhoto($p);
+                    return $p;
+                })
+            );
+        }
+
+        return view('dashboards.super-admin.mart', compact('categories', 'products', 'missingPhoto'));
+    }
+
+    private function productHasUploadedPhoto(Product $product): bool
+    {
+        $fallbacks = [
+            '/images/tulip_mart.jpg',
+            '/images/tulip_gift.jpg',
+            '/images/tulip_store.jpg',
+        ];
+
+        $raw = null;
+        if (Schema::hasColumn('products', 'image')) {
+            $raw = $product->getAttribute('image');
+        }
+        if (! $raw) {
+            $raw = $product->getAttribute('photo') ?: $product->getAttribute('image_path');
+        }
+
+        $path = str_replace('\\', '/', trim((string) ($raw ?? '')));
+        if ($path !== '' && ! in_array($path, $fallbacks, true)) {
+            return true;
+        }
+
+        if (Schema::hasColumn('products', 'images')) {
+            $imgs = $product->getAttribute('images');
+            if (is_array($imgs) && count($imgs) > 0) {
+                $first = $imgs[0];
+                if (is_array($first)) {
+                    $candidate = $first['path'] ?? $first['url'] ?? null;
+                } else {
+                    $candidate = $first;
+                }
+                $candidate = str_replace('\\', '/', trim((string) ($candidate ?? '')));
+                if ($candidate !== '' && ! in_array($candidate, $fallbacks, true)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private function generateUniqueSku(string $prefix, ?int $ignoreProductId = null): string

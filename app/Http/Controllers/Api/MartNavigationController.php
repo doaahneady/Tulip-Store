@@ -18,29 +18,38 @@ class MartNavigationController extends Controller
             return response()->json(['data' => []]);
         }
 
-        $cacheKey = 'mart:navigation:v1';
+        $cacheKey = 'mart:navigation:v2';
 
         $payload = Cache::remember($cacheKey, now()->addMinutes(10), function () {
-            $categoriesQuery = Category::query();
+            $buildCategoriesQuery = function (bool $preferMartOnly) {
+                $categoriesQuery = Category::query();
 
-            if (Schema::hasColumn('categories', 'is_active')) {
-                $categoriesQuery->where('is_active', true);
+                if (Schema::hasColumn('categories', 'is_active')) {
+                    $categoriesQuery->where('is_active', true);
+                }
+
+                if ($preferMartOnly) {
+                    if (Schema::hasColumn('categories', 'market')) {
+                        $categoriesQuery->where('market', 'mart');
+                    } elseif (Schema::hasColumn('categories', 'slug')) {
+                        $martSlugs = ['fruits', 'vegetables', 'khdroaat', 'khodraat', 'mart-fruits', 'mart-vegetables', 'dairy', 'bakery', 'grocery'];
+                        $categoriesQuery->whereIn('slug', $martSlugs);
+                    }
+                }
+
+                if (Schema::hasColumn('categories', 'display_order')) {
+                    $categoriesQuery->orderBy('display_order');
+                }
+
+                $categoriesQuery->orderBy('name');
+
+                return $categoriesQuery;
+            };
+
+            $categories = $buildCategoriesQuery(true)->get();
+            if ($categories->isEmpty()) {
+                $categories = $buildCategoriesQuery(false)->get();
             }
-
-            if (Schema::hasColumn('categories', 'market')) {
-                $categoriesQuery->where('market', 'mart');
-            } elseif (Schema::hasColumn('categories', 'slug')) {
-                $martSlugs = ['fruits', 'vegetables', 'khdroaat', 'khodraat', 'mart-fruits', 'mart-vegetables', 'dairy', 'bakery', 'grocery'];
-                $categoriesQuery->whereIn('slug', $martSlugs);
-            }
-
-            if (Schema::hasColumn('categories', 'display_order')) {
-                $categoriesQuery->orderBy('display_order');
-            }
-
-            $categoriesQuery->orderBy('name');
-
-            $categories = $categoriesQuery->get();
 
             $subcategories = collect();
             if (Schema::hasTable('subcategories')) {
@@ -156,4 +165,3 @@ class MartNavigationController extends Controller
         ]);
     }
 }
-
