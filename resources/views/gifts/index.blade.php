@@ -405,7 +405,8 @@
          <!--  comming sooon!!!!!!!!!!!!!!!!  -->
         <div class="premium-cards">
             <!-- Custom Box Card -->
-            <div class="premium-card box-card" onclick="window.location.href='/gifts/box-arrangement'">
+             <!-- onclick="window.location.href='/gifts/box-arrangement'" تم تعليق هذا المسار حتى يتم تجهيز الصفحة  -->
+            <div class="premium-card box-card" >
                 <div class="card-visual">
                    
                     <img id="boxCardImage" src="/images/box.jpg" alt="Gift Box" class="card-image" loading="lazy" >
@@ -427,7 +428,8 @@
             </div>
 
             <!-- Custom Bouquet Card -->
-            <div class="premium-card flower-card" onclick="window.location.href='/gifts/flower-bouquet'">
+             <!-- onclick="window.location.href='/gifts/flower-bouquet'" تم تعليق هذا المسار حتى يتم تجهيز الصفحة  -->
+            <div class="premium-card flower-card">
                 <div class="card-visual">
                    
                     <img id="bouquetCardImage" src="/images/Bouquet.jpg" alt="Rose Bouquet" class="card-image" loading="lazy">
