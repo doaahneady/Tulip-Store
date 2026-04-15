@@ -17,6 +17,29 @@ class CartController extends Controller
         return Schema::hasTable('carts') && Schema::hasTable('cart_items');
     }
 
+    /**
+     * Cart badge count should represent the number of distinct items (lines),
+     * not the sum of quantities.
+     */
+    protected function distinctCartCount(): int
+    {
+        $customGifts = Session::get('custom_gifts', []);
+        $martProducts = Session::get('mart_products', []);
+
+        // Logged-in users: count DB cart lines + session-based custom gifts + mart products.
+        if (Auth::check() && $this->canUseDatabaseCart()) {
+            $this->mergeSessionCartIntoDatabaseCart();
+            $dbCart = $this->getOrCreateDatabaseCart();
+            $dbDistinct = $dbCart ? (int) $dbCart->items()->count() : 0;
+
+            return $dbDistinct + (int) count($customGifts) + (int) count($martProducts);
+        }
+
+        // Guests (or when DB cart isn't available): count session cart keys + custom gifts + mart products.
+        $cart = Session::get('cart', []);
+        return (int) count($cart) + (int) count($customGifts) + (int) count($martProducts);
+    }
+
     protected function getOrCreateDatabaseCart(): ?Cart
     {
         if (! Auth::check() || ! $this->canUseDatabaseCart()) {
@@ -157,7 +180,7 @@ class CartController extends Controller
                 ];
             }
 
-            $count = (int) array_sum(array_map(fn ($i) => (int) ($i['quantity'] ?? 0), $items));
+            $count = $this->distinctCartCount();
             $total = $subtotal;
 
             return response()->json([
@@ -249,7 +272,7 @@ class CartController extends Controller
         $total = $subtotal;
 
         // Calculate actual count from valid items only
-        $count = array_sum(array_column($cartItems, 'quantity'));
+        $count = $this->distinctCartCount();
 
         return response()->json([
             'items' => $cartItems,
@@ -313,10 +336,7 @@ class CartController extends Controller
 
             Session::put('mart_products', $martProducts);
 
-            // Calculate total count
-            $cart = Session::get('cart', []);
-            $customGifts = Session::get('custom_gifts', []);
-            $totalCount = array_sum($cart) + count($customGifts) + array_sum(array_column($martProducts, 'quantity'));
+            $totalCount = $this->distinctCartCount();
 
             return response()->json([
                 'success' => true,
@@ -366,10 +386,7 @@ class CartController extends Controller
             $cartItem->unit_price = $product->discount_price ?? $product->price;
             $cartItem->save();
 
-            $dbCart->load('items');
-            $totalCount = (int) $dbCart->items->sum(fn ($i) => (int) $i->quantity)
-                + (int) count(Session::get('custom_gifts', []))
-                + (int) array_sum(array_column(Session::get('mart_products', []), 'quantity'));
+            $totalCount = $this->distinctCartCount();
         } else {
             $product = Product::findOrFail($productId);
             $cart = Session::get('cart', []);
@@ -398,9 +415,7 @@ class CartController extends Controller
             $cart[$productId] = $newQty;
             Session::put('cart', $cart);
 
-            $customGifts = Session::get('custom_gifts', []);
-            $martProducts = Session::get('mart_products', []);
-            $totalCount = array_sum($cart) + count($customGifts) + array_sum(array_column($martProducts, 'quantity'));
+            $totalCount = $this->distinctCartCount();
         }
 
         return response()->json([
@@ -445,7 +460,7 @@ class CartController extends Controller
             }
             Session::put('mart_products', $martProducts);
 
-            $cartCount = array_sum($cart) + count(Session::get('custom_gifts', [])) + array_sum(array_column($martProducts, 'quantity'));
+            $cartCount = $this->distinctCartCount();
 
             return response()->json([
                 'success' => true,
@@ -484,10 +499,7 @@ class CartController extends Controller
                 $item->save();
             }
 
-            $dbCart->load('items');
-            $totalCount = (int) $dbCart->items->sum(fn ($i) => (int) $i->quantity)
-                + (int) count(Session::get('custom_gifts', []))
-                + (int) array_sum(array_column(Session::get('mart_products', []), 'quantity'));
+            $totalCount = $this->distinctCartCount();
 
             return response()->json([
                 'success' => true,
@@ -514,9 +526,7 @@ class CartController extends Controller
 
         Session::put('cart', $cart);
 
-        $customGifts = Session::get('custom_gifts', []);
-        $martProducts = Session::get('mart_products', []);
-        $cartCount = array_sum($cart) + count($customGifts) + array_sum(array_column($martProducts, 'quantity'));
+        $cartCount = $this->distinctCartCount();
 
         return response()->json([
             'success' => true,
@@ -578,16 +588,7 @@ class CartController extends Controller
             }
         }
 
-        // Calculate total count
-        $cart = Session::get('cart', []);
-        $customGifts = Session::get('custom_gifts', []);
-        $martProducts = Session::get('mart_products', []);
-        $dbCount = 0;
-        if (Auth::check() && $this->canUseDatabaseCart()) {
-            $dbCart = Cart::where('user_id', Auth::id())->with('items')->first();
-            $dbCount = $dbCart ? (int) $dbCart->items->sum(fn ($i) => (int) $i->quantity) : 0;
-        }
-        $cartCount = $dbCount + array_sum($cart) + count($customGifts) + array_sum(array_column($martProducts, 'quantity'));
+        $cartCount = $this->distinctCartCount();
 
         return response()->json([
             'success' => true,

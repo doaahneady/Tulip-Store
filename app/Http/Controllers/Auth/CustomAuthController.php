@@ -217,6 +217,7 @@ class CustomAuthController extends Controller
         $request->validate([
             'email' => 'required|string',
             'password' => 'required|string',
+            'redirect' => 'nullable|string',
         ]);
 
         if (\Illuminate\Support\Facades\Schema::hasTable('ip_blacklists')) {
@@ -292,7 +293,24 @@ class CustomAuthController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'تم تسجيل الدخول بنجاح',
-                'redirect' => '/',
+                // Prefer explicit redirect from UI (e.g. /login?redirect=/cart),
+                // then Laravel intended URL, then fallback to home.
+                'redirect' => (function () use ($request) {
+                    $explicit = (string) ($request->input('redirect') ?? '');
+                    $explicit = trim($explicit);
+
+                    // Prevent open-redirect: allow only local paths starting with "/"
+                    if ($explicit !== '' && str_starts_with($explicit, '/')) {
+                        return $explicit;
+                    }
+
+                    $intended = (string) ($request->session()->pull('url.intended') ?? '');
+                    if ($intended !== '' && str_starts_with($intended, '/')) {
+                        return $intended;
+                    }
+
+                    return '/';
+                })(),
             ]);
         }
 
@@ -417,6 +435,6 @@ class CustomAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/ar-login');
+        return redirect('/');
     }
 }

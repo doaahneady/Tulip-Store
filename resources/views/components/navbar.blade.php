@@ -429,9 +429,10 @@ function handleLogout() {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
             }
         }).then(() => {
-            window.location.href = '/ar-login';
+            // Force a real reload (avoid staying on same cached page)
+            window.location.replace('/?logout=1');
         }).catch(() => {
-            window.location.href = '/ar-login';
+            window.location.replace('/?logout=1');
         });
     }
 }

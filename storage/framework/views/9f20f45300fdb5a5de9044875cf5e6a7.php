@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>إتمام عملية الدفع - Tulip Store</title>
     <!-- fav icon -->
    <link rel="icon" type="image/png" sizes="48x48" href="/images/fav_icon-v1.png">
     
-    <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
+    <link rel="stylesheet" href="/css/store.css?v=<?php echo e(time()); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <meta name="description" content="اكتشف Tulip Store، منصة تسوق إلكتروني متكاملة تتيح لك الشراء أو إنشاء متجرك الخاص والربح بسهولة، مع توصيل سريع وطرق دفع آمنة وتجربة استخدام مريحة.">
@@ -200,16 +200,16 @@
 </head>
 <body style="margin:0; font-family:'El Messiri',sans-serif; background:#f5f5f5;" class="step-1">
 
-@if(View::exists('components.navbar'))
-    @include('components.navbar')
-@endif
+<?php if(View::exists('components.navbar')): ?>
+    <?php echo $__env->make('components.navbar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+<?php endif; ?>
 
-@guest
+<?php if(auth()->guard()->guest()): ?>
 <script>
     // Redirect to login if not authenticated
     window.location.href = '/login?redirect=/checkout';
 </script>
-@endguest
+<?php endif; ?>
 
 <!-- Policy Acceptance Modal -->
 <div id="policyModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:10000; align-items:center; justify-content:center; overflow-y:auto; padding:2rem 0;">
@@ -952,15 +952,16 @@
 <script>
     // User data from Laravel
     window.userData = {
-        name: '{{ auth()->user()->name ?? "" }}',
-        email: '{{ auth()->user()->email ?? "" }}',
-        phone: '{{ auth()->user()->phone ?? "" }}',
-        balance: {{ (float) (auth()->user()->balance ?? 0) }}
+        name: '<?php echo e(auth()->user()->name ?? ""); ?>',
+        email: '<?php echo e(auth()->user()->email ?? ""); ?>',
+        phone: '<?php echo e(auth()->user()->phone ?? ""); ?>',
+        balance: <?php echo e((float) (auth()->user()->balance ?? 0)); ?>
+
     };
 </script>
 
 <!-- Checkout JavaScript -->
-<script src="/js/checkout.js?v={{ time() }}"></script>
+<script src="/js/checkout.js?v=<?php echo e(time()); ?>"></script>
 
 <script>
     // Initialize map when page loads
@@ -972,3 +973,4 @@
 </script>
 </body>
 </html>
+<?php /**PATH E:\Tulip-Store\resources\views/checkout.blade.php ENDPATH**/ ?>

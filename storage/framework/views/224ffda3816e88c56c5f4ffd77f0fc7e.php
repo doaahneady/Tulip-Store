@@ -415,6 +415,8 @@
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPass').value;
+            const params = new URLSearchParams(window.location.search || '');
+            const redirect = params.get('redirect');
             const errorMsg = document.getElementById('errorMsg');
             const submitBtn = e.target.querySelector('.action-btn');
 
@@ -449,13 +451,15 @@
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ email, password, redirect })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    window.location.href = data.redirect;
+                    // Prefer explicit redirect param when present (e.g. /login?redirect=/cart)
+                    const safeRedirect = (redirect && String(redirect).startsWith('/')) ? redirect : null;
+                    window.location.href = safeRedirect || data.redirect || '/';
                 } else {
                     errorMsg.textContent = data.message;
                     errorMsg.classList.add('show');

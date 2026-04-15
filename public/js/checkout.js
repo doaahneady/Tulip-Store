@@ -45,7 +45,7 @@ async function refreshHasMartItems() {
 // Multiple storage locations in Sweida
 const storageLocations = [
     // Only one storage point (Sweida city) as requested
-    { name: 'المستودع الرئيسي - السويداء', lat: 32.7081, lng: 36.5675 }
+    { name: 'Tulip mart توليب مارت', lat: 32.749925, lng: 36.573006 }
 ];
 
 let nearestStorage = null;
@@ -230,7 +230,7 @@ function initMap() {
     try {
         // Create Leaflet Map centered on Sweida, Syria
         map = L.map('map', {
-            center: [32.7081, 36.5675],
+            center: [32.749925, 36.573006],
             zoom: 12,
             scrollWheelZoom: true, // Enable scroll without Ctrl
             dragging: true,

@@ -850,11 +850,11 @@
                         <div class="cart-item-stock"><i class="fas fa-check-circle"></i> متوفر في المخزون</div>
                         <div class="cart-item-price-section">
                             <div class="cart-item-price">
-                                $${price.toFixed(2)}
-                                ${oldPrice ? `<span class="cart-item-price-old">$${oldPrice.toFixed(2)}</span>` : ''}
+                                ${window.formatMoney ? window.formatMoney(price) : ('$' + price.toFixed(2))}
+                                ${oldPrice ? `<span class="cart-item-price-old">${window.formatMoney ? window.formatMoney(oldPrice) : ('$' + oldPrice.toFixed(2))}</span>` : ''}
                             </div>
-                            ${savings > 0 ? `<div class="cart-item-savings">وفّر $${savings.toFixed(2)}</div>` : ''}
-                            <div class="cart-item-subtotal">المجموع الفرعي: $${itemTotal.toFixed(2)}</div>
+                            ${savings > 0 ? `<div class="cart-item-savings">وفّر ${window.formatMoney ? window.formatMoney(savings) : ('$' + savings.toFixed(2))}</div>` : ''}
+                            <div class="cart-item-subtotal">المجموع الفرعي: ${window.formatMoney ? window.formatMoney(itemTotal) : ('$' + itemTotal.toFixed(2))}</div>
                         </div>
                     </div>
                     <div class="cart-item-actions-column">
@@ -890,7 +890,7 @@
                         </div>
                         <div class="summary-row">
                             <span>المجموع الفرعي (${data.count} ${data.count === 1 ? 'منتج' : 'منتجات'})</span>
-                            <span class="summary-value">$${data.subtotal.toFixed(2)}</span>
+                            <span class="summary-value">${window.formatMoney ? window.formatMoney(data.subtotal) : ('$' + data.subtotal.toFixed(2))}</span>
                         </div>
                         ${appliedCoupon ? `
                         <div class="summary-row" style="color:#16a34a;">
@@ -898,12 +898,12 @@
                                 <i class="fas fa-tag"></i>
                                 خصم (${appliedCoupon.discount_percentage}%)
                             </span>
-                            <span class="summary-value">-$${couponDiscount.toFixed(2)}</span>
+                            <span class="summary-value">-${window.formatMoney ? window.formatMoney(couponDiscount) : ('$' + couponDiscount.toFixed(2))}</span>
                         </div>
                         ` : ''}
                         <div class="summary-row total">
                             <span>الإجمالي</span>
-                            <span class="summary-value">$${finalTotal.toFixed(2)}</span>
+                            <span class="summary-value">${window.formatMoney ? window.formatMoney(finalTotal) : ('$' + finalTotal.toFixed(2))}</span>
                         </div>
                         
                         <!-- Coupon Input Section -->
@@ -1109,6 +1109,12 @@
             const total = parseFloat((totalText || '').replace(/[^0-9.]/g, '')) || 0;
             const balance = CUSTOMER_BALANCE === null ? 0 : parseFloat(CUSTOMER_BALANCE || 0);
             const canPay = IS_AUTHENTICATED && balance + 1e-9 >= total;
+
+            // If user is not logged in, redirect to login then back to cart (not homepage)
+            if (!IS_AUTHENTICATED) {
+                window.location.href = '/login?redirect=/cart';
+                return;
+            }
 
             // Save coupon to session storage for checkout
             if (appliedCoupon) {
