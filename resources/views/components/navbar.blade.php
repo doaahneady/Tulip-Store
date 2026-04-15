@@ -41,7 +41,7 @@
         </div>
       </div>
       @else
-      <div class="nav-icon-item" onclick="window.location.href='/ar-login'">
+      <div class="nav-icon-item" onclick="window.location.href='/login?redirect=' + encodeURIComponent(window.location.pathname + window.location.search)">
         <i class="fas fa-user icon-user"></i>
         <span class="icon-label user-label">
           <i class="fas fa-user"></i>
@@ -382,15 +382,35 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
 
+                const fmtPrice = (p) => {
+                    const n = Number(p?.discount_price ?? p?.price ?? 0) || 0;
+                    const pref = (window.getCurrencyPreference ? window.getCurrencyPreference() : 'USD');
+                    const cur = (pref === 'SYP' || pref === 'USD') ? pref : 'USD';
+                    const rate = Number(window.TULIP_USD_TO_SYP || 117) || 117;
+
+                    // Mart prices are stored/displayed in SYP, store prices are stored in USD.
+                    if (market === 'mart') {
+                        if (cur === 'USD') {
+                            const usd = n / rate;
+                            return '$' + usd.toFixed(2);
+                        }
+                        return Math.round(n).toLocaleString() + ' SYP';
+                    }
+
+                    return window.formatMoney ? window.formatMoney(n) : ('$' + n.toFixed(2));
+                };
+
+                const hrefFor = (p) => `/products/${p.id}`;
+
                 searchResults.innerHTML = products.map(product => `
-                    <div class="search-result-item" onclick="window.location.href='/products/${product.id}'">
+                    <a class="search-result-item" href="${hrefFor(product)}" style="text-decoration:none;color:inherit;">
                         <i class="fas fa-search search-result-icon"></i>
                         <div class="search-result-info">
                             <div class="search-result-name">${product.name}</div>
-                            <div class="search-result-price">${product.price} ل.س</div>
+                            <div class="search-result-price">${fmtPrice(product)}</div>
                         </div>
                         <img src="${product.primary_image_url || product.image || (Array.isArray(product.images) ? product.images[0] : null) || '/images/tulip_store.jpg'}" class="search-result-img" alt="${product.name}" loading="lazy" onerror="this.src='/images/tulip_store.jpg'">
-                    </div>
+                    </a>
                 `).join('');
             })
             .catch(err => {

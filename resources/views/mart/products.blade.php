@@ -1562,11 +1562,10 @@
         function createProductCard(p) {
             const fav = favoriteIds.has(String(p.id));
             return `
-                <div class="product-card" data-id="${p.id}">
+                <div class="product-card" data-id="${p.id}" onclick="window.location.href='/products/${p.id}'">
                     <div class="product-badges">
                         ${p.badge === 'sale' ? '<span class="badge badge-sale">عرض</span>' : ''}
                         ${p.badge === 'new' ? '<span class="badge badge-new">جديد</span>' : ''}
-                        ${p.badge === 'fresh' ? '<span class="badge badge-fresh">طازج</span>' : ''}
                     </div>
                     <div class="product-image">
                         <button class="product-favorite" onclick="toggleFavorite('${p.id}', this)">

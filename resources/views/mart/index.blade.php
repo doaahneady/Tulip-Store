@@ -1174,11 +1174,10 @@
         function createProductCard(p) {
             const isFav = favoriteIds.has(String(p.id));
             return `
-                <div class="product-card" data-id="${p.id}">
+                <div class="product-card" data-id="${p.id}" onclick="window.location.href='/products/${p.id}'">
                     <div class="product-badges">
                         ${p.isFeatured ? '<span class="badge badge-new">مميز</span>' : ''}
                         ${p.badge === 'sale' ? '<span class="badge badge-sale">عرض</span>' : ''}
-                        ${p.badge === 'fresh' ? '<span class="badge badge-fresh">طازج</span>' : ''}
                     </div>
                     <div class="product-image" style="background-image: url('${p.fallbackImage}'); background-size: cover; background-position: center;">
                         <button class="product-favorite" onclick="toggleFavorite('${p.id}', event)">

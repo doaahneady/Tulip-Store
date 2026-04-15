@@ -641,23 +641,17 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
-// Calculate delivery cost based on distance
-// 100 SYP per KM for first 20 KM, then 1000 SYP per KM after that
+// Calculate delivery cost based on distance (SYP)
+// Base: 10000 SYP for first 3 KM, then +2000 SYP for each additional KM (rounded up).
 function calculateDeliveryCost() {
     if (!deliveryDistance) return 0;
     
-    let totalCost = 0;
-    
-    if (deliveryDistance <= 20) {
-        // First 20 km: 100 SYP per km
-        totalCost = deliveryDistance * 100;
-    } else {
-        // First 20 km at 100 SYP/km + remaining distance at 1000 SYP/km
-        const first20km = 20 * 100; // 2000 SYP
-        const remainingDistance = deliveryDistance - 20;
-        const remainingCost = remainingDistance * 1000;
-        totalCost = first20km + remainingCost;
-    }
+    const baseDistanceKm = 3;
+    const baseFee = 10000;
+    const extraFeePerKm = 2000;
+    const extraDistance = Math.max(0, deliveryDistance - baseDistanceKm);
+    const extraKmCharged = Math.ceil(extraDistance);
+    let totalCost = baseFee + (extraKmCharged * extraFeePerKm);
     
     // Apply delivery type multiplier
     let multiplier = 1;

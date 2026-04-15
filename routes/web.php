@@ -739,7 +739,14 @@ Route::view('/ar-verify-registration', 'pages.ar-verify-registration');
 Route::view('/ar-reset-password', 'pages.ar-reset-password');
 
 // Override Laravel login (forces custom UI at /login)
-Route::view('/login', 'pages.ar-login')->name('login');
+// Also persist ?redirect=/path into Laravel's intended URL to support "login then return".
+Route::get('/login', function (\Illuminate\Http\Request $request) {
+    $redirect = trim((string) $request->query('redirect', ''));
+    if ($redirect !== '' && str_starts_with($redirect, '/')) {
+        $request->session()->put('url.intended', $redirect);
+    }
+    return view('pages.ar-login');
+})->name('login');
 
 // Override Laravel register (forces custom UI at /register)
 Route::view('/register', 'pages.ar-signup')->name('register');

@@ -553,6 +553,10 @@
                     <span class="mobile-section-title">المعلومات الشخصية</span>
                 </div>
                 <div class="section-inner">
+                    <a href="/" style="display:inline-flex;align-items:center;gap:0.5rem;text-decoration:none;color:#0f4f55;font-weight:800;background:#f0f9fa;border:1px solid #dbeafe;padding:0.55rem 0.9rem;border-radius:12px;margin-bottom:0.8rem;">
+                        <i class="fas fa-arrow-right"></i>
+                        <span>رجوع للرئيسية</span>
+                    </a>
                     <h2 class="section-title"><i class="fas fa-user-edit"></i> المعلومات الشخصية</h2>
                     <form id="profileForm" onsubmit="saveProfile(event)">
                         <div class="form-row">
