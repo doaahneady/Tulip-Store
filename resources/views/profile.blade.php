@@ -76,7 +76,26 @@
             padding: 2rem;
             text-align: center;
             color: white;
+            position: relative;
         }
+        .sidebar-home-btn{
+            display: none;
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 2;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border: 0;
+            border-radius: 12px;
+            padding: 0.55rem 0.75rem;
+            font-weight: 800;
+            text-decoration: none;
+            align-items: center;
+            gap: 0.45rem;
+            backdrop-filter: blur(8px);
+        }
+        .sidebar-home-btn:hover{ background: rgba(255,255,255,0.35); }
         .profile-avatar {
             width: 100px; height: 100px; border-radius: 50%;
             background: rgba(255,255,255,0.2);
@@ -368,6 +387,9 @@
                 padding: 3rem 1.5rem 2rem;
                 flex-shrink: 0;
             }
+            .sidebar-home-btn{
+                display: inline-flex;
+            }
             .profile-avatar {
                 width: 80px; height: 80px; font-size: 2rem;
             }
@@ -447,7 +469,27 @@
                 font-family: 'El Messiri', sans-serif;
                 font-size: 1.15rem;
                 font-weight: 700;
+                flex: 1;
+                text-align: center;
             }
+
+            .mobile-home-btn{
+                width: 38px;
+                height: 38px;
+                background: rgba(255,255,255,0.2);
+                border: none;
+                border-radius: 10px;
+                color: white;
+                font-size: 1.1rem;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background 0.2s;
+                flex-shrink: 0;
+                text-decoration: none;
+            }
+            .mobile-home-btn:hover { background: rgba(255,255,255,0.35); }
 
             /* ---- المحتوى الداخلي للقسم ---- */
             .section-inner {
@@ -491,6 +533,10 @@
         <!-- ============ SIDEBAR ============ -->
         <div class="profile-sidebar" id="profileSidebar">
             <div class="profile-header">
+                <a class="sidebar-home-btn" href="/" title="الرئيسية">
+                    <i class="fas fa-home"></i>
+                    <span>الرئيسية</span>
+                </a>
                 <div class="profile-avatar" id="profileAvatar">
                     <img
                         id="profilePhotoPreviewImg"
@@ -551,6 +597,9 @@
                         <i class="fas fa-arrow-right"></i>
                     </button>
                     <span class="mobile-section-title">المعلومات الشخصية</span>
+                    <a class="mobile-home-btn" href="/" title="الرئيسية">
+                        <i class="fas fa-home"></i>
+                    </a>
                 </div>
                 <div class="section-inner">
                     <a href="/" style="display:inline-flex;align-items:center;gap:0.5rem;text-decoration:none;color:#0f4f55;font-weight:800;background:#f0f9fa;border:1px solid #dbeafe;padding:0.55rem 0.9rem;border-radius:12px;margin-bottom:0.8rem;">
@@ -628,6 +677,9 @@
                         <i class="fas fa-arrow-right"></i>
                     </button>
                     <span class="mobile-section-title">عناويني</span>
+                    <a class="mobile-home-btn" href="/" title="الرئيسية">
+                        <i class="fas fa-home"></i>
+                    </a>
                 </div>
                 <div class="section-inner">
                     <h2 class="section-title"><i class="fas fa-map-marker-alt"></i> عناويني</h2>
@@ -645,6 +697,9 @@
                         <i class="fas fa-arrow-right"></i>
                     </button>
                     <span class="mobile-section-title">طلباتي</span>
+                    <a class="mobile-home-btn" href="/" title="الرئيسية">
+                        <i class="fas fa-home"></i>
+                    </a>
                 </div>
                 <div class="section-inner">
                     <h2 class="section-title"><i class="fas fa-box-open"></i> طلباتي</h2>
@@ -661,6 +716,9 @@
                         <i class="fas fa-arrow-right"></i>
                     </button>
                     <span class="mobile-section-title">بطاقاتي</span>
+                    <a class="mobile-home-btn" href="/" title="الرئيسية">
+                        <i class="fas fa-home"></i>
+                    </a>
                 </div>
                 <div class="section-inner">
                     <h2 class="section-title"><i class="fas fa-credit-card"></i> بطاقاتي</h2>
@@ -702,6 +760,9 @@
                         <i class="fas fa-arrow-right"></i>
                     </button>
                     <span class="mobile-section-title">الإشعارات</span>
+                    <a class="mobile-home-btn" href="/" title="الرئيسية">
+                        <i class="fas fa-home"></i>
+                    </a>
                 </div>
                 <div class="section-inner">
                     <h2 class="section-title"><i class="fas fa-bell"></i> الإشعارات</h2>
@@ -718,6 +779,9 @@
                         <i class="fas fa-arrow-right"></i>
                     </button>
                     <span class="mobile-section-title">الدعم التقني</span>
+                    <a class="mobile-home-btn" href="/" title="الرئيسية">
+                        <i class="fas fa-home"></i>
+                    </a>
                 </div>
                 <div class="section-inner">
                     <h2 class="section-title"><i class="fas fa-headset"></i> الدعم التقني</h2>
@@ -740,6 +804,9 @@
                         <i class="fas fa-arrow-right"></i>
                     </button>
                     <span class="mobile-section-title">تسجيل خروج</span>
+                    <a class="mobile-home-btn" href="/" title="الرئيسية">
+                        <i class="fas fa-home"></i>
+                    </a>
                 </div>
                 <div class="section-inner">
                     <h2 class="section-title"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</h2>
@@ -763,6 +830,9 @@
                         <i class="fas fa-arrow-right"></i>
                     </button>
                     <span class="mobile-section-title">الأمان</span>
+                    <a class="mobile-home-btn" href="/" title="الرئيسية">
+                        <i class="fas fa-home"></i>
+                    </a>
                 </div>
                 <div class="section-inner">
                     <h2 class="section-title"><i class="fas fa-lock"></i> الأمان</h2>

@@ -23,6 +23,9 @@
             --primary-dark: #047857;
             --secondary: #f59e0b;
             --accent: #ef4444;
+            /* Match mart/products cart button style */
+            --teal: #0f4f55;
+            --teal-dark: #0a3b40;
             --success: #22c55e;
             --warning: #f59e0b;
             --info: #3b82f6;
@@ -575,34 +578,27 @@
             gap: 0.3rem;
         }
         .product-footer {
-            display: block;
-            padding-top: 0.75rem;
-            border-top: 1px solid var(--border);
-        }
-        .price-info {
             display: flex;
-            flex-direction: row;
-            align-items: baseline;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-bottom: 0.5rem;
+            flex-direction: column;
+            gap: 0.8rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border);
+            margin-top: 0.5rem;
+        }
+        .price-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
         }
         .price-current {
             font-family:'El Messiri',sans-serif;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 700;
             color: var(--primary-dark);
         }
-        .price-old {
-            font-size: 0.8rem;
-            color: #9ca3af;
-            text-decoration: line-through;
-        }
-        .price-unit {
-            font-size: 0.75rem;
-            color: var(--text-light);
-            margin-inline-start: auto;
-        }
+        .price-old { font-size: 0.75rem; color: #94a3b8; text-decoration: line-through; }
+        .price-unit { font-size: 0.7rem; color: var(--text-light); }
         /* Modern Add to Cart Button over image */
         .cart-control-wrapper {
             position: absolute;
@@ -617,9 +613,9 @@
         }
 
         .add-btn-circle {
-            width: 40px;
-            height: 40px;
-            background: var(--primary);
+            width: 36px;
+            height: 36px;
+            background: var(--teal);
             color: #fff;
             border: none;
             border-radius: 50%;
@@ -627,31 +623,31 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(15, 79, 85, 0.3);
             transition: all 0.3s ease;
         }
 
         .add-btn-circle:hover {
             transform: scale(1.1);
-            background: var(--primary-dark);
+            background: var(--teal-dark);
         }
 
         .counter-control {
             display: none;
             width: 100%;
-            background: var(--primary);
+            background: var(--teal);
             color: #fff;
             border-radius: 25px;
-            padding: 5px;
+            padding: 4px;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+            box-shadow: 0 4px 15px rgba(15, 79, 85, 0.4);
             animation: expandWidth 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         @keyframes expandWidth {
-            from { width: 40px; border-radius: 50%; }
+            from { width: 36px; border-radius: 50%; }
             to { width: 100%; border-radius: 25px; }
         }
 
@@ -660,8 +656,8 @@
         }
 
         .counter-btn {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             border: none;
             background: rgba(255, 255, 255, 0.2);
@@ -671,7 +667,7 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
 
         .counter-btn:hover {
@@ -681,8 +677,8 @@
         .counter-value {
             font-family: 'Tajawal', sans-serif;
             font-weight: 700;
-            font-size: 1.1rem;
-            min-width: 30px;
+            font-size: 1rem;
+            min-width: 25px;
             text-align: center;
         }
 
@@ -1124,31 +1120,8 @@
                 return { id: slug, name: c.name || slug, image, color: p.color, gradient: p.gradient, productsCount: countsByCategory[slug] };
             });
 
-            sliderItems = [];
-            apiCategories.forEach((c, i) => {
-                const p = palette[i % palette.length];
-                const parentSlug = c.slug;
-                if (!parentSlug) return;
-                const parentName = c.name || parentSlug;
-                const image = resolvePublicImage(c.image_url || c.image) || '/images/tulip_mart.jpg';
-                const subs = Array.isArray(c.subcategories) ? c.subcategories : [];
-
-                subs.forEach((s) => {
-                    const subSlug = s.slug;
-                    if (!subSlug) return;
-                    sliderItems.push({
-                        id: `${parentSlug}/${subSlug}`,
-                        parentSlug,
-                        parentName,
-                        subSlug,
-                        name: s.name || subSlug,
-                        image,
-                        color: p.color,
-                        gradient: p.gradient,
-                        productsCount: Number(s.products_count || 0),
-                    });
-                });
-            });
+            // Slider should show main categories (not subcategories)
+            sliderItems = [...categories];
 
             products = {};
             allProductsFlat = apiProducts.map(normalizeApiProduct);
@@ -1194,13 +1167,12 @@
             const displayItems = sliderItems.slice(0, 7);
             const currentUrl = new URL(window.location.href);
             const activeCategory = currentUrl.searchParams.get('category');
-            const activeSub = currentUrl.searchParams.get('subcategory');
 
             let html = displayItems.map(c => {
-                const isActive = activeCategory === c.parentSlug && (!activeSub || activeSub === c.subSlug);
+                const isActive = activeCategory === c.id;
                 return `
                     <div class="sidebar-item ${isActive ? 'active' : ''}" 
-                         onclick="openMartSection('${c.parentSlug}', '${c.subSlug || ''}')" 
+                         onclick="openMartSection('${c.id}', '')" 
                          title="${c.name}">
                         <div class="sidebar-icon">
                             <img src="${c.image}" alt="${c.name}" onerror="this.src='/images/tulip_mart.jpg'">
@@ -1312,8 +1284,8 @@
             return `
                 <div class="product-card" data-id="${p.id}" onclick="window.location.href='/products/${p.id}'">
                     <div class="product-badges">
-                        ${p.isFeatured ? '<span class="badge badge-new">مميز</span>' : ''}
                         ${p.badge === 'sale' ? '<span class="badge badge-sale">عرض</span>' : ''}
+                        ${p.isFeatured ? '<span class="badge badge-new">جديد</span>' : ''}
                     </div>
                     <div class="product-image" style="background-image: url('${p.fallbackImage}'); background-size: cover; background-position: center;">
                         <button class="product-favorite" onclick="toggleFavorite('${p.id}', event)">
@@ -1345,10 +1317,12 @@
                             ${p.origin}
                         </div>
                         <div class="product-footer">
-                            <div class="price-info">
-                                <span class="price-current">${window.formatMoney ? window.formatMoney(p.price) : (p.price + ' ل.س')}</span>
-                                ${p.oldPrice ? `<span class="price-old">${window.formatMoney ? window.formatMoney(p.oldPrice) : (p.oldPrice + ' ل.س')}</span>` : ''}
-                                <span class="price-unit">${p.unit ? `لكل ${p.unit}` : ''}</span>
+                            <div class="price-wrapper">
+                                <div class="price-current">
+                                    ${window.formatMoney ? window.formatMoney(p.price) : (p.price + ' ل.س')}
+                                    ${p.unit ? `<span class="price-unit">لكل ${p.unit}</span>` : ''}
+                                </div>
+                                ${p.oldPrice ? `<div class="price-old">${window.formatMoney ? window.formatMoney(p.oldPrice) : (p.oldPrice + ' ل.س')}</div>` : ''}
                             </div>
                         </div>
                     </div>
@@ -1479,13 +1453,50 @@
                 if (addBtn) addBtn.style.display = 'flex';
                 countSpan.textContent = '1';
                 
-                // Optionally call API to remove or decrease
-                addToCart(productId, -1);
+                // Remove from cart (quantity 0) instead of sending negative quantity
+                await setCartQuantity(productId, 0);
                 return;
             }
-            
-            countSpan.textContent = newCount;
-            addToCart(productId, delta);
+
+            // Increase uses /api/cart/add (delta +1), decrease uses /api/cart/update (absolute)
+            let ok = true;
+            if (delta > 0) {
+                ok = await addToCart(productId, 1);
+            } else {
+                ok = await setCartQuantity(productId, newCount);
+            }
+            if (ok) countSpan.textContent = String(newCount);
+        }
+
+        async function setCartQuantity(productId, quantity) {
+            try {
+                const response = await fetch('/api/cart/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        item_id: productId,
+                        quantity: quantity
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({ message: 'غير قادر على تحديث السلة' }));
+                    if (window.showToast) window.showToast(errData.message || 'غير قادر على تحديث السلة', 'error');
+                    return false;
+                }
+
+                const data = await response.json();
+                if (window.updateCartCount) window.updateCartCount(data.cart_count || data.count || 0);
+                return true;
+            } catch (error) {
+                console.error('Error updating cart:', error);
+                return false;
+            }
         }
 
         async function addToCart(productId, quantity = 1, event) {
@@ -1525,7 +1536,7 @@
                     if (window.showToast) {
                         window.showToast(errData.message || 'غير قادر على تحديث السلة', 'error');
                     }
-                    return;
+                    return false;
                 }
 
                 const data = await response.json();
@@ -1543,6 +1554,7 @@
                     window.showToast('تم تحديث ' + product.name + ' في السلة', 'success');
                 }
                 
+                return true;
             } catch (error) {
                 console.error('Error updating cart:', error);
                 if (window.showToast) window.showToast('خطأ في الاتصال بالخادم.', 'error');
