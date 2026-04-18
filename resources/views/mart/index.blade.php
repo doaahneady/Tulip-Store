@@ -346,104 +346,6 @@
             margin: 0 auto;
         }
 
-        /* Categories Grid - Horizontal Scroll */
-        .categories-grid {
-            display: flex;
-            gap: 1.5rem;
-            margin-top: 3rem;
-            overflow-x: auto;
-            overflow-y: hidden;
-            padding-bottom: 1rem;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-            scrollbar-color: #e5e7eb transparent;
-        }
-        .categories-grid::-webkit-scrollbar {
-            height: 8px;
-        }
-        .categories-grid::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 4px;
-        }
-        .categories-grid::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-            transition: background 0.3s ease;
-        }
-        .categories-grid::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        .category-card {
-            background: var(--card);
-            border-radius: 24px;
-            padding: 0;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            border: 2px solid transparent;
-            position: relative;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            min-width: 180px;
-            max-width: 180px;
-            flex-shrink: 0;
-        }
-        .category-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: var(--cat-gradient);
-            transform: scaleX(0);
-            transition: transform 0.4s ease;
-            z-index: 2;
-        }
-        .category-card:hover::before {
-            transform: scaleX(1);
-        }
-        .category-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            border-color: var(--cat-color);
-        }
-        .category-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            display: block;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
-        }
-        .category-photo {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            height: auto;
-            object-fit: cover;
-            border-radius: 0;
-            margin-bottom: 0.75rem;
-            display: block;
-        }
-        .category-info {
-            padding: 0 1rem 1.2rem;
-        }
-        .category-name {
-            font-family: 'El Messiri', sans-serif;
-            font-size: 1.15rem;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 0.2rem;
-        }
-        .category-count {
-            font-size: 0.8rem;
-            color: var(--text-light);
-            background: var(--bg);
-            padding: 0.2rem 0.8rem;
-            border-radius: 20px;
-            display: inline-block;
-        }
         /* Daily Prices Feature */
         .daily-prices-feature {
            
@@ -701,29 +603,92 @@
             color: var(--text-light);
             margin-inline-start: auto;
         }
-        .add-to-cart {
+        /* Modern Add to Cart Button over image */
+        .cart-control-wrapper {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            left: 12px;
             display: flex;
+            justify-content: flex-end;
             align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.6rem 1rem;
+            z-index: 10;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .add-btn-circle {
+            width: 40px;
+            height: 40px;
             background: var(--primary);
             color: #fff;
             border: none;
-            border-radius: 12px;
+            border-radius: 50%;
             cursor: pointer;
-            font-family: 'El Messiri', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
             transition: all 0.3s ease;
-            width: 100%;
         }
-        .add-to-cart:hover {
+
+        .add-btn-circle:hover {
+            transform: scale(1.1);
             background: var(--primary-dark);
-            transform: scale(1.05);
         }
-        .add-to-cart.added {
-            background: var(--success);
+
+        .counter-control {
+            display: none;
+            width: 100%;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 25px;
+            padding: 5px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+            animation: expandWidth 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes expandWidth {
+            from { width: 40px; border-radius: 50%; }
+            to { width: 100%; border-radius: 25px; }
+        }
+
+        .counter-control.active {
+            display: flex;
+        }
+
+        .counter-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .counter-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .counter-value {
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        /* Hide default footer button */
+        .product-footer .add-to-cart {
+            display: none;
         }
         /* Responsive Design */
         @media (max-width: 1200px) {
@@ -744,19 +709,6 @@
         }
         @media (max-width: 768px) {
             .hero-title { font-size: 2.5rem; }
-            .categories-grid { 
-                gap: 1rem !important;
-                padding: 0 1rem 1rem 1rem;
-                margin: 3rem -1rem 0 -1rem;
-            }
-            .category-card {
-                min-width: 140px !important;
-                max-width: 140px !important;
-                border-radius: 12px !important;
-            }
-            .category-name { font-size: 0.85rem !important; }
-            .category-count { display: none; } /* Hide count on mobile to save space */
-            .category-info { padding: 0 0.4rem 0.6rem !important; }
             .products-grid { 
                 grid-template-columns: repeat(2, 1fr) !important; 
                 gap: 1rem !important;
@@ -814,15 +766,6 @@
             }
         }
         @media (max-width: 480px) {
-            .categories-grid { 
-                gap: 0.8rem !important;
-                padding: 0 1rem 1rem 1rem;
-                margin: 3rem -1rem 0 -1rem;
-            }
-            .category-card {
-                min-width: 120px !important;
-                max-width: 120px !important;
-            }
             .products-grid { 
                 grid-template-columns: repeat(2, 1fr) !important; 
                 gap: 0.5rem !important;
@@ -832,22 +775,200 @@
             .main-circle { width: 250px; height: 250px; }
             .main-icon { font-size: 5rem; }
         }
+        /* Modern Collapsible Sidebar */
+        .mart-sidebar {
+            position: fixed;
+            top: 80px;
+            right: 10px;
+            width: 80px;
+            background: #ffffff;
+            border-radius: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            z-index: 2000; /* Higher than footer's 1001 */
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 0;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Layout Wrapper to handle side-by-side on mobile */
+        .mart-layout-container {
+            display: flex;
+            flex-direction: row-reverse;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .mart-sidebar:hover {
+            width: 240px;
+            border-radius: 24px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 0.4rem 0.8rem;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(5, 150, 105, 0.05);
+            color: var(--primary);
+        }
+
+        .sidebar-item.active {
+            background: var(--primary);
+            color: #fff !important;
+        }
+
+        .sidebar-icon {
+            width: 50px;
+            height:50px;
+            min-width: 50px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: #f8fafc;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            /* border: 2px solid #000; */
+           /* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); */
+        }
+
+        .sidebar-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sidebar-item:hover .sidebar-icon {
+            background: var(--primary);
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .sidebar-item.active .sidebar-icon {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+
+        .sidebar-text {
+            font-family: 'El Messiri', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .mart-sidebar:hover .sidebar-text {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        /* Mobile View for Sidebar */
+        @media (max-width: 768px) {
+            .mart-layout-container {
+                padding: 0 10px;
+                gap: 10px;
+            }
+            .mart-sidebar {
+                position: sticky; /* Make it part of the flow instead of fixed/overlay */
+                top: 20px;
+                right: 0;
+                width: 60px !important;
+                height: fit-content;
+                max-height: calc(100vh - 40px);
+                border-radius: 20px;
+                padding: 1rem 0;
+                flex-shrink: 0;
+                z-index: 100;
+            }
+            .mart-sidebar:hover {
+                width: 60px !important;
+            }
+            .sidebar-text {
+                display: none !important;
+            }
+            .sidebar-item {
+                padding: 0.2rem;
+                justify-content: center;
+            }
+            .sidebar-icon {
+                width: 32px;
+                height: 32px;
+                min-width: 32px;
+            }
+            .main-content {
+                margin-right: 0 !important;
+                flex: 1;
+                width: 0; /* Allow flex to shrink if needed */
+            }
+        }
+
+        @media (min-width: 769px) {
+            .main-content {
+                margin-right: 100px;
+                width: 100%;
+            }
+        }
+        /* Responsive Utilities */
+        @media (max-width: 768px) {
+            .hide-mobile { display: none !important; }
+            .show-mobile { display: flex !important; }
+            .mobile-view-all {
+                margin: 2rem auto 0;
+                width: fit-content;
+                justify-content: center;
+            }
+        }
+        @media (min-width: 769px) {
+            .show-mobile { display: none !important; }
+        }
     </style>
 
     <div ><img src="{{ asset('images/panner_mart.png') }}" alt="" style="width: 100%;"></div>
-    <div class="main-content">
-        <!-- Categories Section -->
+    
+    <div class="mart-layout-container">
+        <!-- Collapsible Sidebar -->
+        <div class="mart-sidebar" id="martSidebar">
+            <!-- Will be populated by JS -->
+        </div>
+        
+        <div class="main-content">
+           <!-- Fresh Products -->
         <section class="section">
-            <div class="section-header">
-                <h2 class="section-title">تسوق حسب الأقسام</h2>
-                <p class="section-subtitle">اختر من مجموعة واسعة من الأقسام المتنوعة لتلبية جميع احتياجاتك اليومية</p>
+            <div class="section-header" style="display:flex; align-items:center; gap:1rem;">
+                <div>
+                    <h2 class="section-title"> آخر الإضافات</h2>
+                    <p class="section-subtitle">منتجات وصلت اليوم</p>
+                </div>
+                <a href="/mart/products" class="view-all-btn hide-mobile" style="margin-inline-start:auto; display:inline-flex; align-items:center; gap:.5rem;">
+                    <i class="fas fa-arrow-left"></i>
+                    عرض المزيد
+                </a>
             </div>
-            <div class="categories-grid" id="categoriesGrid">
-
+            <div class="products-grid" id="freshProducts"></div>
+            <!-- Mobile Only View More -->
+            <div class="show-mobile mobile-view-all">
+                <a href="/mart/products" class="view-all-btn" style="display:inline-flex; align-items:center; gap:.5rem;">
+                    <i class="fas fa-arrow-left"></i>
+                    عرض المزيد
+                </a>
             </div>
-        </section>
-
-        <!-- Daily Prices Feature -->
+        </section>   <!-- Daily Prices Feature -->
         <section class="daily-prices-feature">
             <div class="section-header">
                 <h2 class="section-title">أسعار الفواكه والخضروات اليوم</h2>
@@ -892,20 +1013,8 @@
             <div class="products-grid" id="featuredProducts"></div>
         </section>
 
-        <!-- Fresh Products -->
-        <section class="section">
-            <div class="section-header" style="display:flex; align-items:center; gap:1rem;">
-                <div>
-                    <h2 class="section-title"> آخر الإضافات</h2>
-                    <p class="section-subtitle">منتجات وصلت اليوم</p>
-                </div>
-                <a href="/mart/products" class="view-all-btn" style="margin-inline-start:auto; display:inline-flex; align-items:center; gap:.5rem;">
-                    <i class="fas fa-arrow-left"></i>
-                    عرض المزيد
-                </a>
-            </div>
-            <div class="products-grid" id="freshProducts"></div>
-        </section>
+      
+    </div>
     </div>
     <!-- Footer -->
    <div style="position:relative; z-index:1001;">
@@ -979,7 +1088,8 @@
                 category: categoryName,
                 categorySlug,
                 imageUrl: resolvePublicImage(imagePath),
-                fallbackImage: '/images/tulip_mart.jpg'
+                fallbackImage: '/images/tulip_mart.jpg',
+                stock: p.stock || 999999 // Assume 999999 if stock is not provided
             };
         }
 
@@ -1077,15 +1187,40 @@
         }
 
         function loadCategories() {
-            document.getElementById('categoriesGrid').innerHTML = sliderItems.map(c => `
-                <div class="category-card" style="--cat-color: ${c.color}; --cat-gradient: ${c.gradient}" onclick="openMartSection('${c.parentSlug}', '${c.subSlug || ''}')">
-                    <img src="${c.image}" alt="${c.name}" class="category-photo">
-                    <div class="category-info">
-                        <div class="category-name">${c.name}</div>
-                        ${c.subSlug ? `<div class="category-count">${c.parentName}</div>` : ''}
+            const sidebar = document.getElementById('martSidebar');
+            if (!sidebar) return;
+
+            // Limit to 7 items + 1 "View All" = 8 items total as requested
+            const displayItems = sliderItems.slice(0, 7);
+            const currentUrl = new URL(window.location.href);
+            const activeCategory = currentUrl.searchParams.get('category');
+            const activeSub = currentUrl.searchParams.get('subcategory');
+
+            let html = displayItems.map(c => {
+                const isActive = activeCategory === c.parentSlug && (!activeSub || activeSub === c.subSlug);
+                return `
+                    <div class="sidebar-item ${isActive ? 'active' : ''}" 
+                         onclick="openMartSection('${c.parentSlug}', '${c.subSlug || ''}')" 
+                         title="${c.name}">
+                        <div class="sidebar-icon">
+                            <img src="${c.image}" alt="${c.name}" onerror="this.src='/images/tulip_mart.jpg'">
+                        </div>
+                        <span class="sidebar-text">${c.name}</span>
                     </div>
+                `;
+            }).join('');
+
+            // Add "View All" button as the 8th item
+            html += `
+                <div class="sidebar-item" onclick="window.location.href='/mart/products'" title="عرض الكل">
+                    <div class="sidebar-icon" style="background: var(--primary); color: #fff;">
+                        <i class="fas fa-th-large"></i>
+                    </div>
+                    <span class="sidebar-text">كل الأقسام</span>
                 </div>
-            `).join('');
+            `;
+
+            sidebar.innerHTML = html;
         }
 
         function openMartSection(categorySlug, subSlug) {
@@ -1150,8 +1285,9 @@
             const picked = [];
             const seen = new Set();
 
+            // Show 10 products for Fresh Products section as requested
             for (const p of sorted) {
-                if (picked.length >= 5) break;
+                if (picked.length >= 10) break;
                 if (p.isFeatured) continue;
                 const id = String(p.id);
                 if (seen.has(id)) continue;
@@ -1159,9 +1295,9 @@
                 picked.push(p);
             }
 
-            if (picked.length < 5) {
+            if (picked.length < 10) {
                 for (const p of sorted) {
-                    if (picked.length >= 5) break;
+                    if (picked.length >= 10) break;
                     const id = String(p.id);
                     if (seen.has(id)) continue;
                     seen.add(id);
@@ -1184,6 +1320,22 @@
                             <i class="${isFav ? 'fas' : 'far'} fa-heart"></i>
                         </button>
                         ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}">` : ''}
+                        
+                        <!-- Floating Cart Control -->
+                        <div class="cart-control-wrapper" id="cart-wrapper-${p.id}" onclick="event.stopPropagation()">
+                            <button class="add-btn-circle" onclick="initCartCounter('${p.id}', event)" id="add-btn-${p.id}">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <div class="counter-control" id="counter-${p.id}">
+                                <button class="counter-btn" onclick="updateQuantity('${p.id}', -1, event)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span class="counter-value" id="count-${p.id}">1</span>
+                                <button class="counter-btn" onclick="updateQuantity('${p.id}', 1, event)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <div class="product-body">
                         <div class="product-category">${p.category}</div>
@@ -1198,10 +1350,6 @@
                                 ${p.oldPrice ? `<span class="price-old">${window.formatMoney ? window.formatMoney(p.oldPrice) : (p.oldPrice + ' ل.س')}</span>` : ''}
                                 <span class="price-unit">${p.unit ? `لكل ${p.unit}` : ''}</span>
                             </div>
-                            <button class="add-to-cart" onclick="addToCart('${p.id}', event)" id="btn-${p.id}">
-                                <i class="fas fa-plus"></i>
-                                أضف
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -1294,19 +1442,62 @@
             setIcon(persistLocalFavorite(id));
         }
 
-        async function addToCart(productId, event) {
+        async function initCartCounter(productId, event) { // Make it async
             if (event) event.stopPropagation();
             
-            const btn = document.getElementById(`btn-${productId}`);
-            const originalContent = btn.innerHTML;
+            const addBtn = document.getElementById(`add-btn-${productId}`);
+            const counter = document.getElementById(`counter-${productId}`);
+            const wrapper = document.getElementById(`cart-wrapper-${productId}`);
+            
+            if (!addBtn || !counter || !wrapper) return;
+
+            // Initial add to cart (quantity 1)
+            const success = await addToCart(productId, 1); // Await the result
+
+            if (success) { // Only update UI if successful
+                addBtn.style.display = 'none';
+                counter.classList.add('active');
+                document.getElementById(`count-${productId}`).textContent = '1'; // Set initial count
+            }
+        }
+
+        async function updateQuantity(productId, delta, event) {
+            if (event) event.stopPropagation();
+            
+            const countSpan = document.getElementById(`count-${productId}`);
+            if (!countSpan) return;
+
+            let currentCount = parseInt(countSpan.textContent);
+            let newCount = currentCount + delta;
+            
+            if (newCount < 1) {
+                // Reset to circle button
+                const addBtn = document.getElementById(`add-btn-${productId}`);
+                const counter = document.getElementById(`counter-${productId}`);
+                
+                if (counter) counter.classList.remove('active');
+                if (addBtn) addBtn.style.display = 'flex';
+                countSpan.textContent = '1';
+                
+                // Optionally call API to remove or decrease
+                addToCart(productId, -1);
+                return;
+            }
+            
+            countSpan.textContent = newCount;
+            addToCart(productId, delta);
+        }
+
+        async function addToCart(productId, quantity = 1, event) {
+            if (event) event.stopPropagation();
             
             // Find product
             const product = Object.values(products).flat().find(p => String(p.id) === String(productId));
-            if (!product) return;
-            
-            // Show loading
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            btn.disabled = true;
+            if (!product) {
+                console.error('Product not found for addToCart:', productId);
+                if (window.showToast) window.showToast('خطأ: المنتج غير موجود.', 'error');
+                return false; // Return false on product not found
+            }
             
             try {
                 const response = await fetch('/api/cart/add', {
@@ -1316,31 +1507,28 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
                         'Accept': 'application/json'
                     },
+                    credentials: 'same-origin',
                     body: JSON.stringify({
                         product_id: productId,
                         product_type: 'mart',
                         name: product.name,
                         price: product.price,
-                        quantity: 1,
+                        quantity: quantity,
                         image: getProductImage(product),
                         unit: product.unit,
                         emoji: product.emoji
                     })
                 });
+
                 if (!response.ok) {
-                    const errData = await response.json().catch(() => ({}));
+                    const errData = await response.json().catch(() => ({ message: 'غير قادر على تحديث السلة' }));
                     if (window.showToast) {
-                        window.showToast(errData.message || 'غير قادر على إضافة المنتج للسلة');
-                    } else {
-                        alert(errData.message || 'غير قادر على إضافة المنتج للسلة');
+                        window.showToast(errData.message || 'غير قادر على تحديث السلة', 'error');
                     }
-                    throw new Error(errData.message || 'Add to cart failed');
+                    return;
                 }
+
                 const data = await response.json();
-                
-                // Show success
-                btn.innerHTML = '<i class="fas fa-check"></i> تمت الإضافة';
-                btn.classList.add('added');
                 
                 // Update cart count
                 if (window.updateCartCount) {
@@ -1349,28 +1537,16 @@
                 if (window.animateCartIcon) {
                     window.animateCartIcon();
                 }
-                if (window.showToast) {
-                    window.showToast('تمت إضافة ' + product.name + ' إلى السلة');
-                    // Mart delivery warning
-                    setTimeout(() => {
-                        window.showToast('تنبيه: منتجات Mart تتوفر للتوصيل فقط إلى (السويداء، عتيل، قنوات)', 4000);
-                    }, 1500);
+
+                // Only show success toast if quantity > 0 (not a pure removal operation, which updateQuantity handles)
+                if (quantity > 0 && window.showToast) {
+                    window.showToast('تم تحديث ' + product.name + ' في السلة', 'success');
                 }
                 
-                // Reset button after delay
-                setTimeout(() => {
-                    btn.innerHTML = originalContent;
-                    btn.classList.remove('added');
-                    btn.disabled = false;
-                }, 2500);
-                
             } catch (error) {
-                console.error('Error adding to cart:', error);
-                btn.innerHTML = '<i class="fas fa-times"></i> خطأ';
-                setTimeout(() => {
-                    btn.innerHTML = originalContent;
-                    btn.disabled = false;
-                }, 2000);
+                console.error('Error updating cart:', error);
+                if (window.showToast) window.showToast('خطأ في الاتصال بالخادم.', 'error');
+                return false; // Return false on network/other error
             }
         }
 

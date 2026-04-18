@@ -509,6 +509,94 @@
         .price-old { font-size: 0.75rem; color: #94a3b8; text-decoration: line-through; }
         .price-unit { font-size: 0.7rem; color: var(--muted); }
 
+        /* Modern Add to Cart Button over image */
+        .cart-control-wrapper {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            left: 12px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            z-index: 10;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .add-btn-circle {
+            width: 36px;
+            height: 36px;
+            background: var(--teal);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(15, 79, 85, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .add-btn-circle:hover {
+            transform: scale(1.1);
+            background: var(--teal-dark);
+        }
+
+        .counter-control {
+            display: none;
+            width: 100%;
+            background: var(--teal);
+            color: #fff;
+            border-radius: 25px;
+            padding: 4px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(15, 79, 85, 0.4);
+            animation: expandWidth 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes expandWidth {
+            from { width: 36px; border-radius: 50%; }
+            to { width: 100%; border-radius: 25px; }
+        }
+
+        .counter-control.active {
+            display: flex;
+        }
+
+        .counter-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .counter-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .counter-value {
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            min-width: 25px;
+            text-align: center;
+        }
+
+        /* Hide default footer button */
+        .product-footer .add-cart-btn {
+            display: none;
+        }
+
         .add-cart-btn {
             display: flex;
             align-items: center;
@@ -1572,6 +1660,22 @@
                             <i class="${fav ? 'fas' : 'far'} fa-heart"></i>
                         </button>
                         <img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.src='/images/tulip_mart.jpg';">
+                        
+                        <!-- Floating Cart Control -->
+                        <div class="cart-control-wrapper" id="cart-wrapper-${p.id}" onclick="event.stopPropagation()">
+                            <button class="add-btn-circle" onclick="initCartCounter('${p.id}', event)" id="add-btn-${p.id}">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <div class="counter-control" id="counter-${p.id}">
+                                <button class="counter-btn" onclick="updateQuantity('${p.id}', -1, event)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span class="counter-value" id="count-${p.id}">1</span>
+                                <button class="counter-btn" onclick="updateQuantity('${p.id}', 1, event)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <div class="product-body">
                         <div class="product-category">${p.category}</div>
@@ -1586,10 +1690,6 @@
                                 ${p.oldPrice ? `<span class="price-old">${window.formatMoney ? window.formatMoney(p.oldPrice) : (p.oldPrice + ' ل.س')}</span>` : ''}
                                 <span class="price-unit">${p.unit ? `لكل ${p.unit}` : ''}</span>
                             </div>
-                            <button class="add-cart-btn" onclick="addToCart('${p.id}', this)" id="btn-${p.id}">
-                                <i class="fas fa-plus"></i>
-                                أضف
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -1815,17 +1915,55 @@
             setIcon(localState);
         }
 
-        async function addToCart(productId, source) {
-            const e = (source && source.preventDefault) ? source : (window.event || null);
+        function initCartCounter(productId, event) {
+            if (event) event.stopPropagation();
+            
+            const addBtn = document.getElementById(`add-btn-${productId}`);
+            const counter = document.getElementById(`counter-${productId}`);
+            const wrapper = document.getElementById(`cart-wrapper-${productId}`);
+            
+            if (!addBtn || !counter || !wrapper) return;
+
+            addBtn.style.display = 'none';
+            counter.classList.add('active');
+            
+            // Initial add to cart (quantity 1)
+            addToCart(productId, 1);
+        }
+
+        async function updateQuantity(productId, delta, event) {
+            if (event) event.stopPropagation();
+            
+            const countSpan = document.getElementById(`count-${productId}`);
+            if (!countSpan) return;
+
+            let currentCount = parseInt(countSpan.textContent);
+            let newCount = currentCount + delta;
+            
+            if (newCount < 1) {
+                // Reset to circle button
+                const addBtn = document.getElementById(`add-btn-${productId}`);
+                const counter = document.getElementById(`counter-${productId}`);
+                
+                if (counter) counter.classList.remove('active');
+                if (addBtn) addBtn.style.display = 'flex';
+                countSpan.textContent = '1';
+                
+                // Optionally call API to remove or decrease
+                addToCart(productId, -1);
+                return;
+            }
+            
+            countSpan.textContent = newCount;
+            addToCart(productId, delta);
+        }
+
+        async function addToCart(productId, quantity = 1, event) {
+            const e = (event && event.preventDefault) ? event : (window.event || null);
             if (e && e.stopPropagation) e.stopPropagation();
 
-            const btn = document.getElementById(`btn-${productId}`);
-            const originalContent = btn.innerHTML;
             const product = allProducts.find(p => String(p.id) === String(productId));
             if (!product) return;
-
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            btn.disabled = true;
 
             try {
                 const response = await fetch('/api/cart/add', {
@@ -1841,44 +1979,33 @@
                         product_type: 'mart',
                         name: product.name,
                         price: product.price,
-                        quantity: 1,
+                        quantity: quantity,
                         image: product.image,
                         unit: product.unit,
                         emoji: product.emoji
                     })
                 });
-                const data = await response.json();
-                
+
                 if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
                     if (window.showToast) {
-                        window.showToast(data.message || 'غير قادر على إضافة المنتج للسلة');
-                    } else {
-                        alert(data.message || 'غير قادر على إضافة المنتج للسلة');
+                        window.showToast(errData.message || 'غير قادر على تحديث السلة');
                     }
-                    btn.innerHTML = originalContent;
-                    btn.disabled = false;
                     return;
                 }
 
-                btn.innerHTML = '<i class="fas fa-check"></i> تمت الإضافة';
-                btn.classList.add('added');
+                const data = await response.json();
+                
+                // Update cart count
                 if (window.updateCartCount) window.updateCartCount(data.count || 0);
                 if (window.animateCartIcon) window.animateCartIcon();
-                if (window.showToast) {
-                    window.showToast('تمت إضافة ' + product.name + ' إلى السلة');
-                    setTimeout(() => {
-                        window.showToast('تنبيه: منتجات Mart تتوفر للتوصيل فقط إلى (السويداء، عتيل، قنوات)', 4000);
-                    }, 1500);
+
+                if (quantity > 0 && window.showToast) {
+                    window.showToast('تم تحديث ' + product.name + ' في السلة');
                 }
-                setTimeout(() => {
-                    btn.innerHTML = originalContent;
-                    btn.classList.remove('added');
-                    btn.disabled = false;
-                }, 2000);
+                
             } catch (error) {
-                console.error('Error adding to cart:', error);
-                btn.innerHTML = '<i class="fas fa-times"></i> خطأ';
-                setTimeout(() => { btn.innerHTML = originalContent; btn.disabled = false; }, 2000);
+                console.error('Error updating cart:', error);
             }
         }
 

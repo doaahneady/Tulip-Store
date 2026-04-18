@@ -21,7 +21,7 @@ class WishlistController extends Controller
 
         $path = trim(str_replace('\\', '/', (string) $raw));
         if ($path === '') {
-            return '/images/banner1.jpg';
+            return '/images/tulip_store.jpg';
         }
         if (Str::startsWith($path, ['http://', 'https://'])) {
             return $path;

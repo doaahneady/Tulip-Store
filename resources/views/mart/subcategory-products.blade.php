@@ -234,6 +234,94 @@
             margin-inline-start: auto;
         }
         
+        /* Modern Add to Cart Button over image */
+        .cart-control-wrapper {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            left: 12px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            z-index: 10;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .add-btn-circle {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .add-btn-circle:hover {
+            transform: scale(1.1);
+            background: var(--primary-dark);
+        }
+
+        .counter-control {
+            display: none;
+            width: 100%;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 25px;
+            padding: 5px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+            animation: expandWidth 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes expandWidth {
+            from { width: 40px; border-radius: 50%; }
+            to { width: 100%; border-radius: 25px; }
+        }
+
+        .counter-control.active {
+            display: flex;
+        }
+
+        .counter-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .counter-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .counter-value {
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        /* Hide default footer button */
+        .product-footer .add-to-cart {
+            display: none;
+        }
+
         .add-to-cart {
             display: flex;
             align-items: center;
@@ -251,12 +339,10 @@
             transition: all 0.3s ease;
             width: 100%;
         }
-        
         .add-to-cart:hover {
             background: var(--primary-dark);
             transform: scale(1.05);
         }
-        
         .add-to-cart.added {
             background: var(--success);
         }
@@ -375,6 +461,7 @@
                 });
                 const data = await response.json();
                 const products = Array.isArray(data.data) ? data.data : [];
+                window.martProductsList = products; // Store for counter functions
                 
                 if (products.length === 0) {
                     document.getElementById('productsGrid').innerHTML = '<div style="grid-column:1/-1; text-align:center; color:#6b7280; padding:4rem;">لا توجد منتجات</div>';
@@ -406,6 +493,22 @@
                             <i class="${isFav ? 'fas' : 'far'} fa-heart"></i>
                         </button>
                         <img src="${imageUrl}" alt="${p.name}" onerror="this.src='/images/tulip_store.jpg'">
+                        
+                        <!-- Floating Cart Control -->
+                        <div class="cart-control-wrapper" id="cart-wrapper-${p.id}" onclick="event.stopPropagation()">
+                            <button class="add-btn-circle" onclick="initCartCounter('${p.id}', event)" id="add-btn-${p.id}">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <div class="counter-control" id="counter-${p.id}">
+                                <button class="counter-btn" onclick="updateQuantity('${p.id}', -1, event)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span class="counter-value" id="count-${p.id}">1</span>
+                                <button class="counter-btn" onclick="updateQuantity('${p.id}', 1, event)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="product-body">
@@ -421,10 +524,6 @@
                                 ${oldPrice ? `<span class="price-old">${window.formatMoney ? window.formatMoney(oldPrice) : (oldPrice.toFixed(2) + ' $')}</span>` : ''}
                                 <span class="price-unit">لكل ${unit}</span>
                             </div>
-                            <button class="add-to-cart" onclick="addToCart(${p.id}, event)" id="btn-${p.id}">
-                                <i class="fas fa-plus"></i>
-                                أضف
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -515,15 +614,55 @@
             setIcon(favoriteIds.has(id));
         }
         
-        async function addToCart(productId, event) {
+        function initCartCounter(productId, event) {
             if (event) event.stopPropagation();
             
-            const btn = document.getElementById(`btn-${productId}`);
-            const originalContent = btn.innerHTML;
+            const addBtn = document.getElementById(`add-btn-${productId}`);
+            const counter = document.getElementById(`counter-${productId}`);
+            const wrapper = document.getElementById(`cart-wrapper-${productId}`);
             
-            // Show loading
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            btn.disabled = true;
+            if (!addBtn || !counter || !wrapper) return;
+
+            addBtn.style.display = 'none';
+            counter.classList.add('active');
+            
+            // Initial add to cart (quantity 1)
+            addToCart(productId, 1);
+        }
+
+        async function updateQuantity(productId, delta, event) {
+            if (event) event.stopPropagation();
+            
+            const countSpan = document.getElementById(`count-${productId}`);
+            if (!countSpan) return;
+
+            let currentCount = parseInt(countSpan.textContent);
+            let newCount = currentCount + delta;
+            
+            if (newCount < 1) {
+                // Reset to circle button
+                const addBtn = document.getElementById(`add-btn-${productId}`);
+                const counter = document.getElementById(`counter-${productId}`);
+                
+                if (counter) counter.classList.remove('active');
+                if (addBtn) addBtn.style.display = 'flex';
+                countSpan.textContent = '1';
+                
+                // Optionally call API to remove or decrease
+                addToCart(productId, -1);
+                return;
+            }
+            
+            countSpan.textContent = newCount;
+            addToCart(productId, delta);
+        }
+
+        async function addToCart(productId, quantity = 1, event) {
+            if (event) event.stopPropagation();
+            
+            // Find product
+            const product = (window.martProductsList || []).find(p => String(p.id) === String(productId));
+            if (!product) return;
             
             try {
                 const response = await fetch('/api/cart/add', {
@@ -535,48 +674,36 @@
                     },
                     body: JSON.stringify({
                         product_id: productId,
-                        quantity: 1
+                        product_type: 'mart',
+                        name: product.name,
+                        price: product.discount_price || product.price,
+                        quantity: quantity,
+                        image: product.primary_image_url || product.image,
+                        unit: (product.attributes?.find(a => a.name === 'unit')?.value) || product.unit,
+                        emoji: product.emoji
                     })
                 });
                 
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    if (window.showToast) {
+                        window.showToast(errData.message || 'غير قادر على تحديث السلة');
+                    }
+                    return;
+                }
+
                 const data = await response.json();
                 
-                if (data.success) {
-                    // Update cart count in navbar
-                    if (typeof window.updateCartCount === 'function') {
-                        window.updateCartCount(data.cart_count || data.count || 0);
-                    }
-                    
-                    // Animate cart icon
-                    if (typeof window.animateCartIcon === 'function') {
-                        window.animateCartIcon();
-                    }
-                    
-                    // Show success
-                    btn.innerHTML = '<i class="fas fa-check"></i> تمت';
-                    btn.classList.add('added');
-                    
-                    // Show toast
-                    if (typeof window.showToast === 'function') {
-                        window.showToast('✓ تم إضافة المنتج إلى السلة');
-                    }
-                    
-                    // Reset button after 2 seconds
-                    setTimeout(() => {
-                        btn.disabled = false;
-                        btn.innerHTML = originalContent;
-                        btn.classList.remove('added');
-                    }, 2000);
-                } else {
-                    btn.disabled = false;
-                    btn.innerHTML = originalContent;
-                    alert(data.message || 'حدث خطأ أثناء إضافة المنتج');
+                // Update cart count
+                if (window.updateCartCount) window.updateCartCount(data.count || 0);
+                if (window.animateCartIcon) window.animateCartIcon();
+
+                if (quantity > 0 && window.showToast) {
+                    window.showToast('تم تحديث ' + product.name + ' في السلة');
                 }
+                
             } catch (error) {
-                console.error('Error:', error);
-                btn.disabled = false;
-                btn.innerHTML = originalContent;
-                alert('حدث خطأ أثناء إضافة المنتج');
+                console.error('Error updating cart:', error);
             }
         }
     </script>

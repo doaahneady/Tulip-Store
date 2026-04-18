@@ -416,9 +416,9 @@ function escapeHtml(value) {
 
 function getProductImageUrl(p) {
   const firstImage = Array.isArray(p?.images)
-    ? (typeof p.images[0] === "object"
-        ? p.images[0]?.path || p.images[0]?.url
-        : p.images[0])
+    ? typeof p.images[0] === "object"
+      ? p.images[0]?.path || p.images[0]?.url
+      : p.images[0]
     : null;
   const img =
     p?.primary_image_url ||
@@ -427,8 +427,10 @@ function getProductImageUrl(p) {
     p?.image_path ||
     firstImage ||
     "";
-  const s = String(img || "").trim().replace(/\\/g, "/");
-  if (!s) return "/images/banner1.jpg";
+  const s = String(img || "")
+    .trim()
+    .replace(/\\/g, "/");
+  if (!s) return "/images/tulip_store.jpg";
   if (s.startsWith("http://") || s.startsWith("https://")) return s;
   if (s.startsWith("/")) return s;
   return `/storage/${s.replace(/^storage\//, "")}`;
@@ -460,7 +462,7 @@ function createProductCard(p) {
                 ${stockLabel}
             </div>
             <div class="product-image-wrapper">
-                <img src="${imgUrl}" alt="${safeName}" class="product-img" loading="lazy" onerror="this.src='/images/banner1.jpg'">
+                <img src="${imgUrl}" alt="${safeName}" class="product-img" loading="lazy" onerror="this.src='/images/tulip_store.jpg'">
             </div>
             <div class="product-info">
                 <h3 class="product-name">${safeName}</h3>
@@ -1178,7 +1180,7 @@ function extractProductFromCard(btn, productId) {
   const name = card.querySelector(".product-name")?.textContent?.trim() || "";
   const image =
     card.querySelector(".product-image img")?.getAttribute("src") ||
-    "/images/banner1.jpg";
+    "/images/tulip_store.jpg";
   const priceText =
     card.querySelector(".price-current")?.textContent?.replace(/[^\d.]/g, "") ||
     "0";
@@ -1262,7 +1264,9 @@ async function toggleProductFavorite(event, productId) {
 
       // Update UI from the synced state (localStorage).
       favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-      const nowFavorite = favorites.some((p) => String(p.id) === String(productId));
+      const nowFavorite = favorites.some(
+        (p) => String(p.id) === String(productId),
+      );
       btn.classList.toggle("active", nowFavorite);
       icon.classList.toggle("fas", nowFavorite);
       icon.classList.toggle("far", !nowFavorite);
@@ -1281,7 +1285,9 @@ async function toggleProductFavorite(event, productId) {
         id: source.id,
         name: source.name,
         price: source.discount_price || source.price,
-        image: source.image || (product ? getProductImageUrl(product) : "/images/banner1.jpg"),
+        image:
+          source.image ||
+          (product ? getProductImageUrl(product) : "/images/tulip_store.jpg"),
       });
       btn.classList.add("active");
       icon.classList.remove("far");
