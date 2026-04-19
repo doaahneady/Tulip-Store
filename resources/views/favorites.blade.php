@@ -278,6 +278,7 @@
         }
         function resolveFavoriteUrl(product) {
             if (product?.url) return product.url;
+            if (String(product?.type || '') === 'mart') return 'javascript:void(0);';
             if (String(product?.type || '') === 'gift' || String(product?.id || '').startsWith('gift-')) {
                 const id = String(product.id).replace('gift-', '');
                 return `/gifts/${id}`;
@@ -294,7 +295,7 @@
             if (isGiftFavorite(product)) {
                 return `<button class="favorite-card-btn btn-add-cart" onclick="window.location.href='${resolveFavoriteUrl(product)}'">عرض الهدية</button>`;
             }
-            return `<button class="favorite-card-btn btn-add-cart" onclick="addToCart(${JSON.stringify(String(product.id))})">أضف للسلة</button>`;
+            return `<button class="favorite-card-btn btn-add-cart" onclick="addToCart(${JSON.stringify(String(product.id))}, event)">أضف للسلة</button>`;
         }
         function loadFavorites() {
             if (isAuthenticated) {
@@ -396,7 +397,7 @@
             }
         }
         
-        async function addToCart(productId) {
+        async function addToCart(productId, event) {
             try {
                 const response = await fetch('/api/cart/add', {
                     method: 'POST',

@@ -291,7 +291,7 @@
         .main-content {
             max-width: 1400px;
             margin: 0 auto;
-            /* padding: 4rem 2rem; */
+            padding:0rem 5.6rem 0rem 0rem;
         }
 
         /* Section Styles */
@@ -864,6 +864,7 @@
             font-family: 'El Messiri', sans-serif;
             font-size: 1rem;
             font-weight: 600;
+            padding:10px;
             opacity: 0;
             transform: translateX(20px);
             transition: all 0.3s ease;
@@ -887,10 +888,12 @@
                 position: fixed;
                 top: 5px;
                 right: 5px;
+                padding: 1.5rem 0;
+
                 width: 60px !important;
                 height: 100vh;
                 padding-top: 60px; /* Adjust for mobile navbar height */
-                border-radius: 30px;
+                border-radius: 10px;
                 flex-shrink: 0;
                 z-index: 100;
             }
@@ -898,11 +901,18 @@
                 width: 60px !important;
             }
             .sidebar-text {
-                display: none !important;
+                /* display: none !important; */
+                font-size: 0.4rem;
+                padding: 1px 0;
+                opacity: 1;
+                transform: translateX(0);
+                pointer-events: auto;
             }
             .sidebar-item {
                 padding: 0.2rem;
                 justify-content: center;
+                flex-direction: column;
+                align-items: center;
             }
             .sidebar-icon {
                 width: 32px;
@@ -910,7 +920,8 @@
                 min-width: 32px;
             }
             .main-content {
-                margin-right: 60px; /* Space for fixed mobile sidebar */
+                /* margin-right: 60px; Space for fixed mobile sidebar */
+                padding:0 55px 0 0 ;
                 flex: 1;
                 width: 0; /* Allow flex to shrink if needed */
             }
@@ -927,7 +938,7 @@
             .hide-mobile { display: none !important; }
             .show-mobile { display: flex !important; }
             .mobile-view-all {
-                margin: 2rem auto 0;
+                /* margin: 2rem auto 0; */
                 width: fit-content;
                 justify-content: center;
             }
@@ -1285,7 +1296,7 @@
         function createProductCard(p) {
             const isFav = favoriteIds.has(String(p.id));
             return `
-                <div class="product-card" data-id="${p.id}" onclick="window.location.href='/products/${p.id}'">
+                <div class="product-card" data-id="${p.id}">
                     <div class="product-badges">
                         ${p.badge === 'sale' ? '<span class="badge badge-sale">عرض</span>' : ''}
                         ${p.isFeatured ? '<span class="badge badge-new">جديد</span>' : ''}
