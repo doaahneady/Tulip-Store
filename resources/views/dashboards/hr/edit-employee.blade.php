@@ -5,9 +5,10 @@
     <form method="POST" action="{{ route('dashboard.hr.employees.update', $employee) }}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         @csrf
         @method('PUT')
-        <input type="text" name="name" value="{{ old('name', optional($employee->user)->name) }}" placeholder="الاسم" class="form-input">
-        <input type="email" name="email" value="{{ old('email', optional($employee->user)->email) }}" placeholder="البريد الإلكتروني" class="form-input">
-        <input type="text" name="phone" value="{{ old('phone', optional($employee->user)->phone) }}" placeholder="الهاتف" class="form-input">
+        <input type="text" name="first_name" value="{{ old('first_name', $employee->first_name) }}" placeholder="الاسم الأول" class="form-input" required>
+        <input type="text" name="last_name" value="{{ old('last_name', $employee->last_name) }}" placeholder="الكنية" class="form-input" required>
+        <input type="email" name="email" value="{{ old('email', $employee->email) }}" placeholder="البريد الإلكتروني" class="form-input" required>
+        <input type="text" name="phone" value="{{ old('phone', $employee->phone) }}" placeholder="الهاتف" class="form-input">
         <input type="text" name="department" value="{{ old('department', $employee->department) }}" placeholder="القسم" class="form-input" required>
         <input type="text" name="position" value="{{ old('position', $employee->position) }}" placeholder="المنصب" class="form-input" required>
         <select name="employment_type" class="form-select" required>

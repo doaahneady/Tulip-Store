@@ -50,6 +50,42 @@ use Illuminate\Validation\Rule;
 
 class SuperAdminController extends Controller
 {
+    private function storePublicImage($file, string $directory): string
+    {
+        /** @var \Illuminate\Http\UploadedFile $file */
+        $ext = strtolower((string) $file->getClientOriginalExtension());
+        $mime = strtolower((string) ($file->getClientMimeType() ?? ''));
+        $isHeic = in_array($ext, ['heic', 'heif'], true) || str_contains($mime, 'heic') || str_contains($mime, 'heif');
+
+        if (! $isHeic) {
+            return \Illuminate\Support\Facades\Storage::disk('public')->putFile($directory, $file);
+        }
+
+        // Convert HEIC/HEIF to JPEG so it can be displayed on the website
+        if (class_exists(\Imagick::class)) {
+            $img = new \Imagick();
+            $img->readImage($file->getRealPath());
+            if (method_exists($img, 'setIteratorIndex')) {
+                $img->setIteratorIndex(0);
+            }
+            $img->setImageFormat('jpeg');
+            if (method_exists($img, 'setImageCompressionQuality')) {
+                $img->setImageCompressionQuality(85);
+            }
+
+            $blob = method_exists($img, 'getImageBlob') ? $img->getImageBlob() : $img->getImagesBlob();
+            $img->clear();
+            $img->destroy();
+
+            $name = $directory.'/'.uniqid('img_', true).'.jpg';
+            \Illuminate\Support\Facades\Storage::disk('public')->put($name, $blob);
+            return $name;
+        }
+
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'image' => 'HEIC/HEIF غير مدعوم على الخادم حالياً. يرجى رفع JPG/PNG/WebP.',
+        ]);
+    }
     public function __construct()
     {
         $this->middleware('auth:employee');
@@ -1476,7 +1512,9 @@ class SuperAdminController extends Controller
             'color' => 'required|string|max:50',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            // Support HEIC/HEIF uploads (common on iPhone). We use `file` instead of `image`
+            // because PHP/GD may not recognize HEIC as a valid "image" for the `image` rule.
+            'image' => 'nullable|file|mimes:jpg,jpeg,png,webp,heic,heif|max:8192',
         ]);
 
         $imagePath = $request->hasFile('image')
@@ -1627,7 +1665,9 @@ class SuperAdminController extends Controller
                         ->orWhere('description', 'like', "%{$search}%");
                 })
                 ->when($request->category_id, fn ($q, $id) => $q->where('category_id', $id))
-                ->when($request->subcategory_id && Schema::hasColumn('products', 'subcategory_id'), fn ($q, $id) => $q->where('subcategory_id', $id))
+                ->when($request->filled('subcategory_id') && Schema::hasColumn('products', 'subcategory_id'), function ($q) use ($request) {
+                    $q->where('subcategory_id', (int) $request->input('subcategory_id'));
+                })
                 ->when($missingPhoto, function ($q) {
                     if (Schema::hasColumn('products', 'image')) {
                         $q->where(function ($qq) {
@@ -1832,7 +1872,7 @@ class SuperAdminController extends Controller
 
         $imagePath = null;
         if ($request->file('image')) {
-            $imagePath = Storage::disk('public')->putFile('products', $request->file('image'));
+            $imagePath = $this->storePublicImage($request->file('image'), 'products');
         }
 
         $sku = trim((string) ($validated['sku'] ?? ''));
@@ -2021,7 +2061,7 @@ class SuperAdminController extends Controller
             }
         }
         if ($request->file('image')) {
-            $storedImage = Storage::disk('public')->putFile('products', $request->file('image'));
+            $storedImage = $this->storePublicImage($request->file('image'), 'products');
             if (Schema::hasColumn('products', 'image')) {
                 $updates['image'] = $storedImage;
             } elseif (Schema::hasColumn('products', 'images')) {
@@ -2102,6 +2142,7 @@ class SuperAdminController extends Controller
         Category::create($data);
 
         Cache::forget('mart:navigation:v1');
+        Cache::forget('mart:navigation:v2');
 
         return redirect()->route('dashboard.admin.mart.index')->with('success', 'Category created');
     }
@@ -2163,6 +2204,7 @@ class SuperAdminController extends Controller
         $category->update($updates);
 
         Cache::forget('mart:navigation:v1');
+        Cache::forget('mart:navigation:v2');
 
         return redirect()->route('dashboard.admin.mart.index')->with('success', 'Category updated');
     }
@@ -2686,6 +2728,7 @@ class SuperAdminController extends Controller
         ]);
 
         Cache::forget('mart:navigation:v1');
+        Cache::forget('mart:navigation:v2');
 
         return back()->with('success', 'Category status updated');
     }
@@ -2697,6 +2740,7 @@ class SuperAdminController extends Controller
         $category->delete();
 
         Cache::forget('mart:navigation:v1');
+        Cache::forget('mart:navigation:v2');
 
         return back()->with('success', 'Category deleted');
     }

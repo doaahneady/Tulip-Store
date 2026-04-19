@@ -81,8 +81,13 @@ class DashboardRoleMiddleware
             $hasRoleTemplateForDashboard = \Illuminate\Support\Facades\Schema::hasTable('dashboard_role_permissions')
                 && $this->hasPermissionTemplatesForDashboard($dashboardKey);
 
-            if (($hasEmployeeOverride || $hasRoleTemplateForDashboard) && ! $resolved['can_view']) {
-                abort(403, 'You don\'t have permission to view this dashboard');
+            // If RBAC tables exist (template or override), use resolved permissions as the source of truth.
+            // This allows granting access without requiring legacy boolean flags (is_admin/is_hr/...) to be set.
+            if ($hasEmployeeOverride || $hasRoleTemplateForDashboard) {
+                if (! $resolved['can_view']) {
+                    abort(403, 'You don\'t have permission to view this dashboard');
+                }
+                return $next($request);
             }
         }
         $explicitKeys = method_exists($user, 'getExplicitDashboardKeys') ? $user->getExplicitDashboardKeys() : [];

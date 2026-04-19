@@ -80,7 +80,8 @@
 </style>
 
 @php
-    $roleOrder = ['admin','it','hr','cs','finance','supervisor','driver','vendor'];
+    // Ensure we show all employees, including those with no specific role flags (staff)
+    $roleOrder = ['admin','it','hr','cs','finance','supervisor','driver','vendor','staff'];
     $employeeRows = ($employees ?? null) instanceof \Illuminate\Contracts\Pagination\Paginator
         ? collect(($employees ?? null)->items())
         : collect($employees ?? []);
@@ -95,6 +96,8 @@
         return 'staff';
     };
     $grouped = $employeeRows->groupBy(fn($e) => $resolveRole($e));
+    // Include any unexpected groups (future roles) so they still render
+    $roleOrder = array_values(array_unique(array_merge($roleOrder, $grouped->keys()->all())));
 @endphp
 
 <div class="roles-permissions-page space-y-5">

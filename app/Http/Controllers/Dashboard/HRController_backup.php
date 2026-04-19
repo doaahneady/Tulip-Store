@@ -335,8 +335,11 @@ class HRController_backup extends Controller
     public function updateEmployee(Request $request, Employee $employee)
     {
         $request->validate([
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            // Backward compat (older form used a single "name" field)
             'name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|unique:users,email,'.($employee->user_id ?? 0),
+            'email' => 'required|email|unique:employees,email,'.$employee->id,
             'phone' => 'nullable|string|max:50',
             'department' => 'required|string',
             'position' => 'required|string',
@@ -354,7 +357,17 @@ class HRController_backup extends Controller
         ]);
 
         $old = $employee->getOriginal();
+        $firstName = (string) ($request->input('first_name') ?? '');
+        $lastName = (string) ($request->input('last_name') ?? '');
+        if ($firstName === '' && $lastName === '' && $request->filled('name')) {
+            $parts = preg_split('/\s+/', trim((string) $request->input('name')), 2);
+            $firstName = (string) ($parts[0] ?? '');
+            $lastName = (string) ($parts[1] ?? '');
+        }
+
         $employee->update($request->only([
+            'email',
+            'phone',
             'department',
             'position',
             'employment_type',
@@ -362,12 +375,18 @@ class HRController_backup extends Controller
             'hourly_rate',
             'monthly_salary',
             'termination_date',
-            'emergency_contact',
         ]));
+        if ($firstName !== '') {
+            $employee->first_name = $firstName;
+        }
+        if ($lastName !== '') {
+            $employee->last_name = $lastName;
+        }
+        $employee->save();
 
         if ($employee->user) {
             $employee->user->update(array_filter([
-                'name' => $request->input('name'),
+                'name' => trim(($employee->first_name ?? '').' '.($employee->last_name ?? '')),
                 'email' => $request->input('email'),
                 'phone' => $request->input('phone'),
             ], fn ($v) => $v !== null && $v !== ''));

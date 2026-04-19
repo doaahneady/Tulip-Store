@@ -307,7 +307,9 @@
 
         (function () {
             const overlay = document.getElementById('sidebarOverlay');
-            overlay?.addEventListener('click', () => setSidebar(false));
+            if (overlay) {
+                overlay.addEventListener('click', () => setSidebar(false));
+            }
 
             document.addEventListener('keydown', function (e) {
                 if (e.key !== 'Escape') return;
@@ -428,7 +430,8 @@
         <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.0/dist/echo.iife.js"></script>
         <script>
             (function () {
-                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                const csrf = csrfMeta ? (csrfMeta.getAttribute('content') || '') : '';
                 window.Pusher = window.Pusher || Pusher;
                 window.Echo = new Echo({
                     broadcaster: 'pusher',

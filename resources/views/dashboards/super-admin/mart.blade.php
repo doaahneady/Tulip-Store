@@ -6,6 +6,17 @@
     $productsTotal = method_exists(($products ?? null), 'total') ? ($products->total() ?? 0) : 0;
 @endphp
 
+<style>
+    /* Full-width layout for this page */
+    #mainContent.db4-container {
+        max-width: none !important;
+        width: 100% !important;
+        margin-inline: 0 !important;
+    }
+    /* Make caret visible and stable in dark theme */
+    #martSearchInput { caret-color: #ffffff; }
+</style>
+
 <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
     <div class="flex flex-wrap items-center gap-2">
        
@@ -14,10 +25,31 @@
             <i class="fas fa-store"></i>
             <span>Tulip Mart</span>
         </a>
-        <a href="{{ route('dashboard.admin.mart.daily-prices.manage') }}" class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition">
-            <i class="fas fa-tags"></i>
-            <span>أسعار يومية</span>
-        </a>
+    </div>
+</div>
+
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h3 class="text-base font-bold text-gray-800">سعر الصرف (USD -> SYP)</h3>
+            <p class="text-xs text-gray-500">تعديل السعر المستخدم في الواجهة لتحويل العملات</p>
+        </div>
+        <form method="POST" action="{{ route('dashboard.admin.exchange-rate.update') }}" class="flex items-center gap-2">
+            @csrf
+            <input
+                type="number"
+                name="usd_to_syp_rate"
+                step="0.01"
+                min="1"
+                value="{{ \App\Models\SystemSetting::get('usd_to_syp_rate', 117) }}"
+                class="form-input w-40"
+                required
+            >
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-save"></i>
+                تحديث
+            </button>
+        </form>
     </div>
 </div>
 
@@ -68,8 +100,9 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 xl:col-span-1">
+<div class="flex flex-col gap-6 w-full">
+    <!-- Products should appear first, categories under them -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 w-full" style="order:2;">
         <div class="p-4 border-b border-gray-100 flex items-center justify-between">
             <h3 class="text-lg font-bold text-gray-800">التصنيفات</h3>
             <div class="flex items-center gap-2">
@@ -91,7 +124,7 @@
                         @php $selected = (string) request('category_id') === (string) $cat->id; @endphp
                         <div class="block p-3 rounded-xl border @if($selected) border-indigo-400 bg-indigo-50 @else border-gray-200 hover:bg-gray-50 @endif mart-category-item" draggable="true" data-id="{{ $cat->id }}" @if($selected) style="background: rgba(34, 195, 166, 0.12) !important; border-color: rgba(34, 195, 166, 0.55) !important;" @endif>
                             <div class="flex items-center justify-between gap-2 mb-2">
-                                <a href="{{ route('dashboard.admin.mart.index', array_merge(request()->query(), ['category_id' => $cat->id])) }}" class="font-bold text-gray-900" @if($selected) style="color: rgba(255, 255, 255, 0.95) !important;" @endif>
+                                <a href="{{ route('dashboard.admin.mart.index', array_merge(array_diff_key(request()->query(), ['subcategory_id' => true]), ['category_id' => $cat->id])) }}" class="font-bold text-gray-900" @if($selected) style="color: rgba(255, 255, 255, 0.95) !important;" @endif>
                                     {{ $cat->name }}
                                     <span class="text-xs text-gray-400 font-normal ms-1" @if($selected) style="color: rgba(255, 255, 255, 0.62) !important;" @endif>({{ $cat->slug }})</span>
                                 </a>
@@ -134,13 +167,13 @@
                             @endif
                         </div>
                     @endforeach
-                    <a href="{{ route('dashboard.admin.mart.index', array_diff_key(request()->query(), ['category_id' => true])) }}" class="block text-center text-sm text-indigo-600 mt-3">عرض الكل</a>
+                    <a href="{{ route('dashboard.admin.mart.index', array_diff_key(request()->query(), ['category_id' => true, 'subcategory_id' => true])) }}" class="block text-center text-sm text-indigo-600 mt-3">عرض الكل</a>
                 </div>
             @endif
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 xl:col-span-3 text-sm">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 text-sm w-full" id="martProductsPanel" style="order:1;">
         <div class="p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
             <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <h3 class="text-base font-bold text-gray-900">المنتجات</h3>
@@ -148,26 +181,24 @@
                     @if(request()->has('missing_photo'))
                         <input type="hidden" name="missing_photo" value="{{ request('missing_photo') }}">
                     @endif
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="بحث بالاسم أو SKU" class="form-input text-xs w-48 md:w-64">
-                    <select name="category_id" class="form-select text-xs w-40">
+                    <input type="text" name="search" id="martSearchInput" value="{{ request('search') }}" placeholder="بحث بالاسم أو SKU" class="form-input text-xs w-48 md:w-64" autocomplete="off" dir="ltr" style="text-align:left;">
+                    <select name="category_id" class="form-select text-xs w-40" id="martCategoryFilter">
                         <option value="">كل التصنيفات</option>
                         @foreach(($categories ?? []) as $cat)
                             <option value="{{ $cat->id }}" @selected((string) request('category_id') === (string) $cat->id)>{{ $cat->name }}</option>
                         @endforeach
                     </select>
                     @php
+                        $selectedCategoryId = request('category_id');
                         $subs = collect();
-                        if (is_iterable($categories ?? null)) {
-                            foreach ($categories as $c) {
-                                if (!empty($c->subcategories)) {
-                                    foreach ($c->subcategories as $s) {
-                                        $subs->push($s);
-                                    }
-                                }
+                        if ($selectedCategoryId && is_iterable($categories ?? null)) {
+                            $cat = collect($categories)->firstWhere('id', (int) $selectedCategoryId) ?? collect($categories)->firstWhere('id', (string) $selectedCategoryId);
+                            if ($cat && !empty($cat->subcategories)) {
+                                $subs = collect($cat->subcategories);
                             }
                         }
                     @endphp
-                    @if($subs->count())
+                    @if($selectedCategoryId && $subs->count())
                         <select name="subcategory_id" class="form-select text-xs w-40">
                             <option value="">كل التصنيفات الفرعية</option>
                             @foreach($subs as $sub)
@@ -224,7 +255,7 @@
                 <div class="text-xs text-gray-500">حدد منتجات من الجدول ثم اختر التصنيف الفرعي</div>
             </div>
 
-            <div class="table-container text-xs">
+            <div class="table-container text-xs" id="martProductsTableContainer">
                 <table class="table table-compact" id="martProductsTable">
                 <thead>
                     <tr>
@@ -300,7 +331,7 @@
             </div>
         </form>
 
-        <div class="p-4">
+        <div class="p-4" id="martProductsPagination">
             @if(method_exists(($products ?? null), 'links'))
                 {{ $products->links() }}
             @endif
@@ -309,8 +340,115 @@
 </div>
 
 <script>
+    // When changing category, clear subcategory_id to avoid mismatched filter
+    document.addEventListener('DOMContentLoaded', function () {
+        // Force full width even if theme CSS overrides it
+        const main = document.getElementById('mainContent');
+        if (main) {
+            main.style.maxWidth = 'none';
+            main.style.width = '100%';
+            main.style.marginInline = '0';
+        }
+
+        function bindMartProductsUI() {
+            const cat = document.getElementById('martCategoryFilter');
+            if (cat) {
+                if (!cat.dataset.bound) {
+                    cat.dataset.bound = '1';
+                    cat.addEventListener('change', function () {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('category_id', this.value);
+                        url.searchParams.delete('subcategory_id');
+                        // Category change affects subcategory dropdown; do full refresh
+                        window.location.href = url.toString();
+                    });
+                }
+            }
+
+            const searchInput = document.getElementById('martSearchInput');
+            if (searchInput) {
+                if (!searchInput.dataset.bound) {
+                    searchInput.dataset.bound = '1';
+                    let t = null;
+                    searchInput.addEventListener('input', function () {
+                        window.clearTimeout(t);
+                        const q = this.value || '';
+                        t = window.setTimeout(() => {
+                            const url = new URL(window.location.href);
+                            if (q.trim().length) url.searchParams.set('search', q.trim());
+                            else url.searchParams.delete('search');
+                            url.searchParams.delete('page');
+                            loadProductsPanel(url.toString());
+                        }, 350);
+                    });
+                }
+            }
+
+            const selectAll = document.getElementById('selectAllProducts');
+            if (selectAll) {
+                if (!selectAll.dataset.bound) {
+                    selectAll.dataset.bound = '1';
+                    selectAll.addEventListener('change', () => {
+                        const checked = selectAll.checked;
+                        document.querySelectorAll('.product-checkbox').forEach((cb) => { cb.checked = checked; });
+                    });
+                }
+            }
+        }
+
+        async function loadProductsPanel(url) {
+            // Update only results (table + pagination) so the search input keeps focus/caret naturally
+            const tableContainer = document.getElementById('martProductsTableContainer');
+            const pagination = document.getElementById('martProductsPagination');
+            if (!tableContainer || !pagination) {
+                window.location.href = url;
+                return;
+            }
+
+            try {
+                const panel = document.getElementById('martProductsPanel');
+                if (panel) panel.classList.add('opacity-80');
+
+                const r = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' });
+                const html = await r.text();
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+
+                const newTable = doc.getElementById('martProductsTableContainer');
+                const newPagination = doc.getElementById('martProductsPagination');
+
+                if (!newTable || !newPagination) {
+                    window.location.href = url;
+                    return;
+                }
+
+                tableContainer.replaceWith(newTable);
+                pagination.replaceWith(newPagination);
+                window.history.replaceState({}, '', url);
+                bindMartProductsUI();
+
+                // Keep caret at end (RTL UIs sometimes move it)
+                const search = document.getElementById('martSearchInput');
+                if (search && document.activeElement === search) {
+                    const len = (search.value || '').length;
+                    try { search.setSelectionRange(len, len); } catch (e) {}
+                }
+            } catch (e) {
+                window.location.href = url;
+            } finally {
+                const panel = document.getElementById('martProductsPanel');
+                if (panel) panel.classList.remove('opacity-80');
+            }
+        }
+
+        // initial bind
+        bindMartProductsUI();
+    });
+</script>
+
+<script>
     (function () {
-        const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        const csrf = csrfMeta ? (csrfMeta.getAttribute('content') || '') : '';
 
         const categoriesList = document.getElementById('martCategoriesList');
         if (categoriesList) {

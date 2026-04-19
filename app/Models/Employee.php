@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
+use App\Services\DashboardPermissionService;
 
 class Employee extends Authenticatable
 {
@@ -348,6 +349,32 @@ class Employee extends Authenticatable
             }
 
             return array_values(array_unique($explicit));
+        }
+
+        // If RBAC tables exist (role templates / employee overrides), use resolved permissions
+        // to decide which dashboards appear in the selection screen.
+        if (
+            class_exists(DashboardPermissionService::class)
+            && (
+                \Illuminate\Support\Facades\Schema::hasTable('employee_dashboard_overrides')
+                || \Illuminate\Support\Facades\Schema::hasTable('dashboard_role_permissions')
+            )
+        ) {
+            $candidates = ['admin', 'it', 'hr', 'cs', 'finance', 'supervisor', 'vendor', 'driver', 'mart'];
+            $allowed = [];
+            foreach ($candidates as $key) {
+                try {
+                    $resolved = DashboardPermissionService::resolve($this, $key);
+                    if ((bool) ($resolved['can_view'] ?? false)) {
+                        $allowed[] = $key;
+                    }
+                } catch (\Throwable $e) {
+                    // Ignore and fall back to legacy rules below
+                }
+            }
+            if (! empty($allowed)) {
+                return array_values(array_unique($allowed));
+            }
         }
 
         if ($this->is_admin) {

@@ -100,9 +100,30 @@
 
         <div>
             <label class="block text-sm text-gray-600 mb-1">تحديث الصورة (اختياري)</label>
-            <input type="file" name="image" class="form-input w-full" accept="image/*">
+            @php
+                $rawImage = (string) ($product->image ?? '');
+                $imageUrl = null;
+                if ($rawImage !== '') {
+                    $imageUrl = \Illuminate\Support\Str::startsWith($rawImage, ['http://', 'https://', '/'])
+                        ? $rawImage
+                        : '/storage/'.$rawImage;
+                }
+            @endphp
+
+            <input type="file" name="image" id="imageInput" class="form-input w-full" accept="image/*,.heic,.heif">
+
+            <div class="mt-3">
+                <img
+                    id="imagePreview"
+                    src="{{ $imageUrl ?: '' }}"
+                    alt="معاينة الصورة"
+                    style="display: {{ $imageUrl ? 'block' : 'none' }}; width: 100%; max-width: 420px; height: auto; border-radius: 14px; border: 1px solid #e5e7eb;"
+                >
+                <div id="imagePreviewHint" class="text-xs text-gray-500 mt-2" style="display:none;"></div>
+            </div>
+
             @if(!empty($product->image))
-                <div class="text-xs text-gray-500 mt-2">{{ $product->image }}</div>
+                <div class="text-xs text-gray-500 mt-2">المسار الحالي: {{ $product->image }}</div>
             @endif
         </div>
 
@@ -149,4 +170,88 @@
     })();
 </script>
 @endif
+
+<script>
+    // Preview uploaded image before saving
+    (function () {
+        const input = document.getElementById('imageInput');
+        const preview = document.getElementById('imagePreview');
+        const hint = document.getElementById('imagePreviewHint');
+        if (!input || !preview) return;
+
+        function showHint(msg) {
+            if (!hint) return;
+            hint.textContent = msg || '';
+            hint.style.display = msg ? 'block' : 'none';
+        }
+
+        function loadHeic2Any() {
+            if (typeof window.heic2any === 'function') return Promise.resolve(true);
+            return new Promise((resolve) => {
+                const existing = document.querySelector('script[data-heic2any="1"]');
+                if (existing) {
+                    existing.addEventListener('load', () => resolve(true), { once: true });
+                    existing.addEventListener('error', () => resolve(false), { once: true });
+                    return;
+                }
+                const s = document.createElement('script');
+                s.src = 'https://unpkg.com/heic2any/dist/heic2any.min.js';
+                s.async = true;
+                s.dataset.heic2any = '1';
+                s.addEventListener('load', () => resolve(true), { once: true });
+                s.addEventListener('error', () => resolve(false), { once: true });
+                document.head.appendChild(s);
+            });
+        }
+
+        input.addEventListener('change', async function () {
+            const file = this.files && this.files[0] ? this.files[0] : null;
+            if (!file) return;
+
+            showHint('');
+
+            const isHeic =
+                (file.type && (file.type.includes('heic') || file.type.includes('heif'))) ||
+                (file.name && (file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')));
+
+            try {
+                if (isHeic) {
+                    // First try direct preview (works on some browsers like iOS Safari)
+                    const directUrl = URL.createObjectURL(file);
+                    preview.src = directUrl;
+                    preview.style.display = 'block';
+
+                    // If browser can't render HEIC, fallback to converting for preview
+                    const ok = await new Promise((resolve) => {
+                        const done = (v) => resolve(v);
+                        const t = setTimeout(() => done(true), 400); // assume ok if no error quickly
+                        preview.onload = () => { clearTimeout(t); done(true); };
+                        preview.onerror = () => { clearTimeout(t); done(false); };
+                    });
+                    if (ok) return;
+
+                    const loaded = await loadHeic2Any();
+                    if (!loaded || typeof window.heic2any !== 'function') {
+                        showHint('ملف HEIC: المتصفح لا يدعم المعاينة. سيتم التحويل على الخادم عند الحفظ.');
+                        return;
+                    }
+
+                    const converted = await window.heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 });
+                    const blob = Array.isArray(converted) ? converted[0] : converted;
+                    const url = URL.createObjectURL(blob);
+                    preview.src = url;
+                    preview.style.display = 'block';
+                    showHint('معاينة HEIC بعد التحويل (سيتم الحفظ كـ JPG).');
+                    return;
+                }
+
+                const url = URL.createObjectURL(file);
+                preview.src = url;
+                preview.style.display = 'block';
+            } catch (e) {
+                showHint('تعذر عرض المعاينة لهذه الصورة قبل الحفظ.');
+            }
+        });
+    })();
+</script>
 @endsection
