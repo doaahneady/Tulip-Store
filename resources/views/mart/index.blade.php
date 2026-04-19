@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    @include('components.navbar')
+   
     <style>
         :root {
             --primary: #059669;
@@ -752,7 +752,7 @@
                 font-size: 0.8rem !important;
             }
 
-            .main-content { padding: 2rem 1rem; }
+            
             
             /* Disable hover scale on mobile */
             .product-card:hover, .category-card:hover {
@@ -774,10 +774,12 @@
         /* Modern Collapsible Sidebar */
         .mart-sidebar {
             position: fixed;
-            top: 80px;
-            right: 10px;
+            top:80px;
+            right: 5px;
             width: 80px;
+            height: 100vh;
             background: #ffffff;
+            z-index: 1000;
             border-radius: 40px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             z-index: 2000; /* Higher than footer's 1001 */
@@ -875,20 +877,20 @@
         }
 
         /* Mobile View for Sidebar */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             .mart-layout-container {
                 padding: 0 10px;
                 gap: 10px;
+                flex-direction: row-reverse;
             }
             .mart-sidebar {
-                position: sticky; /* Make it part of the flow instead of fixed/overlay */
-                top: 20px;
-                right: 0;
+                position: fixed;
+                top: 5px;
+                right: 5px;
                 width: 60px !important;
-                height: fit-content;
-                max-height: calc(100vh - 40px);
-                border-radius: 20px;
-                padding: 1rem 0;
+                height: 100vh;
+                padding-top: 60px; /* Adjust for mobile navbar height */
+                border-radius: 30px;
                 flex-shrink: 0;
                 z-index: 100;
             }
@@ -908,7 +910,7 @@
                 min-width: 32px;
             }
             .main-content {
-                margin-right: 0 !important;
+                margin-right: 60px; /* Space for fixed mobile sidebar */
                 flex: 1;
                 width: 0; /* Allow flex to shrink if needed */
             }
@@ -916,7 +918,7 @@
 
         @media (min-width: 769px) {
             .main-content {
-                margin-right: 100px;
+                /* margin-right: 80px; */
                 width: 100%;
             }
         }
@@ -935,7 +937,7 @@
         }
     </style>
 
-    <div ><img src="{{ asset('images/panner_mart.png') }}" alt="" style="width: 100%;"></div>
+   
     
     <div class="mart-layout-container">
         <!-- Collapsible Sidebar -->
@@ -944,6 +946,8 @@
         </div>
         
         <div class="main-content">
+             @include('components.navbar')
+             <div ><img src="{{ asset('images/panner_mart.png') }}" alt="" style="width: 100%;"></div>
            <!-- Fresh Products -->
         <section class="section">
             <div class="section-header" style="display:flex; align-items:center; gap:1rem;">
@@ -1008,14 +1012,13 @@
             </div>
             <div class="products-grid" id="featuredProducts"></div>
         </section>
-
-      
-    </div>
-    </div>
-    <!-- Footer -->
+   <!-- Footer -->
    <div style="position:relative; z-index:1001;">
     @include('components.footer')
 </div>
+    </div>
+    </div>
+ 
     <script>
         let products = {};
         let categories = [];

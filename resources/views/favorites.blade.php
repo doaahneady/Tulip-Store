@@ -351,11 +351,9 @@
                             </div>
                             <div class="favorite-card-content">
                                 <h3 class="favorite-card-name">${product.name}</h3>
-                                <div class="favorite-card-price">${product.price} ل.س</div>
+                                <div class="favorite-card-price">${product.price} ر.س</div>
                                 <div class="favorite-card-actions">
-                                    <button class="favorite-card-btn btn-view" onclick="window.location.href='${resolveFavoriteUrl(product)}'">
-                                        عرض
-                                    </button>
+                                   
                                     ${renderAddAction(product)}
                                 </div>
                             </div>
