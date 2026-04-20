@@ -777,7 +777,7 @@
             top:80px;
             right: 5px;
             width: 80px;
-            height: 100vh;
+            /* height: 100vh; */
             background: #ffffff;
             z-index: 1000;
             border-radius: 40px;
