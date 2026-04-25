@@ -9,6 +9,7 @@ use App\Models\Notification;
 use App\Models\SecurityAuditLog;
 use App\Models\SystemLog;
 use App\Models\User;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -23,97 +24,86 @@ class CustomAuthController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
-                'phone' => 'nullable|string|max:20',
+                'phone' => 'required|string|max:20|unique:users',
                 'password' => 'required|string|min:8|confirmed',
                 'birth_date' => 'nullable|date',
                 'gender' => 'nullable|in:ذكر,أنثى',
-            ]);
-
-            // Generate username from email
-            $username = explode('@', $validated['email'])[0].'_'.rand(1000, 9999);
-
-            $user = User::create([
-                'name' => $validated['name'],
-                'username' => $username,
-                'email' => $validated['email'],
-                'phone' => $validated['phone'] ?? null,
-                'password' => Hash::make($validated['password']),
-                'birth_date' => $validated['birth_date'] ?? null,
-                'gender' => $validated['gender'] ?? null,
-                'verified' => false, // Set to false to require OTP
+                'terms_accepted' => 'required|accepted',
             ]);
 
             // Generate 6-digit verification code
             $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
             $method = $request->input('verification_method', 'email');
 
-            // Store code and user info in session
+            // Generate username from email
+            $username = explode('@', $validated['email'])[0].'_'.rand(1000, 9999);
+
+            // Store ALL user data in session (don't create user yet!)
+            $request->session()->put('pending_user_data', [
+                'name' => $validated['name'],
+                'username' => $username,
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+                'password' => Hash::make($validated['password']),
+                'birth_date' => $validated['birth_date'] ?? null,
+                'gender' => $validated['gender'] ?? null,
+            ]);
+            
+            // Store verification info in session
             $request->session()->put('verification_code', $code);
-            $request->session()->put('verification_email', $user->email);
-            $request->session()->put('verification_phone', $user->phone);
-            $request->session()->put('verification_user_id', $user->id);
+            $request->session()->put('verification_email', $validated['email']);
+            $request->session()->put('verification_phone', $validated['phone']);
             $request->session()->put('verification_method', $method);
             $request->session()->put('code_expires_at', now()->addMinutes(10));
 
             // Send verification code
-            if ($method === 'sms' && $user->phone) {
-                // Mock SMS sending - in real app use Twilio/Infobip etc.
-                \Log::info("SMS OTP for {$user->phone}: {$code}");
-                // Here you would call your SMS provider API
+            if ($method === 'whatsapp' && $validated['phone']) {
+                // Send via WhatsApp using Green API
+                try {
+                    $whatsappService = new WhatsAppService();
+                    
+                    if (!$whatsappService->isConfigured()) {
+                        \Log::warning('WhatsApp service not configured, falling back to email');
+                        Mail::to($validated['email'])->send(new VerificationCodeMail($code, $validated['name']));
+                    } else {
+                        $result = $whatsappService->sendVerificationCode($validated['phone'], $code, $validated['name']);
+                        
+                        if (!$result['success']) {
+                            \Log::error('Failed to send WhatsApp message: ' . ($result['error'] ?? 'Unknown error'));
+                            // Fallback to email if WhatsApp fails
+                            Mail::to($validated['email'])->send(new VerificationCodeMail($code, $validated['name']));
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('WhatsApp service error: ' . $e->getMessage());
+                    // Fallback to email
+                    Mail::to($validated['email'])->send(new VerificationCodeMail($code, $validated['name']));
+                }
             } else {
                 // Default to Email
                 try {
-                    Mail::to($user->email)->send(new VerificationCodeMail($code, $user->name));
+                    Mail::to($validated['email'])->send(new VerificationCodeMail($code, $validated['name']));
                 } catch (\Exception $e) {
                     \Log::error('Failed to send verification email: '.$e->getMessage());
                 }
             }
 
-            // Admin activity feed: new registration
-            if (Schema::hasTable('activity_feeds')) {
-                ActivityFeed::create([
-                    'dashboard_type' => 'admin',
-                    'activity_type' => 'user',
-                    'action' => 'created',
-                    'title' => 'New User Registration',
-                    'description' => $user->name.' signed up (Method: '.$method.')',
-                    'actor_type' => User::class,
-                    'actor_id' => $user->id,
-                    'target_type' => User::class,
-                    'target_id' => $user->id,
-                    'severity' => 'info',
-                    'metadata' => ['email' => $user->email, 'method' => $method],
-                ]);
-            }
-            // IT: system log + security audit (account_created)
+            // Log registration attempt (user not created yet)
             if (Schema::hasTable('system_logs')) {
                 SystemLog::create([
                     'level' => 'info',
-                    'action' => 'user_registered',
-                    'message' => 'User registered via '.$method,
-                    'user' => $user->email,
+                    'action' => 'registration_attempt',
+                    'message' => 'Registration attempt, OTP sent via '.$method,
+                    'user' => $validated['email'],
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                     'metadata' => ['method' => $method],
                 ]);
             }
-            if (Schema::hasTable('security_audit_logs')) {
-                SecurityAuditLog::create([
-                    'event_type' => 'account_created',
-                    'user_type' => User::class,
-                    'user_id' => $user->id,
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                    'status' => 'success',
-                    'description' => 'Account created, OTP sent via '.$method,
-                    'metadata' => ['email' => $user->email, 'method' => $method],
-                    'risk_level' => 'low',
-                ]);
-            }
 
             return response()->json([
                 'success' => true,
-                'message' => $method === 'sms' ? 'تم إرسال رمز التحقق إلى رقم جوالك' : 'تم إرسال رمز التحقق إلى بريدك الإلكتروني',
+                'message' => $method === 'whatsapp' ? 'تم إرسال رمز التحقق عبر الواتساب' : 'تم إرسال رمز التحقق إلى بريدك الإلكتروني',
                 'redirect' => '/ar-verify-registration',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -138,7 +128,7 @@ class CustomAuthController extends Controller
 
         $storedCode = $request->session()->get('verification_code');
         $expiresAt = $request->session()->get('code_expires_at');
-        $userId = $request->session()->get('verification_user_id');
+        $pendingUserData = $request->session()->get('pending_user_data');
 
         if (! $storedCode || now()->greaterThan($expiresAt)) {
             return response()->json([
@@ -154,56 +144,94 @@ class CustomAuthController extends Controller
             ], 400);
         }
 
-        // Mark user as verified
-        $user = User::find($userId);
-        if ($user) {
-            $user->verified = true;
-            $user->save();
+        if (!$pendingUserData) {
+            return response()->json([
+                'success' => false,
+                'message' => 'بيانات التسجيل غير موجودة',
+            ], 400);
+        }
 
-            // Log the user in
-            Auth::login($user);
+        // NOW create the user after successful verification
+        $user = User::create([
+            'name' => $pendingUserData['name'],
+            'username' => $pendingUserData['username'],
+            'email' => $pendingUserData['email'],
+            'phone' => $pendingUserData['phone'],
+            'password' => $pendingUserData['password'],
+            'birth_date' => $pendingUserData['birth_date'],
+            'gender' => $pendingUserData['gender'],
+            'verified' => true, // Already verified!
+        ]);
 
-            // Create welcome notification
-            if (Schema::hasTable('notifications')) {
-                Notification::create([
-                    'user_id' => $user->id,
-                    'type' => 'system',
-                    'title' => 'Welcome to Tulip Store',
-                    'message' => 'Your email has been verified. Welcome aboard!',
-                    'icon' => 'fa-smile',
-                    'color' => 'green',
-                    'link' => '/profile',
-                ]);
-            }
-            // IT: successful login audit + system log
-            if (Schema::hasTable('system_logs')) {
-                SystemLog::create([
-                    'level' => 'info',
-                    'action' => 'login_success',
-                    'message' => 'User logged in after verification',
-                    'user' => $user->email,
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                    'metadata' => ['method' => 'email_password'],
-                ]);
-            }
-            if (Schema::hasTable('security_audit_logs')) {
-                SecurityAuditLog::create([
-                    'event_type' => 'login_attempt',
-                    'user_type' => User::class,
-                    'user_id' => $user->id,
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                    'status' => 'success',
-                    'description' => 'User logged in after verification',
-                    'metadata' => ['email' => $user->email],
-                    'risk_level' => 'low',
-                ]);
-            }
+        // Log the user in
+        Auth::login($user);
+
+        // Create welcome notification
+        if (Schema::hasTable('notifications')) {
+            Notification::create([
+                'user_id' => $user->id,
+                'type' => 'system',
+                'title' => 'Welcome to Tulip Store',
+                'message' => 'Your account has been verified. Welcome aboard!',
+                'icon' => 'fa-smile',
+                'color' => 'green',
+                'link' => '/profile',
+            ]);
+        }
+
+        // Admin activity feed: new registration
+        if (Schema::hasTable('activity_feeds')) {
+            ActivityFeed::create([
+                'dashboard_type' => 'admin',
+                'activity_type' => 'user',
+                'action' => 'created',
+                'title' => 'New User Registration',
+                'description' => $user->name.' completed registration',
+                'actor_type' => User::class,
+                'actor_id' => $user->id,
+                'target_type' => User::class,
+                'target_id' => $user->id,
+                'severity' => 'info',
+                'metadata' => ['email' => $user->email],
+            ]);
+        }
+
+        // IT: successful registration + login audit
+        if (Schema::hasTable('system_logs')) {
+            SystemLog::create([
+                'level' => 'info',
+                'action' => 'registration_completed',
+                'message' => 'User completed registration and logged in',
+                'user' => $user->email,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'metadata' => ['method' => 'email_password'],
+            ]);
+        }
+        
+        if (Schema::hasTable('security_audit_logs')) {
+            SecurityAuditLog::create([
+                'event_type' => 'account_created',
+                'user_type' => User::class,
+                'user_id' => $user->id,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'status' => 'success',
+                'description' => 'User account created after verification',
+                'metadata' => ['email' => $user->email],
+                'risk_level' => 'low',
+            ]);
         }
 
         // Clear session
-        $request->session()->forget(['verification_code', 'verification_email', 'verification_user_id', 'code_expires_at']);
+        $request->session()->forget([
+            'verification_code', 
+            'verification_email', 
+            'verification_phone',
+            'verification_method',
+            'code_expires_at',
+            'pending_user_data'
+        ]);
 
         return response()->json([
             'success' => true,
@@ -413,8 +441,8 @@ class CustomAuthController extends Controller
 
     public function getVerificationInfo(Request $request)
     {
-        $method = $request->session()->get('verification_method');
-        $target = $method === 'sms' 
+        $method = $request->session()->get('verification_method', 'email');
+        $target = $method === 'whatsapp' || $method === 'sms'
             ? $request->session()->get('verification_phone') 
             : $request->session()->get('verification_email');
 

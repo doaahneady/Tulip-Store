@@ -22,15 +22,15 @@ class CurrencyService
              return 'USD';
         }
 
-        $cur = strtoupper((string) ($user?->currency ?: session('currency') ?: 'USD'));
-        return in_array($cur, ['USD', 'SYP'], true) ? $cur : 'USD';
+        $cur = strtoupper((string) ($user?->currency ?: session('currency') ?: 'SYP'));
+        return in_array($cur, ['USD', 'SYP'], true) ? $cur : 'SYP';
     }
 
     public function setPreferredCurrency(string $currency, ?User $user = null): void
     {
         $cur = strtoupper(trim($currency));
         if (! in_array($cur, ['USD', 'SYP'], true)) {
-            $cur = 'USD';
+            $cur = 'SYP';
         }
 
         session(['currency' => $cur]);

@@ -391,6 +391,12 @@ Route::prefix('reviews')->name('reviews.')->middleware('dashboard.role:admin')->
 // Tulip Mart Dashboard
 Route::prefix('admin/mart')->name('admin.mart.')->middleware('dashboard.role:mart,admin')->group(function () {
     Route::get('/', [SuperAdminController::class, 'mart'])->name('index');
+    Route::get('/sell-prices', [SuperAdminController::class, 'martSellPrices'])->name('sell-prices.index');
+    Route::put('/sell-prices/{product}', [SuperAdminController::class, 'updateMartSellPrice'])->name('sell-prices.update');
+    Route::get('/orders', [SuperAdminController::class, 'martOrders'])->name('orders.index');
+    Route::get('/orders/notifications', [SuperAdminController::class, 'martOrdersNotifications'])->name('orders.notifications');
+    Route::post('/orders/notifications/read', [SuperAdminController::class, 'martOrdersNotificationsRead'])->name('orders.notifications.read');
+    Route::get('/orders/{order}', [SuperAdminController::class, 'martOrderShow'])->name('orders.show');
     Route::get('/products/create', [SuperAdminController::class, 'createMartProduct'])->name('products.create');
     Route::post('/products', [SuperAdminController::class, 'storeMartProduct'])->name('products.store');
     Route::get('/products/{product}/edit', [SuperAdminController::class, 'editMartProduct'])->name('products.edit');
@@ -398,7 +404,11 @@ Route::prefix('admin/mart')->name('admin.mart.')->middleware('dashboard.role:mar
     Route::post('/products/{product}/toggle-active', [SuperAdminController::class, 'toggleMartProductActive'])->name('products.toggle-active');
     Route::post('/products/{product}/toggle-featured', [SuperAdminController::class, 'toggleMartProductFeatured'])->name('products.toggle-featured');
     Route::delete('/products/{product}', [SuperAdminController::class, 'deleteMartProduct'])->name('products.delete');
+    Route::post('/products/{product}/toggle-inventory', [SuperAdminController::class, 'toggleInventoryTracking'])->name('products.toggle-inventory');
+    Route::post('/products/bulk-toggle-inventory', [SuperAdminController::class, 'bulkToggleInventoryTracking'])->name('products.bulk-toggle-inventory');
+    Route::post('/products/{product}/add-stock', [SuperAdminController::class, 'addStock'])->name('products.add-stock');
     Route::post('/products/bulk-move', [SuperAdminController::class, 'bulkMoveMartProducts'])->name('products.bulk-move');
+    Route::get('/low-stock', [SuperAdminController::class, 'showLowStockProducts'])->name('low-stock');
     Route::get('/categories/create', [SuperAdminController::class, 'createMartCategory'])->name('categories.create');
     Route::post('/categories', [SuperAdminController::class, 'storeMartCategory'])->name('categories.store');
     Route::get('/categories/{category}/edit', [SuperAdminController::class, 'editMartCategory'])->name('categories.edit');

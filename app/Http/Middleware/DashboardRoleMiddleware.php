@@ -46,12 +46,19 @@ class DashboardRoleMiddleware
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         if (\Illuminate\Support\Facades\Schema::hasTable('ip_blacklists')) {
-            $blocked = \App\Models\IPBlacklist::where('ip_address', $request->ip())
-                ->where('is_active', true)
-                ->where(function ($q) {
-                    $q->whereNull('expires_at')->orWhere('expires_at', '>=', now());
-                })
-                ->exists();
+            $ip = $request->ip();
+            
+            // Cache the blacklist check for 5 minutes to reduce DB queries
+            $cacheKey = 'ip_blacklist_' . md5($ip);
+            $blocked = \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function () use ($ip) {
+                return \App\Models\IPBlacklist::where('ip_address', $ip)
+                    ->where('is_active', true)
+                    ->where(function ($q) {
+                        $q->whereNull('expires_at')->orWhere('expires_at', '>=', now());
+                    })
+                    ->exists();
+            });
+            
             if ($blocked) {
                 abort(403, 'Access denied');
             }

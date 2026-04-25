@@ -642,13 +642,13 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 // Calculate delivery cost based on distance (SYP)
-// Base: 10000 SYP for first 3 KM, then +2000 SYP for each additional KM (rounded up).
+// Base: FREE for first 3 KM, then +5000 SYP for each additional KM (rounded up).
 function calculateDeliveryCost() {
     if (!deliveryDistance) return 0;
     
     const baseDistanceKm = 3;
-    const baseFee = 10000;
-    const extraFeePerKm = 2000;
+    const baseFee = 0; // FREE for 3km and below
+    const extraFeePerKm = 5000; // 5000 SYP per km above 3km
     const extraDistance = Math.max(0, deliveryDistance - baseDistanceKm);
     const extraKmCharged = Math.ceil(extraDistance);
     let totalCost = baseFee + (extraKmCharged * extraFeePerKm);
@@ -801,7 +801,25 @@ function updateStepUI() {
     // Show current form
     let currentForm;
     if (currentStep === 1) currentForm = document.getElementById('shippingForm');
-    else if (currentStep === 2) currentForm = document.getElementById('deliveryForm');
+    else if (currentStep === 2) {
+        currentForm = document.getElementById('deliveryForm');
+        // Hide normal delivery option if cart has mart items
+        if (window.hasMartItems) {
+            const normalOption = document.querySelector('.delivery-option[data-type="normal"]');
+            if (normalOption) {
+                normalOption.style.display = 'none';
+            }
+            // Auto-select express if normal was selected
+            if (selectedDelivery === 'normal') {
+                selectDelivery('express');
+            }
+        } else {
+            const normalOption = document.querySelector('.delivery-option[data-type="normal"]');
+            if (normalOption) {
+                normalOption.style.display = 'flex';
+            }
+        }
+    }
     else if (currentStep === 3) currentForm = document.getElementById('paymentForm');
     else if (currentStep === 4) {
         currentForm = document.getElementById('confirmationForm');
@@ -864,8 +882,24 @@ async function loadCartSummary() {
         
         if (cart && cart.length > 0) {
             cart.forEach(item => {
-                const priceUSD = item.product.discount_price || item.product.price;
-                const itemTotal = priceUSD * item.quantity;
+                // Check if weight-based item
+                const isWeightBased = item.is_weight_based || false;
+                const weightGrams = item.weight_grams || 0;
+                
+                // For weight-based items, use amount_paid (in SYP, convert to USD)
+                // For regular items, calculate from price * quantity
+                let priceUSD, itemTotal;
+                if (isWeightBased) {
+                    // amount_paid is in SYP, convert to USD
+                    const amountPaidSYP = parseFloat(item.amount_paid || 0);
+                    const amountPaidUSD = amountPaidSYP / usdToSyp;
+                    priceUSD = amountPaidUSD;
+                    itemTotal = amountPaidUSD;
+                } else {
+                    priceUSD = item.product.discount_price || item.product.price;
+                    itemTotal = priceUSD * item.quantity;
+                }
+                
                 subtotal += itemTotal;
                 
                 const isMart = isMartCartItem(item);
@@ -876,6 +910,17 @@ async function loadCartSummary() {
                     img = '/storage/' + img.replace(/^storage\//, '');
                 }
 
+                // Display quantity or weight
+                let quantityDisplay;
+                if (isWeightBased) {
+                    const weightDisplay = weightGrams >= 1000 
+                        ? `${(weightGrams / 1000).toFixed(2)} كيلو`
+                        : `${weightGrams} غرام`;
+                    quantityDisplay = `الوزن: ${weightDisplay}`;
+                } else {
+                    quantityDisplay = `الكمية: ${item.quantity} × ${formatPrice(priceUSD)}`;
+                }
+
                 itemsHtml += `
                     <div style="display:flex; gap:1rem; padding:1rem; background:${isMart ? '#fff9f0' : '#f8f9fa'}; border-radius:10px; margin-bottom:0.8rem; border-right:4px solid ${isMart ? '#ff6b35' : 'transparent'};">
                         <img src="${img || '/images/tulip_store.jpg'}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;" onerror="this.src='/images/tulip_store.jpg'">
@@ -884,7 +929,7 @@ async function loadCartSummary() {
                                 ${item.product.name}
                                 ${isMart ? '<span style="font-size:0.7rem; background:#ff6b35; color:#fff; padding:2px 6px; border-radius:4px; margin-right:5px;">Mart</span>' : ''}
                             </h5>
-                            <p style="font-family:'El Messiri',sans-serif; font-size:0.85rem; color:#666; margin:0;">الكمية: ${item.quantity} × ${formatPrice(priceUSD)}</p>
+                            <p style="font-family:'El Messiri',sans-serif; font-size:0.85rem; color:#666; margin:0;">${quantityDisplay}</p>
                         </div>
                         <div style="text-align:left;">
                             <p style="font-family:'El Messiri',sans-serif; font-size:1rem; font-weight:700; color:#ff6b35; margin:0;">${formatPrice(itemTotal)}</p>
@@ -1068,6 +1113,7 @@ window.backToPaymentOptions = function() {
     // Hide all payment detail forms with animation
     const creditCardDetails = document.getElementById('creditCardDetails');
     const syriatelDetails = document.getElementById('syriatelDetails');
+    const shamCashDetails = document.getElementById('shamCashDetails');
     const paymentOptions = document.getElementById('paymentOptions');
     
     if (creditCardDetails) {
@@ -1080,6 +1126,11 @@ window.backToPaymentOptions = function() {
         syriatelDetails.classList.add('hiding');
     }
     
+    if (shamCashDetails) {
+        shamCashDetails.classList.remove('active');
+        shamCashDetails.classList.add('hiding');
+    }
+    
     setTimeout(() => {
         if (creditCardDetails) {
             creditCardDetails.style.display = 'none';
@@ -1088,6 +1139,10 @@ window.backToPaymentOptions = function() {
         if (syriatelDetails) {
             syriatelDetails.style.display = 'none';
             syriatelDetails.classList.remove('hiding');
+        }
+        if (shamCashDetails) {
+            shamCashDetails.style.display = 'none';
+            shamCashDetails.classList.remove('hiding');
         }
         
         // Show payment options with animation
@@ -1131,6 +1186,12 @@ function selectDelivery(type) {
         }
     });
     
+    // Hide instant delivery option if there are mart items
+    const instantOption = document.querySelector('.delivery-option[data-type="instant"]');
+    if (instantOption && window.hasMartItems) {
+        instantOption.style.display = 'none';
+    }
+    
     // Recalculate delivery cost when delivery type changes
     loadCartSummary();
 }
@@ -1152,14 +1213,28 @@ function selectPayment(type) {
         
         if (optionType === type) {
             option.style.borderColor = '#ff6b35';
-            icons[0].style.color = '#ff6b35';
-            icons[1].className = 'fas fa-check-circle';
-            icons[1].style.color = '#ff6b35';
+            // Update first icon color if it exists (not an image)
+            if (icons[0] && icons[0].tagName === 'I') {
+                icons[0].style.color = '#ff6b35';
+            }
+            // Update check/circle icon (last icon)
+            if (icons.length > 0) {
+                const lastIcon = icons[icons.length - 1];
+                lastIcon.className = 'fas fa-check-circle';
+                lastIcon.style.color = '#ff6b35';
+            }
         } else {
             option.style.borderColor = '#e0e0e0';
-            icons[0].style.color = '#2a7080';
-            icons[1].className = 'far fa-circle';
-            icons[1].style.color = '#ccc';
+            // Reset first icon color if it exists (not an image)
+            if (icons[0] && icons[0].tagName === 'I') {
+                icons[0].style.color = '#2a7080';
+            }
+            // Reset check/circle icon (last icon)
+            if (icons.length > 0) {
+                const lastIcon = icons[icons.length - 1];
+                lastIcon.className = 'far fa-circle';
+                lastIcon.style.color = '#ccc';
+            }
         }
     });
 }
@@ -1181,10 +1256,10 @@ window.proceedWithPayment = function() {
         
         // Show relevant payment details form with animation
         if (selectedPayment === 'card') {
-            const cardDetails = document.getElementById('creditCardDetails');
-            cardDetails.style.display = 'block';
-            setTimeout(() => cardDetails.classList.add('active'), 50);
-            loadSavedCards();
+            // For card payment, skip the card form and go directly to confirmation
+            // Card details will be entered on the separate payment page after order creation
+            console.log('💳 Card payment selected - proceeding to confirmation');
+            goToStep(4);
         } else if (selectedPayment === 'balance') {
             goToStep(4);
         } else if (selectedPayment === 'syriatel') {
@@ -1197,6 +1272,11 @@ window.proceedWithPayment = function() {
             syriatelDetails.style.display = 'block';
             setTimeout(() => syriatelDetails.classList.add('active'), 50);
             prepareSyriatelForm();
+        } else if (selectedPayment === 'shamcash') {
+            // Show Sham Cash details
+            const shamCashDetails = document.getElementById('shamCashDetails');
+            shamCashDetails.style.display = 'block';
+            setTimeout(() => shamCashDetails.classList.add('active'), 50);
         } else if (selectedPayment === 'cash') {
             // Cash on delivery - go directly to confirmation
             goToStep(4);
@@ -1206,6 +1286,43 @@ window.proceedWithPayment = function() {
         }
     }, 300);
 };
+
+// Copy account number to clipboard
+window.copyAccountNumber = function() {
+    const accountNumber = 'cc8571e4f93387893e15f39cda36f45a';
+    
+    // Try modern clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(accountNumber).then(() => {
+            showAlert('تم نسخ رقم الحساب بنجاح', 'success');
+        }).catch(() => {
+            // Fallback to old method
+            fallbackCopyToClipboard(accountNumber);
+        });
+    } else {
+        // Fallback for older browsers
+        fallbackCopyToClipboard(accountNumber);
+    }
+};
+
+// Fallback copy method for older browsers
+function fallbackCopyToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-9999px';
+    document.body.appendChild(textArea);
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        showAlert('تم نسخ رقم الحساب بنجاح', 'success');
+    } catch (err) {
+        showAlert('فشل نسخ رقم الحساب. يرجى نسخه يدوياً', 'error');
+    }
+    
+    document.body.removeChild(textArea);
+}
 
 // Syriatel prep...
 
@@ -2070,31 +2187,117 @@ async function submitOrder() {
         const result = await response.json();
         
         if (result.success) {
-        console.log('✅ Order created successfully!', result);
-        
-        // Clear coupon from sessionStorage after successful order
-        sessionStorage.removeItem('appliedCoupon');
-        
-        // Show success card
-        showOrderSuccessCard(result.order_id);
-    } else {
-        console.error('❌ Order creation failed:', result);
-        const errorMsg = result.message || 'حدث خطأ في إنشاء الطلب';
-        const errorDetail = result.error ? ` (${result.error})` : '';
-        showAlert(errorMsg + errorDetail, 'error');
-        if (result.error) {
-            console.error('Server error:', result.error);
-            console.error('Line:', result.line);
+            console.log('✅ Order created successfully!', result);
+            
+            // If payment method is card, redirect to payment page
+            if (selectedPayment === 'card') {
+                console.log('💳 Redirecting to payment page...');
+                // Redirect to the new payment page
+                window.location.href = `/payment/stripe/${result.order_id}`;
+                return;
+            }
+            
+            // Clear coupon from sessionStorage after successful order
+            sessionStorage.removeItem('appliedCoupon');
+            
+            // Show success card
+            showOrderSuccessCard(result.order_id);
+        } else {
+            console.error('❌ Order creation failed:', result);
+            const errorMsg = result.message || 'حدث خطأ في إنشاء الطلب';
+            const errorDetail = result.error ? ` (${result.error})` : '';
+            showAlert(errorMsg + errorDetail, 'error');
+            if (result.error) {
+                console.error('Server error:', result.error);
+                console.error('Line:', result.line);
+            }
         }
+    } catch (error) {
+        console.error('❌ Error submitting order:', error);
+        showAlert('حدث خطأ في إنشاء الطلب: ' + error.message, 'error');
     }
-} catch (error) {
-    console.error('❌ Error submitting order:', error);
-    showAlert('حدث خطأ في إنشاء الطلب: ' + error.message, 'error');
-}
 }
 
 // Make submitOrder available globally
 window.submitOrder = submitOrder;
+
+// Process Stripe payment
+async function processStripePayment(orderId) {
+    try {
+        if (!window.cardData) {
+            throw new Error('Card data not found. Please try again.');
+        }
+
+        // Show loading indicator
+        showAlert('جاري معالجة الدفع...', 'info');
+
+        // Parse expiry date
+        const expiryParts = window.cardData.expiry.split('/');
+        const expMonth = parseInt(expiryParts[0], 10);
+        const expYear = parseInt('20' + expiryParts[1], 10);
+
+        // Create token using Stripe.js v2
+        Stripe.card.createToken({
+            number: window.cardData.number,
+            cvc: window.cardData.cvv,
+            exp_month: expMonth,
+            exp_year: expYear,
+            name: window.cardData.name
+        }, async function(status, response) {
+            if (response.error) {
+                console.error('Stripe token creation error:', response.error);
+                showAlert('خطأ في معالجة البطاقة: ' + response.error.message, 'error');
+                return;
+            }
+
+            console.log('✅ Stripe token created:', response.id);
+
+            try {
+                // Send token to backend for processing
+                const apiResponse = await fetch('/api/orders/stripe-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        order_id: orderId,
+                        stripe_token: response.id,
+                        save_card: window.cardData.saveCard
+                    })
+                });
+
+                const result = await apiResponse.json();
+
+                if (result.success) {
+                    console.log('✅ Payment processed successfully!');
+                    
+                    // Clear card data
+                    delete window.cardData;
+                    
+                    // Clear coupon from sessionStorage
+                    sessionStorage.removeItem('appliedCoupon');
+                    
+                    // Clear idempotency key to allow new orders
+                    sessionStorage.removeItem('checkoutIdempotencyKey');
+                    
+                    // Show success card
+                    showOrderSuccessCard(orderId);
+                } else {
+                    console.error('❌ Payment processing failed:', result);
+                    showAlert(result.message || 'فشل معالجة الدفع', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Error sending payment to backend:', error);
+                showAlert('حدث خطأ أثناء معالجة الدفع: ' + error.message, 'error');
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Error processing Stripe payment:', error);
+        showAlert('حدث خطأ أثناء معالجة الدفع: ' + error.message, 'error');
+    }
+}
 
 
 // Show order success card
@@ -2384,96 +2587,19 @@ function updateCardPreview() {
 
 // Validate card and proceed to confirmation
 window.validateCardAndProceed = function() {
-    console.log('💳 Validating credit card...');
+    console.log('💳 Validating payment method...');
     
-    // Check if a saved card is selected
-    const savedCardItems = document.querySelectorAll('.saved-card-item');
-    let savedCardSelected = false;
-    savedCardItems.forEach(item => {
-        if (item.style.borderColor === 'rgb(42, 112, 128)' || item.style.borderColor === '#2a7080') {
-            savedCardSelected = true;
-        }
-    });
-    
-    if (savedCardSelected) {
-        console.log('✅ Saved card selected, proceeding...');
+    // If card payment is selected, skip validation and go to confirmation
+    // Card details will be entered on the separate payment page
+    if (selectedPayment === 'card') {
+        console.log('✅ Card payment selected, proceeding to confirmation...');
         goToStep(4);
         return;
     }
     
-    // Validate new card fields
-    const cardNumber = document.getElementById('cardNumber');
-    const cardName = document.getElementById('cardName');
-    const cardExpiry = document.getElementById('cardExpiry');
-    const cardCVV = document.getElementById('cardCVV');
-    
-    let isValid = true;
-    
-    // Reset errors
-    document.getElementById('cardNumberError').style.display = 'none';
-    document.getElementById('cardNameError').style.display = 'none';
-    document.getElementById('cardExpiryError').style.display = 'none';
-    document.getElementById('cardCVVError').style.display = 'none';
-    
-    cardNumber.style.borderColor = '#e0e7ff';
-    cardName.style.borderColor = '#e0e7ff';
-    cardExpiry.style.borderColor = '#e0e7ff';
-    cardCVV.style.borderColor = '#e0e7ff';
-    
-    // Card Number Validation (16 digits minimum)
-    const cardNumVal = cardNumber.value.replace(/\s/g, '');
-    if (cardNumVal.length < 16 || !/^\d+$/.test(cardNumVal)) {
-        document.getElementById('cardNumberError').style.display = 'block';
-        cardNumber.style.borderColor = '#e74c3c';
-        isValid = false;
-    }
-    
-    // Card Name Validation
-    if (cardName.value.trim().length < 3) {
-        document.getElementById('cardNameError').style.display = 'block';
-        cardName.style.borderColor = '#e74c3c';
-        isValid = false;
-    }
-    
-    // Card Expiry Validation (MM/YY)
-    const expiryVal = cardExpiry.value;
-    const expiryRegex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
-    if (!expiryRegex.test(expiryVal)) {
-        document.getElementById('cardExpiryError').style.display = 'block';
-        cardExpiry.style.borderColor = '#e74c3c';
-        isValid = false;
-    } else {
-        // Check if expired
-        const parts = expiryVal.split('/');
-        const month = parseInt(parts[0], 10);
-        const year = parseInt('20' + parts[1], 10);
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        const currentMonth = now.getMonth() + 1;
-        
-        if (year < currentYear || (year === currentYear && month < currentMonth)) {
-            document.getElementById('cardExpiryError').textContent = 'البطاقة منتهية الصلاحية';
-            document.getElementById('cardExpiryError').style.display = 'block';
-            cardExpiry.style.borderColor = '#e74c3c';
-            isValid = false;
-        }
-    }
-    
-    // CVV Validation
-    const cvvVal = cardCVV.value;
-    if (cvvVal.length < 3 || !/^\d+$/.test(cvvVal)) {
-        document.getElementById('cardCVVError').style.display = 'block';
-        cardCVV.style.borderColor = '#e74c3c';
-        isValid = false;
-    }
-    
-    if (isValid) {
-        console.log('✅ New card validation successful, proceeding...');
-        goToStep(4);
-    } else {
-        console.log('❌ Card validation failed');
-        showAlert('الرجاء تصحيح الأخطاء في بيانات البطاقة', 'error');
-    }
+    // For other payment methods, just proceed
+    console.log('✅ Payment method validated, proceeding...');
+    goToStep(4);
 };
 
 
@@ -2586,6 +2712,14 @@ window.placeMarkerLeaflet = function(latlng) {
             
             // Calculate delivery cost
             deliveryCost = calculateDeliveryCost();
+            
+            // Update cart summary if we're on step 2 or later
+            if (currentStep >= 2) {
+                loadCartSummary();
+            }
+            
+            // Update route info panel
+            updateRouteInfo(deliveryDistance, deliveryCost);
             
             // Don't show the green confirmation box - we have route info panel instead
             // const locationMsg = document.getElementById('selectedLocation');

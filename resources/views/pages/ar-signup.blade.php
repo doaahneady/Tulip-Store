@@ -177,6 +177,56 @@
             color: #fff;
             font-weight: 600;
         }
+        
+        /* Disabled WhatsApp option */
+        .method-row label.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            position: relative;
+        }
+        
+        .method-row label.disabled:hover {
+            color: #d3e7e2;
+        }
+        
+        .method-row label.disabled .radio-custom {
+            border-color: #999;
+        }
+        
+        .coming-soon-badge {
+            background: linear-gradient(135deg, #ff6f35 0%, #ff8c5a 100%);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-right: 5px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(255, 111, 53, 0.3);
+        }
+        
+        /* Coming Soon Message */
+        .coming-soon-message {
+            background: rgba(255, 111, 53, 0.1);
+            border: 1px solid rgba(255, 111, 53, 0.3);
+            border-radius: 12px;
+            padding: 10px 15px;
+            margin-top: 10px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            color: #ffb48a;
+            font-size: 0.9rem;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .coming-soon-message.show {
+            display: flex;
+        }
+        
+        .coming-soon-message i {
+            font-size: 1.1rem;
+            color: #ff6f35;
+        }
         h1 {
             font-family: 'El Messiri', sans-serif;
             font-weight: 600;
@@ -227,17 +277,18 @@
         }
         .phone-prefix{
             position:absolute;
-            left:0.5rem;
+            right:0.5rem;
             top:50%;
             transform:translateY(-50%);
             color:#d3e7e2;
             font-size:0.85rem;
             pointer-events:none;
             font-weight:600;
+            z-index:1;
         }
         .phone-input-wrapper input{
-            padding-right:3rem;
-            padding-left:1.5rem;
+            padding-right:4rem;
+            padding-left:3rem;
             text-align:left !important;
         }
         .phone-input-wrapper input::placeholder{
@@ -249,12 +300,12 @@
         }
         .country-flag{
             position:absolute;
-            right:0.5rem;
+            left:0.5rem;
             top:50%;
             transform:translateY(-50%);
             font-size:1.8rem;
             line-height:1;
-            opacity:0;
+            opacity:1;
             transition: opacity 0.3s ease, transform 0.3s ease;
             pointer-events:none;
             display:flex;
@@ -262,6 +313,7 @@
             justify-content:center;
             width:2.5rem;
             height:2.5rem;
+            z-index:1;
         }
         .country-flag img{
             width:32px;
@@ -272,20 +324,99 @@
         }
         .country-flag.show{
             opacity:1;
-            animation: flagPop 0.4s ease;
         }
-        @keyframes flagPop {
-            0% {
-                opacity:0;
-                transform: translateY(-50%) scale(0.5);
-            }
-            60% {
-                transform: translateY(-50%) scale(1.1);
-            }
-            100% {
-                opacity:1;
-                transform: translateY(-50%) scale(1);
-            }
+        
+        /* WhatsApp question row */
+        .whatsapp-question {
+            display: none;
+            margin-top: 0.8rem;
+            padding: 0.8rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            animation: slideDown 0.3s ease;
+        }
+        .whatsapp-question.show {
+            display: block;
+        }
+        .whatsapp-question-text {
+            text-align: center;
+            color: #d3e7e2;
+            font-size: 0.9rem;
+            margin-bottom: 0.6rem;
+            font-weight: 500;
+        }
+        .whatsapp-options {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        .whatsapp-options label {
+            display: flex !important;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border: 1.5px solid #d3e7e2;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            color: #d3e7e2;
+            font-size: 0.85rem;
+            background: transparent;
+            min-width: 80px;
+            justify-content: center;
+        }
+        .whatsapp-options label:hover {
+            border-color: #ffb48a;
+            color: #ffb48a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 180, 138, 0.2);
+        }
+        .whatsapp-options label.selected {
+            background: linear-gradient(135deg, #ff6f35 0%, #ff8c5a 100%);
+            border-color: #ff6f35;
+            color: white;
+            box-shadow: 0 6px 20px rgba(255, 111, 53, 0.4);
+        }
+        .whatsapp-options input[type="radio"] {
+            display: none;
+        }
+        .whatsapp-options .radio-circle {
+            width: 12px;
+            height: 12px;
+            border: 1.5px solid #d3e7e2;
+            border-radius: 50%;
+            position: relative;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        .whatsapp-options label:hover .radio-circle {
+            border-color: #ffb48a;
+        }
+        .whatsapp-options label.selected .radio-circle {
+            border-color: white;
+            background: white;
+        }
+        .whatsapp-options label.selected .radio-circle::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 5px;
+            height: 5px;
+            background: #ff6f35;
+            border-radius: 50%;
+        }
+        
+        /* Separate WhatsApp field */
+        .whatsapp-field-wrapper {
+            display: none;
+            margin-top: 1rem;
+            animation: slideDown 0.3s ease;
+        }
+        .whatsapp-field-wrapper.show {
+            display: block;
         }
         input::placeholder{
             color:#d3e7e2;
@@ -587,6 +718,89 @@
         .sign-row span:hover{
             color:#ffb48a;
         }
+
+        /* Terms and Conditions Checkbox */
+        .terms-row {
+            margin: 1.2rem 0 0.5rem 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .terms-label {
+            display: flex !important;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: #d3e7e2;
+            transition: all 0.3s ease;
+        }
+
+        .terms-label:hover {
+            color: #fff;
+        }
+
+        .terms-label input[type="checkbox"] {
+            display: none;
+        }
+
+        .checkbox-custom {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #d3e7e2;
+            border-radius: 6px;
+            position: relative;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .terms-label:hover .checkbox-custom {
+            border-color: #ffb48a;
+        }
+
+        .terms-label input[type="checkbox"]:checked + .checkbox-custom {
+            background: linear-gradient(135deg, #ff6f35 0%, #ff8c5a 100%);
+            border-color: #ff6f35;
+        }
+
+        .terms-label input[type="checkbox"]:checked + .checkbox-custom::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .terms-text {
+            font-family: 'El Messiri', sans-serif;
+            font-weight: 400;
+        }
+
+        .terms-link {
+            color: #ffb48a;
+            text-decoration: underline;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .terms-link:hover {
+            color: #ff6f35;
+        }
+
+        .terms-row.error .checkbox-custom {
+            border-color: #ef4444 !important;
+            animation: shake 0.5s ease;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #999;
+        }
     </style>
 </head>
 <body>
@@ -653,12 +867,44 @@
                             <div class="control">
                                 <input id="signupName" type="text" placeholder="اسمك الكامل">
                             </div>
-                            <label for="signupPhone">رقم الجوال</label>
+                            <label for="signupPhone">رقم الهاتف للاتصال</label>
                             <div class="control phone-input-wrapper">
-                                <span class="phone-prefix">+</span>
-                                <input id="signupPhone" type="tel" placeholder="رقم الهاتف" dir="ltr">
-                                <span class="country-flag" id="countryFlag"></span>
+                                <span class="phone-prefix">+963</span>
+                                <input id="signupPhone" type="tel" placeholder="رقم للاتصال" dir="ltr" maxlength="9">
+                                <span class="country-flag show" id="countryFlag">
+                                    <img src="https://flagcdn.com/w40/sy.png" alt="سوريا" title="سوريا">
+                                </span>
                             </div>
+                            
+                            <!-- WhatsApp Question (shows after entering phone) -->
+                            <div class="whatsapp-question" id="whatsappQuestion">
+                                <div class="whatsapp-question-text">هل تستخدم هذا الرقم للواتساب؟</div>
+                                <div class="whatsapp-options">
+                                    <label for="whatsappYes" id="labelWhatsappYes">
+                                        <input type="radio" id="whatsappYes" name="whatsapp_same" value="yes">
+                                        <span class="radio-circle"></span>
+                                        <span>نعم</span>
+                                    </label>
+                                    <label for="whatsappNo" id="labelWhatsappNo">
+                                        <input type="radio" id="whatsappNo" name="whatsapp_same" value="no">
+                                        <span class="radio-circle"></span>
+                                        <span>لا</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Separate WhatsApp Field (shows only if user selects "No") -->
+                            <div class="whatsapp-field-wrapper" id="whatsappFieldWrapper">
+                                <label for="signupWhatsapp">رقم الواتساب</label>
+                                <div class="control phone-input-wrapper">
+                                    <span class="phone-prefix">+963</span>
+                                    <input id="signupWhatsapp" type="tel" placeholder="رقم الواتساب" dir="ltr" maxlength="9">
+                                    <span class="country-flag show" id="whatsappFlag">
+                                        <img src="https://flagcdn.com/w40/sy.png" alt="سوريا" title="سوريا">
+                                    </span>
+                                </div>
+                            </div>
+                            
                             <label for="signupEmail">البريد الإلكتروني</label>
                             <div class="control">
                                 <input id="signupEmail" type="email" placeholder="الايميل" dir="ltr" style="text-align:center;font-size:0.9rem;">
@@ -669,18 +915,37 @@
                     <label style="text-align: center; display: block; margin-top: 1rem; color: #d3e7e2;">طريقة التحقق </label>
                     <div class="method-row">
                         <label for="methodEmail" class="selected">
-                            <input type="radio" id="methodEmail" name="verification_method" value="email" >
+                            <input type="radio" id="methodEmail" name="verification_method" value="email" checked>
                             <span class="radio-custom"></span>
                             <span>عبر الإيميل</span>
                         </label>
-                        <label for="methodSms">
-                            <input type="radio" id="methodSms" name="verification_method" value="sms">
+                        <label for="methodWhatsApp" class="disabled" id="whatsappLabel">
+                            <input type="radio" id="methodWhatsApp" name="verification_method" value="whatsapp" disabled>
                             <span class="radio-custom"></span>
-                            <span>عبر رقم الهاتف</span>
+                            <span>عبر الواتساب</span>
+                            <span class="coming-soon-badge">قريباً</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Coming Soon Message -->
+                    <div class="coming-soon-message" id="whatsappMessage">
+                        <i class="fas fa-info-circle"></i>
+                        <span>خدمة التحقق عبر الواتساب ستكون متاحة قريباً</span>
+                    </div>
+
+                    <!-- Terms and Conditions Checkbox -->
+                    <div class="terms-row">
+                        <label for="termsCheckbox" class="terms-label">
+                            <input type="checkbox" id="termsCheckbox" name="terms_accepted">
+                            <span class="checkbox-custom"></span>
+                            <span class="terms-text">
+                                أوافق على 
+                                <a href="/terms-and-conditions" target="_blank" class="terms-link">الشروط والأحكام</a>
+                            </span>
                         </label>
                     </div>
 
-                    <button class="action-btn" type="submit" id="submitBtn">متابعة</button>
+                    <button class="action-btn" type="submit" id="submitBtn" disabled>متابعة</button>
                     <div class="sign-row" style="margin-top:1rem;">
                         <span>لديك حساب ؟</span>
                         <span style="color:#ffb48a;" onclick="window.location.href='/ar-login'">قم بتسجيل الدخول</span>
@@ -754,8 +1019,28 @@
 
         // Verification Method selection
         const methodLabels = document.querySelectorAll('.method-row label');
+        const whatsappLabel = document.getElementById('whatsappLabel');
+        const whatsappMessage = document.getElementById('whatsappMessage');
+        
         methodLabels.forEach(label => {
-            label.addEventListener('click', function() {
+            label.addEventListener('click', function(e) {
+                // If it's the disabled WhatsApp option
+                if (this.classList.contains('disabled')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Show coming soon message
+                    whatsappMessage.classList.add('show');
+                    
+                    // Hide message after 3 seconds
+                    setTimeout(() => {
+                        whatsappMessage.classList.remove('show');
+                    }, 3000);
+                    
+                    return false;
+                }
+                
+                // Normal selection for enabled options
                 methodLabels.forEach(l => l.classList.remove('selected'));
                 this.classList.add('selected');
             });
@@ -791,118 +1076,97 @@
             }
         });
 
-        // Phone country code detection
+        // Terms and Conditions Checkbox
+        const termsCheckbox = document.getElementById('termsCheckbox');
+
+        if (termsCheckbox && submitBtn) {
+            // Enable/disable submit button based on checkbox
+            termsCheckbox.addEventListener('change', function() {
+                submitBtn.disabled = !this.checked;
+                // Remove error state when checked
+                if (this.checked) {
+                    document.querySelector('.terms-row').classList.remove('error');
+                }
+            });
+        }
+
+        // Phone country code detection - FIXED TO 963 (Syria)
         const phoneInput = document.getElementById('signupPhone');
-        
-        const countryCodes = {
-            '+966': { name: 'السعودية', code: 'sa' },
-            '+971': { name: 'الإمارات', code: 'ae' },
-            '+965': { name: 'الكويت', code: 'kw' },
-            '+968': { name: 'عمان', code: 'om' },
-            '+974': { name: 'قطر', code: 'qa' },
-            '+973': { name: 'البحرين', code: 'bh' },
-            '+20': { name: 'مصر', code: 'eg' },
-            '+962': { name: 'الأردن', code: 'jo' },
-            '+961': { name: 'لبنان', code: 'lb' },
-            '+963': { name: 'سوريا', code: 'sy' },
-            '+964': { name: 'العراق', code: 'iq' },
-            '+967': { name: 'اليمن', code: 'ye' },
-            '+212': { name: 'المغرب', code: 'ma' },
-            '+213': { name: 'الجزائر', code: 'dz' },
-            '+216': { name: 'تونس', code: 'tn' },
-            '+218': { name: 'ليبيا', code: 'ly' },
-            '+249': { name: 'السودان', code: 'sd' },
-            '+1': { name: 'أمريكا', code: 'us' },
-            '+44': { name: 'بريطانيا', code: 'gb' },
-            '+33': { name: 'فرنسا', code: 'fr' },
-            '+49': { name: 'ألمانيا', code: 'de' },
-            '+39': { name: 'إيطاليا', code: 'it' },
-            '+34': { name: 'إسبانيا', code: 'es' },
-            '+7': { name: 'روسيا', code: 'ru' },
-            '+86': { name: 'الصين', code: 'cn' },
-            '+81': { name: 'اليابان', code: 'jp' },
-            '+82': { name: 'كوريا', code: 'kr' },
-            '+91': { name: 'الهند', code: 'in' },
-            '+92': { name: 'باكستان', code: 'pk' },
-            '+90': { name: 'تركيا', code: 'tr' },
-            '+98': { name: 'إيران', code: 'ir' },
-            '+60': { name: 'ماليزيا', code: 'my' },
-            '+62': { name: 'إندونيسيا', code: 'id' },
-            '+63': { name: 'الفلبين', code: 'ph' },
-            '+66': { name: 'تايلاند', code: 'th' },
-            '+84': { name: 'فيتنام', code: 'vn' },
-            '+61': { name: 'أستراليا', code: 'au' },
-            '+64': { name: 'نيوزيلندا', code: 'nz' },
-            '+27': { name: 'جنوب أفريقيا', code: 'za' },
-            '+234': { name: 'نيجيريا', code: 'ng' },
-            '+254': { name: 'كينيا', code: 'ke' },
-            '+55': { name: 'البرازيل', code: 'br' },
-            '+52': { name: 'المكسيك', code: 'mx' },
-            '+54': { name: 'الأرجنتين', code: 'ar' },
-        };
+        const whatsappInput = document.getElementById('signupWhatsapp');
+        const whatsappQuestion = document.getElementById('whatsappQuestion');
+        const whatsappFieldWrapper = document.getElementById('whatsappFieldWrapper');
+        const whatsappYesRadio = document.getElementById('whatsappYes');
+        const whatsappNoRadio = document.getElementById('whatsappNo');
 
-        const countryFlag = document.getElementById('countryFlag');
-        const phonePrefix = document.querySelector('.phone-prefix');
-
-        if (phoneInput && countryFlag && phonePrefix) {
-            phoneInput.addEventListener('input', (e) => {
+        // Format phone inputs - only allow 9 digits after 963
+        function formatSyrianPhone(input) {
+            if (!input) return;
+            
+            input.addEventListener('input', (e) => {
                 let value = e.target.value.trim();
-                
-                console.log('Input value:', value);
                 
                 // Only allow numbers
                 const cleaned = value.replace(/[^\d]/g, '');
                 if (cleaned !== value) {
-                    phoneInput.value = cleaned;
-                    value = cleaned;
+                    input.value = cleaned;
                 }
                 
-                // Sort codes by length (longest first) to match 966 before 96
-                const sortedCodes = Object.keys(countryCodes).sort((a, b) => b.length - a.length);
-                
-                console.log('Checking codes...', sortedCodes.slice(0, 5));
-                
-                // Check for country code (without +)
-                let foundCode = false;
-                for (let code of sortedCodes) {
-                    const codeWithoutPlus = code.substring(1); // Remove + from code
-                    if (value.startsWith(codeWithoutPlus)) {
-                        console.log('✓ Found code:', code, 'Country:', countryCodes[code].name);
-                        
-                        // Show country flag using flagcdn.com
-                        const countryCode = countryCodes[code].code;
-                        const flagUrl = `https://flagcdn.com/w40/${countryCode}.png`;
-                        console.log('Flag URL:', flagUrl);
-                        
-                        countryFlag.innerHTML = `<img src="${flagUrl}" alt="${countryCodes[code].name}" title="${countryCodes[code].name}" onerror="console.error('Flag failed to load:', this.src)">`;
-                        countryFlag.classList.add('show');
-                        
-                        // Color the + and input text green when code is detected
-                        phonePrefix.style.color = '#4ade80';
-                        phoneInput.style.color = '#4ade80';
-                        
-                        // Add space after country code
-                        const codeLength = codeWithoutPlus.length;
-                        if (value.length > codeLength && value.charAt(codeLength) !== ' ') {
-                            phoneInput.value = value.substring(0, codeLength) + ' ' + value.substring(codeLength);
-                        }
-                        
-                        foundCode = true;
-                        break;
-                    }
+                // Limit to 9 digits
+                if (cleaned.length > 9) {
+                    input.value = cleaned.substring(0, 9);
                 }
                 
-                if (!foundCode) {
-                    console.log('✗ No code found for:', value);
-                    countryFlag.classList.remove('show');
-                    countryFlag.innerHTML = '';
-                    phonePrefix.style.color = '#d3e7e2';
-                    phoneInput.style.color = '#fff';
+                // Color the input green when valid
+                if (cleaned.length === 9) {
+                    input.style.color = '#4ade80';
+                    input.parentElement.querySelector('.phone-prefix').style.color = '#4ade80';
+                } else {
+                    input.style.color = '#fff';
+                    input.parentElement.querySelector('.phone-prefix').style.color = '#d3e7e2';
                 }
             });
-        } else {
-            console.error('Phone input elements not found!', {phoneInput, countryFlag, phonePrefix});
         }
+
+        formatSyrianPhone(phoneInput);
+        formatSyrianPhone(whatsappInput);
+
+        // Show WhatsApp question when phone number is entered (9 digits)
+        if (phoneInput && whatsappQuestion) {
+            phoneInput.addEventListener('input', function() {
+                const value = this.value.trim();
+                if (value.length === 9) {
+                    whatsappQuestion.classList.add('show');
+                } else {
+                    whatsappQuestion.classList.remove('show');
+                    whatsappFieldWrapper.classList.remove('show');
+                    // Reset radio buttons
+                    whatsappYesRadio.checked = false;
+                    whatsappNoRadio.checked = false;
+                    document.querySelectorAll('.whatsapp-options label').forEach(l => l.classList.remove('selected'));
+                }
+            });
+        }
+
+        // Handle WhatsApp question radio buttons
+        const whatsappLabels = document.querySelectorAll('.whatsapp-options label');
+        whatsappLabels.forEach(label => {
+            label.addEventListener('click', function() {
+                whatsappLabels.forEach(l => l.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                const selectedValue = this.querySelector('input').value;
+                
+                if (selectedValue === 'yes') {
+                    // Hide separate WhatsApp field
+                    whatsappFieldWrapper.classList.remove('show');
+                    // Clear WhatsApp input
+                    whatsappInput.value = '';
+                } else if (selectedValue === 'no') {
+                    // Show separate WhatsApp field
+                    whatsappFieldWrapper.classList.add('show');
+                }
+            });
+        });
 
         // Smooth password toggle
         document.querySelectorAll('.toggle').forEach(t => {
@@ -931,14 +1195,25 @@
             const birth_date = document.getElementById('signupBirth').value;
             const gender = document.querySelector('input[name="gender"]:checked')?.value;
             const verification_method = document.querySelector('input[name="verification_method"]:checked')?.value || 'email';
+            const terms_accepted = document.getElementById('termsCheckbox').checked;
+            const whatsappSame = document.querySelector('input[name="whatsapp_same"]:checked')?.value;
             const errorMsg = document.getElementById('errorMsg');
             const submitBtn = document.getElementById('submitBtn');
 
             // Remove all error classes first
             document.querySelectorAll('input').forEach(inp => inp.classList.remove('error'));
+            document.querySelector('.terms-row').classList.remove('error');
             errorMsg.classList.remove('show');
 
-            // Check if all fields are filled
+            // Check terms acceptance first
+            if (!terms_accepted) {
+                errorMsg.textContent = 'يجب الموافقة على الشروط والأحكام للمتابعة';
+                errorMsg.classList.add('show');
+                document.querySelector('.terms-row').classList.add('error');
+                return;
+            }
+
+            // Check if all required fields are filled
             const requiredFields = [
                 { input: document.getElementById('signupName'), value: name },
                 { input: document.getElementById('signupEmail'), value: email },
@@ -968,6 +1243,50 @@
                 return;
             }
 
+            // Validate phone number (must be 9 digits)
+            if (phone.length !== 9) {
+                errorMsg.textContent = 'رقم الهاتف يجب أن يكون 9 أرقام';
+                errorMsg.classList.add('show');
+                document.getElementById('signupPhone').classList.add('error');
+                return;
+            }
+
+            // Check if WhatsApp question was answered
+            if (!whatsappSame) {
+                errorMsg.textContent = 'يرجى تحديد إذا كنت تستخدم نفس الرقم للواتساب';
+                errorMsg.classList.add('show');
+                whatsappQuestion.style.border = '2px solid #ef4444';
+                setTimeout(() => {
+                    whatsappQuestion.style.border = '1px solid rgba(255,255,255,0.1)';
+                }, 2000);
+                return;
+            }
+
+            // Determine WhatsApp number
+            let whatsapp;
+            if (whatsappSame === 'yes') {
+                // Use same number as phone
+                whatsapp = phone;
+            } else {
+                // Use separate WhatsApp number
+                whatsapp = document.getElementById('signupWhatsapp').value;
+                
+                // Validate separate WhatsApp number
+                if (!whatsapp || whatsapp.trim() === '') {
+                    errorMsg.textContent = 'يرجى إدخال رقم الواتساب';
+                    errorMsg.classList.add('show');
+                    document.getElementById('signupWhatsapp').classList.add('error');
+                    return;
+                }
+                
+                if (whatsapp.length !== 9) {
+                    errorMsg.textContent = 'رقم الواتساب يجب أن يكون 9 أرقام';
+                    errorMsg.classList.add('show');
+                    document.getElementById('signupWhatsapp').classList.add('error');
+                    return;
+                }
+            }
+
             // Validate password
             if (!validatePassword()) {
                 errorMsg.textContent = 'كلمة المرور لا تستوفي جميع الشروط';
@@ -987,6 +1306,10 @@
             submitBtn.textContent = 'جاري التحميل...';
             errorMsg.classList.remove('show');
 
+            // Prepend 963 to phone numbers
+            const fullPhone = '963' + phone;
+            const fullWhatsapp = '963' + whatsapp;
+
             try {
                 const response = await fetch('/api/register', {
                     method: 'POST',
@@ -997,12 +1320,14 @@
                     body: JSON.stringify({
                         name,
                         email,
-                        phone,
+                        phone: fullPhone,
+                        whatsapp: fullWhatsapp,
                         password,
                         password_confirmation,
                         birth_date,
                         gender,
-                        verification_method
+                        verification_method,
+                        terms_accepted
                     })
                 });
 
@@ -1021,7 +1346,7 @@
                 errorMsg.textContent = 'حدث خطأ، يرجى المحاولة مرة أخرى: ' + error.message;
                 errorMsg.classList.add('show');
             } finally {
-                submitBtn.disabled = false;
+                submitBtn.disabled = !document.getElementById('termsCheckbox').checked;
                 submitBtn.textContent = 'متابعة';
             }
         }

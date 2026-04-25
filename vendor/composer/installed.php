@@ -3,7 +3,7 @@
         'name' => 'tulip-store/backend',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'b574da20fe87349eee39f7b99971c805c5a1f8bc',
+        'reference' => '65c46010e8d7bf80bd85a290a6103c2fbe7d9221',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -1169,6 +1169,15 @@
             'aliases' => array(),
             'dev_requirement' => true,
         ),
+        'stripe/stripe-php' => array(
+            'pretty_version' => 'v20.0.0',
+            'version' => '20.0.0.0',
+            'reference' => '7338bd140e641b1f9c7cb602e2de971e14db6b3b',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../stripe/stripe-php',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'symfony/console' => array(
             'pretty_version' => 'v6.4.27',
             'version' => '6.4.27.0',
@@ -1463,7 +1472,7 @@
         'tulip-store/backend' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'b574da20fe87349eee39f7b99971c805c5a1f8bc',
+            'reference' => '65c46010e8d7bf80bd85a290a6103c2fbe7d9221',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

@@ -682,8 +682,14 @@ class SupportDashboardController extends Controller
 
         $orders = $query->paginate(20)->withQueryString();
 
-        $statusOptions = (clone $query)->select('status')->distinct()->pluck('status')->filter()->values();
-        $paymentOptions = (clone $query)->select('payment_status')->distinct()->pluck('payment_status')->filter()->values();
+        // Cache status/payment options for 1 hour to reduce DB queries
+        $statusOptions = \Illuminate\Support\Facades\Cache::remember('order_status_options', 3600, function () {
+            return Order::select('status')->distinct()->pluck('status')->filter()->values();
+        });
+
+        $paymentOptions = \Illuminate\Support\Facades\Cache::remember('order_payment_options', 3600, function () {
+            return Order::select('payment_status')->distinct()->pluck('payment_status')->filter()->values();
+        });
 
         return view('dashboards.cs.orders', compact('orders', 'statusOptions', 'paymentOptions'));
     }
@@ -715,8 +721,15 @@ class SupportDashboardController extends Controller
             ->orderByDesc('created_at');
 
         $orders = $query->paginate(25)->withQueryString();
-        $statusOptions = (clone $query)->select('status')->distinct()->pluck('status')->filter()->values();
-        $paymentOptions = (clone $query)->select('payment_status')->distinct()->pluck('payment_status')->filter()->values();
+        
+        // Cache status/payment options for 1 hour to reduce DB queries
+        $statusOptions = \Illuminate\Support\Facades\Cache::remember('order_status_options', 3600, function () {
+            return Order::select('status')->distinct()->pluck('status')->filter()->values();
+        });
+
+        $paymentOptions = \Illuminate\Support\Facades\Cache::remember('order_payment_options', 3600, function () {
+            return Order::select('payment_status')->distinct()->pluck('payment_status')->filter()->values();
+        });
 
         return view('dashboards.cs.payrolls', compact('orders', 'statusOptions', 'paymentOptions'));
     }

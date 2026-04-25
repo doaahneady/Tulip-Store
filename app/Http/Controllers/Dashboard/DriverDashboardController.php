@@ -32,7 +32,8 @@ class DriverDashboardController extends Controller
 
         $orders = collect();
         if ($driver && $driver->user_id) {
-            $orders = Order::query()
+            // Add eager loading to prevent N+1 queries
+            $orders = Order::with(['user', 'customer', 'items.product'])
                 ->where('assigned_driver_id', $driver->user_id)
                 ->orderByDesc('created_at')
                 ->limit(50)

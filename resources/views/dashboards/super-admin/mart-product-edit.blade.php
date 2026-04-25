@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 max-w-4xl">
-    <form method="POST" action="{{ route('dashboard.admin.mart.products.update', $product) }}" enctype="multipart/form-data" class="space-y-5">
+    <form method="POST" action="{{ route('dashboard.admin.mart.products.update', $product) }}" enctype="multipart/form-data" class="space-y-5" id="martProductForm">
         @csrf
         @method('PUT')
 
@@ -174,9 +174,11 @@
 <script>
     // Preview uploaded image before saving
     (function () {
+        let convertedJpegFile = null; // Used to replace HEIC with JPG on submit
         const input = document.getElementById('imageInput');
         const preview = document.getElementById('imagePreview');
         const hint = document.getElementById('imagePreviewHint');
+        const form = document.getElementById('martProductForm');
         if (!input || !preview) return;
 
         function showHint(msg) {
@@ -209,6 +211,7 @@
             if (!file) return;
 
             showHint('');
+            convertedJpegFile = null;
 
             const isHeic =
                 (file.type && (file.type.includes('heic') || file.type.includes('heif'))) ||
@@ -238,6 +241,7 @@
 
                     const converted = await window.heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 });
                     const blob = Array.isArray(converted) ? converted[0] : converted;
+                    convertedJpegFile = new File([blob], (file.name || 'image').replace(/\.(heic|heif)$/i, '') + '.jpg', { type: 'image/jpeg' });
                     const url = URL.createObjectURL(blob);
                     preview.src = url;
                     preview.style.display = 'block';
@@ -252,6 +256,20 @@
                 showHint('تعذر عرض المعاينة لهذه الصورة قبل الحفظ.');
             }
         });
+
+        // Convert HEIC to JPG before submit so it is saved as JPG even if server can't convert
+        if (form) {
+            form.addEventListener('submit', async function (e) {
+                if (!convertedJpegFile) return;
+                try {
+                    const dt = new DataTransfer();
+                    dt.items.add(convertedJpegFile);
+                    input.files = dt.files;
+                } catch (err) {
+                    // If replacing the file fails, let the request go as-is.
+                }
+            });
+        }
     })();
 </script>
 @endsection

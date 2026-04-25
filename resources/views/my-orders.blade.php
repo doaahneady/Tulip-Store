@@ -246,11 +246,27 @@ const img = p?.image || p?.primary_image || p?.image_path || null;
 const name = item.product_name || p?.name || 'منتج';
 const unit = (item.price ?? item.unit_price ?? 0);
 const sub = (item.subtotal ?? item.total_price ?? (n(unit) * n(item.quantity)));
+
+// Check if weight-based item
+const isWeightBased = item.is_weight_based || false;
+const weightGrams = item.weight_grams || 0;
+
 html+='<div style="display:flex;align-items:center;gap:1rem;background:#fff;padding:1rem;border-radius:10px">';
 if(img)html+='<img src="'+(String(img).startsWith('http')?img:'/storage/'+img)+'" alt="'+name+'" style="width:70px;height:70px;object-fit:cover;border-radius:8px" onerror="this.src=\'/images/tulip_store.jpg\'">';
 else html+='<div style="width:70px;height:70px;background:#e0e0e0;border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="fas fa-image" style="color:#999;font-size:1.5rem"></i></div>';
 html+='<div style="flex:1"><p style="margin:0 0 0.3rem 0;font-weight:700;color:#1a1a1a;font-size:1rem">'+name+'</p>';
-html+='<p style="margin:0;font-size:0.85rem;color:#666">الكمية: '+safeText(item.quantity,'0')+' × '+money(unit)+'</p></div>';
+
+// Display weight or quantity
+if (isWeightBased && weightGrams > 0) {
+    const weightDisplay = weightGrams >= 1000 
+        ? (weightGrams / 1000).toFixed(2) + ' كيلو'
+        : weightGrams + ' غرام';
+    html+='<p style="margin:0;font-size:0.85rem;color:#666">الوزن: '+weightDisplay+'</p>';
+} else {
+    html+='<p style="margin:0;font-size:0.85rem;color:#666">الكمية: '+safeText(item.quantity,'0')+' × '+money(unit)+'</p>';
+}
+
+html+='</div>';
 html+='<div style="text-align:left"><p style="margin:0;font-weight:700;color:#2a7080;font-size:1.1rem">'+money(sub)+'</p></div></div>';
 });
 html+='</div></div>';

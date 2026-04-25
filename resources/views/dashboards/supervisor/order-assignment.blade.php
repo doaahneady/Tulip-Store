@@ -59,19 +59,26 @@
     {{-- Sidebar: Available Drivers + Active Assignments --}}
     <div class="space-y-6">
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">سائقون متاحون</h3>
+            <h3 class="text-lg font-bold text-gray-800 mb-4">جميع السائقين</h3>
             <ul class="space-y-3">
                 @foreach($availableDrivers as $driver)
-                    <li class="flex items-center justify-between p-3 rounded-xl bg-green-50 border border-green-100">
-                        <div>
+                    <li class="flex items-center justify-between p-3 rounded-xl {{ $driver->availability === 'available' ? 'bg-green-50 border border-green-100' : 'bg-blue-50 border border-blue-100' }}">
+                        <div class="flex-1">
                             <div class="font-medium text-gray-900">{{ optional($driver->user)->name ?? optional($driver->user)->user_full_name ?? 'Driver #'.$driver->id }}</div>
                             <div class="text-xs text-gray-500">{{ optional($driver->user)->phone ?? optional($driver->user)->mobile ?? '—' }}</div>
+                            @if($driver->active_assignments_count > 0)
+                                <div class="text-xs text-blue-600 font-semibold mt-1">
+                                    <i class="fas fa-box"></i> {{ $driver->active_assignments_count }} {{ $driver->active_assignments_count == 1 ? 'طلب نشط' : 'طلبات نشطة' }}
+                                </div>
+                            @endif
                         </div>
-                        <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-green-200 text-green-800">متاح</span>
+                        <span class="px-2 py-0.5 text-xs font-semibold rounded-full {{ $driver->availability === 'available' ? 'bg-green-200 text-green-800' : 'bg-blue-200 text-blue-800' }}">
+                            {{ $driver->availability === 'available' ? 'متاح' : 'مشغول' }}
+                        </span>
                     </li>
                 @endforeach
                 @if($availableDrivers->count() === 0)
-                    <li class="py-4 text-center text-sm text-gray-500">لا يوجد سائقون متاحون</li>
+                    <li class="py-4 text-center text-sm text-gray-500">لا يوجد سائقون نشطون</li>
                 @endif
             </ul>
         </div>
@@ -126,8 +133,12 @@
                         <select id="driverSelect" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-700">
                             <option value="">-- اختر سائق --</option>
                             @foreach($availableDrivers as $driver)
-                                @php $phone = optional($driver->user)->phone ?? optional($driver->user)->mobile ?? ''; @endphp
-                                <option value="{{ $driver->id }}" data-phone="{{ $phone }}">{{ optional($driver->user)->name ?? optional($driver->user)->user_full_name ?? 'Driver #'.$driver->id }}</option>
+                                @php 
+                                    $phone = optional($driver->user)->phone ?? optional($driver->user)->mobile ?? '';
+                                    $driverName = optional($driver->user)->name ?? optional($driver->user)->user_full_name ?? 'Driver #'.$driver->id;
+                                    $assignmentInfo = $driver->active_assignments_count > 0 ? " ({$driver->active_assignments_count} طلب نشط)" : '';
+                                @endphp
+                                <option value="{{ $driver->id }}" data-phone="{{ $phone }}">{{ $driverName }}{{ $assignmentInfo }}</option>
                             @endforeach
                         </select>
                     </div>

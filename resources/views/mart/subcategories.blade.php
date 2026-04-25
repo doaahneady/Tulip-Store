@@ -213,7 +213,7 @@
                         <div class="subcategory-info">
                             <div class="subcategory-name">{{ $subcategory->name }}</div>
                             <div class="subcategory-count">
-                                {{ $subcategory->products()->where('is_active', true)->count() }} منتج
+                                {{ $subcategory->products_count ?? 0 }} منتج
                             </div>
                         </div>
                     </a>

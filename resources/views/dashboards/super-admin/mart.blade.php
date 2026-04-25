@@ -25,6 +25,14 @@
             <i class="fas fa-store"></i>
             <span>Tulip Mart</span>
         </a>
+        <a href="{{ route('dashboard.admin.mart.sell-prices.index') }}" class="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition">
+            <i class="fas fa-tag"></i>
+            <span>اسعار المبيع</span>
+        </a>
+        <a href="{{ route('dashboard.admin.mart.orders.index') }}" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition">
+            <i class="fas fa-receipt"></i>
+            <span>طلبات المارت</span>
+        </a>
     </div>
 </div>
 
@@ -87,7 +95,7 @@
             </div>
         </div>
     </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 cursor-pointer hover:shadow-md transition" onclick="window.location.href='{{ route('dashboard.admin.mart.low-stock') }}'">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-500 text-xs">مخزون منخفض</p>
@@ -176,7 +184,19 @@
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 text-sm w-full" id="martProductsPanel" style="order:1;">
         <div class="p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
             <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <h3 class="text-base font-bold text-gray-900">المنتجات</h3>
+                <div class="flex items-center gap-3">
+                    <h3 class="text-base font-bold text-gray-900">المنتجات</h3>
+                    <button 
+                        type="button" 
+                        id="bulkToggleInventoryBtn"
+                        class="btn btn-sm btn-outline"
+                        onclick="bulkToggleInventory()"
+                        title="تفعيل/تعطيل تتبع المخزون لجميع المنتجات"
+                    >
+                        <i class="fas fa-toggle-on me-2"></i>
+                        <span id="bulkToggleText">تفعيل الكل</span>
+                    </button>
+                </div>
                 <form method="GET" action="{{ route('dashboard.admin.mart.index') }}" class="flex flex-wrap items-center gap-2">
                     @if(request()->has('missing_photo'))
                         <input type="hidden" name="missing_photo" value="{{ request('missing_photo') }}">
@@ -268,6 +288,7 @@
                         <th>الفرعي</th>
                         <th>السعر</th>
                         <th>المخزون</th>
+                        <th>تتبع المخزون</th>
                         <th>الحالة</th>
                         <th>التاريخ</th>
                         <th>إجراءات</th>
@@ -276,7 +297,7 @@
                 <tbody>
                     @if($products === null)
                         <tr>
-                            <td colspan="10" class="py-8 text-center text-gray-500">جدول المنتجات غير موجود</td>
+                            <td colspan="11" class="py-8 text-center text-gray-500">جدول المنتجات غير موجود</td>
                         </tr>
                     @else
                         @forelse($products as $p)
@@ -299,6 +320,19 @@
                                 <td>{{ number_format((float) ($p->discount_price ?? $p->price), 2) }}</td>
                                 <td>{{ number_format((int) ($p->stock_quantity ?? 0)) }}</td>
                                 <td>
+                                    @php $trackInventory = (bool) ($p->track_inventory ?? false); @endphp
+                                    <button 
+                                        type="button" 
+                                        class="toggle-inventory-btn px-2 py-0.5 rounded text-[10px] transition @if($trackInventory) bg-emerald-100 text-emerald-700 hover:bg-emerald-200 @else bg-gray-100 text-gray-700 hover:bg-gray-200 @endif"
+                                        data-product-id="{{ $p->id }}"
+                                        data-track-inventory="{{ $trackInventory ? '1' : '0' }}"
+                                        onclick="toggleInventoryTracking(this)"
+                                    >
+                                        <i class="fas fa-{{ $trackInventory ? 'toggle-on' : 'toggle-off' }} me-1"></i>
+                                        {{ $trackInventory ? 'مفعل' : 'معطل' }}
+                                    </button>
+                                </td>
+                                <td>
                                     @php $active = (bool) ($p->is_active ?? true); @endphp
                                     <span class="px-2 py-0.5 rounded text-[10px] @if($active) bg-emerald-100 text-emerald-700 @else bg-gray-100 text-gray-700 @endif">
                                         {{ $active ? 'نشط' : 'غير نشط' }}
@@ -310,19 +344,19 @@
                                         <a href="{{ route('dashboard.admin.mart.products.edit', $p) }}" class="btn btn-ghost btn-xs text-[10px] px-1 h-6 min-h-0">
                                             تعديل
                                         </a>
-                                        <form method="POST" action="{{ route('dashboard.admin.mart.products.delete', $p) }}">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-ghost btn-xs text-[10px] px-1 h-6 min-h-0 text-red-600" onclick="return confirm('حذف المنتج؟')">
-                                                حذف
-                                            </button>
-                                        </form>
+                                        <button 
+                                            type="button" 
+                                            class="btn btn-ghost btn-xs text-[10px] px-1 h-6 min-h-0 text-red-600"
+                                            onclick="deleteProduct({{ $p->id }}, event)"
+                                        >
+                                            حذف
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="py-8 text-center text-gray-500">لا توجد منتجات</td>
+                                <td colspan="11" class="py-8 text-center text-gray-500">لا توجد منتجات</td>
                             </tr>
                         @endforelse
                     @endif
@@ -518,5 +552,144 @@
             });
         }
     })();
+
+    // Toggle inventory tracking
+    async function toggleInventoryTracking(button) {
+        const productId = button.getAttribute('data-product-id');
+        const currentState = button.getAttribute('data-track-inventory') === '1';
+        const newState = !currentState;
+        
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        const csrf = csrfMeta ? csrfMeta.getAttribute('content') : '';
+        
+        try {
+            button.disabled = true;
+            button.style.opacity = '0.5';
+            
+            const response = await fetch(`/dashboard/admin/mart/products/${productId}/toggle-inventory`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrf
+                },
+                body: JSON.stringify({ track_inventory: newState })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Update button state
+                button.setAttribute('data-track-inventory', newState ? '1' : '0');
+                button.className = `toggle-inventory-btn px-2 py-0.5 rounded text-[10px] transition ${newState ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`;
+                button.innerHTML = `<i class="fas fa-${newState ? 'toggle-on' : 'toggle-off'} me-1"></i> ${newState ? 'مفعل' : 'معطل'}`;
+                
+                // Show success message
+                if (window.showToast) {
+                    window.showToast(data.message || 'تم التحديث بنجاح');
+                }
+            } else {
+                throw new Error('Failed to update');
+            }
+        } catch (error) {
+            console.error('Error toggling inventory:', error);
+            alert('حدث خطأ أثناء التحديث');
+        } finally {
+            button.disabled = false;
+            button.style.opacity = '1';
+        }
+    }
+
+    // Bulk toggle inventory tracking for all products
+    async function bulkToggleInventory() {
+        const bulkBtn = document.getElementById('bulkToggleInventoryBtn');
+        const bulkText = document.getElementById('bulkToggleText');
+        
+        // Ask user what action to take
+        const action = confirm('اختر الإجراء:\n\nموافق = تفعيل تتبع المخزون لجميع المنتجات\nإلغاء = تعطيل تتبع المخزون لجميع المنتجات');
+        const enableTracking = action; // true = enable, false = disable
+        
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        const csrf = csrfMeta ? csrfMeta.getAttribute('content') : '';
+        
+        try {
+            bulkBtn.disabled = true;
+            bulkBtn.style.opacity = '0.5';
+            bulkText.textContent = 'جاري التحديث...';
+            
+            const response = await fetch('/dashboard/admin/mart/products/bulk-toggle-inventory', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrf
+                },
+                body: JSON.stringify({ track_inventory: enableTracking })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Show success message
+                if (window.showToast) {
+                    window.showToast(data.message || 'تم تحديث جميع المنتجات بنجاح');
+                } else {
+                    alert(data.message || 'تم تحديث جميع المنتجات بنجاح');
+                }
+                
+                // Reload page to show updated states
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                throw new Error('Failed to bulk update');
+            }
+        } catch (error) {
+            console.error('Error bulk toggling inventory:', error);
+            alert('حدث خطأ أثناء التحديث الجماعي');
+            bulkText.textContent = 'تفعيل الكل';
+        } finally {
+            bulkBtn.disabled = false;
+            bulkBtn.style.opacity = '1';
+        }
+    }
+
+    // Delete product function
+    function deleteProduct(productId, event) {
+        // Prevent parent form submission
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        
+        // Confirm deletion
+        if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+            return;
+        }
+        
+        // Create a temporary form to submit the delete request
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/dashboard/admin/mart/products/${productId}`;
+        
+        // Add CSRF token
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        const csrf = csrfMeta ? csrfMeta.getAttribute('content') : '';
+        
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_token';
+        csrfInput.value = csrf;
+        form.appendChild(csrfInput);
+        
+        // Add DELETE method
+        const methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        methodInput.value = 'DELETE';
+        form.appendChild(methodInput);
+        
+        // Append to body and submit
+        document.body.appendChild(form);
+        form.submit();
+    }
 </script>
 @endsection

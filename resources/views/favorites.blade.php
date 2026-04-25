@@ -295,7 +295,7 @@
             if (isGiftFavorite(product)) {
                 return `<button class="favorite-card-btn btn-add-cart" onclick="window.location.href='${resolveFavoriteUrl(product)}'">عرض الهدية</button>`;
             }
-            return `<button class="favorite-card-btn btn-add-cart" onclick="addToCart(${JSON.stringify(String(product.id))}, event)">أضف للسلة</button>`;
+            return `<button class="favorite-card-btn btn-add-cart" data-product-id="${product.id}"><i class="fas fa-shopping-cart"></i> أضف للسلة</button>`;
         }
         function loadFavorites() {
             if (isAuthenticated) {
@@ -398,7 +398,27 @@
         }
         
         async function addToCart(productId, event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            const btn = event ? event.target.closest('.btn-add-cart') : null;
+            
             try {
+                // Check if user is authenticated
+                if (!isAuthenticated) {
+                    alert('يرجى تسجيل الدخول أولاً لإضافة المنتجات للسلة');
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                    return;
+                }
+                
+                // Disable button during request
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإضافة...';
+                }
+                
                 const response = await fetch('/api/cart/add', {
                     method: 'POST',
                     headers: {
@@ -414,25 +434,38 @@
                 
                 const data = await response.json();
                 
-                if (data.success) {
+                if (response.ok && (data.success || data.cart_count !== undefined)) {
                     // Show success message
-                    const btn = event.target.closest('.btn-add-cart');
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-check"></i> تمت الإضافة';
-                    btn.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
-                    
-                    // Update cart count using global function
-                    if (window.updateCartCount) {
-                        window.updateCartCount(data.cart_count || data.count || 0);
+                    if (btn) {
+                        btn.innerHTML = '<i class="fas fa-check"></i> تمت الإضافة';
+                        btn.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
+                        
+                        // Update cart count using global function
+                        if (window.updateCartCount) {
+                            window.updateCartCount(data.cart_count || data.count || 0);
+                        }
+                        
+                        // Animate cart icon
+                        if (window.animateCartIcon) {
+                            window.animateCartIcon();
+                        }
+                        
+                        setTimeout(() => {
+                            btn.innerHTML = '<i class="fas fa-shopping-cart"></i> أضف للسلة';
+                            btn.style.background = '';
+                            btn.disabled = false;
+                        }, 2000);
                     }
-                    
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.style.background = '';
-                    }, 2000);
+                } else {
+                    throw new Error(data.message || 'فشل في إضافة المنتج للسلة');
                 }
             } catch (error) {
                 console.error('Error adding to cart:', error);
+                if (btn) {
+                    btn.innerHTML = '<i class="fas fa-shopping-cart"></i> أضف للسلة';
+                    btn.disabled = false;
+                }
+                alert('حدث خطأ أثناء إضافة المنتج للسلة: ' + error.message);
             }
         }
         
@@ -460,6 +493,16 @@
                 }
             }
         }
+        
+        // Event delegation for add to cart buttons
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-add-cart');
+            if (btn && btn.dataset.productId) {
+                e.preventDefault();
+                e.stopPropagation();
+                addToCart(btn.dataset.productId, e);
+            }
+        });
         
         window.addEventListener('DOMContentLoaded', loadFavorites);
     </script>

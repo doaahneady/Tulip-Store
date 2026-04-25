@@ -221,10 +221,29 @@
                             <i class="fas fa-bars-staggered" aria-hidden="true"></i>
                             <span class="hidden md:inline">{{ $dashboardLocale === 'ar' ? 'القائمة' : 'Sidebar' }}</span>
                         </button>
+
+                        <!-- Mart orders notifications (shows only on /dashboard/admin/mart pages) -->
+                        <div id="martBellNavWrap" style="position:relative; display:none;">
+                            <button type="button" id="martBellNavBtn" class="db4-action-btn" aria-label="إشعارات الطلبات" style="position:relative;">
+                                <i class="fas fa-bell" aria-hidden="true"></i>
+                                <span id="martBellNavBadge" style="display:none; position:absolute; top:-6px; right:-6px; min-width:20px; height:20px; padding:0 6px; border-radius:999px; background:#dc2626; color:#fff; font-size:11px; line-height:20px; text-align:center; font-weight:800;"></span>
+                            </button>
+
+                            <div id="martBellNavDropdown" style="display:none; position:fixed; top:0; left:0; width:820px; max-width:calc(100vw - 24px); border-radius:16px; border:1px solid rgba(255,255,255,0.12); background:rgba(15,23,42,0.96); color:rgba(255,255,255,0.92); box-shadow:0 22px 70px rgba(0,0,0,0.55); z-index:2147483647; pointer-events:auto;">
+                                <div style="padding:12px 14px; border-bottom:1px solid rgba(255,255,255,0.10); display:flex; align-items:center; justify-content:space-between;">
+                                    <div style="font-weight:800; font-size:13px;">إشعارات الطلبات</div>
+                                    <button type="button" id="martBellNavReadAll" style="font-size:12px; color:rgba(255,255,255,0.85); text-decoration:underline; background:transparent; border:0; cursor:pointer;">قراءة الكل</button>
+                                </div>
+                                <div id="martBellNavList" style="max-height:460px; overflow:auto; padding:8px;">
+                                    <div style="padding:10px 12px; font-size:13px; color:rgba(255,255,255,0.70);">جارٍ التحميل...</div>
+                                </div>
+                            </div>
+                        </div>
                         <button type="button" class="db4-action-btn" aria-label="{{ $dashboardLocale === 'ar' ? 'قائمة المستخدم' : 'User menu' }}" onclick="toggleUserMenu()">
                             <span aria-hidden="true" class="inline-flex items-center justify-center w-8 h-8 rounded-xl" style="background: rgba(13, 70, 76, 0.10); color: var(--db4-primary); font-weight: 900;">
                                 {{ mb_substr($actorName ?? 'U', 0, 1) }}
                             </span>
+                            <span class="hidden md:inline">{{ $actorName }}</span>
                             <span class="hidden md:inline">{{ $actorName }}</span>
                             <i class="fas fa-chevron-down" aria-hidden="true"></i>
                         </button>
@@ -349,6 +368,162 @@
             } else if (typeof mq.addListener === 'function') {
                 mq.addListener(onChange);
             }
+        })();
+
+        // Mart notifications in topbar (only on /dashboard/admin/mart pages)
+        (function () {
+            const wrap = document.getElementById('martBellNavWrap');
+            const btn = document.getElementById('martBellNavBtn');
+            const badge = document.getElementById('martBellNavBadge');
+            const dd = document.getElementById('martBellNavDropdown');
+            const list = document.getElementById('martBellNavList');
+            const readAll = document.getElementById('martBellNavReadAll');
+            if (!wrap || !btn || !badge || !dd || !list || !readAll) return;
+
+            const path = (window.location && window.location.pathname) ? window.location.pathname : '';
+            const isMart = path.indexOf('/dashboard/admin/mart') === 0;
+            if (!isMart) return;
+            wrap.style.display = 'block';
+
+            // Move dropdown to <body> so it can't be clipped/stacked under dashboard containers
+            try {
+                if (dd.parentElement !== document.body) {
+                    document.body.appendChild(dd);
+                }
+            } catch (e) {}
+
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrf = csrfMeta ? (csrfMeta.getAttribute('content') || '') : '';
+            const notificationsUrl = @json(route('dashboard.admin.mart.orders.notifications'));
+            const readUrl = @json(route('dashboard.admin.mart.orders.notifications.read'));
+
+            function setBadge(n) {
+                const num = Number(n || 0);
+                if (num > 0) {
+                    badge.textContent = String(num);
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.textContent = '';
+                    badge.style.display = 'none';
+                }
+            }
+
+            function render(items) {
+                if (!Array.isArray(items) || items.length === 0) {
+                    list.innerHTML = '<div style="padding:10px 12px; font-size:13px; color:rgba(255,255,255,0.70);">لا توجد إشعارات جديدة</div>';
+                    return;
+                }
+
+                list.innerHTML = items.map((o) => {
+                    const number = o.order_number || ('#' + o.id);
+                    const customer = o.customer_name || '';
+                    const status = o.status || '-';
+                    const total = (typeof o.total === 'number') ? o.total.toFixed(2) : (o.total || '0');
+                    const created = o.created_at ? new Date(o.created_at).toLocaleString('ar-SA') : '';
+                    const url = o.show_url || '#';
+                    return `
+                        <div style="padding:6px;">
+                            <div style="border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.05); border-radius:14px; padding:10px 12px;">
+                                <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px;">
+                                    <a href="${url}" style="color:rgba(255,255,255,0.95); font-weight:850; font-size:13px; text-decoration:none;">${number}</a>
+                                    <button type="button" class="mart-nav-read-btn" data-id="${o.id}" style="font-size:12px; color:rgba(255,255,255,0.85); text-decoration:underline; background:transparent; border:0; cursor:pointer;">قراءة</button>
+                                </div>
+                                <div style="margin-top:6px; font-size:12px; color:rgba(255,255,255,0.80);">${customer}</div>
+                                <div style="margin-top:6px; font-size:12px; color:rgba(255,255,255,0.70);">الحالة: ${status} • الإجمالي: ${total}</div>
+                                <div style="margin-top:6px; font-size:11px; color:rgba(255,255,255,0.55);">${created}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                const buttons = list.querySelectorAll('.mart-nav-read-btn');
+                for (let i = 0; i < buttons.length; i++) {
+                    buttons[i].addEventListener('click', async function () {
+                        const id = Number(this.getAttribute('data-id') || 0);
+                        if (!id) return;
+                        try {
+                            await fetch(readUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                                body: JSON.stringify({ order_id: id }),
+                            });
+                        } catch (e) {}
+                        await refresh();
+                    });
+                }
+            }
+
+            async function refresh() {
+                try {
+                    const r = await fetch(notificationsUrl, { headers: { 'Accept': 'application/json' } });
+                    const data = await r.json();
+                    setBadge(data && data.unread_count ? data.unread_count : 0);
+                    render(data && data.orders ? data.orders : []);
+                } catch (e) {}
+            }
+
+            function positionDropdown() {
+                const rect = btn.getBoundingClientRect();
+                const maxW = Math.max(240, window.innerWidth - 24);
+                const desiredW = 820;
+                const w = Math.min(desiredW, maxW);
+                dd.style.width = w + 'px';
+                dd.style.maxWidth = (window.innerWidth - 24) + 'px';
+
+                const top = rect.bottom + 10;
+                dd.style.top = top + 'px';
+
+                // Align dropdown to the button, but keep inside viewport
+                let left = rect.right - w;
+                if (left < 12) left = 12;
+                const maxLeft = window.innerWidth - w - 12;
+                if (left > maxLeft) left = Math.max(12, maxLeft);
+                dd.style.left = left + 'px';
+            }
+
+            function toggleDropdown(open) {
+                const show = (typeof open === 'boolean') ? open : (dd.style.display === 'none' || dd.style.display === '');
+                if (show) {
+                    positionDropdown();
+                    dd.style.display = 'block';
+                    refresh();
+                } else {
+                    dd.style.display = 'none';
+                }
+            }
+
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                toggleDropdown();
+            });
+            document.addEventListener('click', function (e) {
+                if (dd.style.display !== 'block') return;
+                if (dd.contains(e.target) || btn.contains(e.target)) return;
+                dd.style.display = 'none';
+            });
+            window.addEventListener('resize', function () {
+                if (dd.style.display === 'block') {
+                    positionDropdown();
+                }
+            });
+            window.addEventListener('scroll', function () {
+                if (dd.style.display === 'block') {
+                    positionDropdown();
+                }
+            }, true);
+            readAll.addEventListener('click', async function () {
+                try {
+                    await fetch(readUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                        body: JSON.stringify({ all: true }),
+                    });
+                } catch (e) {}
+                await refresh();
+            });
+
+            refresh();
+            setInterval(refresh, 15000);
         })();
 
         // Global date input validation (ensure 4-digit year)

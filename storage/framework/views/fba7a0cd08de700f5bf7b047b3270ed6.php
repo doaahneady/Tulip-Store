@@ -13,9 +13,26 @@
     <link rel="stylesheet" href="/css/store.css?v=999&fix=store&t=<?php echo e(time()); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Weight Modal Placeholder Functions -->
+    <script>
+        // Placeholder functions that will be overridden by the modal component
+        window.openWeightModal = window.openWeightModal || function(productId) {
+            console.log('openWeightModal placeholder called, waiting for modal to load...');
+            // Retry after a short delay to allow modal to load
+            setTimeout(() => {
+                if (window.openWeightModal && window.openWeightModal.toString().includes('placeholder')) {
+                    console.error('Weight modal not loaded yet');
+                    alert('الرجاء الانتظار قليلاً وإعادة المحاولة');
+                } else {
+                    window.openWeightModal(productId);
+                }
+            }, 100);
+        };
+    </script>
 </head>
 <body>
-    <?php echo $__env->make('components.navbar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+   
     <style>
         :root {
             --primary: #059669;
@@ -38,11 +55,19 @@
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* Fix: overflow-x only instead of full overflow: hidden */
+        html {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
         body { 
             font-family: 'El Messiri', sans-serif; 
             background: var(--bg); 
             line-height: 1.6;
             color: var(--text);
+            overflow-x: hidden;
+            max-width: 100%;
         }
 
         /* Store/Gifts-like Hero Banner */
@@ -291,7 +316,7 @@
         .main-content {
             max-width: 1400px;
             margin: 0 auto;
-            /* padding: 4rem 2rem; */
+            padding: 0;
         }
 
         /* Section Styles */
@@ -486,6 +511,8 @@
             border: 2px solid transparent;
             box-shadow: var(--shadow);
             position: relative;
+            width: 100%;
+            min-width: 0;
         }
         .product-card:hover {
             transform: translateY(-8px);
@@ -628,9 +655,18 @@
             transition: all 0.3s ease;
         }
 
+        .add-btn-circle.weight-based {
+            background: #f59e0b;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
         .add-btn-circle:hover {
             transform: scale(1.1);
             background: var(--teal-dark);
+        }
+
+        .add-btn-circle.weight-based:hover {
+            background: #f97316;
         }
 
         .counter-control {
@@ -644,6 +680,11 @@
             justify-content: space-between;
             box-shadow: 0 4px 15px rgba(15, 79, 85, 0.4);
             animation: expandWidth 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .counter-control.weight-based {
+            background: #f59e0b;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
         }
 
         @keyframes expandWidth {
@@ -707,7 +748,13 @@
             .hero-title { font-size: 2.5rem; }
             .products-grid { 
                 grid-template-columns: repeat(2, 1fr) !important; 
-                gap: 1rem !important;
+                gap: 0.6rem !important;
+                width: 100%;
+            }
+            .product-card {
+                width: 100% !important;
+                min-width: 0 !important;
+                max-width: 100% !important;
             }
             .hero-actions { flex-direction: column; align-items: center; }
             
@@ -752,7 +799,7 @@
                 font-size: 0.8rem !important;
             }
 
-            .main-content { padding: 2rem 1rem; }
+            
             
             /* Disable hover scale on mobile */
             .product-card:hover, .category-card:hover {
@@ -771,124 +818,245 @@
             .main-circle { width: 250px; height: 250px; }
             .main-icon { font-size: 5rem; }
         }
-        /* Modern Collapsible Sidebar */
+        
+        @media (max-width: 360px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.4rem !important;
+            }
+            .section {
+                padding: 0 0.5rem !important;
+            }
+        }
+        /* Modern Vertical Sidebar - HIDDEN ON DESKTOP */
         .mart-sidebar {
-            position: fixed;
-            top: 80px;
-            right: 10px;
-            width: 80px;
-            background: #ffffff;
-            border-radius: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            z-index: 2000; /* Higher than footer's 1001 */
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem 0;
-            border: 1px solid rgba(0,0,0,0.05);
+            display: none !important; /* Hide the fixed sidebar */
         }
-
-        /* Layout Wrapper to handle side-by-side on mobile */
-        .mart-layout-container {
-            display: flex;
-            flex-direction: row-reverse;
-            max-width: 1400px;
+        
+        /* Categories Slider Container */
+        .categories-slider-wrapper {
+            position: relative;
+            padding: 0 3rem;
             margin: 0 auto;
-            position: relative;
+            max-width: 1400px;
         }
-
-        .mart-sidebar:hover {
-            width: 240px;
-            border-radius: 24px;
-        }
-
-        .sidebar-item {
+        
+        .categories-slider {
             display: flex;
-            align-items: center;
-            padding: 0.4rem 0.8rem;
-            text-decoration: none;
-            color: var(--text);
-            transition: all 0.3s ease;
-            white-space: nowrap;
+            gap: 1.5rem;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 1rem 0;
+        }
+        
+        .categories-slider::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .category-card {
+            background: transparent;
+            border-radius: 0;
+            padding: 0.5rem;
+            text-align: center;
             cursor: pointer;
-            position: relative;
+            transition: all 0.3s ease;
+            border: none;
+            min-width: 100px;
+            flex-shrink: 0;
         }
-
-        .sidebar-item:hover {
-            background: rgba(5, 150, 105, 0.05);
-            color: var(--primary);
+        
+        .category-card:hover .category-card-icon {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
-
-        .sidebar-item.active {
-            background: var(--primary);
-            color: #fff !important;
+        
+        .category-card.active .category-card-icon {
+            border: 3px solid var(--primary);
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
         }
-
-        .sidebar-icon {
-            width: 50px;
-            height:50px;
-            min-width: 50px;
-            border-radius: 50px;
+        
+        .category-card-icon {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 0.8rem;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
-            background: #f8fafc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
-            overflow: hidden;
-            /* border: 2px solid #000; */
-           /* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); */
+            border: 3px solid transparent;
         }
-
-        .sidebar-icon img {
+        
+        .category-card-icon img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-
-        .sidebar-item:hover .sidebar-icon {
-            background: var(--primary);
-            color: #fff;
-            transform: scale(1.1);
+        
+        .category-card-icon i {
+            font-size: 2.5rem;
+            color: var(--primary);
         }
-
-        .sidebar-item.active .sidebar-icon {
-            background: rgba(255,255,255,0.2);
-            color: #fff;
-        }
-
-        .sidebar-text {
+        
+        .category-card-name {
             font-family: 'El Messiri', sans-serif;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
-            opacity: 0;
-            transform: translateX(20px);
+            color: var(--text);
+            margin: 0;
+            line-height: 1.3;
+        }
+        
+        .category-card-count {
+            display: none;
+        }
+        
+        /* Slider Navigation Buttons */
+        .slider-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 45px;
+            height: 45px;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
             transition: all 0.3s ease;
-            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .slider-nav-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .slider-nav-btn.prev {
+            right: 0;
+        }
+        
+        .slider-nav-btn.next {
+            left: 0;
+        }
+        
+        .slider-nav-btn i {
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+        
+        .slider-nav-btn:hover i {
+            color: white;
         }
 
-        .mart-sidebar:hover .sidebar-text {
-            opacity: 1;
-            transform: translateX(0);
-            pointer-events: auto;
+        /* Layout Wrapper - Remove flex, use block */
+        .mart-layout-container {
+            display: block;
+            max-width: 100%;
+            margin: 0 auto;
+            position: relative;
+            padding: 0;
         }
 
-        /* Mobile View for Sidebar */
+        /* Mobile View - Categories Slider */
         @media (max-width: 768px) {
+            .categories-slider-wrapper {
+                padding: 0 1rem;
+            }
+            
+            .categories-slider {
+                gap: 0.8rem;
+            }
+            
+            .category-card {
+                padding: 0.3rem;
+                min-width: 80px;
+            }
+            
+            .category-card-icon {
+                width: 70px;
+                height: 70px;
+                margin-bottom: 0.5rem;
+            }
+            
+            .category-card-name {
+                font-size: 0.8rem;
+            }
+            
+            .slider-nav-btn {
+                display: none;
+            }
+            
+            .mart-layout-container {
+                padding: 0;
+            }
+            
+            /* Hide sidebar in its original position */
+            .mart-sidebar {
+                display: none !important;
+            }
+            
+            .main-content {
+                padding: 0;
+                width: 100%;
+            }
+            }
+            
+            .section {
+                padding: 0 0.75rem;
+                margin-left: 0;
+                margin-right: 0;
+            }
+            
+            .products-grid {
+                padding: 0;
+                margin-left: 0;
+                margin-right: 0;
+            }
+            
+            .mart-layout-container {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            .main-content > div:first-of-type {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            .main-content > div:first-of-type img {
+                display: block;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+        }
+        
+        /* Tablet View for Sidebar */
+        @media (min-width: 769px) and (max-width: 1024px) {
             .mart-layout-container {
                 padding: 0 10px;
                 gap: 10px;
+                flex-direction: row-reverse;
             }
             .mart-sidebar {
-                position: sticky; /* Make it part of the flow instead of fixed/overlay */
-                top: 20px;
-                right: 0;
+                position: fixed;
+                top: 5px;
+                right: 5px;
+                padding: 1.5rem 0;
                 width: 60px !important;
-                height: fit-content;
-                max-height: calc(100vh - 40px);
-                border-radius: 20px;
-                padding: 1rem 0;
+                height: 100vh;
+                padding-top: 60px;
+                border-radius: 10px;
                 flex-shrink: 0;
                 z-index: 100;
             }
@@ -896,11 +1064,17 @@
                 width: 60px !important;
             }
             .sidebar-text {
-                display: none !important;
+                font-size: 0.4rem;
+                padding: 1px 0;
+                opacity: 1;
+                transform: translateX(0);
+                pointer-events: auto;
             }
             .sidebar-item {
                 padding: 0.2rem;
                 justify-content: center;
+                flex-direction: column;
+                align-items: center;
             }
             .sidebar-icon {
                 width: 32px;
@@ -908,15 +1082,22 @@
                 min-width: 32px;
             }
             .main-content {
-                margin-right: 0 !important;
+                padding: 0;
                 flex: 1;
-                width: 0; /* Allow flex to shrink if needed */
+                width: 100%;
             }
         }
 
-        @media (min-width: 769px) {
+        @media (min-width: 769px) and (max-width: 1024px) {
             .main-content {
-                margin-right: 100px;
+                padding: 0;
+                width: 100%;
+            }
+        }
+        
+        @media (min-width: 1025px) {
+            .main-content {
+                padding: 0;
                 width: 100%;
             }
         }
@@ -925,7 +1106,7 @@
             .hide-mobile { display: none !important; }
             .show-mobile { display: flex !important; }
             .mobile-view-all {
-                margin: 2rem auto 0;
+                /* margin: 2rem auto 0; */
                 width: fit-content;
                 justify-content: center;
             }
@@ -935,7 +1116,7 @@
         }
     </style>
 
-    <div ><img src="<?php echo e(asset('images/panner_mart.png')); ?>" alt="" style="width: 100%;"></div>
+   
     
     <div class="mart-layout-container">
         <!-- Collapsible Sidebar -->
@@ -944,6 +1125,28 @@
         </div>
         
         <div class="main-content">
+             <?php echo $__env->make('components.navbar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+             <div><img src="<?php echo e(asset('images/panner_mart.png')); ?>" alt="" style="width: 100%;"></div>
+           
+           <!-- Categories Section -->
+           <section class="section" style="margin-top: 2rem;">
+               <div class="section-header">
+                   <h2 class="section-title">الأقسام</h2>
+                   <p class="section-subtitle">تصفح جميع الأقسام</p>
+               </div>
+               <div class="categories-slider-wrapper">
+                   <button class="slider-nav-btn prev" onclick="scrollCategories('right')">
+                       <i class="fas fa-chevron-right"></i>
+                   </button>
+                   <div class="categories-slider" id="categoriesSlider">
+                       <!-- Will be populated by JS -->
+                   </div>
+                   <button class="slider-nav-btn next" onclick="scrollCategories('left')">
+                       <i class="fas fa-chevron-left"></i>
+                   </button>
+               </div>
+           </section>
+           
            <!-- Fresh Products -->
         <section class="section">
             <div class="section-header" style="display:flex; align-items:center; gap:1rem;">
@@ -1008,14 +1211,13 @@
             </div>
             <div class="products-grid" id="featuredProducts"></div>
         </section>
-
-      
-    </div>
-    </div>
-    <!-- Footer -->
+   <!-- Footer -->
    <div style="position:relative; z-index:1001;">
     <?php echo $__env->make('components.footer', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 </div>
+    </div>
+    </div>
+ 
     <script>
         let products = {};
         let categories = [];
@@ -1134,6 +1336,9 @@
             window.martProducts = products;
             window.martCategories = categories;
             window.martSubcategories = sliderItems;
+            // Store flat products list globally for weight modal
+            window.martProductsList = allProductsFlat;
+            console.log('Mart data loaded: martProductsList set with', window.martProductsList.length, 'products');
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -1146,6 +1351,34 @@
             loadFreshProducts();
             initMartSearch();
             initScrollAnimations();
+            moveSidebarOnMobile();
+        });
+        
+        // Move sidebar after banner on mobile
+        function moveSidebarOnMobile() {
+            if (window.innerWidth <= 768) {
+                const sidebar = document.getElementById('martSidebar');
+                const banner = document.querySelector('.main-content > div:first-of-type');
+                
+                if (sidebar && banner && banner.nextElementSibling) {
+                    // Clone the sidebar
+                    const sidebarClone = sidebar.cloneNode(true);
+                    sidebarClone.id = 'martSidebarMobile';
+                    
+                    // Insert after banner
+                    banner.parentNode.insertBefore(sidebarClone, banner.nextElementSibling);
+                }
+            }
+        }
+        
+        // Re-run on window resize
+        window.addEventListener('resize', () => {
+            const existingMobileSidebar = document.getElementById('martSidebarMobile');
+            if (window.innerWidth <= 768 && !existingMobileSidebar) {
+                moveSidebarOnMobile();
+            } else if (window.innerWidth > 768 && existingMobileSidebar) {
+                existingMobileSidebar.remove();
+            }
         });
 
         function loadTodayDate() {
@@ -1160,39 +1393,51 @@
         }
 
         function loadCategories() {
-            const sidebar = document.getElementById('martSidebar');
-            if (!sidebar) return;
+            const categoriesSlider = document.getElementById('categoriesSlider');
+            if (!categoriesSlider) return;
 
-            // Limit to 7 items + 1 "View All" = 8 items total as requested
-            const displayItems = sliderItems.slice(0, 7);
+            // Show ALL categories
             const currentUrl = new URL(window.location.href);
             const activeCategory = currentUrl.searchParams.get('category');
 
-            let html = displayItems.map(c => {
+            let html = sliderItems.map(c => {
                 const isActive = activeCategory === c.id;
                 return `
-                    <div class="sidebar-item ${isActive ? 'active' : ''}" 
+                    <div class="category-card ${isActive ? 'active' : ''}" 
                          onclick="openMartSection('${c.id}', '')" 
                          title="${c.name}">
-                        <div class="sidebar-icon">
+                        <div class="category-card-icon">
                             <img src="${c.image}" alt="${c.name}" onerror="this.src='/images/tulip_mart.jpg'">
                         </div>
-                        <span class="sidebar-text">${c.name}</span>
+                        <div class="category-card-name">${c.name}</div>
                     </div>
                 `;
             }).join('');
 
-            // Add "View All" button as the 8th item
+            // Add "View All" card at the end
             html += `
-                <div class="sidebar-item" onclick="window.location.href='/mart/products'" title="عرض الكل">
-                    <div class="sidebar-icon" style="background: var(--primary); color: #fff;">
-                        <i class="fas fa-th-large"></i>
+                <div class="category-card" onclick="window.location.href='/mart/products'" title="عرض الكل">
+                    <div class="category-card-icon" style="background: var(--primary);">
+                        <i class="fas fa-th-large" style="color: white;"></i>
                     </div>
-                    <span class="sidebar-text">كل الأقسام</span>
+                    <div class="category-card-name">كل الأقسام</div>
                 </div>
             `;
 
-            sidebar.innerHTML = html;
+            categoriesSlider.innerHTML = html;
+        }
+        
+        // Scroll categories slider
+        function scrollCategories(direction) {
+            const slider = document.getElementById('categoriesSlider');
+            if (!slider) return;
+            
+            const scrollAmount = 300;
+            if (direction === 'left') {
+                slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            } else {
+                slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
         }
 
         function openMartSection(categorySlug, subSlug) {
@@ -1213,35 +1458,38 @@
             const fruitsCat = categories.find(c => classifySpecialCategory(c) === 'fruits') || categories[0];
             const vegetablesCat = categories.find(c => classifySpecialCategory(c) === 'vegetables') || categories[1];
 
-            const fruitsSpecial = fruitsCat ? (products[fruitsCat.id] || []).slice(0, 4) : [];
-            document.getElementById('fruitsSpecialPrices').innerHTML = fruitsSpecial.map(p => `
-                <div class="price-item" onclick="addToCart('${p.id}', event)" style="--category-color: ${fruitsCat?.color || '#0D464C'};">
-                    <div class="price-item-photo" style="background-image: url('${p.fallbackImage}'); background-size: cover; background-position: center; position: relative; width: 60px; height: 60px; border-radius: 12px; overflow: hidden; flex-shrink: 0;">
-                        ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover;">` : ''}
-                    </div>
-                    <div class="price-item-info">
-                        <div class="price-item-name">${p.name}</div>
-                        <div class="price-item-value">${window.formatMoney ? window.formatMoney(p.price) : (p.price + ' ل.س')} ${p.unit ? `لكل ${p.unit}` : ''}</div>
-                    </div>
-                </div>
-            `).join('');
+            // Don't show any products in fruits section - leave empty
+            document.getElementById('fruitsSpecialPrices').innerHTML = '';
 
-            const vegetablesSpecial = vegetablesCat ? (products[vegetablesCat.id] || []).slice(0, 4) : [];
-            document.getElementById('vegetablesSpecialPrices').innerHTML = vegetablesSpecial.map(p => `
-                <div class="price-item" onclick="addToCart('${p.id}', event)" style="--category-color: ${vegetablesCat?.color || '#0D464C'};">
-                    <div class="price-item-photo" style="background-image: url('${p.fallbackImage}'); background-size: cover; background-position: center; position: relative; width: 60px; height: 60px; border-radius: 12px; overflow: hidden; flex-shrink: 0;">
-                        ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover;">` : ''}
-                    </div>
-                    <div class="price-item-info">
-                        <div class="price-item-name">${p.name}</div>
-                        <div class="price-item-value">${window.formatMoney ? window.formatMoney(p.price) : (p.price + ' ل.س')} ${p.unit ? `لكل ${p.unit}` : ''}</div>
-                    </div>
-                </div>
-            `).join('');
+            // Don't show any products in vegetables section - leave empty
+            document.getElementById('vegetablesSpecialPrices').innerHTML = '';
         }
 
         function loadFeaturedProducts() {
-            const featured = allProductsFlat.filter(p => p.isFeatured === true).slice(0, 5);
+            // Helper function to check if product is fruits or vegetables
+            const isFruitsOrVegetables = (p) => {
+                const catSlug = String(p.categorySlug || '').toLowerCase();
+                const catName = String(p.category || '').toLowerCase();
+                
+                // Check if it's fruits
+                if (catSlug.includes('fruit') || catName.includes('فواك') || catName.includes('فاكه')) {
+                    return true;
+                }
+                
+                // Check if it's vegetables
+                if (catSlug.includes('veget') || catSlug.includes('khdro') || catSlug.includes('khodra') || 
+                    catName.includes('خضر') || catName.includes('خضار')) {
+                    return true;
+                }
+                
+                return false;
+            };
+            
+            // Filter out fruits and vegetables from featured products
+            const featured = allProductsFlat
+                .filter(p => p.isFeatured === true && !isFruitsOrVegetables(p))
+                .slice(0, 5);
+                
             document.getElementById('featuredProducts').innerHTML = featured.length > 0
                 ? featured.map(p => createProductCard(p)).join('')
                 : '<div style="grid-column:1/-1; text-align:center; color:#94a3b8; padding:1.5rem;">لا توجد منتجات مميزة حالياً</div>';
@@ -1253,14 +1501,34 @@
                 return Number.isFinite(t) ? t : 0;
             };
 
+            // Helper function to check if product is fruits or vegetables
+            const isFruitsOrVegetables = (p) => {
+                const catSlug = String(p.categorySlug || '').toLowerCase();
+                const catName = String(p.category || '').toLowerCase();
+                
+                // Check if it's fruits
+                if (catSlug.includes('fruit') || catName.includes('فواك') || catName.includes('فاكه')) {
+                    return true;
+                }
+                
+                // Check if it's vegetables
+                if (catSlug.includes('veget') || catSlug.includes('khdro') || catSlug.includes('khodra') || 
+                    catName.includes('خضر') || catName.includes('خضار')) {
+                    return true;
+                }
+                
+                return false;
+            };
+
             const sorted = [...allProductsFlat].sort((a, b) => toTs(b.createdAt) - toTs(a.createdAt));
             const picked = [];
             const seen = new Set();
 
-            // Show 10 products for Fresh Products section as requested
+            // Show 10 products for Fresh Products section as requested, excluding fruits and vegetables
             for (const p of sorted) {
                 if (picked.length >= 10) break;
                 if (p.isFeatured) continue;
+                if (isFruitsOrVegetables(p)) continue; // Skip fruits and vegetables
                 const id = String(p.id);
                 if (seen.has(id)) continue;
                 seen.add(id);
@@ -1270,6 +1538,7 @@
             if (picked.length < 10) {
                 for (const p of sorted) {
                     if (picked.length >= 10) break;
+                    if (isFruitsOrVegetables(p)) continue; // Skip fruits and vegetables
                     const id = String(p.id);
                     if (seen.has(id)) continue;
                     seen.add(id);
@@ -1281,8 +1550,50 @@
         }
         function createProductCard(p) {
             const isFav = favoriteIds.has(String(p.id));
+            
+            // Check if product is weight-based
+            const unit = p.unit || '';
+            const unitLower = unit.toLowerCase().trim();
+            const isWeightBased = unitLower === 'kilogram' || unitLower === 'gram' || 
+                                  unitLower === 'كيلو' || unitLower === 'كيلوغرام' || 
+                                  unitLower === 'غرام' || unitLower === 'kg' || unitLower === 'g' ||
+                                  unitLower.includes('كيلو') || unitLower.includes('غرام');
+            
+            // For weight-based products, always display as "per kilogram"
+            let displayPrice = p.price;
+            let displayUnit = p.unit;
+            
+            if (isWeightBased) {
+                displayUnit = 'كيلو غرام';
+            }
+            
+            const buttonClass = isWeightBased ? 'add-btn-circle weight-based' : 'add-btn-circle';
+            const buttonIcon = isWeightBased ? 'fa-balance-scale' : 'fa-plus';
+            
+            // Generate button HTML differently for weight-based products
+            const buttonHTML = isWeightBased 
+                ? `<button class="${buttonClass}" onclick="window.openWeightModal('${p.id}')" id="add-btn-${p.id}">
+                       <i class="fas ${buttonIcon}"></i>
+                   </button>`
+                : `<button class="${buttonClass}" onclick="initCartCounter('${p.id}', event)" id="add-btn-${p.id}">
+                       <i class="fas ${buttonIcon}"></i>
+                   </button>`;
+            
+            // Build counter control HTML (only for non-weight-based products)
+            const counterHTML = !isWeightBased ? `
+                <div class="counter-control" id="counter-${p.id}">
+                    <button class="counter-btn" onclick="updateQuantity('${p.id}', -1, event)">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span class="counter-value" id="count-${p.id}">1</span>
+                    <button class="counter-btn" onclick="updateQuantity('${p.id}', 1, event)">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            ` : '';
+            
             return `
-                <div class="product-card" data-id="${p.id}" onclick="window.location.href='/products/${p.id}'">
+                <div class="product-card" data-id="${p.id}">
                     <div class="product-badges">
                         ${p.badge === 'sale' ? '<span class="badge badge-sale">عرض</span>' : ''}
                         ${p.isFeatured ? '<span class="badge badge-new">جديد</span>' : ''}
@@ -1295,18 +1606,8 @@
                         
                         <!-- Floating Cart Control -->
                         <div class="cart-control-wrapper" id="cart-wrapper-${p.id}" onclick="event.stopPropagation()">
-                            <button class="add-btn-circle" onclick="initCartCounter('${p.id}', event)" id="add-btn-${p.id}">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <div class="counter-control" id="counter-${p.id}">
-                                <button class="counter-btn" onclick="updateQuantity('${p.id}', -1, event)">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <span class="counter-value" id="count-${p.id}">1</span>
-                                <button class="counter-btn" onclick="updateQuantity('${p.id}', 1, event)">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
+                            ${buttonHTML}
+                            ${counterHTML}
                         </div>
                     </div>
                     <div class="product-body">
@@ -1319,8 +1620,8 @@
                         <div class="product-footer">
                             <div class="price-wrapper">
                                 <div class="price-current">
-                                    ${window.formatMoney ? window.formatMoney(p.price) : (p.price + ' ل.س')}
-                                    ${p.unit ? `<span class="price-unit">لكل ${p.unit}</span>` : ''}
+                                    ${window.formatMoney ? window.formatMoney(displayPrice) : (displayPrice + ' ل.س')}
+                                    ${displayUnit ? `<span class="price-unit">لكل ${displayUnit}</span>` : ''}
                                 </div>
                                 ${p.oldPrice ? `<div class="price-old">${window.formatMoney ? window.formatMoney(p.oldPrice) : (p.oldPrice + ' ل.س')}</div>` : ''}
                             </div>
@@ -1638,7 +1939,7 @@
                 }
                 
                 searchResults.innerHTML = results.slice(0, 8).map(p => `
-                    <div class="search-result-item" onclick="addToCart('${p.id}', event)" style="cursor:pointer;padding:1rem;border-bottom:1px solid #f1f5f9;transition:all 0.3s;display:flex;align-items:center;gap:1rem;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <div class="search-result-item" style="padding:1rem;border-bottom:1px solid #f1f5f9;transition:all 0.3s;display:flex;align-items:center;gap:1rem;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
                         <div class="search-result-image" style="background-image: url('${p.fallbackImage}'); background-size: cover; background-position: center; width:42px; height:42px; border-radius:10px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.08); flex-shrink:0;">
                             ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}" style="width:100%; height:100%; object-fit:cover;">` : ''}
                         </div>
@@ -1650,7 +1951,7 @@
                             </div>
                             <div class="search-result-price" style="color:#059669;font-weight:700;font-size:1.1rem;margin-top:0.3rem;">${window.formatMoney ? window.formatMoney(p.price) : (p.price + ' ل.س')} ${p.unit ? `لكل ${p.unit}` : ''}</div>
                         </div>
-                        <button style="background:#059669;color:#fff;border:none;padding:0.7rem 1.2rem;border-radius:25px;cursor:pointer;font-family: 'El Messiri', sans-serif;font-weight:600;transition:all 0.3s;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
+                        <button onclick="addToCart('${p.id}', event)" style="background:#059669;color:#fff;border:none;padding:0.7rem 1.2rem;border-radius:25px;cursor:pointer;font-family: 'El Messiri', sans-serif;font-weight:600;transition:all 0.3s;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
                             <i class="fas fa-plus"></i> أضف
                         </button>
                     </div>
@@ -1688,6 +1989,23 @@
                 });
             }
         }
+        
+        // Store products list globally for weight modal (backup in case not set earlier)
+        if (!window.martProductsList || window.martProductsList.length === 0) {
+            window.martProductsList = window.martProducts ? Object.values(window.martProducts).flat() : [];
+            console.log('Mart index: martProductsList backup set with', window.martProductsList.length, 'products');
+        }
+    </script>
+    
+    <?php echo $__env->make('components.weight-modal', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    
+    <script>
+        // Verify weight modal functions are loaded
+        console.log('Checking weight modal functions...');
+        console.log('openWeightModal exists:', typeof window.openWeightModal);
+        console.log('closeWeightModal exists:', typeof window.closeWeightModal);
+        console.log('calculateWeight exists:', typeof window.calculateWeight);
+        console.log('addWeightBasedToCart exists:', typeof window.addWeightBasedToCart);
     </script>
 </body>
 </html>

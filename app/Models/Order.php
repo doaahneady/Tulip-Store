@@ -99,7 +99,9 @@ class Order extends Model
         'payment_method',
         'payment_reference',
         'status',
+        'is_whatsapp_order',
         'payment_status',
+        'stripe_charge_id',
         'payment_receipt',
         'subtotal',
         'tax_amount',
@@ -122,6 +124,7 @@ class Order extends Model
         'signed_at',
         'delivery_notes',
         'tracking_number',
+        'idempotency_key',
     ];
 
     protected $casts = [

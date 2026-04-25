@@ -305,6 +305,12 @@ Route::middleware('auth:sanctum')->prefix('user')->group(function () {
     Route::put('/profile', [UserProfileController::class, 'updateProfile']);
 });
 
+// Recharge API
+Route::middleware('auth:sanctum')->prefix('recharge')->group(function () {
+    Route::post('/shamcash', [UserProfileController::class, 'rechargeShamCash']);
+    Route::post('/card', [UserProfileController::class, 'rechargeCard']);
+});
+
 Route::middleware('auth:sanctum')->prefix('wishlist')->group(function () {
     Route::get('/', [WishlistController::class, 'index']);
     Route::post('/add', [WishlistController::class, 'add']);

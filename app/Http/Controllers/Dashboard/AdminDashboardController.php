@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\SecurityAuditLog;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -16,51 +17,60 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        // Core Metrics
-        $metrics = [
-            'total_users' => User::count(),
-            'new_users_today' => User::whereDate('created_at', today())->count(),
-            'new_users_week' => User::whereBetween('created_at', [now()->startOfWeek(), now()])->count(),
-            'total_orders' => Order::count(),
-            'orders_today' => Order::whereDate('created_at', today())->count(),
-            'pending_orders' => Order::where('status', 'confirmed')->count(),
-            'total_products' => Product::count(),
-            'low_stock_products' => Product::where('stock_quantity', '<', 10)->count(),
-            'total_employees' => Employee::count(),
-            'total_drivers' => Driver::count(),
-            'active_drivers' => Driver::where('status', 'available')->count(),
-            'total_traders' => \App\Models\Trader::count(),
-        ];
-
-        // Revenue Data
-        $revenue = [
-            'today' => Order::whereDate('created_at', today())->where('status', 'delivered')->sum('total'),
-            'yesterday' => Order::whereDate('created_at', today()->subDay())->where('status', 'delivered')->sum('total'),
-            'this_week' => Order::whereBetween('created_at', [now()->startOfWeek(), now()])->where('status', 'delivered')->sum('total'),
-            'this_month' => Order::whereMonth('created_at', now()->month)->where('status', 'delivered')->sum('total'),
-            'last_month' => Order::whereMonth('created_at', now()->subMonth()->month)->where('status', 'delivered')->sum('total'),
-        ];
-
-        // Chart Data - Last 7 days revenue
-        $chartData = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $date = now()->subDays($i);
-            $chartData[] = [
-                'date' => $date->format('M d'),
-                'revenue' => Order::whereDate('created_at', $date)->where('status', 'delivered')->sum('total'),
-                'orders' => Order::whereDate('created_at', $date)->count(),
+        // Cache metrics for 5 minutes to reduce database load
+        $metrics = Cache::remember('admin_dashboard_metrics', 300, function () {
+            return [
+                'total_users' => User::count(),
+                'new_users_today' => User::whereDate('created_at', today())->count(),
+                'new_users_week' => User::whereBetween('created_at', [now()->startOfWeek(), now()])->count(),
+                'total_orders' => Order::count(),
+                'orders_today' => Order::whereDate('created_at', today())->count(),
+                'pending_orders' => Order::where('status', 'confirmed')->count(),
+                'total_products' => Product::count(),
+                'low_stock_products' => Product::where('stock_quantity', '<', 10)->count(),
+                'total_employees' => Employee::count(),
+                'total_drivers' => Driver::count(),
+                'active_drivers' => Driver::where('status', 'available')->count(),
+                'total_traders' => \App\Models\Trader::count(),
             ];
-        }
+        });
 
-        // Recent Orders
+        // Cache revenue data for 5 minutes
+        $revenue = Cache::remember('admin_dashboard_revenue', 300, function () {
+            return [
+                'today' => Order::whereDate('created_at', today())->where('status', 'delivered')->sum('total'),
+                'yesterday' => Order::whereDate('created_at', today()->subDay())->where('status', 'delivered')->sum('total'),
+                'this_week' => Order::whereBetween('created_at', [now()->startOfWeek(), now()])->where('status', 'delivered')->sum('total'),
+                'this_month' => Order::whereMonth('created_at', now()->month)->where('status', 'delivered')->sum('total'),
+                'last_month' => Order::whereMonth('created_at', now()->subMonth()->month)->where('status', 'delivered')->sum('total'),
+            ];
+        });
+
+        // Cache chart data for 10 minutes
+        $chartData = Cache::remember('admin_dashboard_chart', 600, function () {
+            $data = [];
+            for ($i = 6; $i >= 0; $i--) {
+                $date = now()->subDays($i);
+                $data[] = [
+                    'date' => $date->format('M d'),
+                    'revenue' => Order::whereDate('created_at', $date)->where('status', 'delivered')->sum('total'),
+                    'orders' => Order::whereDate('created_at', $date)->count(),
+                ];
+            }
+            return $data;
+        });
+
+        // Recent Orders - with eager loading
         $recentOrders = Order::with('user')->orderBy('created_at', 'desc')->take(10)->get();
 
-        // Top Products
+        // Top Products - with eager loading
         $topProducts = Product::withCount('orderItems')->orderBy('order_items_count', 'desc')->take(5)->get();
 
-        // Order Status Distribution
-        $orderStatus = Order::select('status', DB::raw('count(*) as count'))
-            ->groupBy('status')->get()->pluck('count', 'status')->toArray();
+        // Cache order status distribution for 5 minutes
+        $orderStatus = Cache::remember('admin_dashboard_order_status', 300, function () {
+            return Order::select('status', DB::raw('count(*) as count'))
+                ->groupBy('status')->get()->pluck('count', 'status')->toArray();
+        });
 
         $loginLogs = Schema::hasTable('security_audit_logs')
             ? SecurityAuditLog::with('user')

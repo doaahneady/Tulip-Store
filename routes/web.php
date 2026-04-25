@@ -72,6 +72,164 @@ Route::post('/api/session/exchange-rate', function (\Illuminate\Http\Request $re
         'usd_to_syp_rate' => (float) $validated['usd_to_syp_rate'],
     ]);
 });
+// Coming Soon Page - Temporary
+Route::get('/', function () {
+    return view('pages.coming-soon');
+})->name('home');
+
+// Old homepage for blurred background in coming soon page
+Route::get('/home-old', function () {
+    $martSlugs = ['fruits', 'vegetables', 'khdroaat', 'khodraat', 'mart-fruits', 'mart-vegetables'];
+
+    $productsQuery = PublicProduct::with('category')
+        ->active()
+        ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'));
+    $products = $productsQuery->orderBy('created_at', 'desc')->take(20)->get();
+
+    if ($products->isEmpty()) {
+        $products = PublicProduct::with('category')
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
+            ->orderBy('created_at', 'desc')
+            ->take(20)
+            ->get();
+    }
+
+    $categoriesQuery = PublicCategory::query()
+        ->when(Schema::hasColumn('categories', 'is_active'), fn ($q) => $q->where('is_active', true))
+        ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'store'))
+        ->when(Schema::hasColumn('categories', 'slug'), fn ($q) => $q->whereNotIn('slug', $martSlugs));
+    $categories = $categoriesQuery
+        ->when(Schema::hasColumn('categories', 'display_order'), fn ($q) => $q->orderBy('display_order'))
+        ->orderBy('name')
+        ->take(12)
+        ->get();
+
+    if ($categories->isEmpty()) {
+        $categories = PublicCategory::query()
+            ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'store'))
+            ->when(Schema::hasColumn('categories', 'slug'), fn ($q) => $q->whereNotIn('slug', $martSlugs))
+            ->when(Schema::hasColumn('categories', 'display_order'), fn ($q) => $q->orderBy('display_order'))
+            ->orderBy('name')
+            ->take(12)
+            ->get();
+    }
+
+    // Simple default slides without problematic Arabic encoding
+    $slides = [
+        [
+            'image' => '/images/banner1.jpg',
+            'title' => 'مرحباً',
+            'subtitle' => 'تسوق معنا',
+            'link' => '/store',
+        ],
+        [
+            'image' => '/images/banner2.jpg',
+            'title' => 'عروض خاصة',
+            'subtitle' => 'اكتشف العروض',
+            'link' => '/store?on_sale=1',
+        ],
+        [
+            'image' => '/images/banner3.jpg',
+            'title' => 'أحدث المنتجات',
+            'subtitle' => 'تصفح الجديد',
+            'link' => '/store?sort=newest',
+        ],
+    ];
+
+    return view('home-new', [
+        'products' => $products,
+        'categories' => $categories,
+        'slides' => $slides,
+    ]);
+})->name('home.old');
+
+/* Home preview route - Not needed anymore, using gradient background instead
+// Home preview for blurred background (used by coming soon page)
+Route::get('/home-preview', function () {
+    $martSlugs = ['fruits', 'vegetables', 'khdroaat', 'khodraat', 'mart-fruits', 'mart-vegetables'];
+
+    $productsQuery = PublicProduct::with('category')
+        ->active()
+        ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'));
+    $products = $productsQuery->orderBy('created_at', 'desc')->take(20)->get();
+
+    if ($products->isEmpty()) {
+        $products = PublicProduct::with('category')
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'store'))
+            ->orderBy('created_at', 'desc')
+            ->take(20)
+            ->get();
+    }
+
+    $categoriesQuery = PublicCategory::query()
+        ->when(Schema::hasColumn('categories', 'is_active'), fn ($q) => $q->where('is_active', true))
+        ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'store'))
+        ->when(Schema::hasColumn('categories', 'slug'), fn ($q) => $q->whereNotIn('slug', $martSlugs));
+    $categories = $categoriesQuery
+        ->when(Schema::hasColumn('categories', 'display_order'), fn ($q) => $q->orderBy('display_order'))
+        ->orderBy('name')
+        ->take(12)
+        ->get();
+
+    if ($categories->isEmpty()) {
+        $categories = PublicCategory::query()
+            ->when(Schema::hasColumn('categories', 'market'), fn ($q) => $q->where('market', 'store'))
+            ->when(Schema::hasColumn('categories', 'slug'), fn ($q) => $q->whereNotIn('slug', $martSlugs))
+            ->when(Schema::hasColumn('categories', 'display_order'), fn ($q) => $q->orderBy('display_order'))
+            ->orderBy('name')
+            ->take(12)
+            ->get();
+    }
+
+    $slides = PublicSetting::get('homepage_slider_slides', []);
+    $defaultSlides = [
+        [
+            'image' => 'public\images\banner1.jpg',
+            'title' => 'ط·آ·ط¢آ£ط·آ·ط¢آ±ط·آ·ط¢آ³ط·آ¸أ¢â‚¬â€چ',
+            'subtitle' => 'ط·آ·ط¹آ¾ط·آ·ط¢آ³ط·آ¸ط«â€ ط·آ¸أ¢â‚¬ع' ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ¹ط·آ¸أ¢â‚¬آ ط·آ·ط¢آ§ ط·آ·ط¢آ£ط·آ¸ط¸آ¾ط·آ·ط¢آ¶ط·آ¸أ¢â‚¬â€چ ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ¸أ¢â‚¬آ¦ط·آ¸أ¢â‚¬آ ط·آ·ط¹آ¾ط·آ·ط¢آ¬ط·آ·ط¢آ§ط·آ·ط¹آ¾ ط·آ¸ط«â€ ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ·ط¢آ¹ط·آ·ط¢آ±ط·آ¸ط«â€ ط·آ·ط¢آ¶',
+            'link' => '/store',
+        ],
+        [
+            'image' => '/images/banner2.jpg',
+            'title' => 'ط·آ·ط¢آ¹ط·آ·ط¢آ±ط·آ¸ط«â€ ط·آ·ط¢آ¶ ط·آ¸ط«â€ ط·آ·ط¢آ®ط·آ·ط¢آµط·آ¸ط«â€ ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ§ط·آ·ط¹آ¾',
+            'subtitle' => 'ط·آ·ط¢آ§ط·آ¸ط¦â€™ط·آ·ط¹آ¾ط·آ·ط¢آ´ط·آ¸ط¸آ¾ ط·آ·ط¢آ¹ط·آ·ط¢آ±ط·آ¸ط«â€ ط·آ·ط¢آ¶ط·آ¸أ¢â‚¬آ ط·آ·ط¢آ§ ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ¸أ¢â‚¬آ¦ط·آ¸أ¢â‚¬آ¦ط·آ¸ط¸آ¹ط·آ·ط¢آ²ط·آ·ط¢آ© ط·آ¸ط«â€ ط·آ·ط¹آ¾ط·آ¸ط«â€ ط·آ¸ط¸آ¾ط·آ¸ط¸آ¹ط·آ·ط¢آ± ط·آ·ط¢آ£ط·آ¸ط¦â€™ط·آ·ط¢آ¨ط·آ·ط¢آ± ط·آ·ط¢آ¹ط·آ¸أ¢â‚¬â€چط·آ¸أ¢â‚¬آ° ط·آ¸أ¢â‚¬آ¦ط·آ·ط¢آ´ط·آ·ط¹آ¾ط·آ·ط¢آ±ط·آ¸ط¸آ¹ط·آ·ط¢آ§ط·آ·ط¹آ¾ط·آ¸ط¦â€™',
+            'link' => '/store?on_sale=1',
+        ],
+        [
+            'image' => '/images/banner3.jpg',
+            'title' => 'ط·آ¸ط«â€ ط·آ·ط¢آµط·آ¸أ¢â‚¬â€چ ط·آ·ط¢آ­ط·آ·ط¢آ¯ط·آ¸ط¸آ¹ط·آ·ط¢آ«ط·آ·ط¢آ§ط·آ¸أ¢â‚¬آ¹',
+            'subtitle' => 'ط·آ·ط¢آ§ط·آ¸ط¥â€™ط·آ·ط¹آ¾ط·آ·ط¢آ´ط·آ¸ط¸آ¾ ط·آ·ط¢آ£ط·آ·ط¢آ­ط·آ·ط¢آ¯ط·آ·ط¢آ« ط·آ·ط¢آ§ط·آ¸أ¢â‚¬â€چط·آ¸أ¢â‚¬آ¦ط·آ¸أ¢â‚¬آ ط·آ·ط¹آ¾ط·آ·ط¢آ¬ط·آ·ط¢آ§ط·آ·ط¹آ¾ ط·آ¸ط¸آ¾ط·آ¸ط¸آ¹ ط·آ¸أ¢â‚¬آ¦ط·آ·ط¹آ¾ط·آ·ط¢آ¬ط·آ·ط¢آ±ط·آ¸أ¢â‚¬آ ط·آ·ط¢آ§',
+            'link' => '/store?sort=newest',
+        ],
+    ];
+
+    if (! is_array($slides)) {
+        $slides = [];
+    }
+
+    $slides = array_values(array_filter($slides, fn ($s) => is_array($s)));
+
+    if (count($slides) < 3) {
+        for ($i = count($slides); $i < 3; $i++) {
+            $slides[] = $defaultSlides[$i];
+        }
+        PublicSetting::set('homepage_slider_slides', $slides, 'json', 'Home page slider slides');
+    }
+
+    if (empty($slides)) {
+        $slides = $defaultSlides;
+        PublicSetting::set('homepage_slider_slides', $slides, 'json', 'Home page slider slides');
+    }
+
+    return view('home-new', [
+        'products' => $products,
+        'categories' => $categories,
+        'slides' => $slides,
+    ]);
+})->name('home.preview');
+End of home preview route comment */
+
+/* Original Home Route - Commented out for Coming Soon page
 Route::get('/', function () {
     $martSlugs = ['fruits', 'vegetables', 'khdroaat', 'khodraat', 'mart-fruits', 'mart-vegetables'];
 
@@ -153,7 +311,8 @@ Route::get('/', function () {
         'categories' => $categories,
         'slides' => $slides,
     ]);
-})->name('home');
+})->name('home.old'); // Renamed to home.old
+*/
 
 // Quick access to employee login for testing
 Route::get('/staff', function () {
@@ -727,6 +886,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings', function () {
         return view('profile');
     })->name('settings');
+    
+    // Recharge page
+    Route::get('/recharge', function () {
+        return view('recharge');
+    })->name('recharge');
 });
 
 // Arabic auth pages (custom static views)
@@ -734,6 +898,7 @@ Route::view('/ar-login', 'pages.ar-login');
 Route::view('/ar-signup', 'pages.ar-signup');
 Route::view('/ar-login-error', 'pages.ar-login-error');
 Route::view('/ar-forgot-password', 'pages.ar-forgot-password');
+Route::view('/terms-and-conditions', 'pages.terms-and-conditions')->name('terms');
 Route::view('/ar-verify-code', 'pages.ar-verify-code');
 Route::view('/ar-verify-registration', 'pages.ar-verify-registration');
 Route::view('/ar-reset-password', 'pages.ar-reset-password');
@@ -832,6 +997,10 @@ Route::middleware(['web'])->group(function () {
     // Order API routes
     Route::post('/api/checkout/delivery-fee', [\App\Http\Controllers\OrderController::class, 'deliveryFeeQuote']);
     Route::post('/api/orders/create', [\App\Http\Controllers\OrderController::class, 'create']);
+    Route::post('/api/orders/whatsapp', [\App\Http\Controllers\OrderController::class, 'createWhatsAppOrder']);
+    Route::post('/api/orders/stripe-payment', [\App\Http\Controllers\OrderController::class, 'processStripePayment']);
+    Route::post('/api/orders/stripe-payment-saved-card', [\App\Http\Controllers\OrderController::class, 'processStripePaymentWithSavedCard']);
+    Route::get('/api/user/saved-cards', [\App\Http\Controllers\OrderController::class, 'getSavedCards'])->middleware('auth');
     Route::post('/api/orders/{id}/upload-receipt', [\App\Http\Controllers\OrderController::class, 'uploadReceipt']);
     Route::get('/api/user/profile', function () {
         if (Auth::check()) {
@@ -917,6 +1086,11 @@ Route::get('/cart', function () {
     return view('cart');
 })->name('cart');
 
+// WhatsApp Order page route (for guest users with mart items)
+Route::get('/whatsapp-order', function () {
+    return view('whatsapp-order');
+})->name('whatsapp-order');
+
 // Store page route
 Route::get('/traders/{trader}/products', function (\App\Models\Trader $trader) {
     $avg = 0.0;
@@ -978,7 +1152,13 @@ Route::get('/mart', function () {
 
 Route::get('/mart/category/{category}', function ($category) {
     $categoryModel = \App\Models\Category::where('slug', $category)->firstOrFail();
-    $subcategories = $categoryModel->subcategories()->where('is_active', true)->orderBy('display_order')->get();
+    $subcategories = $categoryModel->subcategories()
+        ->where('is_active', true)
+        ->withCount(['products' => function($query) {
+            $query->where('is_active', true);
+        }])
+        ->orderBy('display_order')
+        ->get();
     return view('mart.subcategories', [
         'category' => $categoryModel,
         'subcategories' => $subcategories
@@ -1016,6 +1196,11 @@ Route::get('/gifts/category/{category}', [App\Http\Controllers\GiftController::c
 Route::get('/checkout', function () {
     return view('checkout');
 })->middleware('auth')->name('checkout');
+
+// Stripe payment page route (requires authentication)
+Route::get('/payment/stripe/{orderId}', [\App\Http\Controllers\OrderController::class, 'showStripePaymentPage'])
+    ->middleware('auth')
+    ->name('payment.stripe');
 
 // Order confirmation page
 Route::get('/order-confirmation/{id}', [\App\Http\Controllers\OrderController::class, 'show'])->name('order.confirmation');

@@ -91,7 +91,7 @@ class OrderController extends Controller
             'location.lat' => 'required|numeric',
             'location.lng' => 'required|numeric',
             'delivery_method' => 'required|in:normal,express,instant',
-            'payment_method' => 'required|in:cash,card,syriatel,bank,balance',
+            'payment_method' => 'required|in:cash,card,syriatel,bank,balance,shamcash',
             'delivery_cost' => 'required|numeric|min:0',
             'distance_km' => 'nullable|numeric|min:0',
             'service_fee' => 'nullable|numeric|min:0',
@@ -180,6 +180,9 @@ class OrderController extends Controller
                     continue;
                 }
 
+                // Check if this is a weight-based item
+                $isWeightBased = isset($martProduct['is_weight_based']) && $martProduct['is_weight_based'];
+                
                 $subtotal += $price * $quantity;
                 $orderItemsData[] = [
                     'product' => null,
@@ -188,6 +191,9 @@ class OrderController extends Controller
                     'product_sku' => $martProduct['unit'] ?? 'MART',
                     'quantity' => $quantity,
                     'price' => $price,
+                    'is_weight_based' => $isWeightBased,
+                    'weight_grams' => $isWeightBased ? (float) ($martProduct['weight_grams'] ?? 0) : null,
+                    'price_per_unit' => $isWeightBased ? (float) ($martProduct['price_per_unit'] ?? 0) : null,
                 ];
             }
 
@@ -364,15 +370,39 @@ class OrderController extends Controller
                 $quantity = $item['quantity'];
                 $price = $item['price'];
 
-                OrderItem::create([
+                // For mart products, product_id might be a string, so we need to handle it
+                $productId = null;
+                if ($product) {
+                    $productId = $product->id;
+                } elseif (isset($item['product_id'])) {
+                    // Check if it's a numeric ID or a mart product string ID
+                    $rawId = $item['product_id'];
+                    if (is_numeric($rawId)) {
+                        $productId = (int) $rawId;
+                    } else {
+                        // It's a mart product with string ID, set to null
+                        $productId = null;
+                    }
+                }
+
+                $orderItemData = [
                     'order_id' => $order->id,
-                    'product_id' => $product?->id ?? ($item['product_id'] ?? null),
+                    'product_id' => $productId,
                     'product_name' => $product?->name ?? ($item['product_name'] ?? 'Mart Product'),
                     'product_sku' => $product?->sku ?? ($item['product_sku'] ?? 'MART'),
                     'quantity' => $quantity,
                     'unit_price' => $price,
                     'total_price' => $price * $quantity,
-                ]);
+                ];
+
+                // Add weight-based fields if present
+                if (isset($item['is_weight_based']) && $item['is_weight_based']) {
+                    $orderItemData['is_weight_based'] = true;
+                    $orderItemData['weight_grams'] = $item['weight_grams'] ?? 0;
+                    $orderItemData['price_per_unit'] = $item['price_per_unit'] ?? 0;
+                }
+
+                OrderItem::create($orderItemData);
 
                 if ($product && $product->track_inventory) {
                     InventoryMovement::recordMovement(
@@ -421,12 +451,17 @@ class OrderController extends Controller
             }
             \App\Models\FinancialTransaction::create($ftData);
 
-            session()->forget('cart');
-            session()->forget('mart_products');
-            if (Auth::check() && \Illuminate\Support\Facades\Schema::hasTable('carts') && \Illuminate\Support\Facades\Schema::hasTable('cart_items')) {
-                $dbCart = Cart::where('user_id', Auth::id())->first();
-                if ($dbCart) {
-                    CartItem::where('cart_id', $dbCart->id)->delete();
+            // Don't clear cart for card payments - wait until payment is successful
+            $isCardPayment = $validated['payment_method'] === 'card';
+            
+            if (!$isCardPayment) {
+                session()->forget('cart');
+                session()->forget('mart_products');
+                if (Auth::check() && \Illuminate\Support\Facades\Schema::hasTable('carts') && \Illuminate\Support\Facades\Schema::hasTable('cart_items')) {
+                    $dbCart = Cart::where('user_id', Auth::id())->first();
+                    if ($dbCart) {
+                        CartItem::where('cart_id', $dbCart->id)->delete();
+                    }
                 }
             }
 
@@ -507,6 +542,178 @@ class OrderController extends Controller
         }
     }
 
+    public function processStripePayment(Request $request)
+    {
+        $validated = $request->validate([
+            'order_id' => 'required|integer|exists:orders,id',
+            'stripe_token' => 'required|string',
+            'save_card' => 'nullable|boolean',
+        ]);
+
+        try {
+            $order = Order::findOrFail($validated['order_id']);
+
+            // Verify order belongs to current user
+            if (!$this->orderOwnerOrAdmin($order)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'غير مصرح لك بالوصول لهذا الطلب',
+                ], 403);
+            }
+
+            // Check if order is already paid
+            if ($order->payment_status === 'paid') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'هذا الطلب مدفوع بالفعل',
+                ], 400);
+            }
+
+            // Initialize Stripe
+            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+
+            // Convert amount to cents (Stripe uses smallest currency unit)
+            $amountInCents = (int) round($order->total * 100);
+
+            // Create charge using the token
+            $charge = \Stripe\Charge::create([
+                'amount' => $amountInCents,
+                'currency' => 'usd',
+                'source' => $validated['stripe_token'],
+                'description' => 'Order #' . $order->order_number,
+                'metadata' => [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'user_id' => Auth::id(),
+                ],
+            ]);
+
+            // Save card if requested (must be done BEFORE using the token for charge)
+            // Note: We need to get the card from the charge, not use the token again
+            if ($validated['save_card'] ?? false) {
+                try {
+                    $user = Auth::user();
+                    
+                    // Get the card ID from the charge
+                    $cardId = $charge->source->id ?? null;
+                    
+                    if ($cardId) {
+                        // Check if user already has a Stripe customer ID
+                        if (empty($user->stripe_customer_id)) {
+                            // Create a new Stripe customer with the card
+                            $customer = \Stripe\Customer::create([
+                                'email' => $user->email,
+                                'name' => $user->name,
+                                'source' => $cardId,
+                                'metadata' => [
+                                    'user_id' => $user->id,
+                                ],
+                            ]);
+                            
+                            // Save customer ID to user
+                            $user->update(['stripe_customer_id' => $customer->id]);
+                        } else {
+                            // Add card to existing customer
+                            $customer = \Stripe\Customer::retrieve($user->stripe_customer_id);
+                            $customer->sources->create(['source' => $cardId]);
+                        }
+                        
+                        Log::info('Card saved successfully for user: ' . $user->id);
+                    }
+                } catch (\Exception $e) {
+                    // Log error but don't fail the payment
+                    Log::error('Failed to save card: ' . $e->getMessage());
+                }
+            }
+
+            // Update order payment status
+            $order->update([
+                'payment_status' => 'paid',
+                'stripe_charge_id' => $charge->id,
+            ]);
+
+            // Create financial transaction
+            \App\Models\FinancialTransaction::create([
+                'transaction_id' => 'TXN-' . strtoupper(uniqid()),
+                'user_id' => Auth::id(),
+                'order_id' => $order->id,
+                'type' => 'card_payment', // Changed from 'stripe_payment' to fit column size
+                'status' => 'completed',
+                'amount' => $order->total,
+                'currency' => 'USD',
+                'description' => "Stripe Payment for Order #{$order->order_number}",
+                'metadata' => [
+                    'stripe_charge_id' => $charge->id,
+                    'payment_method' => 'card',
+                ],
+            ]);
+
+            // Clear cart after successful payment
+            session()->forget('cart');
+            session()->forget('mart_products');
+            if (Auth::check() && \Illuminate\Support\Facades\Schema::hasTable('carts') && \Illuminate\Support\Facades\Schema::hasTable('cart_items')) {
+                $dbCart = Cart::where('user_id', Auth::id())->first();
+                if ($dbCart) {
+                    CartItem::where('cart_id', $dbCart->id)->delete();
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم الدفع بنجاح',
+                'order_id' => $order->id,
+                'charge_id' => $charge->id,
+            ]);
+
+        } catch (\Stripe\Exception\CardException $e) {
+            // Card was declined
+            Log::error('Stripe card declined: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'تم رفض البطاقة: ' . $e->getError()->message,
+            ], 400);
+
+        } catch (\Stripe\Exception\InvalidRequestException $e) {
+            // Invalid parameters
+            Log::error('Stripe invalid request: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'خطأ في معلومات الدفع: ' . $e->getMessage(),
+            ], 400);
+
+        } catch (\Exception $e) {
+            Log::error('Stripe payment failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء معالجة الدفع',
+            ], 500);
+        }
+    }
+
+    public function showStripePaymentPage($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+
+        // Verify order belongs to current user
+        if (!$this->orderOwnerOrAdmin($order)) {
+            abort(403, 'غير مصرح لك بالوصول لهذا الطلب');
+        }
+
+        // Check if order is already paid
+        if ($order->payment_status === 'paid') {
+            return redirect()->route('order.confirmation', $order->id)
+                ->with('message', 'هذا الطلب مدفوع بالفعل');
+        }
+
+        // Check if payment method is card
+        if ($order->payment_method !== 'card') {
+            return redirect()->route('order.confirmation', $order->id)
+                ->with('message', 'طريقة الدفع لهذا الطلب ليست بطاقة ائتمانية');
+        }
+
+        return view('stripe-payment', compact('order'));
+    }
+
     public function show($id)
     {
         $order = Order::with('items.product')->findOrFail($id);
@@ -530,6 +737,11 @@ class OrderController extends Controller
 
         $orders = Order::with(['items.product', 'couponUsage.coupon'])
             ->where('user_id', $userId)
+            // Exclude pending card payment orders (only show paid or non-card orders)
+            ->where(function($query) {
+                $query->where('payment_status', 'paid')
+                      ->orWhere('payment_method', '!=', 'card');
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -748,5 +960,230 @@ class OrderController extends Controller
         }
 
         return "\u{200F}".$out."\u{200F}";
+    }
+    
+    public function getSavedCards()
+    {
+        try {
+            $user = Auth::user();
+            
+            if (!$user || empty($user->stripe_customer_id)) {
+                return response()->json([]);
+            }
+            
+            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+            
+            $customer = \Stripe\Customer::retrieve($user->stripe_customer_id);
+            $cards = \Stripe\PaymentMethod::all([
+                'customer' => $user->stripe_customer_id,
+                'type' => 'card',
+            ]);
+            
+            $formattedCards = [];
+            foreach ($cards->data as $card) {
+                $formattedCards[] = [
+                    'id' => $card->id,
+                    'brand' => $card->card->brand,
+                    'last4' => $card->card->last4,
+                    'exp_month' => $card->card->exp_month,
+                    'exp_year' => $card->card->exp_year,
+                ];
+            }
+            
+            return response()->json($formattedCards);
+            
+        } catch (\Exception $e) {
+            Log::error('Error fetching saved cards: ' . $e->getMessage());
+            return response()->json([]);
+        }
+    }
+    
+    public function processStripePaymentWithSavedCard(Request $request)
+    {
+        $validated = $request->validate([
+            'order_id' => 'required|integer|exists:orders,id',
+            'card_id' => 'required|string',
+        ]);
+        
+        try {
+            $order = Order::findOrFail($validated['order_id']);
+            
+            // Verify order belongs to current user
+            if (!$this->orderOwnerOrAdmin($order)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'غير مصرح لك بالوصول لهذا الطلب',
+                ], 403);
+            }
+            
+            // Check if order is already paid
+            if ($order->payment_status === 'paid') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'هذا الطلب مدفوع بالفعل',
+                ], 400);
+            }
+            
+            $user = Auth::user();
+            
+            if (empty($user->stripe_customer_id)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'لم يتم العثور على معلومات العميل',
+                ], 400);
+            }
+            
+            // Initialize Stripe
+            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+            
+            // Convert amount to cents
+            $amountInCents = (int) round($order->total * 100);
+            
+            // Create payment intent with saved card
+            $paymentIntent = \Stripe\PaymentIntent::create([
+                'amount' => $amountInCents,
+                'currency' => 'usd',
+                'customer' => $user->stripe_customer_id,
+                'payment_method' => $validated['card_id'],
+                'off_session' => true,
+                'confirm' => true,
+                'description' => 'Order #' . $order->order_number,
+                'metadata' => [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'user_id' => Auth::id(),
+                ],
+            ]);
+            
+            // Update order payment status
+            $order->update([
+                'payment_status' => 'paid',
+                'stripe_charge_id' => $paymentIntent->id,
+            ]);
+            
+            // Create financial transaction
+            \App\Models\FinancialTransaction::create([
+                'transaction_id' => 'TXN-' . strtoupper(uniqid()),
+                'user_id' => Auth::id(),
+                'order_id' => $order->id,
+                'type' => 'card_payment',
+                'status' => 'completed',
+                'amount' => $order->total,
+                'currency' => 'USD',
+                'description' => "Stripe Payment for Order #{$order->order_number}",
+                'metadata' => [
+                    'stripe_payment_intent_id' => $paymentIntent->id,
+                    'payment_method' => 'saved_card',
+                ],
+            ]);
+            
+            // Clear cart after successful payment
+            session()->forget('cart');
+            session()->forget('mart_products');
+            if (Auth::check() && \Illuminate\Support\Facades\Schema::hasTable('carts') && \Illuminate\Support\Facades\Schema::hasTable('cart_items')) {
+                $dbCart = Cart::where('user_id', Auth::id())->first();
+                if ($dbCart) {
+                    CartItem::where('cart_id', $dbCart->id)->delete();
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'تم الدفع بنجاح',
+                'order_id' => $order->id,
+            ]);
+            
+        } catch (\Stripe\Exception\CardException $e) {
+            Log::error('Stripe card declined: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'تم رفض البطاقة: ' . $e->getError()->message,
+            ], 400);
+            
+        } catch (\Exception $e) {
+            Log::error('Stripe payment with saved card failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء معالجة الدفع',
+            ], 500);
+        }
+    }
+
+    /**
+     * Create a WhatsApp order for guest users (mart items only)
+     */
+    public function createWhatsAppOrder(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'customer_name' => 'required|string|max:255',
+                'customer_phone' => 'required|string|max:20',
+                'cart_items' => 'required|array',
+            ]);
+            
+            // Generate order number
+            $orderNumber = 'WA-' . strtoupper(uniqid());
+            
+            // Calculate total
+            $total = 0;
+            foreach ($validated['cart_items'] as $item) {
+                if (isset($item['is_weight_based']) && $item['is_weight_based']) {
+                    $total += floatval($item['amount_paid'] ?? 0);
+                } else {
+                    $price = floatval($item['product']['discount_price'] ?? $item['product']['price'] ?? 0);
+                    $quantity = intval($item['quantity'] ?? 1);
+                    $total += $price * $quantity;
+                }
+            }
+            
+            // Create order
+            $order = Order::create([
+                'order_number' => $orderNumber,
+                'recipient_name' => $validated['customer_name'],
+                'phone' => $validated['customer_phone'],
+                'payment_method' => 'cash',
+                'status' => 'pending',
+                'payment_status' => 'pending',
+                'subtotal' => $total,
+                'total' => $total,
+                'total_amount' => $total,
+                'is_whatsapp_order' => true,
+                'delivery_method' => 'normal',
+            ]);
+            
+            // Create order items
+            foreach ($validated['cart_items'] as $item) {
+                $productId = is_numeric($item['id']) ? $item['id'] : null;
+                $isWeightBased = isset($item['is_weight_based']) && $item['is_weight_based'];
+                
+                $orderItem = [
+                    'order_id' => $order->id,
+                    'product_id' => $productId,
+                    'product_name' => $item['product']['name'] ?? 'Unknown',
+                    'quantity' => $isWeightBased ? 1 : intval($item['quantity'] ?? 1),
+                    'price' => $isWeightBased ? floatval($item['amount_paid'] ?? 0) : floatval($item['product']['discount_price'] ?? $item['product']['price'] ?? 0),
+                ];
+                
+                if ($isWeightBased) {
+                    $orderItem['weight_grams'] = floatval($item['weight_grams'] ?? 0);
+                    $orderItem['is_weight_based'] = true;
+                }
+                
+                \App\Models\OrderItem::create($orderItem);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'order_number' => $orderNumber,
+                'order_id' => $order->id,
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('WhatsApp order creation failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'فشل إنشاء الطلب'
+            ], 500);
+        }
     }
 }

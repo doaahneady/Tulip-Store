@@ -24,19 +24,19 @@ class CartController extends Controller
     protected function distinctCartCount(): int
     {
         $customGifts = Session::get('custom_gifts', []);
-        $martProducts = Session::get('mart_products', []);
 
-        // Logged-in users: count DB cart lines + session-based custom gifts + mart products.
+        // Logged-in users: count DB cart lines + session-based custom gifts
         if (Auth::check() && $this->canUseDatabaseCart()) {
             $this->mergeSessionCartIntoDatabaseCart();
             $dbCart = $this->getOrCreateDatabaseCart();
             $dbDistinct = $dbCart ? (int) $dbCart->items()->count() : 0;
 
-            return $dbDistinct + (int) count($customGifts) + (int) count($martProducts);
+            return $dbDistinct + (int) count($customGifts);
         }
 
-        // Guests (or when DB cart isn't available): count session cart keys + custom gifts + mart products.
+        // Guests: count session cart keys + custom gifts + mart products
         $cart = Session::get('cart', []);
+        $martProducts = Session::get('mart_products', []);
         return (int) count($cart) + (int) count($customGifts) + (int) count($martProducts);
     }
 
@@ -56,40 +56,99 @@ class CartController extends Controller
             return;
         }
 
+        // Merge regular products
         $sessionCart = Session::get('cart', []);
-        if (! is_array($sessionCart) || empty($sessionCart)) {
-            return;
+        if (is_array($sessionCart) && !empty($sessionCart)) {
+            foreach ($sessionCart as $productId => $quantity) {
+                $productId = (int) $productId;
+                $quantity = (int) $quantity;
+                if ($productId <= 0 || $quantity <= 0) {
+                    continue;
+                }
+
+                $product = Product::find($productId);
+                if (! $product || ! $product->is_active) {
+                    continue;
+                }
+
+                $cartItem = CartItem::where([
+                    'cart_id' => $dbCart->id,
+                    'product_id' => $productId,
+                    'product_type' => 'regular',
+                ])->first();
+
+                if (!$cartItem) {
+                    $cartItem = new CartItem([
+                        'cart_id' => $dbCart->id,
+                        'product_id' => $productId,
+                        'product_type' => 'regular',
+                    ]);
+                }
+
+                $newQty = ((int) ($cartItem->quantity ?? 0)) + $quantity;
+
+                if ($product->track_inventory) {
+                    $available = (int) ($product->stock_quantity ?? 0);
+                    $newQty = min($newQty, $available);
+                }
+
+                $cartItem->quantity = $newQty;
+                $cartItem->unit_price = $product->discount_price ?? $product->price;
+                $cartItem->save();
+            }
+
+            Session::forget('cart');
         }
 
-        foreach ($sessionCart as $productId => $quantity) {
-            $productId = (int) $productId;
-            $quantity = (int) $quantity;
-            if ($productId <= 0 || $quantity <= 0) {
-                continue;
+        // Merge mart products
+        $martProducts = Session::get('mart_products', []);
+        if (is_array($martProducts) && !empty($martProducts)) {
+            foreach ($martProducts as $key => $martProduct) {
+                $productId = (int) ($martProduct['id'] ?? 0);
+                if ($productId <= 0) {
+                    continue;
+                }
+
+                $isWeightBased = (bool) ($martProduct['is_weight_based'] ?? false);
+
+                // For weight-based products, always create new entries
+                // For regular mart products, merge quantities
+                if (!$isWeightBased) {
+                    $cartItem = CartItem::where([
+                        'cart_id' => $dbCart->id,
+                        'product_id' => $productId,
+                        'product_type' => 'mart',
+                        'is_weight_based' => false,
+                    ])->first();
+
+                    if ($cartItem) {
+                        $cartItem->quantity += (int) ($martProduct['quantity'] ?? 1);
+                        $cartItem->save();
+                        continue;
+                    }
+                }
+
+                // Create new cart item for weight-based or new regular mart products
+                $cartItem = new CartItem([
+                    'cart_id' => $dbCart->id,
+                    'product_id' => $productId,
+                    'product_type' => 'mart',
+                    'quantity' => (int) ($martProduct['quantity'] ?? 1),
+                    'unit_price' => (float) ($martProduct['price'] ?? 0),
+                    'mart_product_name' => $martProduct['name'] ?? null,
+                    'mart_product_image' => $martProduct['image'] ?? null,
+                    'mart_product_unit' => $martProduct['unit'] ?? null,
+                    'mart_product_emoji' => $martProduct['emoji'] ?? null,
+                    'is_weight_based' => $isWeightBased,
+                    'weight_grams' => (float) ($martProduct['weight_grams'] ?? 0),
+                    'price_per_unit' => (float) ($martProduct['price_per_unit'] ?? 0),
+                    'amount_paid' => (float) ($martProduct['amount_paid'] ?? 0),
+                ]);
+                $cartItem->save();
             }
 
-            $product = Product::find($productId);
-            if (! $product || ! $product->is_active) {
-                continue;
-            }
-
-            $cartItem = CartItem::firstOrNew([
-                'cart_id' => $dbCart->id,
-                'product_id' => $productId,
-            ]);
-            $newQty = ((int) ($cartItem->quantity ?? 0)) + $quantity;
-
-            if ($product->track_inventory) {
-                $available = (int) ($product->stock_quantity ?? 0);
-                $newQty = min($newQty, $available);
-            }
-
-            $cartItem->quantity = $newQty;
-            $cartItem->unit_price = $product->discount_price ?? $product->price;
-            $cartItem->save();
+            Session::forget('mart_products');
         }
-
-        Session::forget('cart');
     }
 
     /**
@@ -107,34 +166,79 @@ class CartController extends Controller
 
             if ($dbCart) {
                 foreach ($dbCart->items as $item) {
-                    $product = $item->product;
-                    if (! $product) {
-                        continue;
+                    $productType = $item->product_type ?? 'regular';
+
+                    if ($productType === 'mart') {
+                        // Mart product from database
+                        $isWeightBased = $item->is_weight_based ?? false;
+                        
+                        if ($isWeightBased) {
+                            $amountPaidSyp = (float) ($item->amount_paid ?? 0);
+                            $USD_TO_SYP = 13100;
+                            $itemSubtotal = $amountPaidSyp / $USD_TO_SYP;
+                        } else {
+                            $itemSubtotal = ((float) ($item->unit_price ?? 0)) * ((int) $item->quantity);
+                        }
+                        
+                        $subtotal += $itemSubtotal;
+
+                        $items[] = [
+                            'id' => $item->id,
+                            'product_id' => $item->product_id,
+                            'type' => 'mart',
+                            'product' => [
+                                'id' => $item->product_id,
+                                'name' => $item->mart_product_name ?? 'منتج',
+                                'image' => $item->mart_product_image ?? null,
+                                'price' => $item->unit_price ?? 0,
+                                'discount_price' => null,
+                                'brand' => 'توليب مارت',
+                                'unit' => $item->mart_product_unit ?? 'قطعة',
+                                'emoji' => $item->mart_product_emoji ?? null,
+                            ],
+                            'quantity' => (int) $item->quantity,
+                            'subtotal' => $itemSubtotal,
+                            'is_weight_based' => $isWeightBased,
+                            'weight_grams' => (float) ($item->weight_grams ?? 0),
+                            'price_per_unit' => (float) ($item->price_per_unit ?? 0),
+                            'amount_paid' => (float) ($item->amount_paid ?? 0),
+                        ];
+                    } else {
+                        // Regular product from database
+                        $product = $item->product;
+                        if (! $product) {
+                            continue;
+                        }
+
+                        $unit = (float) ($item->unit_price ?? ($product->discount_price ?? $product->price));
+                        $qty = (int) $item->quantity;
+                        $line = $unit * $qty;
+                        $subtotal += $line;
+
+                        $items[] = [
+                            'id' => (int) $product->id,
+                            'product_id' => (int) $product->id,
+                            'type' => 'product',
+                            'product' => [
+                                'id' => $product->id,
+                                'name' => $product->name,
+                                'image' => $product->primary_image_url,
+                                'price' => $product->price,
+                                'discount_price' => $product->discount_price,
+                                'brand' => $product->brand ?? null,
+                            ],
+                            'quantity' => $qty,
+                            'subtotal' => $line,
+                            'is_weight_based' => $item->is_weight_based ?? false,
+                            'weight_grams' => $item->weight_grams ?? 0,
+                            'price_per_unit' => $item->price_per_unit ?? 0,
+                            'amount_paid' => $item->amount_paid ?? 0,
+                        ];
                     }
-
-                    $unit = (float) ($item->unit_price ?? ($product->discount_price ?? $product->price));
-                    $qty = (int) $item->quantity;
-                    $line = $unit * $qty;
-                    $subtotal += $line;
-
-                    $items[] = [
-                        'id' => (int) $product->id,
-                        'product_id' => (int) $product->id,
-                        'type' => 'product',
-                        'product' => [
-                            'id' => $product->id,
-                            'name' => $product->name,
-                            'image' => $product->primary_image_url,
-                            'price' => $product->price,
-                            'discount_price' => $product->discount_price,
-                            'brand' => $product->brand ?? null,
-                        ],
-                        'quantity' => $qty,
-                        'subtotal' => $line,
-                    ];
                 }
             }
 
+            // Custom gifts still in session (for now)
             $customGifts = Session::get('custom_gifts', []);
             foreach ($customGifts as $giftId => $gift) {
                 $subtotal += (float) ($gift['price'] ?? 0);
@@ -154,29 +258,6 @@ class CartController extends Controller
                     'quantity' => 1,
                     'subtotal' => (float) ($gift['price'] ?? 0),
                     'gift_details' => $gift,
-                ];
-            }
-
-            $martProducts = Session::get('mart_products', []);
-            foreach ($martProducts as $productId => $product) {
-                $itemSubtotal = ((float) ($product['price'] ?? 0)) * ((int) ($product['quantity'] ?? 0));
-                $subtotal += $itemSubtotal;
-
-                $items[] = [
-                    'id' => $productId,
-                    'type' => 'mart',
-                    'product' => [
-                        'id' => $productId,
-                        'name' => $product['name'] ?? 'منتج',
-                        'image' => $product['image'] ?? null,
-                        'price' => $product['price'] ?? 0,
-                        'discount_price' => null,
-                        'brand' => 'توليب مارت',
-                        'unit' => $product['unit'] ?? 'قطعة',
-                        'emoji' => $product['emoji'] ?? null,
-                    ],
-                    'quantity' => (int) ($product['quantity'] ?? 0),
-                    'subtotal' => $itemSubtotal,
                 ];
             }
 
@@ -225,7 +306,17 @@ class CartController extends Controller
         // Mart products
         $martProducts = Session::get('mart_products', []);
         foreach ($martProducts as $productId => $product) {
-            $itemSubtotal = $product['price'] * $product['quantity'];
+            $isWeightBased = isset($product['is_weight_based']) && $product['is_weight_based'];
+            
+            // For weight-based products, amount_paid is in SYP, need to convert to USD
+            if ($isWeightBased) {
+                $amountPaidSyp = (float) ($product['amount_paid'] ?? 0);
+                $USD_TO_SYP = 13100; // Exchange rate
+                $itemSubtotal = $amountPaidSyp / $USD_TO_SYP; // Convert SYP to USD
+            } else {
+                $itemSubtotal = ((float) ($product['price'] ?? 0)) * ((int) ($product['quantity'] ?? 0));
+            }
+            
             $subtotal += $itemSubtotal;
 
             $cartItems[] = [
@@ -242,6 +333,11 @@ class CartController extends Controller
                 ],
                 'quantity' => $product['quantity'],
                 'subtotal' => $itemSubtotal,
+                // Weight-based fields
+                'is_weight_based' => $isWeightBased,
+                'weight_grams' => (float) ($product['weight_grams'] ?? 0),
+                'price_per_unit' => (float) ($product['price_per_unit'] ?? 0),
+                'amount_paid' => (float) ($product['amount_paid'] ?? 0),
             ];
         }
 
@@ -301,37 +397,150 @@ class CartController extends Controller
                 'quantity' => 'integer|min:1',
                 'image' => 'nullable|string',
                 'unit' => 'nullable|string',
+                'is_weight_based' => 'sometimes|boolean',
+                'amount_paid' => 'required_if:is_weight_based,true|nullable|numeric',
+                'weight_grams' => 'nullable|numeric',
+                'price_per_unit' => 'nullable|numeric',
             ]);
 
             $product = Product::find($productId);
-            $martProducts = Session::get('mart_products', []);
-            $existingQty = isset($martProducts[$productId]) ? $martProducts[$productId]['quantity'] : 0;
-            $newQty = $existingQty + $quantity;
+            $isWeightBased = $request->input('is_weight_based', false);
 
-            if ($product && $product->track_inventory) {
-                $available = (int) ($product->stock_quantity ?? 0);
-                if ($newQty > $available) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'الكمية المطلوبة تتجاوز المخزون المتاح للمنتج ' . $product->name,
-                        'available' => $available,
-                    ], 422);
+            // For logged-in users, save to database
+            if (Auth::check() && $this->canUseDatabaseCart()) {
+                $this->mergeSessionCartIntoDatabaseCart();
+                $dbCart = $this->getOrCreateDatabaseCart();
+
+                if ($isWeightBased) {
+                    // Weight-based products: always add as new item
+                    $cartItem = new CartItem([
+                        'cart_id' => $dbCart->id,
+                        'product_id' => $productId,
+                        'product_type' => 'mart',
+                        'quantity' => 1,
+                        'unit_price' => $request->input('amount_paid', 0),
+                        'mart_product_name' => $request->name,
+                        'mart_product_image' => $request->image,
+                        'mart_product_unit' => $request->unit ?? 'كيلو غرام',
+                        'mart_product_emoji' => $request->emoji,
+                        'is_weight_based' => true,
+                        'weight_grams' => $request->weight_grams ?? 0,
+                        'price_per_unit' => $request->price_per_unit ?? 0,
+                        'amount_paid' => $request->amount_paid ?? 0,
+                    ]);
+                    $cartItem->save();
+                } else {
+                    // Regular mart products: merge quantities
+                    $cartItem = CartItem::where([
+                        'cart_id' => $dbCart->id,
+                        'product_id' => $productId,
+                        'product_type' => 'mart',
+                        'is_weight_based' => false,
+                    ])->first();
+
+                    if ($cartItem) {
+                        $existingQty = (int) $cartItem->quantity;
+                        $newQty = $existingQty + (int) $quantity;
+
+                        if ($product && $product->track_inventory) {
+                            $available = (int) ($product->stock_quantity ?? 0);
+                            if ($newQty > $available) {
+                                return response()->json([
+                                    'success' => false,
+                                    'message' => 'الكمية المطلوبة تتجاوز المخزون المتاح للمنتج ' . $product->name,
+                                    'available' => $available,
+                                ], 422);
+                            }
+                        }
+
+                        $cartItem->quantity = $newQty;
+                        $cartItem->save();
+                    } else {
+                        if ($product && $product->track_inventory) {
+                            $available = (int) ($product->stock_quantity ?? 0);
+                            if ($quantity > $available) {
+                                return response()->json([
+                                    'success' => false,
+                                    'message' => 'الكمية المطلوبة تتجاوز المخزون المتاح للمنتج ' . $product->name,
+                                    'available' => $available,
+                                ], 422);
+                            }
+                        }
+
+                        $cartItem = new CartItem([
+                            'cart_id' => $dbCart->id,
+                            'product_id' => $productId,
+                            'product_type' => 'mart',
+                            'quantity' => $quantity,
+                            'unit_price' => $request->price,
+                            'mart_product_name' => $request->name,
+                            'mart_product_image' => $request->image,
+                            'mart_product_unit' => $request->unit ?? 'قطعة',
+                            'mart_product_emoji' => $request->emoji,
+                        ]);
+                        $cartItem->save();
+                    }
                 }
+
+                $totalCount = $this->distinctCartCount();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'تم إضافة المنتج للسلة',
+                    'count' => $totalCount,
+                ]);
             }
 
-            if (isset($martProducts[$productId])) {
-                $martProducts[$productId]['quantity'] = $newQty;
-            } else {
-                $martProducts[$productId] = [
+            // For guests, save to session (existing behavior)
+            $martProducts = Session::get('mart_products', []);
+            
+            if ($isWeightBased) {
+                // Weight-based products: always add as new item (don't merge quantities)
+                $uniqueId = $productId . '_' . time() . '_' . rand(1000, 9999);
+                $martProducts[$uniqueId] = [
                     'id' => $productId,
                     'name' => $request->name,
                     'price' => $request->price,
-                    'quantity' => $quantity,
+                    'quantity' => 1,
                     'image' => $request->image,
-                    'unit' => $request->unit ?? 'قطعة',
+                    'unit' => $request->unit ?? 'كيلو غرام',
                     'type' => 'mart',
                     'emoji' => $request->emoji,
+                    'is_weight_based' => true,
+                    'weight_grams' => $request->weight_grams ?? 0,
+                    'price_per_unit' => $request->price_per_unit ?? 0,
+                    'amount_paid' => $request->amount_paid ?? 0,
                 ];
+            } else {
+                // Regular mart products: merge quantities
+                $existingQty = isset($martProducts[$productId]) ? $martProducts[$productId]['quantity'] : 0;
+                $newQty = $existingQty + $quantity;
+
+                if ($product && $product->track_inventory) {
+                    $available = (int) ($product->stock_quantity ?? 0);
+                    if ($newQty > $available) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'الكمية المطلوبة تتجاوز المخزون المتاح للمنتج ' . $product->name,
+                            'available' => $available,
+                        ], 422);
+                    }
+                }
+
+                if (isset($martProducts[$productId])) {
+                    $martProducts[$productId]['quantity'] = $newQty;
+                } else {
+                    $martProducts[$productId] = [
+                        'id' => $productId,
+                        'name' => $request->name,
+                        'price' => $request->price,
+                        'quantity' => $quantity,
+                        'image' => $request->image,
+                        'unit' => $request->unit ?? 'قطعة',
+                        'type' => 'mart',
+                        'emoji' => $request->emoji,
+                    ];
+                }
             }
 
             Session::put('mart_products', $martProducts);
@@ -436,14 +645,57 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:0',
         ]);
 
+        $itemId = $request->item_id;
+        $qty = (int) $request->quantity;
+
+        // For logged-in users with database cart
+        if (Auth::check() && $this->canUseDatabaseCart()) {
+            $this->mergeSessionCartIntoDatabaseCart();
+            $dbCart = $this->getOrCreateDatabaseCart();
+
+            // Try to find the item in the database cart
+            $cartItem = CartItem::where('cart_id', $dbCart->id)
+                ->where('id', $itemId)
+                ->first();
+
+            if ($cartItem) {
+                // Check inventory for non-weight-based products
+                if (!$cartItem->is_weight_based) {
+                    $product = Product::find($cartItem->product_id);
+                    if ($product && $product->track_inventory && $qty > (int) ($product->stock_quantity ?? 0)) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'الكمية المطلوبة تتجاوز المخزون المتاح للمنتج',
+                            'available' => (int) ($product->stock_quantity ?? 0),
+                        ], 422);
+                    }
+                }
+
+                if ($qty === 0) {
+                    $cartItem->delete();
+                } else {
+                    $cartItem->quantity = $qty;
+                    $cartItem->save();
+                }
+
+                $cartCount = $this->distinctCartCount();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'تم تحديث السلة',
+                    'cart_count' => $cartCount,
+                    'count' => $cartCount,
+                ]);
+            }
+        }
+
+        // For guests or session-based items
         $cart = Session::get('cart', []);
         $martProducts = Session::get('mart_products', []);
-        $productId = $request->item_id;
 
         // Check if it's a Mart product in session
-        if (isset($martProducts[$productId])) {
-            $qty = (int) $request->quantity;
-            $product = Product::find($productId);
+        if (isset($martProducts[$itemId])) {
+            $product = Product::find($itemId);
             
             if ($product && $product->track_inventory && $qty > (int) ($product->stock_quantity ?? 0)) {
                 return response()->json([
@@ -454,9 +706,9 @@ class CartController extends Controller
             }
 
             if ($qty === 0) {
-                unset($martProducts[$productId]);
+                unset($martProducts[$itemId]);
             } else {
-                $martProducts[$productId]['quantity'] = $qty;
+                $martProducts[$itemId]['quantity'] = $qty;
             }
             Session::put('mart_products', $martProducts);
 
@@ -470,58 +722,20 @@ class CartController extends Controller
             ]);
         }
 
-        if (Auth::check() && $this->canUseDatabaseCart() && is_numeric($productId)) {
-            $this->mergeSessionCartIntoDatabaseCart();
-            $dbCart = $this->getOrCreateDatabaseCart();
-            $productIdInt = (int) $productId;
-            $qty = (int) $request->quantity;
-            $product = Product::find($productIdInt);
-
+        // Regular product in session
+        if ($qty == 0) {
+            unset($cart[$itemId]);
+        } else {
+            $product = Product::find($itemId);
             if ($product && $product->track_inventory && $qty > (int) ($product->stock_quantity ?? 0)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'الكمية المطلوبة تتجاوز المخزون المتاح للمنتج ',
+                    'message' => 'الكمية المطلوبة تتجاوز المخزون المتاح للمنتج',
                     'available' => (int) ($product->stock_quantity ?? 0),
                 ], 422);
             }
 
-            if ($qty === 0) {
-                CartItem::where('cart_id', $dbCart->id)->where('product_id', $productIdInt)->delete();
-            } else {
-                $item = CartItem::firstOrNew([
-                    'cart_id' => $dbCart->id,
-                    'product_id' => $productIdInt,
-                ]);
-                if ($product) {
-                    $item->unit_price = $product->discount_price ?? $product->price;
-                }
-                $item->quantity = $qty;
-                $item->save();
-            }
-
-            $totalCount = $this->distinctCartCount();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'تم تحديث السلة',
-                'cart_count' => $totalCount,
-                'count' => $totalCount,
-            ]);
-        }
-
-        if ($request->quantity == 0) {
-            unset($cart[$productId]);
-        } else {
-            $product = Product::find($productId);
-            if ($product && $product->track_inventory && (int) $request->quantity > (int) ($product->stock_quantity ?? 0)) {
-                return response()->json([
-                    'success' => false,
-                    'message' =>   'الكمية المطلوبة تتجاوز المخزون المتاح للمنتج  ',
-                    'available' => (int) ($product->stock_quantity ?? 0),
-                ], 422);
-            }
-
-            $cart[$productId] = (int) $request->quantity;
+            $cart[$itemId] = $qty;
         }
 
         Session::put('cart', $cart);
@@ -550,13 +764,34 @@ class CartController extends Controller
             ], 400);
         }
 
+        // For logged-in users with database cart
+        if (Auth::check() && $this->canUseDatabaseCart()) {
+            $this->mergeSessionCartIntoDatabaseCart();
+            $dbCart = $this->getOrCreateDatabaseCart();
+
+            // Try to find and delete the item by ID (works for both regular and mart products)
+            $deleted = CartItem::where('cart_id', $dbCart->id)
+                ->where('id', $itemId)
+                ->delete();
+
+            if ($deleted) {
+                $cartCount = $this->distinctCartCount();
+                return response()->json([
+                    'success' => true,
+                    'message' => 'تم حذف المنتج من السلة',
+                    'count' => $cartCount,
+                    'cart_count' => $cartCount,
+                ]);
+            }
+        }
+
         // Check if it's a custom gift or bouquet
         if (is_string($itemId) && (str_starts_with($itemId, 'custom_gift_') || str_starts_with($itemId, 'custom_bouquet_'))) {
             $customGifts = Session::get('custom_gifts', []);
             unset($customGifts[$itemId]);
             Session::put('custom_gifts', $customGifts);
         }
-        // Check if it's a mart product
+        // Check if it's a mart product in session
         else {
             $martProducts = Session::get('mart_products', []);
             $martKeyCandidates = array_values(array_unique([
@@ -576,15 +811,10 @@ class CartController extends Controller
             if ($removedFromMart) {
                 Session::put('mart_products', $martProducts);
             } else {
-                if (Auth::check() && $this->canUseDatabaseCart() && is_numeric($itemId)) {
-                    $this->mergeSessionCartIntoDatabaseCart();
-                    $dbCart = $this->getOrCreateDatabaseCart();
-                    CartItem::where('cart_id', $dbCart->id)->where('product_id', (int) $itemId)->delete();
-                } else {
-                    $cart = Session::get('cart', []);
-                    unset($cart[$itemId]);
-                    Session::put('cart', $cart);
-                }
+                // Regular product in session
+                $cart = Session::get('cart', []);
+                unset($cart[$itemId]);
+                Session::put('cart', $cart);
             }
         }
 
@@ -636,21 +866,50 @@ class CartController extends Controller
 
             if ($dbCart) {
                 foreach ($dbCart->items as $item) {
-                    if (! $item->product) {
-                        continue;
-                    }
-                    $items[] = [
-                        'id' => $item->product->id,
-                        'type' => 'product',
-                        'product' => [
+                    $productType = $item->product_type ?? 'regular';
+
+                    if ($productType === 'mart') {
+                        // Mart product from database
+                        $isWeightBased = $item->is_weight_based ?? false;
+                        
+                        $items[] = [
+                            'id' => $item->id,
+                            'type' => 'mart',
+                            'product' => [
+                                'id' => $item->product_id,
+                                'name' => $item->mart_product_name ?? 'منتج',
+                                'image' => $item->mart_product_image ?? null,
+                                'price' => (float) ($item->unit_price ?? 0),
+                                'discount_price' => null,
+                            ],
+                            'quantity' => (int) $item->quantity,
+                            'is_weight_based' => $isWeightBased,
+                            'weight_grams' => $item->weight_grams ?? 0,
+                            'amount_paid' => $item->amount_paid ?? 0,
+                            'price_per_unit' => $item->price_per_unit ?? 0,
+                        ];
+                    } else {
+                        // Regular product from database
+                        if (! $item->product) {
+                            continue;
+                        }
+                        $items[] = [
                             'id' => $item->product->id,
-                            'name' => $item->product->name,
-                            'image' => $item->product->primary_image_url,
-                            'price' => $item->product->price,
-                            'discount_price' => $item->product->discount_price,
-                        ],
-                        'quantity' => (int) $item->quantity,
-                    ];
+                            'type' => 'product',
+                            'product' => [
+                                'id' => $item->product->id,
+                                'name' => $item->product->name,
+                                'image' => $item->product->primary_image_url,
+                                'price' => $item->product->price,
+                                'discount_price' => $item->product->discount_price,
+                            ],
+                            'quantity' => (int) $item->quantity,
+                            'is_weight_based' => $item->is_weight_based ?? false,
+                            'weight_grams' => $item->weight_grams ?? 0,
+                            'amount_paid' => $item->amount_paid ?? 0,
+                            'price_per_unit' => $item->price_per_unit ?? 0,
+                        ];
+                    }
                 }
             }
 
@@ -667,24 +926,6 @@ class CartController extends Controller
                         'discount_price' => null,
                     ],
                     'quantity' => 1,
-                ];
-            }
-
-            $martProducts = Session::get('mart_products', []);
-            foreach ($martProducts as $productId => $product) {
-                $items[] = [
-                    'id' => $productId,
-                    'type' => 'mart',
-                    'product' => [
-                        'id' => $productId,
-                        'name' => $product['name'] ?? 'منتج',
-                        'image' => $product['image'] ?? null,
-                        'price' => (float) ($product['price'] ?? 0),
-                        'discount_price' => null,
-                        'unit' => $product['unit'] ?? 'قطعة',
-                        'emoji' => $product['emoji'] ?? null,
-                    ],
-                    'quantity' => (int) ($product['quantity'] ?? 0),
                 ];
             }
 
@@ -712,6 +953,8 @@ class CartController extends Controller
 
         $martProducts = Session::get('mart_products', []);
         foreach ($martProducts as $productId => $product) {
+            $isWeightBased = isset($product['is_weight_based']) && $product['is_weight_based'];
+            
             $items[] = [
                 'id' => $productId,
                 'type' => 'mart',
@@ -723,6 +966,10 @@ class CartController extends Controller
                     'discount_price' => null,
                 ],
                 'quantity' => (int) ($product['quantity'] ?? 0),
+                'is_weight_based' => $isWeightBased,
+                'weight_grams' => (float) ($product['weight_grams'] ?? 0),
+                'amount_paid' => (float) ($product['amount_paid'] ?? 0),
+                'price_per_unit' => (float) ($product['price_per_unit'] ?? 0),
             ];
         }
 

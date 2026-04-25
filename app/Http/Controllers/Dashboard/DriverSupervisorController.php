@@ -786,10 +786,17 @@ class DriverSupervisorController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
 
+        // MODIFIED: Show all active drivers (not just available ones)
+        // and include count of their current assignments
         $availableDrivers = Driver::with(['user'])
             ->where('status', 'active')
-            ->where('availability', 'available')
-            ->get();
+            ->withCount([
+                'deliveryAssignments as active_assignments_count' => function ($query) {
+                    $query->whereIn('status', ['pending', 'assigned', 'accepted', 'picked_up', 'in_transit']);
+                }
+            ])
+            ->get()
+            ->sortBy('active_assignments_count'); // Sort by assignment count (least busy first)
 
         $activeAssignments = DeliveryAssignment::with(['order', 'driver.user'])
             ->whereIn('status', ['assigned', 'accepted', 'picked_up', 'in_transit'])
@@ -856,14 +863,16 @@ class DriverSupervisorController extends Controller
                 return response()->json(['success' => false, 'message' => 'Order already assigned']);
             }
 
-            // Check if driver is available
+            // Check if driver exists and has user_id
             $driver = Driver::find($request->driver_id);
             if (! $driver->user_id) {
                 return response()->json(['success' => false, 'message' => 'Driver has no linked login user (user_id missing)']);
             }
-            if ($driver->availability !== 'available') {
-                return response()->json(['success' => false, 'message' => 'Driver not available']);
-            }
+            
+            // REMOVED: Driver availability check - allow assigning multiple orders
+            // if ($driver->availability !== 'available') {
+            //     return response()->json(['success' => false, 'message' => 'Driver not available']);
+            // }
 
             $flowResult = CrossDepartmentFlowService::handleDriverAssignment(
                 $request->order_id,
@@ -873,8 +882,16 @@ class DriverSupervisorController extends Controller
             );
             $assignment = $flowResult['assignment'];
 
-            // Update driver status
-            $driver->update(['availability' => 'busy']);
+            // MODIFIED: Set driver to busy only if this is their first assignment
+            // Check if driver has any other active assignments
+            $activeAssignmentsCount = DeliveryAssignment::where('driver_id', $request->driver_id)
+                ->whereIn('status', ['pending', 'accepted', 'picked_up'])
+                ->count();
+            
+            if ($activeAssignmentsCount === 1) {
+                // This is the first assignment, set driver to busy
+                $driver->update(['availability' => 'busy']);
+            }
 
             // Update order status (assigned_driver_id → users.id)
             Order::where('id', $request->order_id)->update([

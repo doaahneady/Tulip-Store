@@ -322,9 +322,14 @@
                 const response = await fetch('/api/get-verification-info');
                 const data = await response.json();
                 if (data.success) {
-                    const msg = data.method === 'sms' 
-                        ? `تم إرسال رمز التحقق إلى رقم الجوال: ${data.target}`
-                        : `تم إرسال رمز التحقق إلى البريد الإلكتروني: ${data.target}`;
+                    let msg = '';
+                    if (data.method === 'whatsapp') {
+                        msg = `تم إرسال رمز التحقق عبر الواتساب إلى: ${data.target}`;
+                    } else if (data.method === 'sms') {
+                        msg = `تم إرسال رمز التحقق إلى رقم الجوال: ${data.target}`;
+                    } else {
+                        msg = `تم إرسال رمز التحقق إلى البريد الإلكتروني: ${data.target}`;
+                    }
                     document.getElementById('verifyMsg').textContent = msg;
                 }
             } catch (e) {

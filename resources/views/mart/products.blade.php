@@ -14,6 +14,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     
+    <!-- Weight Modal Placeholder Functions -->
+    <script>
+        // Placeholder functions that will be overridden by the modal component
+        window.openWeightModal = window.openWeightModal || function(productId) {
+            console.log('openWeightModal placeholder called, waiting for modal to load...');
+            // Retry after a short delay to allow modal to load
+            setTimeout(() => {
+                if (window.openWeightModal && window.openWeightModal.toString().includes('placeholder')) {
+                    console.error('Weight modal not loaded yet');
+                    alert('الرجاء الانتظار قليلاً وإعادة المحاولة');
+                } else {
+                    window.openWeightModal(productId);
+                }
+            }, 100);
+        };
+    </script>
+    
     <!-- CSS Loading Check -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -131,6 +148,8 @@
             gap: 2rem;
             width: 100%;
             box-sizing: border-box;
+            position: relative;
+            z-index: 1;
         }
 
         /* ===== SIDEBAR FILTERS ===== */
@@ -318,6 +337,10 @@
         .sort-select:focus { outline: none; border-color: var(--teal); }
 
         /* ===== PRODUCTS AREA ===== */
+        .products-area {
+            position: relative;
+            z-index: 1;
+        }
         .products-header {
             display: flex;
             align-items: center;
@@ -366,6 +389,8 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 1.5rem;
+            position: relative;
+            z-index: 1;
         }
         .products-grid.list-view { grid-template-columns: 1fr; }
 
@@ -538,9 +563,18 @@
             transition: all 0.3s ease;
         }
 
+        .add-btn-circle.weight-based {
+            background: #f59e0b;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
         .add-btn-circle:hover {
             transform: scale(1.1);
             background: var(--teal-dark);
+        }
+
+        .add-btn-circle.weight-based:hover {
+            background: #f97316;
         }
 
         .counter-control {
@@ -554,6 +588,11 @@
             justify-content: space-between;
             box-shadow: 0 4px 15px rgba(15, 79, 85, 0.4);
             animation: expandWidth 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .counter-control.weight-based {
+            background: #f59e0b;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
         }
 
         @keyframes expandWidth {
@@ -699,15 +738,18 @@
             display: none;
             gap: 0.6rem;
             overflow-x: auto;
+            overflow-y: visible;
             padding: 0.5rem 0.2rem;
             scrollbar-width: none;
             margin-bottom: 1rem;
             -ms-overflow-style: none;
+            position: relative;
+            z-index: 100;
         }
         .mobile-filter-dropdowns::-webkit-scrollbar { display: none; }
 
         .mobile-filter-item {
-            position: relative;
+            position: static;
             flex-shrink: 0;
         }
         .mobile-filter-toggle {
@@ -732,17 +774,20 @@
         }
         .mobile-filter-menu {
             display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
+            position: fixed;
+            top: auto;
+            right: 1rem;
+            left: 1rem;
             background: #fff;
             border-radius: 16px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-            z-index: 1000;
-            min-width: 220px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+            z-index: 200;
+            min-width: auto;
             margin-top: 0.5rem;
             padding: 1rem;
             border: 1px solid #eee;
+            max-height: 400px;
+            overflow-y: auto;
         }
         .mobile-filter-item.open .mobile-filter-menu { display: block; }
 
@@ -756,8 +801,12 @@
             bottom: 0;
             background: rgba(0,0,0,0.5);
             z-index: 9998;
+            pointer-events: none;
         }
-        .filters-overlay.active { display: block; }
+        .filters-overlay.active { 
+            display: block;
+            pointer-events: none;
+        }
 
         /* ===== HEADER TOP ROW ===== */
         .header-top {
@@ -837,18 +886,48 @@
                 max-width: 320px !important;
                 height: 100vh !important;
                 overflow-y: auto !important;
-                z-index: 9999 !important;
+                overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch !important;
+                z-index: 10000 !important;
                 border-radius: 0 !important;
                 transition: right 0.3s ease !important;
                 box-shadow: -4px 0 24px rgba(0,0,0,0.18) !important;
                 padding: 1.25rem !important;
                 margin: 0 !important;
-                sticky: unset !important;
+                position: fixed !important;
+                pointer-events: auto !important;
+                background: #ffffff !important;
+                overscroll-behavior: contain !important;
             }
 
             /* عندما يكون الـ drawer مفتوح */
             .filters-sidebar.active {
                 right: 0 !important;
+                pointer-events: auto !important;
+            }
+            
+            /* Ensure all sidebar children are clickable */
+            .filters-sidebar *,
+            .filters-sidebar input,
+            .filters-sidebar button,
+            .filters-sidebar select,
+            .filters-sidebar .category-item,
+            .filters-sidebar .checkbox-item,
+            .filters-sidebar label {
+                pointer-events: auto !important;
+            }
+            
+            .filters-sidebar .category-item {
+                cursor: pointer !important;
+                touch-action: manipulation !important;
+                -webkit-tap-highlight-color: rgba(0,0,0,0.1) !important;
+            }
+            
+            /* Prevent body scroll when sidebar is open */
+            body.sidebar-open {
+                overflow: hidden !important;
+                position: fixed !important;
+                width: 100% !important;
             }
 
             /* إظهار زر الإغلاق داخل الـ sidebar */
@@ -1116,7 +1195,7 @@
             if (s.includes('dairy') || n.includes('لب')) return '';
             if (s.includes('baker') || n.includes('مخب')) return '';
             if (s.includes('groc') || n.includes('بقال')) return '';
-            return '🛒';
+            return '';
         }
 
         function escapeHtml(str) {
@@ -1241,6 +1320,8 @@
                 categorySlug,
                 subcategory: p.subcategory?.name || '',
                 subcategorySlug: p.subcategory?.slug || '',
+                attributes: attrs,  // Include attributes for modal
+                primary_image_url: p.primary_image_url,  // Include for modal
             };
         }
 
@@ -1320,6 +1401,7 @@
             const d = await r.json().catch(() => ({}));
             const items = Array.isArray(d?.data) ? d.data : [];
             allProducts = items.map(normalizeApiProduct);
+            window.martProductsList = allProducts; // Store globally for weight modal
             filteredProducts = [...allProducts];
             currentPage = 1;
             loadOrigins();
@@ -1367,6 +1449,7 @@
             const d = await r.json().catch(() => ({}));
             const items = Array.isArray(d?.data) ? d.data : [];
             allProducts = items.map(normalizeApiProduct);
+            window.martProductsList = allProducts; // Store globally for weight modal
             filteredProducts = [...allProducts];
             currentPage = 1;
             loadOrigins();
@@ -1415,7 +1498,6 @@
                     <div class="category-item" data-category="${cat.id}" onclick="selectCategory('${cat.id}')">
                         <span class="emoji">${cat.emoji}</span>
                         <span>${cat.name}</span>
-                        <span class="count">${count}</span>
                     </div>
                 `;
             }).join('');
@@ -1433,7 +1515,6 @@
                     <div class="category-item" data-subcategory="${s.slug || String(s.id)}" onclick="selectSubcategory('${s.slug || String(s.id)}')">
                         <span class="emoji"> </span>
                         <span>${escapeHtml(s.name || '')}</span>
-                        <span class="count">${Number(s.products_count || 0)}</span>
                     </div>
                 `).join('')
                 : `<div style="color: var(--muted); font-size: 0.9rem;">اختر قسمًا لعرض التصنيفات الفرعية</div>`;
@@ -1658,6 +1739,54 @@
 
         function createProductCard(p) {
             const fav = favoriteIds.has(String(p.id));
+            
+            // Check if product is weight-based
+            const unit = p.unit || '';
+            const unitLower = unit.toLowerCase().trim();
+            
+            // Debug logging
+            console.log('Product:', p.name, 'Unit:', unit, 'Unit Lower:', unitLower);
+            
+            const isWeightBased = unitLower === 'kilogram' || unitLower === 'gram' || 
+                                  unitLower === 'كيلو' || unitLower === 'كيلوغرام' || 
+                                  unitLower === 'غرام' || unitLower === 'kg' || unitLower === 'g' ||
+                                  unitLower.includes('كيلو') || unitLower.includes('غرام');
+            
+            console.log('Is Weight Based:', isWeightBased);
+            
+            // For weight-based products, always display as "per kilogram"
+            let displayPrice = p.price;
+            let displayUnit = p.unit;
+            
+            if (isWeightBased) {
+                displayUnit = 'كيلو غرام';
+            }
+            
+            const buttonClass = isWeightBased ? 'add-btn-circle weight-based' : 'add-btn-circle';
+            const buttonIcon = isWeightBased ? 'fa-balance-scale' : 'fa-plus';
+            
+            // Generate button HTML differently for weight-based products
+            const buttonHTML = isWeightBased 
+                ? `<button class="${buttonClass}" onclick="window.openWeightModal('${p.id}')" id="add-btn-${p.id}">
+                       <i class="fas ${buttonIcon}"></i>
+                   </button>`
+                : `<button class="${buttonClass}" onclick="initCartCounter('${p.id}', event)" id="add-btn-${p.id}">
+                       <i class="fas ${buttonIcon}"></i>
+                   </button>`;
+            
+            // Build counter control HTML (only for non-weight-based products)
+            const counterHTML = !isWeightBased ? `
+                <div class="counter-control" id="counter-${p.id}">
+                    <button class="counter-btn" onclick="updateQuantity('${p.id}', -1, event)">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span class="counter-value" id="count-${p.id}">1</span>
+                    <button class="counter-btn" onclick="updateQuantity('${p.id}', 1, event)">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            ` : '';
+            
             return `
                 <div class="product-card" data-id="${p.id}">
                     <div class="product-badges">
@@ -1672,18 +1801,8 @@
                         
                         <!-- Floating Cart Control -->
                         <div class="cart-control-wrapper" id="cart-wrapper-${p.id}" onclick="event.stopPropagation()">
-                            <button class="add-btn-circle" onclick="initCartCounter('${p.id}', event)" id="add-btn-${p.id}">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <div class="counter-control" id="counter-${p.id}">
-                                <button class="counter-btn" onclick="updateQuantity('${p.id}', -1, event)">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <span class="counter-value" id="count-${p.id}">1</span>
-                                <button class="counter-btn" onclick="updateQuantity('${p.id}', 1, event)">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
+                            ${buttonHTML}
+                            ${counterHTML}
                         </div>
                     </div>
                     <div class="product-body">
@@ -1695,9 +1814,9 @@
                         </div>
                         <div class="product-footer">
                             <div class="price-wrapper">
-                                <span class="price-current">${window.formatMoney ? window.formatMoney(p.price) : (p.price + ' ل.س')}</span>
+                                <span class="price-current">${window.formatMoney ? window.formatMoney(displayPrice) : (displayPrice + ' ل.س')}</span>
                                 ${p.oldPrice ? `<span class="price-old">${window.formatMoney ? window.formatMoney(p.oldPrice) : (p.oldPrice + ' ل.س')}</span>` : ''}
-                                <span class="price-unit">${p.unit ? `لكل ${p.unit}` : ''}</span>
+                                <span class="price-unit">${displayUnit ? `لكل ${displayUnit}` : ''}</span>
                             </div>
                         </div>
                     </div>
@@ -1865,9 +1984,15 @@
 
             /* منع تمرير الصفحة خلف الـ drawer */
             if (sidebar.classList.contains('active')) {
+                document.body.classList.add('sidebar-open');
                 document.body.style.overflow = 'hidden';
+                document.body.style.position = 'fixed';
+                document.body.style.width = '100%';
             } else {
+                document.body.classList.remove('sidebar-open');
                 document.body.style.overflow = '';
+                document.body.style.position = '';
+                document.body.style.width = '';
             }
         }
 
@@ -2102,7 +2227,21 @@
         document.addEventListener('DOMContentLoaded', function() {
             const navSearchInput = document.getElementById('searchInput');
             if (navSearchInput) navSearchInput.placeholder = 'ابحث في توليب مارت...';
+            
+            // Store products list globally for weight modal
+            window.martProductsList = allProducts;
         });
+    </script>
+    
+    @include('components.weight-modal')
+    
+    <script>
+        // Verify weight modal functions are loaded
+        console.log('Checking weight modal functions...');
+        console.log('openWeightModal exists:', typeof window.openWeightModal);
+        console.log('closeWeightModal exists:', typeof window.closeWeightModal);
+        console.log('calculateWeight exists:', typeof window.calculateWeight);
+        console.log('addWeightBasedToCart exists:', typeof window.addWeightBasedToCart);
     </script>
 </body>
 </html>

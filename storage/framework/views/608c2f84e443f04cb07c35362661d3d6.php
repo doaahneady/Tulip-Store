@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء حساب جديد - Tulip Store</title>
+     <!-- fav icon -->
+        <link rel="icon" type="image/png" sizes="48x48" href="/images/fav_icon-v1.png">
+        <meta name="description" content="اكتشف Tulip Store، منصة تسوق إلكتروني متكاملة تتيح لك الشراء أو إنشاء متجرك الخاص والربح بسهولة، مع توصيل سريع وطرق دفع آمنة وتجربة استخدام مريحة.">
+    <link rel="stylesheet" href="/css/store.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Changa:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-image: url('/images/background-pattern.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
+            direction: rtl;
+            font-family:'El Messiri',sans-serif;
+            font-weight: 400;
+            height: 100%;
+        }
+        .auth-shell {
+            height: 100vh;
+            width: 100vw;
+            max-width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+            position: relative;
+        }
+        .auth-card-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0;
+            max-width: 1040px;
+            width: 1040px;
+            background: none;
+            margin: 0 auto;
+            padding-left: 50px;
+        }
+        /* big illustration behind the form on the RIGHT */
+        .auth-illustration {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            max-width: 820px;
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0.9;
+            z-index: 0;
+        }
+        .auth-illustration img {
+            width: 100%;
+            height: auto;
+            max-width:none;
+            object-fit:contain;
+            filter: none;
+            background: transparent;
+            display: block;
+        }
+        .auth-card {
+            position: relative;
+            z-index: 1;
+            background: #0f4f55;
+            border-radius: 90px;
+            padding: 2.4rem 3rem 2.8rem;
+            width: 520px;
+            max-width: 520px;
+            color: #fff;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.10);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #ff6f35;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-family: 'El Messiri', sans-serif;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(255,111,53,0.3);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        .back-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255,111,53,0.5);
+            color: #fff;
+        }
+        .back-btn i {
+            font-size: 1.2rem;
+        }
+        @media (max-width: 768px) {
+            .back-btn {
+                padding: 10px;
+                width: 40px;
+                height: 40px;
+                justify-content: center;
+                border-radius: 50%;
+            }
+            .back-btn span {
+                display: none;
+            }
+        }
+        .method-row {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin: 1rem 0;
+            background: rgba(255,255,255,0.05);
+            padding: 0.8rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .method-row label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: #d3e7e2;
+            transition: all 0.3s ease;
+        }
+        .method-row label:hover {
+            color: #fff;
+        }
+        .method-row input[type="radio"] {
+            display: none;
+        }
+        .method-row .radio-custom {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ff6f35;
+            border-radius: 50%;
+            position: relative;
+        }
+        .method-row input[type="radio"]:checked + .radio-custom::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background: #ff6f35;
+            border-radius: 50%;
+        }
+        .method-row label.selected {
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        /* Disabled WhatsApp option */
+        .method-row label.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            position: relative;
+        }
+        
+        .method-row label.disabled:hover {
+            color: #d3e7e2;
+        }
+        
+        .method-row label.disabled .radio-custom {
+            border-color: #999;
+        }
+        
+        .coming-soon-badge {
+            background: linear-gradient(135deg, #ff6f35 0%, #ff8c5a 100%);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-right: 5px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(255, 111, 53, 0.3);
+        }
+        
+        /* Coming Soon Message */
+        .coming-soon-message {
+            background: rgba(255, 111, 53, 0.1);
+            border: 1px solid rgba(255, 111, 53, 0.3);
+            border-radius: 12px;
+            padding: 10px 15px;
+            margin-top: 10px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            color: #ffb48a;
+            font-size: 0.9rem;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .coming-soon-message.show {
+            display: flex;
+        }
+        
+        .coming-soon-message i {
+            font-size: 1.1rem;
+            color: #ff6f35;
+        }
+        h1 {
+            font-family: 'El Messiri', sans-serif;
+            font-weight: 600;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 1.2rem;
+        }
+        .form-columns{
+            display:flex;
+            gap:1.5rem;
+        }
+        .form-columns>div{
+            flex:1;
+            display:flex;
+            flex-direction:column;
+            gap:1rem;
+        }
+        /* hide labels above inputs; use placeholders only */
+        label{
+            display:none;
+        }
+        .control{
+            position:relative;
+        }
+        input{
+            width:100%;
+            border:none;
+            border-bottom:2px solid #d3e7e2;
+            background:transparent;
+            color:#fff;
+            padding:0.5rem 0.5rem;
+            font-size:0.85rem;
+            text-align:center;
+            outline:none;
+            transition: border-bottom 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+            font-family: 'El Messiri',sans-serif;
+            font-weight: 400;
+        }
+
+        input[type="email"]{
+            font-size:0.8rem;
+            letter-spacing: -0.3px;
+        }
+        .phone-input-wrapper{
+            position:relative;
+            display:flex;
+            align-items:center;
+        }
+        .phone-prefix{
+            position:absolute;
+            right:0.5rem;
+            top:50%;
+            transform:translateY(-50%);
+            color:#d3e7e2;
+            font-size:0.85rem;
+            pointer-events:none;
+            font-weight:600;
+            z-index:1;
+        }
+        .phone-input-wrapper input{
+            padding-right:4rem;
+            padding-left:3rem;
+            text-align:left !important;
+        }
+        .phone-input-wrapper input::placeholder{
+            text-align:center !important;
+            font-family:'El Messiri',sans-serif;
+        }
+        .phone-input-wrapper input:not(:placeholder-shown){
+            text-align:left !important;
+        }
+        .country-flag{
+            position:absolute;
+            left:0.5rem;
+            top:50%;
+            transform:translateY(-50%);
+            font-size:1.8rem;
+            line-height:1;
+            opacity:1;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events:none;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            width:2.5rem;
+            height:2.5rem;
+            z-index:1;
+        }
+        .country-flag img{
+            width:32px;
+            height:24px;
+            object-fit:cover;
+            border-radius:4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .country-flag.show{
+            opacity:1;
+        }
+        
+        /* WhatsApp question row */
+        .whatsapp-question {
+            display: none;
+            margin-top: 0.8rem;
+            padding: 0.8rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            animation: slideDown 0.3s ease;
+        }
+        .whatsapp-question.show {
+            display: block;
+        }
+        .whatsapp-question-text {
+            text-align: center;
+            color: #d3e7e2;
+            font-size: 0.9rem;
+            margin-bottom: 0.6rem;
+            font-weight: 500;
+        }
+        .whatsapp-options {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        .whatsapp-options label {
+            display: flex !important;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border: 1.5px solid #d3e7e2;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            color: #d3e7e2;
+            font-size: 0.85rem;
+            background: transparent;
+            min-width: 80px;
+            justify-content: center;
+        }
+        .whatsapp-options label:hover {
+            border-color: #ffb48a;
+            color: #ffb48a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 180, 138, 0.2);
+        }
+        .whatsapp-options label.selected {
+            background: linear-gradient(135deg, #ff6f35 0%, #ff8c5a 100%);
+            border-color: #ff6f35;
+            color: white;
+            box-shadow: 0 6px 20px rgba(255, 111, 53, 0.4);
+        }
+        .whatsapp-options input[type="radio"] {
+            display: none;
+        }
+        .whatsapp-options .radio-circle {
+            width: 12px;
+            height: 12px;
+            border: 1.5px solid #d3e7e2;
+            border-radius: 50%;
+            position: relative;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        .whatsapp-options label:hover .radio-circle {
+            border-color: #ffb48a;
+        }
+        .whatsapp-options label.selected .radio-circle {
+            border-color: white;
+            background: white;
+        }
+        .whatsapp-options label.selected .radio-circle::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 5px;
+            height: 5px;
+            background: #ff6f35;
+            border-radius: 50%;
+        }
+        
+        /* Separate WhatsApp field */
+        .whatsapp-field-wrapper {
+            display: none;
+            margin-top: 1rem;
+            animation: slideDown 0.3s ease;
+        }
+        .whatsapp-field-wrapper.show {
+            display: block;
+        }
+        input::placeholder{
+            color:#d3e7e2;
+            font-family'El Messiri',sans-serif;
+            font-weight: 300;
+        }
+        input:focus{
+            border-bottom:2px solid #ffb48a;
+            box-shadow: 0 2px 8px rgba(255, 180, 138, 0.4);
+        }
+        input.error{
+            border-bottom:2px solid #ef4444 !important;
+            box-shadow: 0 2px 12px rgba(239, 68, 68, 0.6) !important;
+            animation: shake 0.5s ease;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .toggle{
+            position:absolute;
+            left:0;
+            top:50%;
+            transform:translateY(-50%);
+            color:#d3e7e2;
+            cursor:pointer;
+            transition: all 0.3s ease;
+        }
+        .toggle:hover{
+            color:#ffb48a;
+            transform: translateY(-50%) scale(1.1);
+        }
+        .error-message{
+            background:rgba(248,113,113,0.2);
+            border:1px solid #f87171;
+            color:#fff;
+            padding:0.7rem;
+            border-radius:10px;
+            font-size:0.9rem;
+            text-align:center;
+            margin-bottom:0.5rem;
+            display:none;
+        }
+        .error-message.show{
+            display:block;
+            animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown {
+            from {
+                opacity:0;
+                transform:translateY(-10px);
+            }
+            to {
+                opacity:1;
+                transform:translateY(0);
+            }
+        }
+        input[type="date"]{
+            color-scheme: dark;
+            cursor: pointer;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+        .gender-row{
+            display:flex;
+            align-items:center;
+            gap:0.5rem;
+            justify-content:center;
+            font-family: 'El Messiri',sans-serif;
+            font-weight: 300;
+            margin-top:0.2rem;
+        }
+        .gender-row label {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0.25rem;
+            cursor: pointer;
+            padding: 0.3rem 0.6rem;
+            border: 1.5px solid #d3e7e2;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            color: #d3e7e2;
+            font-size: 0.7rem;
+            background: transparent;
+            position: relative;
+            min-width: 60px;
+        }
+        .gender-row label:hover {
+            border-color: #ffb48a;
+            color: #ffb48a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 180, 138, 0.2);
+        }
+        .gender-row label.selected {
+            background: linear-gradient(135deg, #ff6f35 0%, #ff8c5a 100%);
+            border-color: #ff6f35;
+            color: white;
+            box-shadow: 0 6px 20px rgba(255, 111, 53, 0.4);
+        }
+        .gender-row input[type="radio"]{
+            display: none;
+        }
+        .gender-row label .radio-circle {
+            width: 12px;
+            height: 12px;
+            border: 1.5px solid #d3e7e2;
+            border-radius: 50%;
+            position: relative;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        .gender-row label:hover .radio-circle {
+            border-color: #ffb48a;
+        }
+        .gender-row label.selected .radio-circle {
+            border-color: white;
+            background: white;
+        }
+        .gender-row label.selected .radio-circle::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 5px;
+            height: 5px;
+            background: #ff6f35;
+            border-radius: 50%;
+        }
+
+        .password-rules{
+            background:rgba(255,255,255,0.1);
+            border-radius:12px;
+            padding:0.6rem 0.8rem;
+            margin-top:0.3rem;
+            font-size:0.8rem;
+            font-family: 'El Messiri',sans-serif;
+            font-weight: 300;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+        }
+        .password-rules.show{
+            max-height: 200px;
+            opacity: 1;
+            padding:0.6rem 0.8rem;
+            margin-top:0.3rem;
+        }
+        .password-rules .rule{
+            display:flex;
+            align-items:center;
+            gap:0.4rem;
+            margin:0.25rem 0;
+            color:#d3e7e2;
+            transition: color 0.3s ease;
+        }
+        .password-rules .rule.valid{
+            color:#4ade80;
+        }
+        .password-rules .rule.invalid{
+            color:#f87171;
+        }
+        .password-rules .rule i{
+            font-size:0.7rem;
+        }
+        .action-btn{
+            margin-top:1.5rem;
+            background:#ff6f35;
+            border:none;
+            width:100%;
+            padding:0.7rem 0;
+            font-size:1.2rem;
+            border-radius:18px;
+            color:#fff;
+            font-weight:600;
+            box-shadow:0 12px 25px rgba(255,111,53,0.25);
+            cursor:pointer;
+            transition: transform 0.2s ease;
+        }
+        .action-btn:hover{
+            transform: translateY(-2px);
+        }
+        .action-btn:disabled{
+            opacity:0.5;
+            cursor:not-allowed;
+        }
+        @media (max-width:900px){
+            .auth-card-wrap{max-width:99vw;width:99vw;}
+            .auth-illustration{width:75%;left:-10%;opacity:0.7;}
+            .auth-card{border-radius:45px;}
+        }
+        @media (max-width:700px){
+            .home-logo {
+                width: 65px;
+                height: 65px;
+                top: 15px;
+                left: 15px;
+            }
+            .auth-shell{padding:1rem;}
+            .auth-card-wrap{
+                flex-direction:column;
+                align-items:center;
+                gap:1.5rem;
+                width:100%;
+                padding:0;
+            }
+            .auth-illustration{
+                position:static;
+                transform:none;
+                width:200px;
+                opacity:0.7;
+                justify-content:center;
+                order:-1;
+            }
+            .auth-illustration img{width:200px;}
+            .auth-card{
+                width:95%;
+                max-width:95%;
+                border-radius:30px;
+                padding:1.8rem 1.2rem;
+                order:1;
+            }
+            .auth-card h1{font-size:1.8rem;margin-bottom:1.2rem;}
+            form{gap:0.9rem;}
+            input,button{font-size:0.9rem;padding:0.7rem 1rem;}
+        }
+        @media (max-width:480px){
+            .auth-card{
+                width:90%;
+                max-width:90%;
+                border-radius:25px;
+                padding:1.5rem 1rem;
+            }
+            .auth-card h1{font-size:1.5rem;margin-bottom:1rem;}
+            .auth-illustration{width:180px;}
+            .auth-illustration img{width:180px;}
+            input,button{font-size:0.85rem;padding:0.6rem 0.9rem;}
+            .home-logo {
+                width: 55px;
+                height: 55px;
+                top: 10px;
+                left: 10px;
+            }
+        }
+        .home-logo {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            z-index: 1000;
+            background: white;
+        }
+        .home-logo:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(255,111,53,0.5);
+        }
+        .home-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            image-rendering: auto;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+        }
+        .gender-row.error label {
+            border-color: #ef4444 !important;
+            animation: shake 0.5s ease;
+        }
+        .sign-row{
+            display:flex;
+            justify-content:center;
+            gap:0.4rem;
+            font-size:0.95rem;
+            font-family: 'El Messiri',sans-serif;
+            font-weight: 300;
+            cursor: pointer;
+        }
+        .sign-row span{
+            cursor:pointer;
+            transition: color 0.3s ease;
+        }
+        .sign-row span:hover{
+            color:#ffb48a;
+        }
+
+        /* Terms and Conditions Checkbox */
+        .terms-row {
+            margin: 1.2rem 0 0.5rem 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .terms-label {
+            display: flex !important;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: #d3e7e2;
+            transition: all 0.3s ease;
+        }
+
+        .terms-label:hover {
+            color: #fff;
+        }
+
+        .terms-label input[type="checkbox"] {
+            display: none;
+        }
+
+        .checkbox-custom {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #d3e7e2;
+            border-radius: 6px;
+            position: relative;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .terms-label:hover .checkbox-custom {
+            border-color: #ffb48a;
+        }
+
+        .terms-label input[type="checkbox"]:checked + .checkbox-custom {
+            background: linear-gradient(135deg, #ff6f35 0%, #ff8c5a 100%);
+            border-color: #ff6f35;
+        }
+
+        .terms-label input[type="checkbox"]:checked + .checkbox-custom::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .terms-text {
+            font-family: 'El Messiri', sans-serif;
+            font-weight: 400;
+        }
+
+        .terms-link {
+            color: #ffb48a;
+            text-decoration: underline;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .terms-link:hover {
+            color: #ff6f35;
+        }
+
+        .terms-row.error .checkbox-custom {
+            border-color: #ef4444 !important;
+            animation: shake 0.5s ease;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #999;
+        }
+    </style>
+</head>
+<body>
+    <a href="/ar-login" class="back-btn"><i class="fas fa-arrow-left"></i> <span>رجوع</span></a>
+    <div class="auth-shell">
+        <div class="auth-card-wrap">
+            <div class="auth-card">
+                <h1>إنشاء حساب جديد</h1>
+                <div class="error-message" id="errorMsg"></div>
+                <form onsubmit="handleRegister(event)" id="registerForm">
+                    <div class="form-columns">
+                        <div>
+                            <label for="signupBirth">تاريخ الميلاد</label>
+                            <div class="control">
+                                <input id="signupBirth" type="date" placeholder="تاريخ ميلادك" min="1000-01-01" max="9999-12-31" oninput="if(this.value.length > 10) this.value=this.value.slice(0,10)">
+                            </div>
+                            <label for="signupPass">كلمة السر</label>
+                            <div class="control">
+                                <input id="signupPass" type="password" placeholder="أدخل كلمة السر">
+                                <span class="toggle" data-target="signupPass"><i class="fa fa-eye"></i></span>
+                            </div>
+                            <div class="password-rules" id="passwordRules">
+                                <div class="rule" id="rule-length">
+                                    <i class="fa fa-circle"></i>
+                                    <span>8 أحرف على الأقل</span>
+                                </div>
+                                <div class="rule" id="rule-lower">
+                                    <i class="fa fa-circle"></i>
+                                    <span>حرف صغير</span>
+                                </div>
+                                <div class="rule" id="rule-upper">
+                                    <i class="fa fa-circle"></i>
+                                    <span>حرف كبير</span>
+                                </div>
+                                <div class="rule" id="rule-number">
+                                    <i class="fa fa-circle"></i>
+                                    <span>رقم واحد</span>
+                                </div>
+                                <div class="rule" id="rule-special">
+                                    <i class="fa fa-circle"></i>
+                                    <span>رمز خاص</span>
+                                </div>
+                            </div>
+                            <label for="signupPassConfirm">تأكيد كلمة السر</label>
+                            <div class="control">
+                                <input id="signupPassConfirm" type="password" placeholder="أعد كتابة كلمة السر">
+                                <span class="toggle" data-target="signupPassConfirm"><i class="fa fa-eye"></i></span>
+                            </div>
+                            <div class="gender-row">
+                                <label for="genderMale" id="labelMale">
+                                    <input type="radio" id="genderMale" name="gender" value="ذكر">
+                                    <span class="radio-circle"></span>
+                                    <span>ذكر</span>
+                                </label>
+                                <label for="genderFemale" id="labelFemale">
+                                    <input type="radio" id="genderFemale" name="gender" value="أنثى">
+                                    <span class="radio-circle"></span>
+                                    <span>أنثى</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="signupName">اسم المستخدم</label>
+                            <div class="control">
+                                <input id="signupName" type="text" placeholder="اسمك الكامل">
+                            </div>
+                            <label for="signupPhone">رقم الهاتف للاتصال</label>
+                            <div class="control phone-input-wrapper">
+                                <span class="phone-prefix">+963</span>
+                                <input id="signupPhone" type="tel" placeholder="رقم للاتصال" dir="ltr" maxlength="9">
+                                <span class="country-flag show" id="countryFlag">
+                                    <img src="https://flagcdn.com/w40/sy.png" alt="سوريا" title="سوريا">
+                                </span>
+                            </div>
+                            
+                            <!-- WhatsApp Question (shows after entering phone) -->
+                            <div class="whatsapp-question" id="whatsappQuestion">
+                                <div class="whatsapp-question-text">هل تستخدم هذا الرقم للواتساب؟</div>
+                                <div class="whatsapp-options">
+                                    <label for="whatsappYes" id="labelWhatsappYes">
+                                        <input type="radio" id="whatsappYes" name="whatsapp_same" value="yes">
+                                        <span class="radio-circle"></span>
+                                        <span>نعم</span>
+                                    </label>
+                                    <label for="whatsappNo" id="labelWhatsappNo">
+                                        <input type="radio" id="whatsappNo" name="whatsapp_same" value="no">
+                                        <span class="radio-circle"></span>
+                                        <span>لا</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Separate WhatsApp Field (shows only if user selects "No") -->
+                            <div class="whatsapp-field-wrapper" id="whatsappFieldWrapper">
+                                <label for="signupWhatsapp">رقم الواتساب</label>
+                                <div class="control phone-input-wrapper">
+                                    <span class="phone-prefix">+963</span>
+                                    <input id="signupWhatsapp" type="tel" placeholder="رقم الواتساب" dir="ltr" maxlength="9">
+                                    <span class="country-flag show" id="whatsappFlag">
+                                        <img src="https://flagcdn.com/w40/sy.png" alt="سوريا" title="سوريا">
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <label for="signupEmail">البريد الإلكتروني</label>
+                            <div class="control">
+                                <input id="signupEmail" type="email" placeholder="الايميل" dir="ltr" style="text-align:center;font-size:0.9rem;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <label style="text-align: center; display: block; margin-top: 1rem; color: #d3e7e2;">طريقة التحقق </label>
+                    <div class="method-row">
+                        <label for="methodEmail" class="selected">
+                            <input type="radio" id="methodEmail" name="verification_method" value="email" checked>
+                            <span class="radio-custom"></span>
+                            <span>عبر الإيميل</span>
+                        </label>
+                        <label for="methodWhatsApp" class="disabled" id="whatsappLabel">
+                            <input type="radio" id="methodWhatsApp" name="verification_method" value="whatsapp" disabled>
+                            <span class="radio-custom"></span>
+                            <span>عبر الواتساب</span>
+                            <span class="coming-soon-badge">قريباً</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Coming Soon Message -->
+                    <div class="coming-soon-message" id="whatsappMessage">
+                        <i class="fas fa-info-circle"></i>
+                        <span>خدمة التحقق عبر الواتساب ستكون متاحة قريباً</span>
+                    </div>
+
+                    <!-- Terms and Conditions Checkbox -->
+                    <div class="terms-row">
+                        <label for="termsCheckbox" class="terms-label">
+                            <input type="checkbox" id="termsCheckbox" name="terms_accepted">
+                            <span class="checkbox-custom"></span>
+                            <span class="terms-text">
+                                أوافق على 
+                                <a href="/terms-and-conditions" target="_blank" class="terms-link">الشروط والأحكام</a>
+                            </span>
+                        </label>
+                    </div>
+
+                    <button class="action-btn" type="submit" id="submitBtn" disabled>متابعة</button>
+                    <div class="sign-row" style="margin-top:1rem;">
+                        <span>لديك حساب ؟</span>
+                        <span style="color:#ffb48a;" onclick="window.location.href='/ar-login'">قم بتسجيل الدخول</span>
+                    </div>
+                </form>
+            </div>
+            <div class="auth-illustration">
+                <img src="/images/logo-girl.jpg" alt="Tulip illustration">
+            </div>
+        </div>
+    </div>
+    <script>
+        const signupPassInput = document.getElementById('signupPass');
+        const confirmPassInput = document.getElementById('signupPassConfirm');
+        const passwordRules = document.getElementById('passwordRules');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        const rules = {
+            length: { regex: /.{8,}/, element: document.getElementById('rule-length') },
+            lower: { regex: /[a-z]/, element: document.getElementById('rule-lower') },
+            upper: { regex: /[A-Z]/, element: document.getElementById('rule-upper') },
+            number: { regex: /[0-9]/, element: document.getElementById('rule-number') },
+            special: { regex: /[!@#$%^&*(),.?":{}|<>]/, element: document.getElementById('rule-special') }
+        };
+
+        signupPassInput.addEventListener('focus', () => {
+            passwordRules.classList.add('show');
+        });
+
+        signupPassInput.addEventListener('blur', () => {
+            setTimeout(() => {
+                passwordRules.classList.remove('show');
+            }, 200);
+        });
+
+        function validatePassword() {
+            const password = signupPassInput.value;
+            let allValid = true;
+
+            Object.keys(rules).forEach(key => {
+                const rule = rules[key];
+                const isValid = rule.regex.test(password);
+                
+                if(isValid) {
+                    rule.element.classList.remove('invalid');
+                    rule.element.classList.add('valid');
+                    rule.element.querySelector('i').className = 'fa fa-check-circle';
+                } else {
+                    rule.element.classList.remove('valid');
+                    rule.element.classList.add('invalid');
+                    rule.element.querySelector('i').className = 'fa fa-times-circle';
+                    allValid = false;
+                }
+            });
+
+            return allValid;
+        }
+
+        signupPassInput.addEventListener('input', validatePassword);
+
+        // Gender selection
+        const genderLabels = document.querySelectorAll('.gender-row label');
+        genderLabels.forEach(label => {
+            label.addEventListener('click', function() {
+                genderLabels.forEach(l => l.classList.remove('selected'));
+                this.classList.add('selected');
+                // Remove error state when gender is selected
+                document.querySelector('.gender-row').classList.remove('error');
+            });
+        });
+
+        // Verification Method selection
+        const methodLabels = document.querySelectorAll('.method-row label');
+        const whatsappLabel = document.getElementById('whatsappLabel');
+        const whatsappMessage = document.getElementById('whatsappMessage');
+        
+        methodLabels.forEach(label => {
+            label.addEventListener('click', function(e) {
+                // If it's the disabled WhatsApp option
+                if (this.classList.contains('disabled')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Show coming soon message
+                    whatsappMessage.classList.add('show');
+                    
+                    // Hide message after 3 seconds
+                    setTimeout(() => {
+                        whatsappMessage.classList.remove('show');
+                    }, 3000);
+                    
+                    return false;
+                }
+                
+                // Normal selection for enabled options
+                methodLabels.forEach(l => l.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        // Confirm password validation - stays red until match
+        confirmPassInput.addEventListener('input', function() {
+            const password = signupPassInput.value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword.length > 0) {
+                if (password !== confirmPassword) {
+                    this.classList.add('error');
+                } else {
+                    this.classList.remove('error');
+                }
+            } else {
+                this.classList.remove('error');
+            }
+        });
+        
+        // Also validate confirm password when main password changes
+        signupPassInput.addEventListener('input', function() {
+            const password = this.value;
+            const confirmPassword = confirmPassInput.value;
+            
+            if (confirmPassword.length > 0) {
+                if (password !== confirmPassword) {
+                    confirmPassInput.classList.add('error');
+                } else {
+                    confirmPassInput.classList.remove('error');
+                }
+            }
+        });
+
+        // Terms and Conditions Checkbox
+        const termsCheckbox = document.getElementById('termsCheckbox');
+
+        if (termsCheckbox && submitBtn) {
+            // Enable/disable submit button based on checkbox
+            termsCheckbox.addEventListener('change', function() {
+                submitBtn.disabled = !this.checked;
+                // Remove error state when checked
+                if (this.checked) {
+                    document.querySelector('.terms-row').classList.remove('error');
+                }
+            });
+        }
+
+        // Phone country code detection - FIXED TO 963 (Syria)
+        const phoneInput = document.getElementById('signupPhone');
+        const whatsappInput = document.getElementById('signupWhatsapp');
+        const whatsappQuestion = document.getElementById('whatsappQuestion');
+        const whatsappFieldWrapper = document.getElementById('whatsappFieldWrapper');
+        const whatsappYesRadio = document.getElementById('whatsappYes');
+        const whatsappNoRadio = document.getElementById('whatsappNo');
+
+        // Format phone inputs - only allow 9 digits after 963
+        function formatSyrianPhone(input) {
+            if (!input) return;
+            
+            input.addEventListener('input', (e) => {
+                let value = e.target.value.trim();
+                
+                // Only allow numbers
+                const cleaned = value.replace(/[^\d]/g, '');
+                if (cleaned !== value) {
+                    input.value = cleaned;
+                }
+                
+                // Limit to 9 digits
+                if (cleaned.length > 9) {
+                    input.value = cleaned.substring(0, 9);
+                }
+                
+                // Color the input green when valid
+                if (cleaned.length === 9) {
+                    input.style.color = '#4ade80';
+                    input.parentElement.querySelector('.phone-prefix').style.color = '#4ade80';
+                } else {
+                    input.style.color = '#fff';
+                    input.parentElement.querySelector('.phone-prefix').style.color = '#d3e7e2';
+                }
+            });
+        }
+
+        formatSyrianPhone(phoneInput);
+        formatSyrianPhone(whatsappInput);
+
+        // Show WhatsApp question when phone number is entered (9 digits)
+        if (phoneInput && whatsappQuestion) {
+            phoneInput.addEventListener('input', function() {
+                const value = this.value.trim();
+                if (value.length === 9) {
+                    whatsappQuestion.classList.add('show');
+                } else {
+                    whatsappQuestion.classList.remove('show');
+                    whatsappFieldWrapper.classList.remove('show');
+                    // Reset radio buttons
+                    whatsappYesRadio.checked = false;
+                    whatsappNoRadio.checked = false;
+                    document.querySelectorAll('.whatsapp-options label').forEach(l => l.classList.remove('selected'));
+                }
+            });
+        }
+
+        // Handle WhatsApp question radio buttons
+        const whatsappLabels = document.querySelectorAll('.whatsapp-options label');
+        whatsappLabels.forEach(label => {
+            label.addEventListener('click', function() {
+                whatsappLabels.forEach(l => l.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                const selectedValue = this.querySelector('input').value;
+                
+                if (selectedValue === 'yes') {
+                    // Hide separate WhatsApp field
+                    whatsappFieldWrapper.classList.remove('show');
+                    // Clear WhatsApp input
+                    whatsappInput.value = '';
+                } else if (selectedValue === 'no') {
+                    // Show separate WhatsApp field
+                    whatsappFieldWrapper.classList.add('show');
+                }
+            });
+        });
+
+        // Smooth password toggle
+        document.querySelectorAll('.toggle').forEach(t => {
+            const input = document.getElementById(t.dataset.target);
+            if(!input) return;
+            t.addEventListener('click', () => {
+                const hidden = input.type === 'password';
+                input.type = hidden ? 'text' : 'password';
+                t.style.transform = 'translateY(-50%) rotate(360deg)';
+                setTimeout(() => {
+                    t.innerHTML = `<i class="fa ${hidden ? 'fa-eye-slash' : 'fa-eye'}"></i>`;
+                    t.style.transform = 'translateY(-50%) rotate(0deg)';
+                }, 150);
+            });
+        });
+
+        // Handle registration
+        async function handleRegister(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const phone = document.getElementById('signupPhone').value;
+            const password = document.getElementById('signupPass').value;
+            const password_confirmation = document.getElementById('signupPassConfirm').value;
+            const birth_date = document.getElementById('signupBirth').value;
+            const gender = document.querySelector('input[name="gender"]:checked')?.value;
+            const verification_method = document.querySelector('input[name="verification_method"]:checked')?.value || 'email';
+            const terms_accepted = document.getElementById('termsCheckbox').checked;
+            const whatsappSame = document.querySelector('input[name="whatsapp_same"]:checked')?.value;
+            const errorMsg = document.getElementById('errorMsg');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Remove all error classes first
+            document.querySelectorAll('input').forEach(inp => inp.classList.remove('error'));
+            document.querySelector('.terms-row').classList.remove('error');
+            errorMsg.classList.remove('show');
+
+            // Check terms acceptance first
+            if (!terms_accepted) {
+                errorMsg.textContent = 'يجب الموافقة على الشروط والأحكام للمتابعة';
+                errorMsg.classList.add('show');
+                document.querySelector('.terms-row').classList.add('error');
+                return;
+            }
+
+            // Check if all required fields are filled
+            const requiredFields = [
+                { input: document.getElementById('signupName'), value: name },
+                { input: document.getElementById('signupEmail'), value: email },
+                { input: document.getElementById('signupPhone'), value: phone },
+                { input: document.getElementById('signupPass'), value: password },
+                { input: document.getElementById('signupPassConfirm'), value: password_confirmation },
+                { input: document.getElementById('signupBirth'), value: birth_date }
+            ];
+
+            let hasEmptyFields = false;
+            requiredFields.forEach(field => {
+                if (!field.value || field.value.trim() === '') {
+                    field.input.classList.add('error');
+                    hasEmptyFields = true;
+                }
+            });
+
+            // Check gender selection
+            if (!gender) {
+                document.querySelector('.gender-row').classList.add('error');
+                hasEmptyFields = true;
+            }
+
+            if (hasEmptyFields) {
+                errorMsg.textContent = 'املأ جميع الحقول';
+                errorMsg.classList.add('show');
+                return;
+            }
+
+            // Validate phone number (must be 9 digits)
+            if (phone.length !== 9) {
+                errorMsg.textContent = 'رقم الهاتف يجب أن يكون 9 أرقام';
+                errorMsg.classList.add('show');
+                document.getElementById('signupPhone').classList.add('error');
+                return;
+            }
+
+            // Check if WhatsApp question was answered
+            if (!whatsappSame) {
+                errorMsg.textContent = 'يرجى تحديد إذا كنت تستخدم نفس الرقم للواتساب';
+                errorMsg.classList.add('show');
+                whatsappQuestion.style.border = '2px solid #ef4444';
+                setTimeout(() => {
+                    whatsappQuestion.style.border = '1px solid rgba(255,255,255,0.1)';
+                }, 2000);
+                return;
+            }
+
+            // Determine WhatsApp number
+            let whatsapp;
+            if (whatsappSame === 'yes') {
+                // Use same number as phone
+                whatsapp = phone;
+            } else {
+                // Use separate WhatsApp number
+                whatsapp = document.getElementById('signupWhatsapp').value;
+                
+                // Validate separate WhatsApp number
+                if (!whatsapp || whatsapp.trim() === '') {
+                    errorMsg.textContent = 'يرجى إدخال رقم الواتساب';
+                    errorMsg.classList.add('show');
+                    document.getElementById('signupWhatsapp').classList.add('error');
+                    return;
+                }
+                
+                if (whatsapp.length !== 9) {
+                    errorMsg.textContent = 'رقم الواتساب يجب أن يكون 9 أرقام';
+                    errorMsg.classList.add('show');
+                    document.getElementById('signupWhatsapp').classList.add('error');
+                    return;
+                }
+            }
+
+            // Validate password
+            if (!validatePassword()) {
+                errorMsg.textContent = 'كلمة المرور لا تستوفي جميع الشروط';
+                errorMsg.classList.add('show');
+                document.getElementById('signupPass').classList.add('error');
+                return;
+            }
+
+            if (password !== password_confirmation) {
+                errorMsg.textContent = 'كلمة المرور وتأكيد كلمة المرور غير متطابقين';
+                errorMsg.classList.add('show');
+                document.getElementById('signupPassConfirm').classList.add('error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'جاري التحميل...';
+            errorMsg.classList.remove('show');
+
+            // Prepend 963 to phone numbers
+            const fullPhone = '963' + phone;
+            const fullWhatsapp = '963' + whatsapp;
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        phone: fullPhone,
+                        whatsapp: fullWhatsapp,
+                        password,
+                        password_confirmation,
+                        birth_date,
+                        gender,
+                        verification_method,
+                        terms_accepted
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    const errors = data.errors || {};
+                    const firstError = Object.values(errors)[0]?.[0] || data.message || 'حدث خطأ';
+                    errorMsg.textContent = firstError;
+                    errorMsg.classList.add('show');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                errorMsg.textContent = 'حدث خطأ، يرجى المحاولة مرة أخرى: ' + error.message;
+                errorMsg.classList.add('show');
+            } finally {
+                submitBtn.disabled = !document.getElementById('termsCheckbox').checked;
+                submitBtn.textContent = 'متابعة';
+            }
+        }
+
+        // Global date input validation (ensure 4-digit year)
+        document.addEventListener('DOMContentLoaded', function() {
+            function enforceDateLimit(input) {
+                if (!input.getAttribute('min')) input.setAttribute('min', '1000-01-01');
+                if (!input.getAttribute('max')) input.setAttribute('max', '9999-12-31');
+                
+                input.addEventListener('input', function() {
+                    if (this.value && this.value.length > 10) {
+                        this.value = this.value.slice(0, 10);
+                    }
+                });
+            }
+
+            // Apply to existing inputs
+            document.querySelectorAll('input[type="date"]').forEach(enforceDateLimit);
+
+            // Watch for dynamically added inputs
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) {
+                            if (node.tagName === 'INPUT' && node.type === 'date') {
+                                enforceDateLimit(node);
+                            }
+                            node.querySelectorAll('input[type="date"]').forEach(enforceDateLimit);
+                        }
+                    });
+                });
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        });
+    </script>
+</body>
+</html>
+<?php /**PATH E:\Tulip-Store\resources\views/pages/ar-signup.blade.php ENDPATH**/ ?>

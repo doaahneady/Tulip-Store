@@ -334,6 +334,11 @@
             .profile-container { flex-direction: column; }
             .form-row { grid-template-columns: 1fr; }
             .content-section { padding: 1.5rem; }
+            
+            /* Card form responsive - stack on mobile */
+            #addCardForm > div[style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
         }
 
         /* ============================================================
@@ -631,7 +636,7 @@
                         <div class="form-row">
                             <div class="form-group" style="grid-column:1/-1;">
                                 <label class="form-label">العملة المفضلة</label>
-                                <input type="hidden" id="currencyPref" value="{{ strtoupper((string) (Auth::user()->currency ?? (session('currency') ?? 'USD'))) }}">
+                                <input type="hidden" id="currencyPref" value="{{ strtoupper((string) (Auth::user()->currency ?? (session('currency') ?? 'SYP'))) }}">
                                 <div class="currency-toggle">
                                     <button type="button" class="currency-btn" id="currencyBtnUSD" onclick="setCurrencyPreferenceUI('USD')">
                                         <span>USD</span><span>($)</span>
@@ -653,18 +658,22 @@
                         </div>
                         <button type="submit" class="btn-save"><i class="fas fa-save"></i> حفظ التغييرات</button>
                     </form>
-                    <div style="margin-top:1.5rem; padding:1.25rem; border:1px solid #e8e8e8; border-radius:14px; background:#fff;">
+                    <div style="margin-top:1.5rem; padding:1.25rem; border:1px solid #e8e8e8; border-radius:14px; background:linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);">
                         <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
                             <div style="display:flex; align-items:center; gap:0.6rem; color:#0f4f55; font-weight:900;">
                                 <i class="fas fa-wallet" style="color:#ff6b35;"></i>
                                 <span>رصيدي</span>
                             </div>
-                            <div style="font-size:1.25rem; font-weight:900; color:#1a1a1a;">
-                                {{ number_format((float) (Auth::user()->balance ?? 0), 2) }}
+                            <div id="balanceDisplay" style="font-size:1.25rem; font-weight:900; color:#1a1a1a;">
+                                <span id="balanceAmount">{{ number_format((float) (Auth::user()->balance ?? 0), 2) }}</span>
+                                <span id="balanceCurrency">SYP</span>
                             </div>
                         </div>
-                        <div style="margin-top:0.5rem; color:#64748b; font-size:0.9rem;">
-                            هذا الرصيد للعرض فقط ولا يمكن تعديله من حساب العميل.
+                        <div style="margin-top:1rem; display:flex; gap:0.8rem; flex-wrap:wrap;">
+                            <a href="/recharge" style="flex:1; min-width:150px; background:linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%); color:white; border:none; padding:0.8rem 1.5rem; border-radius:10px; font-family:'El Messiri',sans-serif; font-size:1rem; font-weight:700; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; transition:all 0.3s; box-shadow:0 4px 15px rgba(255,107,53,0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255,107,53,0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255,107,53,0.3)';">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>شحن رصيد</span>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -722,31 +731,50 @@
                 </div>
                 <div class="section-inner">
                     <h2 class="section-title"><i class="fas fa-credit-card"></i> بطاقاتي</h2>
-                    <p style="color:#666;margin-bottom:1rem;font-size:0.95rem;">أضف بطاقاتك أو احذف البطاقات المحفوظة.</p>
-                    <div style="background:#f0f9fa;padding:1.25rem;border-radius:12px;margin-bottom:1.5rem;border:1px solid #e0f2f1;">
-                        <h4 style="margin:0 0 1rem 0;color:#0f4f55;font-size:1rem;">إضافة بطاقة جديدة</h4>
-                        <form id="addCardForm" onsubmit="addCard(event)" style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-                            <div>
-                                <label style="display:block;font-size:0.85rem;color:#555;margin-bottom:0.3rem;">آخر 4 أرقام</label>
-                                <input type="text" id="cardLast4" maxlength="4" placeholder="4242" pattern="[0-9]{4}" required style="width:100%;padding:0.6rem;border:2px solid #e0e0e0;border-radius:8px;font-family:'El Messiri',sans-serif;">
+                    <p style="color:#666;margin-bottom:1.5rem;font-size:0.95rem;">أضف بطاقاتك أو احذف البطاقات المحفوظة.</p>
+                    
+                    <!-- Add New Card Form -->
+                    <div style="background:#f0f9fa;padding:1.5rem;border-radius:12px;margin-bottom:2rem;border:1px solid #e0f2f1;">
+                        <h4 style="margin:0 0 1.2rem 0;color:#0f4f55;font-size:1.1rem;font-weight:700;">
+                            <i class="fas fa-plus-circle" style="margin-left:0.5rem;"></i>
+                            إضافة بطاقة جديدة
+                        </h4>
+                        <form id="addCardForm" onsubmit="addCard(event)">
+                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label class="form-label" style="display:block;font-size:0.9rem;color:#555;margin-bottom:0.5rem;font-weight:600;">
+                                        <i class="fas fa-hashtag" style="margin-left:0.3rem;color:#0f4f55;"></i>
+                                        آخر 4 أرقام
+                                    </label>
+                                    <input type="text" id="cardLast4" class="form-input" maxlength="4" placeholder="4242" pattern="[0-9]{4}" required style="width:100%;padding:0.8rem;border:2px solid #e0e0e0;border-radius:10px;font-family:'El Messiri',sans-serif;font-size:1rem;text-align:center;direction:ltr;" oninput="formatLast4Input(this)">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label class="form-label" style="display:block;font-size:0.9rem;color:#555;margin-bottom:0.5rem;font-weight:600;">
+                                        <i class="fas fa-calendar-alt" style="margin-left:0.3rem;color:#0f4f55;"></i>
+                                        انتهاء الصلاحية
+                                    </label>
+                                    <input type="text" id="cardExpiry" class="form-input" placeholder="MM/YY" maxlength="5" required style="width:100%;padding:0.8rem;border:2px solid #e0e0e0;border-radius:10px;font-family:'El Messiri',sans-serif;font-size:1rem;text-align:center;direction:ltr;" oninput="formatExpiryInput(this)">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label class="form-label" style="display:block;font-size:0.9rem;color:#555;margin-bottom:0.5rem;font-weight:600;">
+                                        <i class="fas fa-credit-card" style="margin-left:0.3rem;color:#0f4f55;"></i>
+                                        العلامة التجارية
+                                    </label>
+                                    <select id="cardBrand" class="form-input" style="width:100%;padding:0.8rem;border:2px solid #e0e0e0;border-radius:10px;font-family:'El Messiri',sans-serif;font-size:1rem;cursor:pointer;">
+                                        <option value="Visa">Visa</option>
+                                        <option value="Mastercard">Mastercard</option>
+                                        <option value="Card">أخرى</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div>
-                                <label style="display:block;font-size:0.85rem;color:#555;margin-bottom:0.3rem;">انتهاء الصلاحية</label>
-                                <input type="text" id="cardExpiry" placeholder="12/25" maxlength="5" required style="width:100%;padding:0.6rem;border:2px solid #e0e0e0;border-radius:8px;font-family:'El Messiri',sans-serif;">
-                            </div>
-                            <div>
-                                <label style="display:block;font-size:0.85rem;color:#555;margin-bottom:0.3rem;">العلامة</label>
-                                <select id="cardBrand" style="width:100%;padding:0.6rem;border:2px solid #e0e0e0;border-radius:8px;font-family:'El Messiri',sans-serif;">
-                                    <option value="Visa">Visa</option>
-                                    <option value="Mastercard">Mastercard</option>
-                                    <option value="Card">أخرى</option>
-                                </select>
-                            </div>
-                            <div style="display:flex;align-items:flex-end;">
-                                <button type="submit" class="btn-save" style="margin:0;width:100%;padding:0.7rem 1rem;font-size:0.95rem;"><i class="fas fa-plus"></i> إضافة</button>
-                            </div>
+                            <button type="submit" class="btn-save" style="width:100%;margin:0;padding:0.9rem 1.5rem;font-size:1rem;">
+                                <i class="fas fa-plus-circle" style="margin-left:0.5rem;"></i>
+                                إضافة البطاقة
+                            </button>
                         </form>
                     </div>
+                    
+                    <!-- Cards List -->
                     <div id="cardsList">
                         <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>جاري تحميل البطاقات...</p></div>
                     </div>
@@ -986,6 +1014,29 @@
             document.getElementById('currencyBtnUSD')?.classList.toggle('active', cur === 'USD');
             document.getElementById('currencyBtnSYP')?.classList.toggle('active', cur === 'SYP');
             if (window.setCurrencyPreference) window.setCurrencyPreference(cur);
+            
+            // Update balance display based on currency
+            updateBalanceDisplay(cur);
+        }
+        
+        function updateBalanceDisplay(currency) {
+            const balanceAmount = document.getElementById('balanceAmount');
+            const balanceCurrency = document.getElementById('balanceCurrency');
+            
+            if (!balanceAmount || !balanceCurrency) return;
+            
+            // Get the balance in SYP (stored in database)
+            const balanceSYP = {{ (float) (Auth::user()->balance ?? 0) }};
+            const exchangeRate = {{ config('app.usd_to_syp_rate', 13000) }};
+            
+            if (currency === 'USD') {
+                const balanceUSD = balanceSYP / exchangeRate;
+                balanceAmount.textContent = balanceUSD.toFixed(2);
+                balanceCurrency.textContent = 'USD';
+            } else {
+                balanceAmount.textContent = balanceSYP.toFixed(2);
+                balanceCurrency.textContent = 'SYP';
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -1312,51 +1363,140 @@
         }
         async function loadCards() {
             const container = document.getElementById('cardsList');
+            if (!container) return;
+            
             try {
                 const response = await fetch(API_BASE + '/api/user/saved-cards', {
-                    headers:{'Accept':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content}
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
                 });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>يرجى تسجيل الدخول أولاً</p></div>';
+                        return;
+                    }
+                    throw new Error('فشل تحميل البطاقات');
+                }
+                
                 const cards = await response.json();
-                if (!Array.isArray(cards)||cards.length===0) { container.innerHTML='<div class="empty-state"><i class="fas fa-credit-card"></i><p>لا توجد بطاقات محفوظة بعد</p></div>'; return; }
+                
+                if (!Array.isArray(cards) || cards.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-credit-card"></i><p>لا توجد بطاقات محفوظة بعد</p></div>';
+                    return;
+                }
+                
                 container.innerHTML = cards.map(card => `
                     <div style="background:linear-gradient(135deg,#2a7080 0%,#1a5060 100%);padding:1.5rem;border-radius:15px;margin-bottom:1rem;color:white;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 15px rgba(42,112,128,0.2);flex-wrap:wrap;gap:1rem;">
                         <div style="display:flex;align-items:center;gap:1.2rem;">
                             <i class="fab ${cardBrandToIcon(card.brand)}" style="font-size:2.5rem;opacity:0.9;"></i>
                             <div>
                                 <p style="font-family:monospace;font-size:1.1rem;letter-spacing:2px;margin:0;">•••• •••• •••• ${card.last4}</p>
-                                <p style="font-size:0.85rem;opacity:0.8;margin-top:0.3rem;">ينتهي في ${card.expiry}${card.brand?' · '+card.brand:''}</p>
+                                <p style="font-size:0.85rem;opacity:0.8;margin-top:0.3rem;">ينتهي في ${card.expiry}${card.brand ? ' · ' + card.brand : ''}</p>
                             </div>
                         </div>
-                        <button type="button" onclick="removeCard(${card.id})" style="background:rgba(255,255,255,0.2);border:none;color:white;padding:0.5rem 0.9rem;border-radius:8px;cursor:pointer;font-family:'El Messiri',sans-serif;font-size:0.85rem;"><i class="fas fa-trash-alt"></i> حذف</button>
+                        <button type="button" onclick="removeCard(${card.id})" style="background:rgba(255,255,255,0.2);border:none;color:white;padding:0.5rem 0.9rem;border-radius:8px;cursor:pointer;font-family:'El Messiri',sans-serif;font-size:0.85rem;transition:all 0.3s;" onmouseover="this.style.background='rgba(239,68,68,0.8)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                            <i class="fas fa-trash-alt"></i> حذف
+                        </button>
                     </div>
                 `).join('');
             } catch (error) {
-                container.innerHTML='<div class="empty-state"><i class="fas fa-credit-card"></i><p>لا توجد بطاقات محفوظة بعد</p></div>';
+                console.error('Error loading cards:', error);
+                container.innerHTML = '<div class="empty-state" style="background:#fff3cd;border:2px solid #ffc107;"><i class="fas fa-exclamation-triangle" style="color:#856404;"></i><p style="color:#856404;">حدث خطأ في تحميل البطاقات. يرجى المحاولة مرة أخرى.</p><button onclick="loadCards()" style="margin-top:1rem;padding:0.5rem 1rem;background:#ffc107;color:#856404;border:none;border-radius:8px;cursor:pointer;font-family:\'El Messiri\',sans-serif;font-weight:600;"><i class="fas fa-redo"></i> إعادة المحاولة</button></div>';
             }
         }
+        
+        // Format expiry input as MM/YY
+        function formatExpiryInput(input) {
+            let value = input.value.replace(/\D/g, ''); // Remove non-digits
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2, 4);
+            }
+            input.value = value;
+        }
+        
+        // Format last 4 digits input (only numbers)
+        function formatLast4Input(input) {
+            input.value = input.value.replace(/\D/g, '').slice(0, 4);
+        }
+        
         async function addCard(e) {
             e.preventDefault();
             const last4 = document.getElementById('cardLast4').value.replace(/\D/g,'').slice(0,4);
             let expiry = document.getElementById('cardExpiry').value.trim().replace(/\s/g,'');
             if (/^([0-9]{2})([0-9]{2})$/.test(expiry)) expiry = expiry.replace(/^([0-9]{2})([0-9]{2})$/,'$1/$2');
             const brand = document.getElementById('cardBrand').value;
-            if (last4.length!==4){alert('أدخل آخر 4 أرقام بشكل صحيح');return;}
-            if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(expiry)){alert('صيغة انتهاء الصلاحية: MM/YY');return;}
+            
+            if (last4.length !== 4) {
+                alert('أدخل آخر 4 أرقام بشكل صحيح');
+                return;
+            }
+            if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(expiry)) {
+                alert('صيغة انتهاء الصلاحية: MM/YY (مثال: 12/25)');
+                return;
+            }
+            
             try {
-                const response = await fetch(API_BASE+'/api/user/saved-cards',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify({last4,expiry,brand})});
+                const response = await fetch(API_BASE + '/api/user/saved-cards', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ last4, expiry, brand })
+                });
+                
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.error||'فشل الإضافة');
-                document.getElementById('cardLast4').value='';document.getElementById('cardExpiry').value='';document.getElementById('cardBrand').value='Visa';
+                
+                if (!response.ok) {
+                    throw new Error(data.error || data.message || 'فشل إضافة البطاقة');
+                }
+                
+                // Clear form
+                document.getElementById('cardLast4').value = '';
+                document.getElementById('cardExpiry').value = '';
+                document.getElementById('cardBrand').value = 'Visa';
+                
+                // Show success message
+                alert('تم إضافة البطاقة بنجاح!');
+                
+                // Reload cards
                 loadCards();
-            } catch(err){alert(err.message||'حدث خطأ');}
+            } catch(err) {
+                console.error('Error adding card:', err);
+                alert(err.message || 'حدث خطأ في إضافة البطاقة');
+            }
         }
+        
         async function removeCard(id) {
-            if(!confirm('حذف هذه البطاقة؟')) return;
+            if (!confirm('هل أنت متأكد من حذف هذه البطاقة؟')) return;
+            
             try {
-                const response = await fetch(API_BASE+'/api/user/saved-cards/'+id,{method:'DELETE',headers:{'Accept':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content}});
-                if(!response.ok) throw new Error('فشل الحذف');
+                const response = await fetch(API_BASE + '/api/user/saved-cards/' + id, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+                
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'فشل حذف البطاقة');
+                }
+                
+                // Show success message
+                alert('تم حذف البطاقة بنجاح!');
+                
+                // Reload cards
                 loadCards();
-            } catch(err){alert(err.message||'حدث خطأ');}
+            } catch(err) {
+                console.error('Error removing card:', err);
+                alert(err.message || 'حدث خطأ في حذف البطاقة');
+            }
         }
 
         /* ============================================================

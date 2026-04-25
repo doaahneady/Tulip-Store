@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="/css/store.css?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="/js/weight-based-products.js"></script>
     <style>
         :root {
             --primary: #059669;
@@ -263,9 +264,18 @@
             transition: all 0.3s ease;
         }
 
+        .add-btn-circle.weight-based {
+            background: #f59e0b;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
         .add-btn-circle:hover {
             transform: scale(1.1);
             background: var(--primary-dark);
+        }
+
+        .add-btn-circle.weight-based:hover {
+            background: #f97316;
         }
 
         .counter-control {
@@ -279,6 +289,11 @@
             justify-content: space-between;
             box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
             animation: expandWidth 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .counter-control.weight-based {
+            background: #f59e0b;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
         }
 
         @keyframes expandWidth {
@@ -484,6 +499,46 @@
             const imageUrl = p.primary_image_url || p.image || '/images/tulip_store.jpg';
             const isFav = favoriteIds.has(String(p.id));
             
+            // Check if product is weight-based
+            const unitLower = unit.toLowerCase().trim();
+            const isWeightBased = unitLower === 'kilogram' || unitLower === 'gram' || 
+                                  unitLower === 'كيلو' || unitLower === 'كيلوغرام' || 
+                                  unitLower === 'غرام' || unitLower === 'kg' || unitLower === 'g' ||
+                                  unitLower.includes('كيلو') || unitLower.includes('غرام');
+            
+            // For weight-based products, always display as "per kilogram"
+            let displayPrice = price;
+            let displayUnit = unit;
+            
+            if (isWeightBased) {
+                displayUnit = 'كيلو غرام';
+            }
+            
+            const buttonClass = isWeightBased ? 'add-btn-circle weight-based' : 'add-btn-circle';
+            const buttonIcon = isWeightBased ? 'fa-balance-scale' : 'fa-plus';
+            
+            // Generate button HTML differently for weight-based products
+            const buttonHTML = isWeightBased 
+                ? `<button class="${buttonClass}" onclick="window.openWeightModal('${p.id}')" id="add-btn-${p.id}">
+                       <i class="fas ${buttonIcon}"></i>
+                   </button>`
+                : `<button class="${buttonClass}" onclick="initCartCounter('${p.id}', event)" id="add-btn-${p.id}">
+                       <i class="fas ${buttonIcon}"></i>
+                   </button>`;
+            
+            // Build counter control HTML (only for non-weight-based products)
+            const counterHTML = !isWeightBased ? `
+                <div class="counter-control" id="counter-${p.id}">
+                    <button class="counter-btn" onclick="updateQuantity('${p.id}', -1, event)">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span class="counter-value" id="count-${p.id}">1</span>
+                    <button class="counter-btn" onclick="updateQuantity('${p.id}', 1, event)">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            ` : '';
+            
             return `
                 <div class="product-card" data-id="${p.id}">
                     ${p.discount_price ? '<div class="product-badges"><span class="badge badge-sale">عرض</span></div>' : ''}
@@ -496,18 +551,8 @@
                         
                         <!-- Floating Cart Control -->
                         <div class="cart-control-wrapper" id="cart-wrapper-${p.id}" onclick="event.stopPropagation()">
-                            <button class="add-btn-circle" onclick="initCartCounter('${p.id}', event)" id="add-btn-${p.id}">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <div class="counter-control" id="counter-${p.id}">
-                                <button class="counter-btn" onclick="updateQuantity('${p.id}', -1, event)">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <span class="counter-value" id="count-${p.id}">1</span>
-                                <button class="counter-btn" onclick="updateQuantity('${p.id}', 1, event)">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
+                            ${buttonHTML}
+                            ${counterHTML}
                         </div>
                     </div>
                     
@@ -520,9 +565,9 @@
                         </div>
                         <div class="product-footer">
                             <div class="price-info">
-                                <span class="price-current">${window.formatMoney ? window.formatMoney(price) : (price.toFixed(2) + ' $')}</span>
+                                <span class="price-current">${window.formatMoney ? window.formatMoney(displayPrice) : (displayPrice.toFixed(2) + ' $')}</span>
                                 ${oldPrice ? `<span class="price-old">${window.formatMoney ? window.formatMoney(oldPrice) : (oldPrice.toFixed(2) + ' $')}</span>` : ''}
-                                <span class="price-unit">لكل ${unit}</span>
+                                <span class="price-unit">لكل ${displayUnit}</span>
                             </div>
                         </div>
                     </div>
@@ -707,5 +752,7 @@
             }
         }
     </script>
+    
+    @include('components.weight-modal')
 </body>
 </html>

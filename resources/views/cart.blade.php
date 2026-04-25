@@ -706,7 +706,27 @@
         const API_BASE = window.location.origin + '/api';
         const CUSTOMER_BALANCE = {{ Auth::check() ? (float) (Auth::user()->balance ?? 0) : 'null' }};
         const IS_AUTHENTICATED = {{ Auth::check() ? 'true' : 'false' }};
+        const USER_CURRENCY = '{{ Auth::check() ? (Auth::user()->currency ?? "USD") : "USD" }}';
         let selectedPaymentMethod = 'default';
+
+        // Check if cart has mart items and show continue without login button
+        function checkMartItemsAndShowButton(data) {
+            const hasMartItems = data.items && data.items.some(item => 
+                item.type === 'mart' || (typeof item.id === 'string' && item.id.startsWith('m'))
+            );
+            
+            const continueSection = document.getElementById('continueWithoutLoginSection');
+            if (continueSection && hasMartItems) {
+                continueSection.style.display = 'block';
+            } else if (continueSection) {
+                continueSection.style.display = 'none';
+            }
+        }
+        
+        // Continue without login function
+        function continueWithoutLogin() {
+            window.location.href = '/whatsapp-order';
+        }
 
         // Load cart on page load
         window.addEventListener('DOMContentLoaded', () => {
@@ -743,7 +763,16 @@
 
         async function loadCart() {
             try {
-                const response = await fetch(`${API_BASE}/cart`, { credentials: 'same-origin' });
+                // Add timestamp to prevent caching
+                const timestamp = new Date().getTime();
+                const response = await fetch(`${API_BASE}/cart?_=${timestamp}`, { 
+                    credentials: 'same-origin',
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
                 const data = await response.json();
                 
                 // Calculate discount if coupon is applied
@@ -756,6 +785,9 @@
                 }
                 
                 displayCart(data);
+                
+                // Check if cart has mart items and show continue without login button
+                checkMartItemsAndShowButton(data);
             } catch (error) {
                 console.error('Error loading cart:', error);
                 document.getElementById('cartContent').innerHTML = `
@@ -787,10 +819,21 @@
             }
 
             const itemsHTML = data.items.map(item => {
-                const price = parseFloat(item.product.discount_price || item.product.price);
-                const oldPrice = item.product.discount_price ? parseFloat(item.product.price) : null;
+                // Check if this is weight-based FIRST
+                const isWeightBased = item.is_weight_based || false;
+                const weightGrams = item.weight_grams || 0;
+                const amountPaidSyp = parseFloat(item.amount_paid || 0);
+                
+                // Convert SYP back to USD for display (formatMoney expects USD)
+                const USD_TO_SYP = window.TULIP_USD_TO_SYP || 13100;
+                const amountPaidUsd = amountPaidSyp / USD_TO_SYP;
+                
+                // For weight-based products, use amount_paid (converted to USD)
+                // For regular products, use the product price
+                const price = isWeightBased ? amountPaidUsd : parseFloat(item.product.discount_price || item.product.price);
+                const oldPrice = (!isWeightBased && item.product.discount_price) ? parseFloat(item.product.price) : null;
                 const savings = oldPrice ? (oldPrice - price) * item.quantity : 0;
-                const itemTotal = price * item.quantity;
+                const itemTotal = isWeightBased ? amountPaidUsd : (price * item.quantity);
                 const placeholderImage = '/images/tulip_store.jpg';
                 
                 // Check if this is a custom gift/bouquet (string ID)
@@ -815,13 +858,26 @@
                 }
                 
                 // For custom items, hide quantity controls (quantity is always 1)
-                const quantityControls = isCustom 
-                    ? `<div class="quantity-control" style="opacity:0.5;pointer-events:none;"><span class="quantity-value">1</span></div>`
-                    : `<div class="quantity-control">
+                // For weight-based items, also hide quantity controls and show weight instead
+                let quantityControls = '';
+                if (isCustom) {
+                    quantityControls = `<div class="quantity-control" style="opacity:0.5;pointer-events:none;"><span class="quantity-value">1</span></div>`;
+                } else if (isWeightBased) {
+                    // Show weight instead of quantity
+                    const weightDisplay = weightGrams >= 1000 
+                        ? `${(weightGrams / 1000).toFixed(2)} كيلو`
+                        : `${Math.round(weightGrams)} غرام`;
+                    quantityControls = `<div class="quantity-control" style="background:#fef3c7;border-color:#fde68a;">
+                        <i class="fas fa-balance-scale" style="color:#f59e0b;margin:0 0.5rem;"></i>
+                        <span class="quantity-value" style="color:#b45309;">${weightDisplay}</span>
+                    </div>`;
+                } else {
+                    quantityControls = `<div class="quantity-control">
                             <button class="quantity-btn" onclick="updateQuantity(${itemIdParam}, ${item.quantity - 1})"><i class="fas fa-minus"></i></button>
                             <span class="quantity-value">${item.quantity}</span>
                             <button class="quantity-btn" onclick="updateQuantity(${itemIdParam}, ${item.quantity + 1})"><i class="fas fa-plus"></i></button>
                        </div>`;
+                }
                 
                 // Product ID display
                 let productIdDisplay = '';
@@ -832,6 +888,13 @@
                         <div class="cart-item-meta-item"><i class="fas fa-store"></i> توليب مارت</div>
                         <div class="cart-item-meta-item"><i class="fas fa-box"></i> رقم المنتج: #${item.id}</div>
                     `;
+                    // Add weight info for weight-based products
+                    if (isWeightBased) {
+                        const weightDisplay = weightGrams >= 1000 
+                            ? `${(weightGrams / 1000).toFixed(2)} كيلو`
+                            : `${Math.round(weightGrams)} غرام`;
+                        productIdDisplay += `<div class="cart-item-meta-item" style="color:#f59e0b;font-weight:700;"><i class="fas fa-balance-scale"></i> ${weightDisplay}</div>`;
+                    }
                 } else {
                     productIdDisplay = `<div class="cart-item-meta-item"><i class="fas fa-box"></i> رقم المنتج: #${item.product.id}</div>`;
                 }
@@ -851,10 +914,10 @@
                         <div class="cart-item-price-section">
                             <div class="cart-item-price">
                                 ${window.formatMoney ? window.formatMoney(price) : ('$' + price.toFixed(2))}
-                                ${oldPrice ? `<span class="cart-item-price-old">${window.formatMoney ? window.formatMoney(oldPrice) : ('$' + oldPrice.toFixed(2))}</span>` : ''}
+                                ${oldPrice && !isWeightBased ? `<span class="cart-item-price-old">${window.formatMoney ? window.formatMoney(oldPrice) : ('$' + oldPrice.toFixed(2))}</span>` : ''}
                             </div>
-                            ${savings > 0 ? `<div class="cart-item-savings">وفّر ${window.formatMoney ? window.formatMoney(savings) : ('$' + savings.toFixed(2))}</div>` : ''}
-                            <div class="cart-item-subtotal">المجموع الفرعي: ${window.formatMoney ? window.formatMoney(itemTotal) : ('$' + itemTotal.toFixed(2))}</div>
+                            ${savings > 0 && !isWeightBased ? `<div class="cart-item-savings">وفّر ${window.formatMoney ? window.formatMoney(savings) : ('$' + savings.toFixed(2))}</div>` : ''}
+                            ${!isWeightBased ? `<div class="cart-item-subtotal">المجموع الفرعي: ${window.formatMoney ? window.formatMoney(itemTotal) : ('$' + itemTotal.toFixed(2))}</div>` : ''}
                         </div>
                     </div>
                     <div class="cart-item-actions-column">
@@ -977,6 +1040,15 @@
                             <i class="fas fa-lock"></i>
                             إتمام الطلب بأمان
                         </button>
+                        
+                        <!-- Continue without login button for mart items -->
+                        <div id="continueWithoutLoginSection" style="display:none; margin-top:1rem;">
+                            <button class="checkout-btn" onclick="continueWithoutLogin()" style="background:linear-gradient(135deg, #25D366 0%, #20BA5A 100%); box-shadow:0 6px 16px rgba(37,211,102,0.3);">
+                                <i class="fab fa-whatsapp"></i>
+                                متابعة بدون تسجيل دخول (واتساب)
+                            </button>
+                        </div>
+                        
                         <div class="security-badges">
                             <div class="security-badge">
                                 <i class="fas fa-shield-alt"></i>

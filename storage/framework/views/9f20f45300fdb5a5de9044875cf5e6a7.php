@@ -24,6 +24,9 @@
     <!-- Routing Machine JS only (CSS removed to hide UI) -->
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
     
+    <!-- Stripe.js v2 for Credit Card Processing (supports direct tokenization) -->
+    <script src="https://js.stripe.com/v2/"></script>
+    
     <style>
         /* Smooth Transitions for Payment Sections */
         .payment-section {
@@ -91,6 +94,17 @@
         .payment-option:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+        
+        /* Disabled Payment Option */
+        .payment-option-disabled {
+            pointer-events: none;
+            user-select: none;
+        }
+        
+        .payment-option-disabled:hover {
+            transform: none !important;
+            box-shadow: none !important;
         }
 
         /* Responsive Mobile Fixes */
@@ -580,7 +594,7 @@
                         </div>
                         <div style="flex:1;">
                             <h3 style="font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; color:#1a1a1a; margin:0 0 0.2rem 0;">توصيل مستعجل</h3>
-                            <p style="font-family:'El Messiri',sans-serif; font-size:0.9rem; color:#666; margin:0;">خلال 24 ساعة</p>
+                            <p style="font-family:'El Messiri',sans-serif; font-size:0.9rem; color:#666; margin:0;"></p>
                         </div>
                     </div>
                     
@@ -591,7 +605,7 @@
                         </div>
                         <div style="flex:1;">
                             <h3 style="font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; color:#1a1a1a; margin:0 0 0.2rem 0;">توصيل فوري</h3>
-                            <p style="font-family:'El Messiri',sans-serif; font-size:0.9rem; color:#666; margin:0;">مسافة الطريق</p>
+                            <p style="font-family:'El Messiri',sans-serif; font-size:0.9rem; color:#666; margin:0;"></p>
                         </div>
                     </div>
                 </div>
@@ -644,14 +658,29 @@
                             </div>
                         </div>
                         
-                        <!-- Option 3: بطاقة ائتمان -->
-                        <div onclick="selectPayment('card')" class="payment-option" data-type="card" style="background:#fff; padding:1.5rem; border-radius:12px; margin-bottom:1rem; cursor:pointer; border:3px solid #e0e0e0; transition:all 0.3s; display:flex; align-items:center; gap:1rem;">
+                        <!-- Option 3: بطاقة ائتمان (Disabled - Coming Soon) -->
+                        <div class="payment-option payment-option-disabled" data-type="card" title="قريباً" style="background:#f5f5f5; padding:1.5rem; border-radius:12px; margin-bottom:1rem; cursor:not-allowed; border:3px solid #e0e0e0; transition:all 0.3s; display:flex; align-items:center; gap:1rem; opacity:0.6; position:relative;">
                             <div style="flex-shrink:0;">
-                                <i class="fas fa-credit-card" style="font-size:2.5rem; color:#2a7080;"></i>
+                                <i class="fas fa-credit-card" style="font-size:2.5rem; color:#999;"></i>
                             </div>
                             <div style="flex:1;">
-                                <h3 style="font-family:'El Messiri',sans-serif; font-size:1.2rem; font-weight:700; color:#1a1a1a; margin:0 0 0.3rem 0;">بطاقة ائتمان</h3>
-                                <p style="font-family:'El Messiri',sans-serif; font-size:0.95rem; color:#666; margin:0;">ادفع بأمان باستخدام بطاقتك</p>
+                                <h3 style="font-family:'El Messiri',sans-serif; font-size:1.2rem; font-weight:700; color:#999; margin:0 0 0.3rem 0;">بطاقة ائتمان</h3>
+                                <p style="font-family:'El Messiri',sans-serif; font-size:0.95rem; color:#999; margin:0;">ادفع بأمان باستخدام بطاقتك</p>
+                            </div>
+                            <div style="flex-shrink:0;">
+                                <span style="background:linear-gradient(135deg, #ff6f35 0%, #ff8c5a 100%); color:white; padding:0.3rem 0.8rem; border-radius:20px; font-family:'El Messiri',sans-serif; font-size:0.75rem; font-weight:700; box-shadow:0 2px 8px rgba(255,111,53,0.3);">قريباً</span>
+                            </div>
+                        </div>
+
+                        <!-- Sham Cash Payment -->
+                        <div onclick="selectPayment('shamcash')" class="payment-option" data-type="shamcash" style="background:#fff; padding:1.5rem; border-radius:12px; margin-bottom:1rem; cursor:pointer; border:3px solid #e0e0e0; transition:all 0.3s; display:flex; align-items:center; gap:1rem;">
+                            <div style="flex-shrink:0;">
+                                <img src="/images/shamccashlogo.jpg" alt="Sham Cash" style="width:50px; height:50px; object-fit:contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                <i class="fas fa-university" style="font-size:2.5rem; color:#2a7080; display:none;"></i>
+                            </div>
+                            <div style="flex:1;">
+                                <h3 style="font-family:'El Messiri',sans-serif; font-size:1.2rem; font-weight:700; color:#1a1a1a; margin:0 0 0.3rem 0;">Sham Cash</h3>
+                                <p style="font-family:'El Messiri',sans-serif; font-size:0.95rem; color:#666; margin:0;">حوّل المبلغ إلى الحساب المحدد</p>
                             </div>
                             <div style="flex-shrink:0;">
                                 <i class="far fa-circle" style="font-size:1.5rem; color:#ccc;"></i>
@@ -675,28 +704,53 @@
                         <i class="fas fa-arrow-right"></i> العودة لطرق الدفع
                     </button>
                     
-                    <!-- Visual Credit Card Preview -->
-                    <div style="perspective:1000px; margin-bottom:2rem;">
-                        <div id="cardPreview" style="width:100%; max-width:420px; height:240px; margin:0 auto; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius:20px; padding:2rem; box-shadow:0 20px 60px rgba(102,126,234,0.4); position:relative; transform-style:preserve-3d; transition:transform 0.6s;">
-                            <div style="position:absolute; top:2rem; right:2rem; width:60px; height:40px; background:rgba(255,255,255,0.3); border-radius:8px;"></div>
-                            <div style="position:absolute; top:2rem; left:2rem;">
-                                <i id="previewCardType" class="fas fa-credit-card" style="font-size:2.5rem; color:rgba(255,255,255,0.9);"></i>
+                    <!-- Visual Credit Card Preview with 3D Effect -->
+                    <div style="perspective:1500px; margin-bottom:3rem;">
+                        <div id="cardPreview" style="width:100%; max-width:450px; height:260px; margin:0 auto; background:linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%); border-radius:24px; padding:2.5rem; box-shadow:0 25px 70px rgba(30,60,114,0.5), 0 10px 30px rgba(126,34,206,0.3); position:relative; transform-style:preserve-3d; transition:transform 0.6s ease; overflow:hidden;">
+                            <!-- Animated Background Pattern -->
+                            <div style="position:absolute; top:0; left:0; right:0; bottom:0; background:url('data:image/svg+xml,<svg width=\"100\" height=\"100\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"rgba(255,255,255,0.03)\"/></svg>'); opacity:0.4;"></div>
+                            
+                            <!-- Chip -->
+                            <div style="position:absolute; top:2.5rem; right:2.5rem; width:55px; height:45px; background:linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.3); overflow:hidden;">
+                                <div style="position:absolute; top:8px; left:8px; right:8px; bottom:8px; border:2px solid rgba(0,0,0,0.1); border-radius:6px;"></div>
                             </div>
-                            <div style="position:absolute; bottom:5rem; right:2rem; left:2rem;">
-                                <div id="previewCardNumber" style="font-family:'El Messiri', sans-serif; font-size:1.5rem; font-weight:700; color:#fff; letter-spacing:3px; direction:ltr; text-align:left;">•••• •••• •••• ••••</div>
+                            
+                            <!-- Card Type Icon -->
+                            <div style="position:absolute; top:2.5rem; left:2.5rem;">
+                                <i id="previewCardType" class="fas fa-credit-card" style="font-size:3rem; color:rgba(255,255,255,0.95); filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3));"></i>
                             </div>
-                            <div style="position:absolute; bottom:2rem; right:2rem; left:2rem; display:flex; justify-content:space-between; align-items:flex-end;">
-                                <div>
-                                    <div style="font-size:0.7rem; color:rgba(255,255,255,0.7); margin-bottom:0.3rem;">حامل البطاقة</div>
-                                    <div id="previewCardName" style="font-family:'El Messiri',sans-serif; font-size:1rem; font-weight:600; color:#fff;">الاسم الكامل</div>
+                            
+                            <!-- Card Number -->
+                            <div style="position:absolute; bottom:6.5rem; right:2.5rem; left:2.5rem;">
+                                <div id="previewCardNumber" style="font-family:'Courier New', monospace; font-size:1.7rem; font-weight:700; color:#fff; letter-spacing:4px; direction:ltr; text-align:left; text-shadow:0 2px 8px rgba(0,0,0,0.4);">•••• •••• •••• ••••</div>
+                            </div>
+                            
+                            <!-- Card Holder and Expiry -->
+                            <div style="position:absolute; bottom:2rem; right:2.5rem; left:2.5rem; display:flex; justify-content:space-between; align-items:flex-end;">
+                                <div style="flex:1;">
+                                    <div style="font-size:0.65rem; color:rgba(255,255,255,0.7); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:1px;">Card Holder</div>
+                                    <div id="previewCardName" style="font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; color:#fff; text-shadow:0 2px 6px rgba(0,0,0,0.3); text-transform:uppercase;">YOUR NAME</div>
                                 </div>
                                 <div style="text-align:left;">
-                                    <div style="font-size:0.7rem; color:rgba(255,255,255,0.7); margin-bottom:0.3rem;">ينتهي في</div>
-                                    <div id="previewCardExpiry" style="font-family:'El Messiri', sans-serif; font-size:1rem; font-weight:600; color:#fff; direction:ltr;">MM/YY</div>
+                                    <div style="font-size:0.65rem; color:rgba(255,255,255,0.7); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:1px;">Expires</div>
+                                    <div id="previewCardExpiry" style="font-family:'Courier New', monospace; font-size:1.1rem; font-weight:700; color:#fff; direction:ltr; text-shadow:0 2px 6px rgba(0,0,0,0.3);">MM/YY</div>
                                 </div>
                             </div>
+                            
+                            <!-- Shine Effect -->
+                            <div style="position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%); pointer-events:none; animation:shine 3s infinite;"></div>
                         </div>
                     </div>
+                    
+                    <style>
+                        @keyframes shine {
+                            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+                            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+                        }
+                        #cardPreview:hover {
+                            transform: rotateY(5deg) rotateX(5deg);
+                        }
+                    </style>
                     
                     <!-- Card Form Container -->
                     <div style="background:#fff; padding:2.5rem; border-radius:20px; box-shadow:0 10px 40px rgba(0,0,0,0.08); margin-bottom:1.5rem;">
@@ -782,6 +836,104 @@
                             <i class="fas fa-arrow-right" style="margin-left:0.5rem;"></i> العودة
                         </button>
                         <button onclick="validateCardAndProceed()" style="flex:2; background:#ff6b35; color:#fff; border:none; padding:0.6rem; font-family:'El Messiri',sans-serif; font-size:0.85rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 15px rgba(255,107,53,0.3);">
+                            متابعة <i class="fas fa-arrow-left" style="margin-right:0.5rem;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sham Cash Details Form -->
+                <div id="shamCashDetails" class="payment-section" style="display:none;">
+                    <button onclick="backToPaymentOptions()" style="background:transparent; border:none; color:#2a7080; font-family:'El Messiri',sans-serif; font-size:0.9rem; font-weight:600; cursor:pointer; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.5rem; transition:all 0.3s;">
+                        <i class="fas fa-arrow-right"></i> العودة لطرق الدفع
+                    </button>
+                    
+                    <div style="background:#fff; padding:2.5rem; border-radius:20px; box-shadow:0 10px 40px rgba(0,0,0,0.08); margin-bottom:1.5rem;">
+                        <h2 style="font-family:'El Messiri',sans-serif; font-size:1.6rem; font-weight:800; color:#1a1a1a; margin:0 0 2rem 0; text-align:center;">
+                            <i class="fas fa-university" style="margin-left:0.5rem; color:#2a7080;"></i>
+                            تحويل Sham Cash
+                        </h2>
+                        
+                        <!-- Instructions -->
+                        <div style="background:#fff3cd; padding:1.5rem; border-radius:12px; border-right:4px solid #ffc107; margin-bottom:2rem;">
+                            <h3 style="font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; color:#856404; margin:0 0 1rem 0;">
+                                <i class="fas fa-info-circle" style="margin-left:0.5rem;"></i>
+                                تعليمات الدفع
+                            </h3>
+                            <p style="font-family:'El Messiri',sans-serif; font-size:0.95rem; color:#856404; margin:0; line-height:1.8;">
+                                يرجى تحويل المبلغ إلى الحساب المحدد أدناه. سيتم التحقق من الدفع قبل معالجة طلبك وشحنه.
+                            </p>
+                        </div>
+                        
+                        <!-- Account Image (QR Code) -->
+                        <div style="text-align:center; margin-bottom:2rem;">
+                            <img src="/images/shamcash.jpeg" alt="Sham Cash Account" style="max-width:100%; height:auto; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1);" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div style="display:none; background:#f8f9fa; padding:2rem; border-radius:12px; border:2px dashed #ccc;">
+                                <i class="fas fa-image" style="font-size:3rem; color:#ccc; margin-bottom:1rem;"></i>
+                                <p style="font-family:'El Messiri',sans-serif; color:#999; margin:0;">صورة الحساب غير متوفرة</p>
+                            </div>
+                        </div>
+                        
+                        <!-- User Account Details Form -->
+                        <div style="background:linear-gradient(135deg, #e8f4f8 0%, #f0f8ff 100%); padding:1.5rem; border-radius:12px; border:2px solid #2a7080; margin-bottom:2rem;">
+                            <h4 style="font-family:'El Messiri',sans-serif; font-size:1rem; font-weight:700; color:#2a7080; margin:0 0 1.5rem 0; text-align:center;">
+                                <i class="fas fa-edit" style="margin-left:0.5rem;"></i>
+                                أدخل معلومات حسابك في Sham Cash
+                            </h4>
+                            
+                            <!-- Account Name Input -->
+                            <div style="margin-bottom:1.5rem;">
+                                <label style="display:block; font-family:'El Messiri',sans-serif; font-size:0.9rem; font-weight:600; color:#2a7080; margin-bottom:0.5rem;">
+                                    <i class="fas fa-user" style="margin-left:0.5rem;"></i>
+                                    اسم حسابك
+                                </label>
+                                <input type="text" id="userAccountName" placeholder="أدخل اسم حسابك في Sham Cash" style="width:100%; padding:1rem; border:2px solid #e0e0e0; border-radius:8px; font-family:'El Messiri',sans-serif; font-size:1rem; color:#1a1a1a; transition:all 0.3s;" onfocus="this.style.borderColor='#2a7080'" onblur="this.style.borderColor='#e0e0e0'">
+                            </div>
+                            
+                            <!-- Account Number Input -->
+                            <div>
+                                <label style="display:block; font-family:'El Messiri',sans-serif; font-size:0.9rem; font-weight:600; color:#2a7080; margin-bottom:0.5rem;">
+                                    <i class="fas fa-hashtag" style="margin-left:0.5rem;"></i>
+                                    رقم حسابك
+                                </label>
+                                <input type="text" id="userAccountNumber" placeholder="أدخل رقم حسابك في Sham Cash" style="width:100%; padding:1rem; border:2px solid #e0e0e0; border-radius:8px; font-family:'Courier New', monospace; font-size:1rem; color:#1a1a1a; direction:ltr; transition:all 0.3s;" onfocus="this.style.borderColor='#2a7080'" onblur="this.style.borderColor='#e0e0e0'">
+                            </div>
+                        </div>
+                        
+                        <!-- Important Note -->
+                        <div style="background:#ffe8e8; padding:1.5rem; border-radius:12px; border-right:4px solid #dc3545; margin-bottom:1.5rem;">
+                            <p style="font-family:'El Messiri',sans-serif; font-size:0.95rem; color:#721c24; margin:0 0 1rem 0; line-height:1.8;">
+                                <i class="fas fa-exclamation-triangle" style="margin-left:0.5rem; color:#dc3545;"></i>
+                                <strong>مهم:</strong> لن يتم شحن طلبك حتى يتم التحقق من استلام المبلغ في الحساب المحدد.
+                            </p>
+                        </div>
+                        
+                        <!-- WhatsApp Instructions -->
+                        <div style="background:#d4edda; padding:1.5rem; border-radius:12px; border-right:4px solid #28a745; margin-bottom:1.5rem;">
+                            <h4 style="font-family:'El Messiri',sans-serif; font-size:1.1rem; font-weight:700; color:#155724; margin:0 0 1rem 0;">
+                                <i class="fab fa-whatsapp" style="margin-left:0.5rem; color:#25D366;"></i>
+                                إرسال معلومات الحساب
+                            </h4>
+                            <p style="font-family:'El Messiri',sans-serif; font-size:0.95rem; color:#155724; margin:0 0 1rem 0; line-height:1.8;">
+                                بعد إدخال معلومات حسابك أعلاه، اضغط على الزر أدناه لإرسالها عبر واتساب:
+                            </p>
+                            <div style="background:#fff; padding:1rem; border-radius:8px; text-align:center; margin-bottom:1rem;">
+                                <div style="font-family:'El Messiri',sans-serif; font-size:1.2rem; font-weight:700; color:#155724; direction:ltr;">
+                                    +963 968355553
+                                </div>
+                            </div>
+                            <button onclick="sendToWhatsAppCheckout()" style="display:block; width:100%; padding:1rem; background:#25D366; color:#fff; border:none; border-radius:8px; font-family:'El Messiri',sans-serif; font-weight:700; font-size:1rem; text-align:center; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 15px rgba(37,211,102,0.3);" onmouseover="this.style.background='#20BA5A'" onmouseout="this.style.background='#25D366'">
+                                <i class="fab fa-whatsapp" style="margin-left:0.5rem; font-size:1.2rem;"></i>
+                                إرسال معلومات حسابي عبر واتساب
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation Buttons -->
+                    <div style="display:flex; gap:1rem;">
+                        <button onclick="backToPaymentOptions()" style="flex:1; background:#e0e0e0; color:#666; border:none; padding:0.6rem; font-family:'El Messiri',sans-serif; font-size:0.85rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s;">
+                            <i class="fas fa-arrow-right" style="margin-left:0.5rem;"></i> العودة
+                        </button>
+                        <button onclick="goToStep(4)" style="flex:2; background:#ff6b35; color:#fff; border:none; padding:0.6rem; font-family:'El Messiri',sans-serif; font-size:0.85rem; font-weight:700; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 15px rgba(255,107,53,0.3);">
                             متابعة <i class="fas fa-arrow-left" style="margin-right:0.5rem;"></i>
                         </button>
                     </div>
@@ -970,6 +1122,36 @@
             initMap();
         }
     });
+    
+    // Send user account info to WhatsApp for checkout
+    function sendToWhatsAppCheckout() {
+        const userAccountName = document.getElementById('userAccountName').value.trim();
+        const userAccountNumber = document.getElementById('userAccountNumber').value.trim();
+        
+        // Validate inputs
+        if (!userAccountName || !userAccountNumber) {
+            alert('يرجى إدخال اسم الحساب ورقم الحساب أولاً');
+            return;
+        }
+        
+        // Get order total
+        const totalElement = document.getElementById('totalAmount');
+        const totalText = totalElement ? totalElement.textContent : '0';
+        
+        const message = `مرحباً، أود إرسال إثبات الدفع عبر Sham Cash\n\nمعلومات حسابي:\nاسم الحساب: ${userAccountName}\nرقم الحساب: ${userAccountNumber}\n\nالمبلغ المطلوب: ${totalText}\n\nحساب Tulip Mart:\nاسم الحساب: Tulip Mart\nرقم الحساب: cc8571e4f93387893e15f39cda36f45a`;
+        const whatsappUrl = `https://wa.me/963968355553?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+    }
+</script>
+
+<script>
+    // Initialize Stripe v2
+    const stripePublicKey = '<?php echo e(config("services.stripe.public")); ?>';
+    if (stripePublicKey && stripePublicKey !== '') {
+        Stripe.setPublishableKey(stripePublicKey);
+    } else {
+        console.warn('Stripe public key not configured');
+    }
 </script>
 </body>
 </html>

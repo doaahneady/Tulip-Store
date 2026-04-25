@@ -7,10 +7,10 @@ class DeliveryFeeCalculator
     public function calculate(float $distanceKm): array
     {
         $normalizedDistance = max(0, $distanceKm);
-        $baseFee = 20000;
+        $baseFee = 0; // Free for 3km and below
         $extraDistance = max(0, $normalizedDistance - 3);
         $extraKilometers = (int) ceil($extraDistance);
-        $extraFee = $extraKilometers * 2000;
+        $extraFee = $extraKilometers * 5000; // 5000 per km above 3km
 
         return [
             'distance_km' => round($normalizedDistance, 2),

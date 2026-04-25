@@ -33,6 +33,7 @@ use App\Models\SupportTicket;
 use App\Models\SystemSetting;
 use App\Models\User;
 use App\Models\Wishlist;
+use App\Models\DriverLocation;
 use App\Services\Dashboard\CSDashboardService;
 use App\Services\Dashboard\DeliveryDashboardService;
 use App\Services\Dashboard\ExportService;
@@ -50,6 +51,46 @@ use Illuminate\Validation\Rule;
 
 class SuperAdminController extends Controller
 {
+    private function martOrdersBaseQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = Order::query()->with(['customer', 'store'])->withCount('items');
+
+        // Only orders that contain at least one Mart product item
+        if (Schema::hasTable('order_items')) {
+            $query->whereHas('items', function ($iq) {
+                $iq->whereHas('product', function ($pq) {
+                    if (Schema::hasColumn('products', 'market')) {
+                        $pq->where('market', 'mart');
+                    } elseif (Schema::hasTable('categories') && Schema::hasColumn('categories', 'market')) {
+                        $pq->whereHas('category', fn ($cq) => $cq->where('market', 'mart'));
+                    }
+                });
+            });
+        }
+
+        return $query;
+    }
+
+    private function martOrdersReadCacheKey(): string
+    {
+        $id = auth('employee')->id() ?: 0;
+        return 'mart:orders:read_ids:'.$id;
+    }
+
+    private function getMartOrdersReadIds(): array
+    {
+        $ids = Cache::get($this->martOrdersReadCacheKey(), []);
+        return is_array($ids) ? array_values(array_unique(array_map('intval', $ids))) : [];
+    }
+
+    private function markMartOrderRead(int $orderId): void
+    {
+        $ids = $this->getMartOrdersReadIds();
+        $ids[] = $orderId;
+        $ids = array_values(array_unique($ids));
+        $ids = array_slice($ids, -500); // keep last 500
+        Cache::put($this->martOrdersReadCacheKey(), $ids, now()->addDays(30));
+    }
     private function storePublicImage($file, string $directory): string
     {
         /** @var \Illuminate\Http\UploadedFile $file */
@@ -1481,7 +1522,8 @@ class SuperAdminController extends Controller
             'pattern' => 'nullable|string|max:50',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            // HEIC/HEIF will be converted to JPG on upload (and saved as JPG)
+            'image' => 'nullable|file|mimes:jpg,jpeg,png,webp,heic,heif|max:8192',
         ]);
 
         $imagePath = $request->hasFile('image')
@@ -1543,7 +1585,8 @@ class SuperAdminController extends Controller
             'price' => 'required|numeric|min:0',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            // HEIC/HEIF will be converted to JPG on upload (and saved as JPG)
+            'image' => 'nullable|file|mimes:jpg,jpeg,png,webp,heic,heif|max:8192',
         ]);
 
         $imagePath = $request->hasFile('image')
@@ -1707,6 +1750,208 @@ class SuperAdminController extends Controller
         return view('dashboards.super-admin.mart', compact('categories', 'products', 'missingPhoto'));
     }
 
+    public function martSellPrices(Request $request)
+    {
+        abort_unless(Schema::hasTable('products'), 404);
+
+        $hasLastEntryPrice = Schema::hasColumn('products', 'last_entry_price');
+        $zeroOnly = $request->boolean('zero_only');
+
+        $products = Product::query()
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'mart'))
+            ->when($zeroOnly, function ($q) {
+                $q->where(function ($qq) {
+                    $qq->whereNull('price')->orWhere('price', 0);
+                });
+            })
+            ->when($request->search, function ($q, $search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%");
+            })
+            ->orderBy('name')
+            ->paginate(50)
+            ->withQueryString();
+
+        return view('dashboards.super-admin.mart-sell-prices', compact('products', 'hasLastEntryPrice', 'zeroOnly'));
+    }
+
+    public function martOrders(Request $request)
+    {
+        abort_unless(Schema::hasTable('orders'), 404);
+
+        $query = $this->martOrdersBaseQuery()
+            ->when($request->search, function ($q, $search) {
+                $q->where(function ($inner) use ($search) {
+                    $inner->where('order_number', 'like', "%{$search}%")
+                        ->orWhere('recipient_name', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
+                })->orWhereHas('customer', function ($c) use ($search) {
+                    $c->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->when($request->status, fn ($q, $status) => $q->where('status', $status))
+            ->when($request->payment_status, fn ($q, $status) => $q->where('payment_status', $status))
+            ->when($request->date_from, fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
+            ->when($request->date_to, fn ($q, $date) => $q->whereDate('created_at', '<=', $date))
+            ->orderByDesc('created_at');
+
+        $orders = $query->paginate(20)->withQueryString();
+        $statusOptions = (clone $query)->select('status')->distinct()->pluck('status')->filter()->values();
+        $paymentOptions = (clone $query)->select('payment_status')->distinct()->pluck('payment_status')->filter()->values();
+
+        return view('dashboards.super-admin.mart-orders', compact('orders', 'statusOptions', 'paymentOptions'));
+    }
+
+    public function martOrderShow(Order $order)
+    {
+        abort_unless(Schema::hasTable('orders'), 404);
+
+        // Ensure it contains Mart items
+        $exists = $this->martOrdersBaseQuery()->whereKey($order->id)->exists();
+        abort_unless($exists, 404);
+
+        $order->load([
+            'customer',
+            'user',
+            'store',
+            'items.product',
+            'deliveryAssignments.driver',
+            'assignedDriver',
+        ]);
+
+        $delivery = $order->deliveryAssignments->sortByDesc('created_at')->first() ?? $order->deliveryAssignment;
+
+        $customerLat = $order->latitude ?? ($order->shipping_address['lat'] ?? ($order->shipping_address['latitude'] ?? null));
+        $customerLng = $order->longitude ?? ($order->shipping_address['lng'] ?? ($order->shipping_address['longitude'] ?? null));
+        if (! $customerLat && $delivery) {
+            $customerLat = $delivery->delivery_latitude ?? null;
+        }
+        if (! $customerLng && $delivery) {
+            $customerLng = $delivery->delivery_longitude ?? null;
+        }
+
+        $driverTrack = collect();
+        $driverLast = null;
+        if ($delivery && $delivery->driver_id && Schema::hasTable('driver_locations')) {
+            $from = $delivery->assigned_at ?? $order->assigned_at ?? $order->created_at ?? now()->subHours(6);
+            $to = $delivery->delivered_at ?? now();
+            $driverTrack = DriverLocation::query()
+                ->where('driver_id', $delivery->driver_id)
+                ->whereBetween('recorded_at', [$from, $to])
+                ->orderBy('recorded_at')
+                ->limit(600)
+                ->get(['latitude', 'longitude', 'recorded_at', 'speed']);
+            $driverLast = $driverTrack->last();
+        }
+
+        $driverLat = $driverLast ? $driverLast->latitude : ($delivery && $delivery->driver ? ($delivery->driver->current_latitude ?? null) : null);
+        $driverLng = $driverLast ? $driverLast->longitude : ($delivery && $delivery->driver ? ($delivery->driver->current_longitude ?? null) : null);
+
+        $auditLogs = Schema::hasTable('audit_logs')
+            ? AuditLog::query()
+                ->whereIn('model_type', ['Order', Order::class])
+                ->where('model_id', $order->id)
+                ->orderByDesc('created_at')
+                ->take(50)
+                ->get()
+            : collect();
+
+        // Mark order read for Mart notifications
+        $this->markMartOrderRead((int) $order->id);
+
+        return view('dashboards.super-admin.mart-order', compact(
+            'order',
+            'delivery',
+            'customerLat',
+            'customerLng',
+            'driverLat',
+            'driverLng',
+            'driverTrack',
+            'auditLogs'
+        ));
+    }
+
+    public function martOrdersNotifications(Request $request)
+    {
+        abort_unless(Schema::hasTable('orders'), 404);
+
+        $readIds = $this->getMartOrdersReadIds();
+        $limit = min(20, max(1, (int) $request->query('limit', 10)));
+
+        $q = $this->martOrdersBaseQuery()
+            ->select(['id', 'order_number', 'recipient_name', 'customer_id', 'user_id', 'status', 'payment_status', 'total_amount', 'total', 'created_at'])
+            ->orderByDesc('created_at');
+
+        if ($readIds !== []) {
+            $q->whereNotIn('id', $readIds);
+        }
+
+        $unreadCount = (clone $q)->count();
+        $orders = $q->limit($limit)->get();
+
+        $payload = $orders->map(function (Order $o) {
+            $customerName = $o->customer->name ?? $o->recipient_name ?? 'Customer';
+            if (is_array($customerName)) {
+                $customerName = $customerName['ar'] ?? ($customerName['en'] ?? '');
+            }
+            $total = $o->total_amount ?? $o->total ?? 0;
+            return [
+                'id' => $o->id,
+                'order_number' => $o->order_number ?? ('#'.$o->id),
+                'customer_name' => $customerName,
+                'status' => $o->status ?? '-',
+                'payment_status' => $o->payment_status ?? '-',
+                'total' => (float) $total,
+                'created_at' => optional($o->created_at)->toIso8601String(),
+                'show_url' => route('dashboard.admin.mart.orders.show', $o),
+            ];
+        })->values()->all();
+
+        return response()->json([
+            'unread_count' => (int) $unreadCount,
+            'orders' => $payload,
+        ]);
+    }
+
+    public function martOrdersNotificationsRead(Request $request)
+    {
+        abort_unless(Schema::hasTable('orders'), 404);
+
+        $validated = $request->validate([
+            'order_id' => 'nullable|integer|min:1',
+            'all' => 'nullable|boolean',
+        ]);
+
+        if (!empty($validated['all'])) {
+            // Mark latest unread as read by storing their ids
+            $ids = $this->martOrdersBaseQuery()->orderByDesc('created_at')->limit(200)->pluck('id')->map(fn ($v) => (int) $v)->all();
+            Cache::put($this->martOrdersReadCacheKey(), $ids, now()->addDays(30));
+            return response()->json(['success' => true]);
+        }
+
+        if (! empty($validated['order_id'])) {
+            $this->markMartOrderRead((int) $validated['order_id']);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function updateMartSellPrice(Request $request, Product $product)
+    {
+        abort_unless(Schema::hasTable('products') && Schema::hasColumn('products', 'price'), 404);
+
+        $validated = $request->validate([
+            'price' => 'required|numeric|min:0',
+        ]);
+
+        $product->update([
+            'price' => (float) $validated['price'],
+        ]);
+
+        return back()->with('success', 'تم تحديث السعر بنجاح');
+    }
+
     private function productHasUploadedPhoto(Product $product): bool
     {
         $fallbacks = [
@@ -1819,7 +2064,8 @@ class SuperAdminController extends Controller
             'track_inventory' => 'nullable|boolean',
             'is_featured' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            // HEIC/HEIF will be converted to JPG on upload (and saved as JPG)
+            'image' => 'nullable|file|mimes:jpg,jpeg,png,webp,heic,heif|max:8192',
             'unit' => 'nullable|string|max:50',
             'origin' => 'nullable|string|max:100',
         ];
@@ -1974,7 +2220,8 @@ class SuperAdminController extends Controller
             'track_inventory' => 'nullable|boolean',
             'is_featured' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            // HEIC/HEIF will be converted to JPG on upload (and saved as JPG)
+            'image' => 'nullable|file|mimes:jpg,jpeg,png,webp,heic,heif|max:8192',
             'unit' => 'nullable|string|max:50',
             'origin' => 'nullable|string|max:100',
         ];
@@ -2610,6 +2857,94 @@ class SuperAdminController extends Controller
         Cache::forget('mart:navigation:v1');
 
         return back()->with('success', 'Product deleted');
+    }
+
+    public function showLowStockProducts()
+    {
+        abort_unless(Schema::hasTable('products'), 404);
+
+        $lowStockProducts = Product::query()
+            ->with(['category', 'subcategory'])
+            ->when(Schema::hasColumn('products', 'market'), fn ($q) => $q->where('market', 'mart'))
+            ->whereColumn('stock_quantity', '<=', 'low_stock_threshold')
+            ->orderByRaw('stock_quantity ASC')
+            ->orderBy('name')
+            ->get();
+
+        return view('dashboards.super-admin.mart-low-stock', compact('lowStockProducts'));
+    }
+
+    public function toggleInventoryTracking(Request $request, Product $product)
+    {
+        abort_unless(Schema::hasTable('products'), 404);
+
+        $trackInventory = $request->input('track_inventory', false);
+
+        $product->update([
+            'track_inventory' => $trackInventory,
+        ]);
+
+        Cache::forget('mart:navigation:v1');
+
+        return response()->json([
+            'success' => true,
+            'message' => $trackInventory ? 'تم تفعيل تتبع المخزون' : 'تم تعطيل تتبع المخزون',
+            'track_inventory' => $trackInventory,
+        ]);
+    }
+
+    public function bulkToggleInventoryTracking(Request $request)
+    {
+        abort_unless(Schema::hasTable('products'), 404);
+
+        $trackInventory = $request->input('track_inventory', false);
+
+        // Update all mart products
+        $query = Product::query();
+        
+        if (Schema::hasColumn('products', 'market')) {
+            $query->where('market', 'mart');
+        }
+
+        $updatedCount = $query->update([
+            'track_inventory' => $trackInventory,
+        ]);
+
+        Cache::forget('mart:navigation:v1');
+
+        $action = $trackInventory ? 'تفعيل' : 'تعطيل';
+        $message = "تم {$action} تتبع المخزون لـ {$updatedCount} منتج";
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'track_inventory' => $trackInventory,
+            'updated_count' => $updatedCount,
+        ]);
+    }
+
+    public function addStock(Request $request, Product $product)
+    {
+        abort_unless(Schema::hasTable('products'), 404);
+
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $currentStock = (int) ($product->stock_quantity ?? 0);
+        $newStock = $currentStock + $request->quantity;
+
+        $product->update([
+            'stock_quantity' => $newStock,
+        ]);
+
+        Cache::forget('mart:navigation:v1');
+
+        return response()->json([
+            'success' => true,
+            'message' => "تم إضافة {$request->quantity} وحدة. المخزون الجديد: {$newStock}",
+            'stock_quantity' => $newStock,
+        ]);
     }
 
     public function manageDailyPrices()

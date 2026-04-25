@@ -119,8 +119,8 @@
 <script>
 (function () {
   const USD_TO_SYP = Number(@json((float) \App\Models\SystemSetting::get('usd_to_syp_rate', 117))) || 117;
-  const serverCurrency = @json(auth()->check() ? (strtoupper((string) (auth()->user()->currency ?: 'USD'))) : (strtoupper((string) (session('currency') ?: 'USD'))));
-  const safeServerCurrency = (serverCurrency === 'SYP' || serverCurrency === 'USD') ? serverCurrency : 'USD';
+  const serverCurrency = @json(auth()->check() ? (strtoupper((string) (auth()->user()->currency ?: 'SYP'))) : (strtoupper((string) (session('currency') ?: 'SYP'))));
+  const safeServerCurrency = (serverCurrency === 'SYP' || serverCurrency === 'USD') ? serverCurrency : 'SYP';
   let preferred = safeServerCurrency;
 
   try {
@@ -294,6 +294,24 @@ document.addEventListener('DOMContentLoaded', function() {
         dropdownTitle.textContent = 'أكثر ما تم البحث عنه مؤخراً';
         recentChips.style.display = 'flex';
         searchResults.style.display = 'none';
+        
+        // Populate chips based on market
+        const martChips = ['ليمون', 'بندورة', 'خيار', 'بطاطا', 'بصل', 'تفاح'];
+        const storeChips = ['ورود', 'شوكولاتة', 'هدايا', 'باقات', 'أطفال', 'حفلات'];
+        const chips = isMart ? martChips : storeChips;
+        
+        recentChips.innerHTML = chips.map(text => 
+            `<div class="search-chip">${text}</div>`
+        ).join('');
+        
+        // Re-attach click handlers to new chips
+        document.querySelectorAll('.search-chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                const text = this.textContent.trim();
+                searchInput.value = text;
+                performSearch(text);
+            });
+        });
     }
 
     function showCategories() {
@@ -383,7 +401,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 const fmtPrice = (p) => {
-                    const n = Number(p?.discount_price ?? p?.price ?? 0) || 0;
+                    // Try multiple possible price fields
+                    const priceValue = p?.discount_price ?? p?.price ?? p?.price_syp ?? p?.unit_price ?? 0;
+                    const n = Number(priceValue) || 0;
+                    
+                    // Debug: log the product to see what fields are available
+                    if (n === 0) {
+                        console.log('Product with zero price:', p);
+                    }
+                    
                     const pref = (window.getCurrencyPreference ? window.getCurrencyPreference() : 'USD');
                     const cur = (pref === 'SYP' || pref === 'USD') ? pref : 'USD';
                     const rate = Number(window.TULIP_USD_TO_SYP || 117) || 117;
@@ -394,7 +420,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             const usd = n / rate;
                             return '$' + usd.toFixed(2);
                         }
-                        return Math.round(n).toLocaleString() + ' SYP';
+                        return Math.round(n).toLocaleString() + ' ل.س';
                     }
 
                     return window.formatMoney ? window.formatMoney(n) : ('$' + n.toFixed(2));
@@ -402,16 +428,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const hrefFor = (p) => `/products/${p.id}`;
 
-                searchResults.innerHTML = products.map(product => `
-                    <a class="search-result-item" href="${hrefFor(product)}" style="text-decoration:none;color:inherit;">
-                        <i class="fas fa-search search-result-icon"></i>
-                        <div class="search-result-info">
-                            <div class="search-result-name">${product.name}</div>
-                            <div class="search-result-price">${fmtPrice(product)}</div>
-                        </div>
-                        <img src="${product.primary_image_url || product.image || (Array.isArray(product.images) ? product.images[0] : null) || '/images/tulip_store.jpg'}" class="search-result-img" alt="${product.name}" loading="lazy" onerror="this.src='/images/tulip_store.jpg'">
-                    </a>
-                `).join('');
+                searchResults.innerHTML = products.map(product => {
+                    // For mart, make cards unclickable (no href)
+                    if (market === 'mart') {
+                        return `
+                            <div class="search-result-item" style="text-decoration:none;color:inherit;cursor:default;">
+                                <img src="${product.primary_image_url || product.image || (Array.isArray(product.images) ? product.images[0] : null) || '/images/tulip_store.jpg'}" class="search-result-img" alt="${product.name}" loading="lazy" onerror="this.src='/images/tulip_store.jpg'" style="width:50px;height:50px;object-fit:cover;border-radius:8px;margin-left:12px;">
+                                <div class="search-result-info">
+                                    <div class="search-result-name">${product.name}</div>
+                                    <div class="search-result-price">${fmtPrice(product)}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    // For store, keep clickable
+                    return `
+                        <a class="search-result-item" href="${hrefFor(product)}" style="text-decoration:none;color:inherit;">
+                            <img src="${product.primary_image_url || product.image || (Array.isArray(product.images) ? product.images[0] : null) || '/images/tulip_store.jpg'}" class="search-result-img" alt="${product.name}" loading="lazy" onerror="this.src='/images/tulip_store.jpg'" style="width:50px;height:50px;object-fit:cover;border-radius:8px;margin-left:12px;">
+                            <div class="search-result-info">
+                                <div class="search-result-name">${product.name}</div>
+                                <div class="search-result-price">${fmtPrice(product)}</div>
+                            </div>
+                        </a>
+                    `;
+                }).join('');
             })
             .catch(err => {
                 console.error(err);

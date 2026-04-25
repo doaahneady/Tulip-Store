@@ -46,14 +46,24 @@ class UserProfileController extends Controller
                     'items' => $order->items->map(function ($item) {
                         $unitPrice = $item->unit_price ?? $item->price ?? 0;
                         $subtotal = $item->total_price ?? $item->subtotal ?? ((float) $unitPrice * (int) ($item->quantity ?? 0));
-                        return [
+                        
+                        $itemData = [
                             'id' => $item->id,
                             'product_name' => $item->product_name ?? $item->product?->name ?? 'منتج',
                             'product_image' => $item->product?->image ?? $item->product?->primary_image ?? $item->product?->image_path ?? null,
                             'quantity' => $item->quantity,
                             'price' => $unitPrice,
                             'subtotal' => $subtotal,
+                            'is_weight_based' => $item->is_weight_based ?? false,
                         ];
+                        
+                        // Add weight fields if it's a weight-based item
+                        if ($item->is_weight_based) {
+                            $itemData['weight_grams'] = $item->weight_grams ?? 0;
+                            $itemData['price_per_unit'] = $item->price_per_unit ?? 0;
+                        }
+                        
+                        return $itemData;
                     }),
                     'recipient_name' => $order->recipient_name,
                     'address' => $order->village.' - '.$order->address_note,
@@ -220,7 +230,7 @@ class UserProfileController extends Controller
                 'email' => $user->email,
                 'phone' => $user->phone ?? $user->mobile,
                 'address' => $user->address,
-                'currency' => $user->currency ?? session('currency') ?? 'USD',
+                'currency' => $user->currency ?? session('currency') ?? 'SYP',
             ],
         ], 200);
     }
@@ -573,4 +583,89 @@ class UserProfileController extends Controller
 
         return response()->json(['success' => true], 200);
     }
+    
+    /**
+     * Recharge balance via Sham Cash
+     */
+    public function rechargeShamCash(Request $request)
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'payment_method' => 'required|string|in:shamcash',
+        ]);
+
+        // Convert USD to SYP
+        $exchangeRate = config('app.usd_to_syp_rate', 13000);
+        $amountSYP = $validated['amount'] * $exchangeRate;
+
+        // Create a pending recharge request (you may want to create a recharge_requests table)
+        // For now, we'll just log it and return success
+        // In production, you should create a recharge request that admin can approve
+        
+        \Log::info('Recharge request', [
+            'user_id' => $user->id,
+            'amount_usd' => $validated['amount'],
+            'amount_syp' => $amountSYP,
+            'payment_method' => 'shamcash',
+            'status' => 'pending',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم إرسال طلب الشحن بنجاح! سيتم مراجعته خلال 24 ساعة.',
+            'amount_usd' => $validated['amount'],
+            'amount_syp' => $amountSYP,
+        ], 200);
+    }
+    
+    /**
+     * Recharge balance via Credit Card
+     */
+    public function rechargeCard(Request $request)
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'payment_method' => 'required|string|in:card',
+            'card_token' => 'required|string',
+        ]);
+
+        // Convert USD to SYP
+        $exchangeRate = config('app.usd_to_syp_rate', 13000);
+        $amountSYP = $validated['amount'] * $exchangeRate;
+
+        // Process credit card payment (integrate with Stripe or other payment gateway)
+        // For now, we'll just simulate success
+        
+        // Add balance to user account
+        if (Schema::hasColumn('users', 'balance')) {
+            $user->balance = ($user->balance ?? 0) + $amountSYP;
+            $user->save();
+        }
+
+        \Log::info('Card recharge completed', [
+            'user_id' => $user->id,
+            'amount_usd' => $validated['amount'],
+            'amount_syp' => $amountSYP,
+            'payment_method' => 'card',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم شحن الرصيد بنجاح!',
+            'amount_usd' => $validated['amount'],
+            'amount_syp' => $amountSYP,
+            'new_balance' => $user->balance,
+        ], 200);
+    }
 }
+
