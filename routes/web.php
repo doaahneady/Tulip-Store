@@ -1189,6 +1189,11 @@ Route::get('/mart/daily-prices', function () {
     return view('mart.daily-prices');
 })->name('mart.daily-prices');
 
+// Tulip Net
+Route::get('/net', function () {
+    return view('net.index');
+})->name('net.index');
+
 Route::get('/gifts/{gift}', [App\Http\Controllers\GiftController::class, 'show'])->name('gifts.show');
 Route::get('/gifts/category/{category}', [App\Http\Controllers\GiftController::class, 'category'])->name('gifts.category');
 

@@ -3,11 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tulip Net</title>
-     <!-- fav icon -->
-        <link rel="icon" type="image/png" sizes="48x48" href="/images/fav_icon-v1.png">
-            <meta name="description" content="اكتشف Tulip Store، منصة تسوق إلكتروني متكاملة تتيح لك الشراء أو إنشاء متجرك الخاص والربح بسهولة، مع توصيل سريع وطرق دفع آمنة وتجربة استخدام مريحة.">
-
+    <title>Tulip Net - جودة سرعة استقرار</title>
     <link
       href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -26,7 +22,7 @@
     <style>
       :root {
         --primary: #255690;
-        --secondary: #ECCE0D;
+        --secondary: #ecce0d;
         --accent: #0aabba;
         --bg: #f4f8f9;
         --bg-section: #eef4f5;
@@ -58,7 +54,7 @@
         grid-template-columns: 1fr auto 1fr;
         align-items: center;
         padding: 1rem 2%;
-        background: transparent; /* خلفية شفافة تماماً */
+        background: transparent;
         position: fixed;
         width: 100%;
         top: 0;
@@ -66,8 +62,8 @@
         transition: all 0.3s ease;
       }
       header.scrolled {
-        background: rgba(37, 86, 144, 0.4); /* شفافية عالية جداً عند السكرول للحفاظ على الصورة */
-        backdrop-filter: blur(50px); /* تأثير ضبابي خفيف لتحسين القراءة */
+        background: rgba(37, 86, 144, 0.4);
+        backdrop-filter: blur(50px);
       }
       .header-left {
         display: flex;
@@ -75,7 +71,7 @@
         align-items: center;
       }
       .logo-left-img {
-        height: 70px; /* تكبير بسيط للوغو */
+        height: 70px;
       }
       .logo-center-img {
         height: 50px;
@@ -90,10 +86,11 @@
         color: var(--white);
         text-decoration: none;
         font-size: 1.1rem;
-        transition: all 0.3s;
+        transition: all 2.3s;
         font-weight: 700;
         position: relative;
         padding-bottom: 8px;
+        
       }
       nav a:hover {
         color: var(--secondary);
@@ -109,7 +106,7 @@
         width: 0;
         height: 3px;
         background: var(--white);
-        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: width 2.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
       nav a.active::after {
         width: 100%;
@@ -117,28 +114,29 @@
 
       /* ─── HERO & HEADER BACKGROUND ────────────── */
       .hero-section-wrapper {
-        background: url("../assets/images/panner.png") no-repeat center center;
+        background: url("/images/net/panner.png") no-repeat center center;
         background-size: cover;
         position: relative;
         width: 100%;
-        height: 650px; /* ارتفاع ثابت للبانر ليظهر بشكل كامل */
+        height: 650px;
         display: flex;
         flex-direction: column;
-        justify-content: center; /* توسيط عمودي لمحتوى الهيرو */
+        justify-content: center;
       }
 
       .hero {
         position: relative;
         background: transparent;
-        overflow: visible; /* للسماح للصورة الكبيرة بالبروز */
+        overflow: visible;
         display: flex;
         align-items: center;
         padding: 0 5%;
         color: var(--white);
-        margin-top: -30px; /* رفع المحتوى للأعلى ليتوسط المساحة البصرية */
+        margin-top: -30px;
       }
-      /* إزالة الأشكال القديمة */
-      .hero::before, .hero::after {
+
+      .hero::before,
+      .hero::after {
         display: none;
       }
 
@@ -160,15 +158,20 @@
         align-items: center;
       }
       .satellite-img {
-        width: 120%; /* تكبير إضافي للصورة */
+        width: 120%;
         max-width: 800px;
-        filter: drop-shadow(0 30px 60px rgba(0,0,0,0.3));
+        filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.3));
         animation: float 5s infinite ease-in-out;
-        transform: scale(0.4); /* زيادة الحجم الأولي */
+        transform: scale(0.4);
       }
       @keyframes float {
-        0%, 100% { transform: translateY(1px) scale(1.1); }
-        50% { transform: translateY(70px) scale(1.15); }
+        0%,
+        100% {
+          transform: translateY(1px) scale(1.1);
+        }
+        50% {
+          transform: translateY(70px) scale(1.15);
+        }
       }
 
       .hero-text-side {
@@ -176,22 +179,22 @@
         padding-right: 40px;
       }
       .hero-text-side h1 {
-        font-size: clamp(3rem, 4vw, 5.8rem); /* تكبير الخط أكثر */
+        font-size: clamp(3rem, 4vw, 5.8rem);
         font-weight: 900;
         margin-bottom: 15px;
         color: var(--white);
         line-height: 1.1;
-        text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
       }
       .hero-text-side h1 span {
         color: var(--secondary);
       }
       .hero-subtitle {
-        font-size: clamp(1.8rem, 1.2vw, 3rem); /* تكبير العنوان الفرعي */
+        font-size: clamp(1.8rem, 1.2vw, 3rem);
         font-weight: 700;
         color: var(--white);
         margin-top: 15px;
-        text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
       }
 
       .menu-toggle {
@@ -209,7 +212,7 @@
         position: fixed;
         z-index: 3000;
         top: 0;
-        right: 0; /* التعديل هنا: الفتح من اليمين */
+        right: 0;
         background-color: var(--primary);
         overflow-x: hidden;
         transition: 0.5s;
@@ -233,7 +236,7 @@
       .sidenav .close-btn {
         position: absolute;
         top: 15px;
-        left: 25px; /* التعديل هنا: الزر في أقصى يسار النافذة */
+        left: 25px;
         font-size: 36px;
       }
 
@@ -246,7 +249,7 @@
 
       @media (max-width: 992px) {
         header {
-          grid-template-columns: auto 1fr; /* عكس ترتيب العناصر */
+          grid-template-columns: auto 1fr;
           background: var(--bg);
           padding: 0.5rem 5%;
         }
@@ -259,8 +262,12 @@
           order: 1;
           color: var(--primary);
         }
-        nav { display: none; }
-        .header-center { display: none; }
+        nav {
+          display: none;
+        }
+        .header-center {
+          display: none;
+        }
 
         .hero-section-wrapper {
           height: auto;
@@ -269,13 +276,20 @@
           background-image: none !important;
           background-color: var(--bg);
         }
-        .hero-container { grid-template-columns: 1fr; text-align: center; }
-        .hero-image-side { display: none; } /* الصورة تختفي كما طلبت */
-        .hero-text-side { padding-right: 0; order: 1;}
-        
-        /* تحويل الخطوط البيضاء إلى زرقاء */
-        .hero-text-side h1, 
-        .hero-subtitle, 
+        .hero-container {
+          grid-template-columns: 1fr;
+          text-align: center;
+        }
+        .hero-image-side {
+          display: none;
+        }
+        .hero-text-side {
+          padding-right: 0;
+          order: 1;
+        }
+
+        .hero-text-side h1,
+        .hero-subtitle,
         .hero {
           color: var(--primary) !important;
         }
@@ -338,14 +352,15 @@
         max-width: 1000px;
         margin: 2rem auto 4rem;
         padding: 4rem 2rem;
-        background: linear-gradient(
+        background:
+          linear-gradient(
             135deg,
             rgba(255, 255, 255, 0.9) 0%,
             rgba(240, 248, 250, 0.8) 100%
           ),
           url("https://www.transparenttextures.com/patterns/white-paper.png"); /* Subtle paper texture */
         border-radius: 40px;
-        box-shadow: 
+        box-shadow:
           0 20px 40px rgba(13, 70, 76, 0.05),
           0 1px 3px rgba(0, 0, 0, 0.05);
         display: flex;
@@ -362,7 +377,11 @@
         position: absolute;
         width: 300px;
         height: 300px;
-        background: radial-gradient(circle, rgba(240, 89, 40, 0.05) 0%, transparent 70%);
+        background: radial-gradient(
+          circle,
+          rgba(240, 89, 40, 0.05) 0%,
+          transparent 70%
+        );
         top: -100px;
         right: -100px;
         z-index: 0;
@@ -373,7 +392,11 @@
         position: absolute;
         width: 250px;
         height: 250px;
-        background: radial-gradient(circle, rgba(10, 171, 186, 0.05) 0%, transparent 70%);
+        background: radial-gradient(
+          circle,
+          rgba(10, 171, 186, 0.05) 0%,
+          transparent 70%
+        );
         bottom: -80px;
         left: -80px;
         z-index: 0;
@@ -600,7 +623,7 @@
         max-width: 800px;
         margin: 0 auto;
         box-shadow: var(--shadow-hover);
-        text-align: center; /* توسيط النصوص والعناوين */
+        text-align: center;
       }
       .booking-card h2 {
         font-size: 1.8rem;
@@ -619,14 +642,14 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 18px;
-        justify-items: center; /* توسيط الحقول في الـ grid */
+        justify-items: center;
       }
       .form-group {
         margin-bottom: 18px;
         width: 100%;
         display: flex;
         flex-direction: column;
-        align-items: center; /* توسيط محتويات الـ group */
+        align-items: center;
       }
       .form-group-full {
         grid-column: 1 / -1;
@@ -647,7 +670,7 @@
       .form-group select,
       .form-group textarea {
         width: 100%;
-        max-width: 100%; /* الحفاظ على عرض الحقول */
+        max-width: 100%;
         padding: 13px 16px;
         background: var(--bg);
         border: 1.5px solid rgba(13, 70, 76, 0.1);
@@ -657,7 +680,7 @@
         font-family: "El Messiri", sans-serif;
         outline: none;
         transition: all 0.3s;
-        text-align: center; /* توسيط النص داخل الحقول */
+        text-align: center;
       }
       .form-group input::placeholder,
       .form-group textarea::placeholder {
@@ -676,18 +699,18 @@
         color: #0d464c;
       }
       .btn-submit {
-        width: 100%; /* العودة للعرض الكامل ليتطابق مع حقل الملاحظات */
+        width: 100%;
         max-width: 100%;
-        background: linear-gradient(35deg, #255690 ,  var(--secondary));
+        background: linear-gradient(35deg, #255690, var(--secondary));
         color: #fff;
         border: none;
-        padding: 12px 28px; /* نفس padding زر الواتساب */
-        border-radius: 30px; /* نفس border-radius زر الواتساب */
-        font-size: 1rem; /* نفس font-size زر الواتساب */
+        padding: 12px 28px;
+        border-radius: 30px;
+        font-size: 1rem;
         font-weight: 700;
         font-family: "El Messiri", sans-serif;
         cursor: pointer;
-        display: inline-flex; /* مثل زر الواتساب */
+        display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 10px;
@@ -725,7 +748,7 @@
 
       /* ─── FOOTER ──────────────────────────────── */
       footer {
-        background: var(--primary);
+        background: linear-gradient(300deg, var(--primary), var(--secondary));
         color: var(--white);
         padding: 3rem 5% 1.5rem;
       }
@@ -776,7 +799,7 @@
         justify-content: center;
         gap: 10px;
         background: var(--secondary);
-        color: var(--primary); /* التعديل هنا ليتناسب مع ألوان توليب نت */
+        color: var(--primary);
         padding: 12px 35px;
         border-radius: 30px;
         text-decoration: none;
@@ -860,7 +883,6 @@
     </style>
   </head>
   <body>
-
     <div class="hero-section-wrapper" id="home">
       <!-- HEADER -->
       <header id="mainHeader">
@@ -871,10 +893,18 @@
           <a href="#booking" class="nav-link">إحجز الآن</a>
         </nav>
         <div class="header-center">
-          <img src="public\images\tulip_tulip.png" alt="Tulip Logo Center" class="logo-center-img">
+          <img
+            src="\images\net\logo_tulip.png"
+            alt="Tulip Logo Center"
+            class="logo-center-img"
+          />
         </div>
         <div class="header-left">
-          <img src="public\images\tulip_net.png" alt="Tulip Net Logo" class="logo-left-img">
+          <img
+            src="\images\net\tulip_net.png"
+            alt="Tulip Net Logo"
+            class="logo-left-img"
+          />
         </div>
         <button class="menu-toggle" aria-label="Toggle menu">
           <i class="fas fa-bars"></i>
@@ -892,35 +922,47 @@
       <!-- HERO -->
       <section class="hero">
         <div class="hero-container">
-            <div class="hero-text-side">
-            <h1> إشتراك <span>بالنت الفضائي</span></h1>
+          <div class="hero-text-side">
+            <h1>إشترك <span>بالنت الفضائي</span></h1>
             <div class="hero-subtitle">جودة - سرعة - استقرار</div>
           </div>
           <div class="hero-image-side">
-            <img src="public\images\satalitte.png" alt="Satellite" class="satellite-img">
+            <img
+              src="\images\net\satalitte.png"
+              alt="Satellite"
+              class="satellite-img"
+            />
           </div>
-        
         </div>
       </section>
     </div>
 
-   
     <!-- PACKAGES -->
     <section class="section" id="packages">
       <h2 class="section-title">باقاتنا <span>المتاحة</span></h2>
       <p class="section-sub">اختر الباقة المناسبة لاحتياجاتك</p>
 
+      <!-- *** صورة الباقات داخل بانر واقعي *** -->
+      <!-- <div class="packages-banner">
+        <div class="packages-image-box">
+          <img
+            src="\images\net\net_ads.jpeg"
+            alt="باقات توليب نت"
+          />
+        </div>
+      </div> -->
+
       <!-- Pricing Cards Grid -->
       <div class="pricing-grid">
         <div class="price-card">
           <span class="price-icon"><i class="fas fa-bolt"></i></span>
-          <h3>سرعة 2 ميغا</h3>
-          <div class="price-amount">7$ <small>/ شهر</small></div>
+          <h3>سرعة 4 ميغا</h3>
+          <div class="price-amount">10$ <small>/ شهر</small></div>
         </div>
         <div class="price-card">
           <span class="price-icon"><i class="fas fa-rocket"></i></span>
-          <h3>سرعة 4 ميغا</h3>
-          <div class="price-amount">10$ <small>/ شهر</small></div>
+          <h3>سرعة 6 ميغا</h3>
+          <div class="price-amount">15$ <small>/ شهر</small></div>
         </div>
         <div class="price-card">
           <span class="price-icon"><i class="fas fa-tachometer-alt"></i></span>
@@ -940,7 +982,7 @@
       <h2 class="section-title" style="margin-bottom: 0.5rem">
         خريطة <span>التغطية</span>
       </h2>
-      <!-- <p class="section-sub">برجان يغطيان قرية عتيل بنطاق 2 كم لكل برج</p> -->
+
       <div class="map-wrapper">
         <button class="map-toggle-btn" id="toggleCoverage">
           <i class="fas fa-eye"></i> إخفاء/إظهار التغطية
@@ -955,125 +997,40 @@
         <div class="legend-item">
           <div
             class="legend-dot"
-            style="background: radial-gradient(circle, rgba(240, 89, 40, 1) 0%, rgba(240, 89, 40, 0.4) 40%, rgba(240, 89, 40, 0.05) 100%);"
+            style="
+              background: radial-gradient(
+                circle,
+                rgba(240, 89, 40, 1) 0%,
+                rgba(240, 89, 40, 0.4) 40%,
+                rgba(240, 89, 40, 0.05) 100%
+              );
+            "
           ></div>
-          نطاق التغطية (2 كم)
+          نطاق التغطية (1.5 كم)
         </div>
-        <!-- <div class="legend-item">
-          <div class="legend-dot" style="background: #f0e028"></div>
-          قرية عتيل
-        </div> -->
       </div>
     </section>
 
     <!-- BOOKING FORM -->
     <section class="booking-section" id="booking">
       <div class="booking-card">
-        <h2>احجز موعد <span>التركيب</span></h2>
-        <p>تواصل معنا أو احجز موعداً لتركيب الإنترنت الفضائي في منزلك</p>
-        <form id="bookingForm">
+        
+        <h2>تابع اخبارنا عبر <span>قناة الواتساب </span></h2>
+        <form id="bookingForm" style="display: none">
+
           <div class="form-row">
             <div class="form-group">
-              <!-- <label for="fname">الاسم الكامل</label> -->
-              <input type="text" id="fname" placeholder="الإسم الكامل" required />
-            </div>
-            <div class="form-group">
-              <!-- <label for="phone"></label> -->
-              <input
-                type="tel"
-                id="phone"
-                placeholder="رقم الهاتف"
-                required
-              />
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <!-- <label for="location"></label> -->
-              <input
-                type="text"
-                id="location"
-                placeholder="القرية / المنطقة"
-                required
-              />
-            </div>
-            <div class="form-group">
-              <!-- <label for="package"></label> -->
-              <select id="package" required>
-                <option value="">الباقة المطلوبة</option>
-                <option value="2mb">سرعة 2 ميغا - 7$</option>
-                <option value="4mb">سرعة 4 ميغا - 10$</option>
-                <option value="8mb">سرعة 8 ميغا - 20$</option>
-                <option value="16mb">سرعة 16 ميغا - 35$</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <!-- <label for="tower"></label> -->
+            
+              <!-- <label for="tower">+963 937 355 550</label> -->
               <select id="tower" required>
-                <option value="">البرج المطلوب (الأقرب لموقعك)</option>
                 <!-- سيمتلىء برمجياً -->
               </select>
             </div>
-            <div class="form-group">
-              <!-- <label for="date">تاريخ الموعد المفضل</label> -->
-              <input type="date" id="date" />
-            </div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <!-- <label for="time"></label> -->
-              <select id="time">
-                <option value="">الوقت المفضل</option>
-                <option>صباحاً (9:00 - 12:00)</option>
-                <option>ظهراً (12:00 - 15:00)</option>
-                <option>عصراً (15:00 - 18:00)</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group form-group-full">
-              <label for="notes">ملاحظات إضافية</label>
-              <textarea
-                id="notes"
-                rows="3"
-                placeholder="أي معلومات إضافية تساعدنا في خدمتك..."
-              ></textarea>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group form-group-full">
-              <button type="submit" class="btn-submit">
-                <i class="fas fa-calendar-check"></i>
-                تأكيد حجز الموعد
-              </button>
-            </div>
-          </div>
-          <p class="form-note">سيتم التواصل معك خلال 24 ساعة لتأكيد الموعد</p>
-          <div class="success-msg" id="successMsg">
-            <i
-              class="fas fa-check-circle"
-              style="font-size: 2rem; display: block; margin-bottom: 10px"
-            ></i>
-            شكراً! تم استلام طلبك بنجاح. سنتواصل معك قريباً لتأكيد الموعد.
-          </div>
+          <div class="form-row"></div>
         </form>
-
-        <!-- WhatsApp shortcut -->
-        <div
-          style="
-            margin-top: 2rem;
-            text-align: center;
-            border-top: 1px solid rgba(13, 70, 76, 0.08);
-            padding-top: 1.5rem;
-          "
-        >
-          <p style="color: #7a9ea3; font-size: 0.9rem; margin-bottom: 12px">
-            أو تواصل معنا مباشرة عبر
-          </p>
-          <a
-            href="https://wa.me/963900000000"
+             <a
+            href="https://whatsapp.com/channel/0029VbC6Ivu1iUxhXk1JF40o"
             target="_blank"
             style="
               display: inline-flex;
@@ -1092,25 +1049,33 @@
             onmouseout="this.style.transform = ''"
           >
             <i class="fab fa-whatsapp" style="font-size: 1.3rem"></i>
-            تواصل عبر واتساب
+            WhatsApp
           </a>
+           
+        <!-- WhatsApp shortcut -->
+        <div style="
+            margin-top: 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(13, 70, 76, 0.08);
+            padding-top: 1.5rem;">
+          <p style="color: #7a9ea3; font-size: 0.9rem; margin-bottom: 12px">
+           احجز موعد الان عبر هذا الرقم 
+          </p>
+          <a href="tel:+963937355550" style="color: black;font-weight: bold;"> اتصل بنا</a>
         </div>
+     
       </div>
     </section>
 
-    <footer>
+    <!-- <footer>
       <div class="footer-grid">
-        <!-- <div class="footer-col">
-          <h4>هل أنت جديد هنا؟</h4>
-          <a href="signup.html" class="footer-btn">إنشاء حساب <i class="fas fa-user-plus"></i></a>
-        </div> -->
         <div class="footer-col">
           <h4>الأقسام الخاصة بشركتنا</h4>
           <ul>
-            <li><a href="/store">توليب ستور</a></li>
-            <li><a href="/tulip-mart">توليب مارت</a></li>
-            <li><a href="/tulip-net">توليب نت</a></li>
-            <li><a href="/tulip-gift">توليب لتنسيق الهدايا</a></li>
+            <li><a href="/">توليب ستور</a></li>
+            <li><a href="/mart">توليب مارت</a></li>
+            <li><a href="/net">توليب نت</a></li>
+            <li><a href="/gift">توليب لتنسيق الهدايا</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -1144,50 +1109,61 @@
           <a href="#"><i class="fab fa-instagram"></i></a>
           <a href="#"><i class="fab fa-whatsapp"></i></a>
         </div>
+        جميع الحقوق محفوظة © 2026 توليب نت
       </div>
-    </footer>
+    </footer> -->
 
     <!-- MAP SCRIPT -->
     <script>
-      // ── البيانات الأساسية للأبراج ──
+      // Coordinates of the towers
       const towersData = [
         {
           id: 1,
           name: "منطقة جنوب غرب",
           pos: [32.75018700254111, 36.5726944],
-          subscribers: 18, // شارفت على الامتلاء
+          subscribers: 18,
         },
         {
           id: 2,
           name: "منطقة جنوب شرق",
           pos: [32.75482139004328, 36.58319976441808],
-          subscribers: 20, // ممتلئ
+          subscribers: 20,
         },
         {
           id: 3,
           name: "منطقة شرق شمال",
           pos: [32.76294979890881, 36.58243279325427],
-          subscribers: 5, // متاح
+          subscribers: 5,
         },
         {
           id: 4,
           name: "منطقة شمال غرب",
           pos: [32.76524682433049, 36.57552291223117],
           subscribers: 5, // متاح
-        }
+        },
       ];
 
       // Initialize map centered on Sweida governorate
       const map = L.map("map", {
-        center: [32.75764854454428, 36.57951608130383], // عتيل / السويداء
-        zoom: 14,
+        center: [32.75764854454428, 36.57951608130383],
+        zoom: 15,
         zoomControl: true,
       });
 
       // Tile layer (OpenStreetMap)
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap contributors",
-        maxZoom: 18,
+
+      L.tileLayer("https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+        attribution: "© Google Maps",
+        subdomains: ["0", "1", "2", "3"],
+        maxZoom: 22,
+        maxNativeZoom: 22,
+      }).addTo(map);
+
+      L.tileLayer("https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", {
+        attribution: "© Google Maps",
+        subdomains: ["0", "1", "2", "3"],
+        maxZoom: 22,
+        maxNativeZoom: 22,
       }).addTo(map);
 
       // ── Custom tower icon ──
@@ -1221,31 +1197,29 @@
       });
 
       // Village position
-      const villagePos = [32.75766658973171, 36.57964482733799]; // مركز عتيل
+      const villagePos = [32.749852, 36.572935]; // مركز عتيل
 
       // Village marker
       L.marker(villagePos, { icon: villageIcon }).addTo(map)
         .bindPopup(`<div style="text-align:right;padding:5px;">
-          <strong style="color:#0d464c;font-size:1rem;">قرية عتيل</strong><br/>
-          <span style="color:#4a6b70;font-size:0.85rem;">محافظة السويداء - سوريا</span>
+          <strong style="color:#0d464c;font-size:1rem;"> مكتب توليب نت</strong><br/>
+          <span style="color:#4a6b70;font-size:0.85rem;">محافظة السويداء - عتيل</span>
         </div>`);
-
-
 
       // Function to create gradient effect (Natural Spotlight with Dark Core)
       function createGradientCoverage(pos, maxRadius) {
         const group = L.layerGroup();
-        const steps = 8; // تقليل عدد التدرجات كما طلب المستخدم
+        const steps = 7; // Number of circles for smoother gradient
         for (let i = steps; i >= 1; i--) {
           const radius = (maxRadius / steps) * i;
-          const opacity = 0.05 + (0.03 * (1 - i/steps)); 
-          
+          const opacity = 0.05 + 0.03 * (1 - i / steps);
+
           L.circle(pos, {
             radius: radius,
             stroke: false,
             fillColor: "#f05928",
             fillOpacity: opacity,
-            interactive: false
+            interactive: false,
           }).addTo(group);
         }
         return group;
@@ -1253,37 +1227,37 @@
 
       // Reusable function to add a tower with its coverage
       const allCoverages = L.layerGroup().addTo(map);
-      
+
       function addTower(tower) {
-        const isFull = tower.subscribers >= 20;
-        const statusText = isFull ? '<span style="color:red;font-weight:bold;">ممتلئ (20/20)</span>' : `<span style="color:#0aabba;">نشط (${tower.subscribers}/20)</span>`;
-        
+        const isFull = tower.subscribers >= 60;
+        const statusText = isFull
+          ? '<span style="color:red;font-weight:bold;">ممتلئ (60/60)</span>'
+          : `<span style="color:#0aabba;">نشط (${tower.subscribers}/60)</span>`;
+
         // Create Marker
         const marker = L.marker(tower.pos, { icon: towerIcon }).addTo(map);
         marker.bindPopup(`<div style="text-align:right;padding:5px;">
           <strong style="color:#f05928;font-size:1rem;">برج توليب نت #${tower.id}</strong><br/>
           <span style="color:#0d464c;font-weight:600;">${tower.name}</span><br/>
-          <span style="color:#4a6b70;font-size:0.85rem;">المشتركين: ${tower.subscribers} / 20</span><br/>
+          <span style="color:#4a6b70;font-size:0.85rem;">المشتركين: ${tower.subscribers} / 60</span><br/>
           <span style="font-size:0.85rem;">الحالة: ${statusText}</span>
         </div>`);
 
         // Create and Add Coverage
-        const coverage = createGradientCoverage(tower.pos, 1500);
+        const coverage = createGradientCoverage(tower.pos, 1200);
         allCoverages.addLayer(coverage);
-        
+
         return { marker, coverage };
       }
 
-      // إضافة الأبراج من البيانات التعريفية
       const towerSelect = document.getElementById("tower");
-      towersData.forEach(tower => {
+      towersData.forEach((tower) => {
         addTower(tower);
-        
-        // إضافة الخيارات لقائمة الحجز
+
         const option = document.createElement("option");
         option.value = tower.id;
-        const isFull = tower.subscribers >= 20;
-        option.textContent = `${tower.name} (${isFull ? 'ممتلئ' : 'متاح'})`;
+        const isFull = tower.subscribers >= 60;
+        option.textContent = `${tower.name} (${isFull ? "ممتلئ" : "متاح"})`;
         if (isFull) {
           option.disabled = true;
           option.style.color = "#ccc";
@@ -1311,11 +1285,11 @@
         .getElementById("bookingForm")
         .addEventListener("submit", function (e) {
           e.preventDefault();
-          
+
           const selectedTowerId = document.getElementById("tower").value;
-          const tower = towersData.find(t => t.id == selectedTowerId);
-          
-          if (tower && tower.subscribers >= 20) {
+          const tower = towersData.find((t) => t.id == selectedTowerId);
+
+          if (tower && tower.subscribers >= 60) {
             alert("عذراً، هذا البرج ممتلئ حالياً. يرجى اختيار برج آخر.");
             return;
           }
@@ -1338,16 +1312,18 @@
       document.getElementById("date").min = today;
 
       // ── Navigation Effects (Sticky Header & Active Link) ──
-      const header = document.getElementById('mainHeader');
-      const navLinks = document.querySelectorAll('.nav-link');
-      const sections = document.querySelectorAll('section, .hero-section-wrapper');
+      const header = document.getElementById("mainHeader");
+      const navLinks = document.querySelectorAll(".nav-link");
+      const sections = document.querySelectorAll(
+        "section, .hero-section-wrapper",
+      );
 
-      window.addEventListener('scroll', () => {
+      window.addEventListener("scroll", () => {
         // Sticky Header Effect
         if (window.scrollY > 50) {
-          header.classList.add('scrolled');
+          header.classList.add("scrolled");
         } else {
-          header.classList.remove('scrolled');
+          header.classList.remove("scrolled");
         }
 
         // Active Link on Scroll
@@ -1369,15 +1345,15 @@
       });
 
       // Smooth Scroll
-      navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
+      navLinks.forEach((link) => {
+        link.addEventListener("click", function (e) {
           e.preventDefault();
-          const targetId = this.getAttribute('href');
+          const targetId = this.getAttribute("href");
           const targetSection = document.querySelector(targetId);
           if (targetSection) {
             window.scrollTo({
               top: targetSection.offsetTop - 70,
-              behavior: 'smooth'
+              behavior: "smooth",
             });
           }
         });
@@ -1385,22 +1361,22 @@
     </script>
     <script>
       // JavaScript for menu toggle
-      const menuToggle = document.querySelector('.menu-toggle');
-      const closeBtn = document.querySelector('.close-btn');
-      const sidenav = document.querySelector('.sidenav');
+      const menuToggle = document.querySelector(".menu-toggle");
+      const closeBtn = document.querySelector(".close-btn");
+      const sidenav = document.querySelector(".sidenav");
 
-      menuToggle.addEventListener('click', () => {
-        sidenav.style.width = '250px';
+      menuToggle.addEventListener("click", () => {
+        sidenav.style.width = "250px";
       });
 
-      closeBtn.addEventListener('click', () => {
-        sidenav.style.width = '0';
+      closeBtn.addEventListener("click", () => {
+        sidenav.style.width = "0";
       });
 
       // Header scroll effect
-      window.addEventListener('scroll', () => {
-        const header = document.querySelector('header');
-        header.classList.toggle('scrolled', window.scrollY > 50);
+      window.addEventListener("scroll", () => {
+        const header = document.querySelector("header");
+        header.classList.toggle("scrolled", window.scrollY > 50);
       });
     </script>
   </body>

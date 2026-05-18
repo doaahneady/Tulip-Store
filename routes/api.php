@@ -272,6 +272,10 @@ Route::prefix('mart')->group(function () {
         return response()->json($data);
     });
 });
+// tulip net
+Route::prefix('net')->group(function () {
+    Route::get('/', [App\Http\Controllers\Api\GiftController::class, 'index']);
+});
 
 Route::middleware('auth:sanctum')->prefix('admin/mart')->group(function () {
     Route::get('/subcategories', [AdminMartSubcategoryController::class, 'index']);
